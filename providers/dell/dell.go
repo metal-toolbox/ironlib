@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
@@ -26,8 +27,7 @@ type Dell struct {
 	Dmidecode               *utils.Dmidecode
 	Dnf                     *utils.Dnf
 	Dsu                     *utils.Dsu
-	DsuVersions             []string
-	UpdateEnvironment       string
+	FirmwareUpdateConfig    *model.FirmwareUpdateConfig
 }
 
 type Component struct {
@@ -45,41 +45,25 @@ func (d *Dell) GetVendor() string {
 	return d.Vendor
 }
 
+func (d *Dell) GetDeviceID() string {
+	return d.ID
+}
+
+func (d *Dell) SetDeviceID(id string) {
+	d.ID = id
+}
+
+func (d *Dell) SetFirmwareUpdateConfig(config *model.FirmwareUpdateConfig) {
+	d.FirmwareUpdateConfig = config
+}
+
 func (d *Dell) RebootRequired() bool {
 	return d.PendingReboot
 }
 
-// Sets various options for the dell system update utility and fup
-func (d *Dell) SetOptions(options map[string]interface{}) error {
-
-	// the dell-system-update versions that should be installed
-	dsuVersions, exists := options["dsu_versions"]
-	if !exists {
-		return fmt.Errorf("dell provider expects 'dsu_versions' option to be set with SetOptions()")
-	}
-
-	d.DsuVersions = dsuVersions.([]string)
-
-	// the update environment this device is part of
-	// update_environment is one of production, vanguard, canary
-	// this is a fup thing and could be moved out from this lib at some point
-	updateEnvironment, exists := options["update_environment"]
-	if !exists {
-		return fmt.Errorf("dell provider expects 'update_environment' options to be set with SetOptions()")
-	}
-
-	switch updateEnvironment {
-	case "production", "vanguard", "canary":
-		d.UpdateEnvironment = updateEnvironment.(string)
-	default:
-		return fmt.Errorf("dell provider expects a valid 'update_environment' - one of production, vanguard, canary")
-	}
-
-	return nil
-}
-
-// Return device component inventory
-func (d *Dell) GetInventory(ctx context.Context) (*model.Device, error) {
+// nolint: gocyclo
+// Return device component inventory, including any update information
+func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Device, error) {
 
 	err := d.pre()
 	if err != nil {
@@ -102,6 +86,43 @@ func (d *Dell) GetInventory(ctx context.Context) (*model.Device, error) {
 		Components: componentInventory,
 	}
 
+	if !listUpdates {
+		return device, nil
+	}
+
+	// collect firmware updates available for components
+	d.Logger.Info("Identifying available component firmware updates...")
+	// set d.ComponentUpdates with available updates
+	err = d.listUpdatesAvailable()
+	if err != nil {
+		return nil, err
+	}
+
+	count := len(d.ComponentUpdates)
+	if count > 0 {
+		d.Logger.WithField("count", count).Info("device has updates available..")
+	} else {
+		d.Logger.Info("device has no available updates to install")
+	}
+
+	// converge component inventory data with firmware update data
+	for _, component := range componentInventory {
+		component.DeviceID = d.ID
+		for _, update := range d.ComponentUpdates {
+			if component.Slug == update.Slug {
+				component.Metadata = update.Metadata
+				if strings.TrimSpace(update.FirmwareAvailable) != "" {
+					d.Logger.WithFields(logrus.Fields{"component slug": component.Slug, "update": update.FirmwareAvailable}).Trace("update available")
+				}
+				if component.Slug == "Unknown" {
+					d.Logger.WithFields(logrus.Fields{"component name": component.Name}).Warn("component slug is 'Unknown', this needs to be fixed in componentNameSlug()")
+				}
+				component.FirmwareAvailable = update.FirmwareAvailable
+			}
+		}
+	}
+
+	device.Components = componentInventory
 	return device, nil
 }
 
@@ -139,6 +160,11 @@ func (d *Dell) GetUpdatesAvailable(ctx context.Context) (*model.Device, error) {
 	return device, nil
 }
 
+// The installed DSU release is the firmware revision for dells
+func (d *Dell) GetDeviceFirmwareRevision(ctx context.Context) (string, error) {
+	return d.Dsu.Version()
+}
+
 // sets d.ComponentUpdates to the slice of updates identified by the dell-system-update utility
 func (d *Dell) listUpdatesAvailable() error {
 
@@ -158,7 +184,11 @@ func (d *Dell) listUpdatesAvailable() error {
 	return nil
 }
 
-func (d *Dell) ApplyUpdatesAvailable() (err error) {
+func (d *Dell) ApplyUpdatesAvailable(ctx context.Context) (err error) {
+
+	if d.FirmwareUpdateConfig == nil {
+		return fmt.Errorf("ApplyUpdatesAvailable() requires a firmware config set with SetFirmwareConfig()")
+	}
 
 	// collect data before we proceed to apply updates
 	steps := []func() error{d.pre}
@@ -207,8 +237,7 @@ func (d *Dell) ApplyUpdatesAvailable() (err error) {
 
 }
 
-//
-//// pre sets up prequisites for dealing with updates
+// pre sets up prequisites for dealing with updates
 func (d *Dell) pre() (err error) {
 
 	errPrefix := "dell dsu prereqs setup error: "
@@ -239,8 +268,8 @@ func (d *Dell) installPkgs() error {
 	// install dsu package
 	var dsuPkgs []string
 
-	if len(d.DsuVersions) > 0 {
-		for _, version := range d.DsuVersions {
+	if d.FirmwareUpdateConfig != nil && len(d.FirmwareUpdateConfig.Updates) > 0 {
+		for _, version := range d.FirmwareUpdateConfig.Updates {
 			dsuPkgs = append(dsuPkgs, "dell-system-update-"+version)
 		}
 	} else {
@@ -273,16 +302,16 @@ func (d *Dell) enableRepo() error {
 	// the update environment this dsu package is being installed
 	// environment is one of production, vanguard, canary
 	// the update environment is used by fup to segregate devices under upgrade for testing/production
-	var e string
+	var updateEnv string
 
 	// if a deploy manifest was defined
-	if d.UpdateEnvironment != "" {
-		e = d.UpdateEnvironment
+	if d.FirmwareUpdateConfig != nil && d.FirmwareUpdateConfig.UpdateEnv != "" {
+		updateEnv = d.FirmwareUpdateConfig.UpdateEnv
 	} else {
-		e = "production"
+		updateEnv = "production"
 	}
 
-	repos := []string{e + "-dell-system-update_independent", e + "-dell-system-update_dependent"}
+	repos := []string{updateEnv + "-dell-system-update_independent", updateEnv + "-dell-system-update_dependent"}
 
 	return d.Dnf.EnableRepo(repos)
 
