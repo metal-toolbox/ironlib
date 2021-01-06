@@ -1,0 +1,14 @@
+---
+pipeline:
+  lint:
+    group: ci
+    image: golangci/golangci-lint:v1.24.0
+    commands:
+      - make lint
+
+  test:
+    group: ci
+    image: golang:1.15-alpine
+    commands:
+      - apk add --update make
+      - make test
