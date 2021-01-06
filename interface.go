@@ -6,15 +6,18 @@ import (
 )
 
 type Setter interface {
-	SetOptions(map[string]interface{}) error
+	SetDeviceID(string)
+	SetFirmwareUpdateConfig(*model.FirmwareUpdateConfig)
 }
 
 type Getter interface {
+	GetDeviceID() string
 	GetModel() string
 	GetVendor() string
 	RebootRequired() bool
-	GetInventory(ctx context.Context) (*model.Device, error)
+	GetInventory(ctx context.Context, listUpdates bool) (*model.Device, error)
 	GetUpdatesAvailable(ctx context.Context) (*model.Device, error)
+	GetDeviceFirmwareRevision(ctx context.Context) (string, error)
 }
 
 //type Configurer interface {

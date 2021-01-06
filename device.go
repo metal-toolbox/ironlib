@@ -58,8 +58,7 @@ func NewSupermicro(model string, dmidecode *utils.Dmidecode, l *logrus.Logger) M
 	}
 }
 
-// New returns a device based on the hardware vendor, model attributes
-// the apiclient is passed to the device instance to submit inventory information
+// New returns a device Manager interface based on the hardware vendor, model attributes
 func New(logger *logrus.Logger) (m Manager, err error) {
 
 	if os.Getenv("TEST_DELL") != "" {

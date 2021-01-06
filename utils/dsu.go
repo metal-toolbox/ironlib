@@ -42,7 +42,7 @@ func NewFakeDsu() *Dsu {
 	}
 }
 
-// Returns components identified by dell system update and thier current firmware revisions
+// Returns components identified by dell system update and their current firmware revisions
 func (d *Dsu) ComponentInventory() ([]*model.Component, error) {
 
 	d.Executor.SetArgs([]string{"--import-public-key", "--inventory"})
