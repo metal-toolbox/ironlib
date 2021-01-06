@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -39,6 +40,8 @@ func NewMlxupCmd(trace bool) Collector {
 	return &Mlxup{Executor: e}
 }
 
+
+
 func (m *Mlxup) Components() ([]*model.Component, error) {
 
 	devices, err := m.Query()
@@ -47,12 +50,14 @@ func (m *Mlxup) Components() ([]*model.Component, error) {
 	}
 
 	inv := []*model.Component{}
-	for _, d := range devices {
+	for idx, d := range devices {
 
+		uid, _ := uuid.NewRandom()
 		item := &model.Component{
+			ID:              uid.String(),
 			Model:           d.DeviceType,
 			Vendor:          vendorFromString(d.DeviceType),
-			Slug:            "NIC",
+			Slug:            prefixIndex(idx, "NIC"),
 			Name:            d.Description,
 			Serial:          d.PSID,
 			FirmwareManaged: true,

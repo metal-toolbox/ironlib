@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -108,7 +108,9 @@ func dsuParseInventoryBytes(in []byte) []*model.Component {
 	matches := r.FindAllSubmatch(in, -1)
 	for _, m := range matches {
 		if len(m) == 4 {
+			uid, _ := uuid.NewRandom()
 			component := &model.Component{
+				ID:                uid.String(),
 				Slug:              componentNameToSlug(trimBytes(m[2])),
 				Name:              trimBytes(m[2]),
 				FirmwareInstalled: trimBytes(m[3]),
@@ -130,11 +132,12 @@ func dsuParsePreviewBytes(in []byte) []*model.Component {
 	// see test file for sample data
 	r := regexp.MustCompile(`(?m)^\d : \w+.*`)
 	matches := r.FindAllSubmatch(in, -1)
-	for idx, m := range matches {
+	for _, m := range matches {
 		s := strings.Split(string(m[0]), ":")
 		if len(s) == 5 {
+			uid, _ := uuid.NewRandom()
 			component := &model.Component{
-				ID:                strconv.Itoa(idx),
+				ID:                uid.String(),
 				Slug:              componentNameToSlug(strings.TrimSpace(s[2])),
 				Name:              strings.TrimSpace(s[2]),
 				FirmwareAvailable: strings.TrimSpace(s[3]),

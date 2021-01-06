@@ -1,6 +1,11 @@
 package utils
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/packethost/ironlib/model"
+)
 
 func vendorFromString(s string) string {
 
@@ -18,4 +23,16 @@ func vendorFromString(s string) string {
 	default:
 		return "unknown"
 	}
+}
+
+// return the given string with the idx prefixed
+func prefixIndex(idx int, s string) string {
+	return fmt.Sprintf("[%d] %s", idx, s)
+}
+
+func purgeTestComponentID(components []*model.Component) []*model.Component {
+	for _, c := range components {
+		c.ID = ""
+	}
+	return components
 }

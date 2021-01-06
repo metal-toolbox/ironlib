@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -50,18 +51,20 @@ func (s *Smartctl) Components() ([]*model.Component, error) {
 		return nil, err
 	}
 
-	for _, drive := range DrivesList.Drives {
+	for idx, drive := range DrivesList.Drives {
 		// collect drive information with smartctl -a <drive>
 		smartctlAll, err := s.All(drive.Name)
 		if err != nil {
 			return nil, err
 		}
 
+		uid, _ := uuid.NewRandom()
 		item := &model.Component{
+			ID:                uid.String(),
 			Vendor:            vendorFromString(smartctlAll.ModelName),
 			Model:             smartctlAll.ModelName,
 			Serial:            smartctlAll.SerialNumber,
-			Slug:              drive.Type,
+			Slug:              prefixIndex(idx, drive.Type),
 			Name:              drive.Type,
 			FirmwareInstalled: smartctlAll.FirmwareVersion,
 		}

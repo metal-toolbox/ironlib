@@ -38,6 +38,5 @@ func Test_dsuParsePreviewBytes(t *testing.T) {
 	assert.Equal(t, "SAS HBA330 Controller", components[0].Slug)
 	assert.Equal(t, "16.17.01.00", components[0].FirmwareAvailable)
 	assert.Equal(t, "SAS-Non-RAID_Firmware_124X2_LN_16.17.01.00_A08", components[0].Metadata["firmware_available_filename"])
-	assert.Equal(t, "0", components[0].ID)
 
 }

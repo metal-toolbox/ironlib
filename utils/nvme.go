@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -56,7 +57,7 @@ func (n *Nvme) Components() ([]*model.Component, error) {
 		return nil, err
 	}
 
-	for _, d := range list.Devices {
+	for idx, d := range list.Devices {
 		dModel := d.ModelNumber
 
 		var vendor string
@@ -66,12 +67,14 @@ func (n *Nvme) Components() ([]*model.Component, error) {
 			vendor = modelTokens[1]
 		}
 
+		uid, _ := uuid.NewRandom()
 		item := &model.Component{
+			ID:                uid.String(),
 			Serial:            d.SerialNumber,
 			Vendor:            vendor,
 			Model:             dModel,
 			FirmwareInstalled: d.Firmware,
-			Slug:              "NVME drive",
+			Slug:              prefixIndex(idx, "NVME drive"),
 			Name:              "NVME drive",
 		}
 

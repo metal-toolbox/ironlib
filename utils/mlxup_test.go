@@ -17,7 +17,7 @@ func newFakeMlxup() *Mlxup {
 func Test_MlxupComponents(t *testing.T) {
 
 	expected := []*model.Component{
-		{Serial: "MT_2420110034", Vendor: "Mellanox", Model: "ConnectX4LX", Name: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6", Slug: "NIC", FirmwareManaged: true, FirmwareInstalled: "14.27.1016", FirmwareAvailable: "14.28.2006", Metadata: map[string]string{"firmware_pxe_installed": "3.5.0901", "firmware_pxe_available": "3.6.0102", "firmware_uefi_installed": "14.20.0019", "firmware_uefi_available": "14.21.0017"}, Oem: false},
+		{Serial: "MT_2420110034", Vendor: "Mellanox", Model: "ConnectX4LX", Name: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6", Slug: "[0] NIC", FirmwareManaged: true, FirmwareInstalled: "14.27.1016", FirmwareAvailable: "14.28.2006", Metadata: map[string]string{"firmware_pxe_installed": "3.5.0901", "firmware_pxe_available": "3.6.0102", "firmware_uefi_installed": "14.20.0019", "firmware_uefi_available": "14.21.0017"}, Oem: false},
 	}
 
 	m := newFakeMlxup()
@@ -26,6 +26,8 @@ func Test_MlxupComponents(t *testing.T) {
 		t.Error(err)
 	}
 
+	// since the component IDs are unique
+	inventory = purgeTestComponentID(inventory)
 	assert.Equal(t, expected, inventory)
 }
 

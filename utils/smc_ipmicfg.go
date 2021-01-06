@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -42,9 +43,11 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 		return nil, err
 	}
 
+	uid, _ := uuid.NewRandom()
 	// add CPLD and BIOS firmware inventory
 	inv := []*model.Component{
 		{
+			ID:                uid.String(),
 			Model:             "Supermicro",
 			Vendor:            "Supermicro",
 			Name:              "CPLD",
@@ -52,6 +55,7 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 			FirmwareInstalled: summary.CPLDVersion,
 		},
 		{
+			ID:                uid.String(),
 			Model:             "Supermicro",
 			Vendor:            "Supermicro",
 			Name:              "BIOS",

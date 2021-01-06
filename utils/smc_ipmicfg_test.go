@@ -25,7 +25,8 @@ func Test_IpmicfgDeviceAttributes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
+	// since the component IDs are unique
+	inventory = purgeTestComponentID(inventory)
 	assert.Equal(t, expected, inventory)
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -62,14 +63,16 @@ func (s *StoreCLI) Components() ([]*model.Component, error) {
 		return nil, err
 	}
 
-	for _, c := range list.Controllers {
+	uid, _ := uuid.NewRandom()
+	for idx, c := range list.Controllers {
 		item := &model.Component{
+			ID:                uid.String(),
 			Serial:            c.ResponseData.SerialNumber,
 			Vendor:            vendorFromString(c.ResponseData.ProductName),
 			Model:             c.ResponseData.ProductName,
 			FirmwareInstalled: c.ResponseData.FirmwareVersion,
-			Slug:              "Serial Attached SCSI controller", // based on lspci
-			Name:              "Serial Attached SCSI controller",
+			Slug:              prefixIndex(idx, "Serial Attached SCSI controller"),
+			Name:              "Serial Attached SCSI controller", // based on lspci
 		}
 		inv = append(inv, item)
 	}
