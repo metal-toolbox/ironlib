@@ -3,6 +3,9 @@ github.com/davecgh/go-spew/spew
 # github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
 ## explicit
 github.com/dselans/dmidecode
+# github.com/google/uuid v1.1.4
+## explicit
+github.com/google/uuid
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.7.0
