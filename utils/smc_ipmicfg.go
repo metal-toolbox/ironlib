@@ -43,11 +43,12 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 		return nil, err
 	}
 
-	uid, _ := uuid.NewRandom()
+	uid1, _ := uuid.NewRandom()
+	uid2, _ := uuid.NewRandom()
 	// add CPLD and BIOS firmware inventory
 	inv := []*model.Component{
 		{
-			ID:                uid.String(),
+			ID:                uid1.String(),
 			Model:             "Supermicro",
 			Vendor:            "Supermicro",
 			Name:              "CPLD",
@@ -55,7 +56,7 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 			FirmwareInstalled: summary.CPLDVersion,
 		},
 		{
-			ID:                uid.String(),
+			ID:                uid2.String(),
 			Model:             "Supermicro",
 			Vendor:            "Supermicro",
 			Name:              "BIOS",
