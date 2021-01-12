@@ -184,16 +184,18 @@ func (d *Dell) listUpdatesAvailable() error {
 	return nil
 }
 
-func (d *Dell) ApplyUpdatesAvailable(ctx context.Context) (err error) {
+func (d *Dell) ApplyUpdatesAvailable(ctx context.Context, config *model.FirmwareUpdateConfig, dryRun bool) (err error) {
 
-	if d.FirmwareUpdateConfig == nil {
-		return fmt.Errorf("ApplyUpdatesAvailable() requires a firmware config set with SetFirmwareConfig()")
+	if config == nil {
+		return fmt.Errorf("ApplyUpdatesAvailable() requires a valid *model.FirmwareUpdateConfig")
 	}
+
+	d.FirmwareUpdateConfig = config
 
 	// collect data before we proceed to apply updates
 	steps := []func() error{d.pre}
 
-	// Skip component inventory collection if we have an update count
+	// lookup component updates if it wasn't done earlier
 	if len(d.ComponentUpdates) == 0 {
 		steps = append(steps, d.listUpdatesAvailable)
 	}
@@ -210,9 +212,16 @@ func (d *Dell) ApplyUpdatesAvailable(ctx context.Context) (err error) {
 		return nil
 	}
 
+	for _, component := range d.ComponentUpdates {
+		d.Logger.WithFields(logrus.Fields{"slug": component.Slug, "name": component.Name, "installed": component.FirmwareInstalled, "available": component.FirmwareAvailable}).Info("component update to be applied")
+	}
+
+	if dryRun {
+		return nil
+	}
+
 	// log update process to stdout
 	d.Dsu.Executor.SetVerbose()
-	d.Logger.Info("applying available updates")
 
 	// apply updates
 	exitCode, err := d.Dsu.ApplyUpdates()
