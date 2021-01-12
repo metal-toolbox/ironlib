@@ -27,7 +27,7 @@ type Getter interface {
 //
 
 type Updater interface {
-	ApplyUpdatesAvailable(ctx context.Context) error
+	ApplyUpdatesAvailable(ctx context.Context, config *model.FirmwareUpdateConfig, dryRun bool) error
 	//UpdateBMC(ctx context.Context) error
 	//UpdateBIOS(ctx context.Context) error
 }
