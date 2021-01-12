@@ -51,7 +51,7 @@ func NewSupermicro(model string, dmidecode *utils.Dmidecode, l *logrus.Logger) M
 	return &supermicro.Supermicro{
 		ID:         uid.String(),
 		Vendor:     "supermicro",
-		Model:      model,
+		Model:      utils.FormatProductName(model),
 		Dmidecode:  dmidecode,
 		Collectors: collectors,
 		Logger:     l,
@@ -86,7 +86,8 @@ func New(logger *logrus.Logger) (m Manager, err error) {
 		return nil, fmt.Errorf("unable to identify product name: %s", err.Error())
 	}
 
-	vendor = utils.FormatVendorStr(vendor)
+	vendor = utils.FormatVendorName(vendor)
+	model = utils.FormatProductName(model)
 
 	// update the log formatter
 	logger.SetFormatter(&LogFormat{
