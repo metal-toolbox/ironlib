@@ -17,7 +17,7 @@ type Ipmicfg struct {
 }
 
 type IpmicfgSummary struct {
-	FirmwareRevision string
+	FirmwareRevision string // BMC
 	BIOSVersion      string
 	CPLDVersion      string
 }
@@ -36,6 +36,13 @@ func NewIpmicfgCmd(trace bool) Collector {
 	return &Ipmicfg{Executor: e}
 }
 
+// Fake IPMI executor for tests
+func NewFakeIpmicfg() *Ipmicfg {
+	return &Ipmicfg{
+		Executor: NewFakeExecutor("ipmicfg"),
+	}
+}
+
 func (i *Ipmicfg) Components() ([]*model.Component, error) {
 
 	summary, err := i.Summary()
@@ -45,6 +52,7 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 
 	uid1, _ := uuid.NewRandom()
 	uid2, _ := uuid.NewRandom()
+	uid3, _ := uuid.NewRandom()
 	// add CPLD and BIOS firmware inventory
 	inv := []*model.Component{
 		{
@@ -62,6 +70,14 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 			Name:              "BIOS",
 			Slug:              "BIOS",
 			FirmwareInstalled: summary.BIOSVersion,
+		},
+		{
+			ID:                uid3.String(),
+			Model:             "Supermicro",
+			Vendor:            "Supermicro",
+			Name:              "BMC",
+			Slug:              "BMC",
+			FirmwareInstalled: summary.FirmwareRevision,
 		},
 	}
 
