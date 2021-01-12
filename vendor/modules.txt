@@ -6,6 +6,9 @@ github.com/dselans/dmidecode
 # github.com/google/uuid v1.1.4
 ## explicit
 github.com/google/uuid
+# github.com/hashicorp/go-version v1.2.1
+## explicit
+github.com/hashicorp/go-version
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.7.0
