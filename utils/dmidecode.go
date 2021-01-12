@@ -77,24 +77,3 @@ func (d *Dmidecode) ChassisSerialNumber() (serial string, err error) {
 func (d *Dmidecode) BIOSVersion() (serial string, err error) {
 	return d.query("BIOS Information", "Version")
 }
-
-func FormatVendorStr(v string) string {
-
-	switch v {
-	case "Dell Inc.":
-		return "dell"
-	case "HP", "HPE":
-		return "hp"
-	case "Supermicro":
-		return "supermicro"
-	case "Quanta Cloud Technology Inc.":
-		return "quanta"
-	case "GIGABYTE":
-		return "gigabyte"
-	case "Intel Corporation":
-		return "intel"
-	default:
-		return v
-	}
-
-}
