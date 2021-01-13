@@ -117,8 +117,8 @@ func (s *Supermicro) GetDeviceFirmwareRevision(ctx context.Context) (string, err
 // Identify components firmware revisions and apply updates
 func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.FirmwareUpdateConfig, dryRun bool) (err error) {
 
-	if config == nil {
-		return fmt.Errorf("ApplyUpdatesAvailable() requires a valid *model.FirmwareUpdateConfig")
+	if config == nil || config.Components == nil || len(config.Components) == 0 {
+		return fmt.Errorf("ApplyUpdatesAvailable() requires a valid *model.FirmwareUpdateConfig with a valid slice of Component config")
 	}
 
 	s.FirmwareUpdateConfig = config
