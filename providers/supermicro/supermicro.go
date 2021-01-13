@@ -162,6 +162,10 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 			s.Logger.WithFields(logrus.Fields{"component": component.Slug, "err": err}).Warn("component update error")
 			return err
 		}
+
+		// this flag can be optimized further
+		// BMC updates don't require a reboot, and some devices
+		s.PendingReboot = true
 	}
 
 	return nil
