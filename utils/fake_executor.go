@@ -53,6 +53,12 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			return nil, err
 		}
 		e.Stdout = b
+	case "storecli-nocontrollers":
+		b, err := ioutil.ReadFile("test_data/storecli_nocontrollers.json")
+		if err != nil {
+			return nil, err
+		}
+		e.Stdout = b
 	case "smartctl":
 		switch e.Args[0] {
 		case "--scan":

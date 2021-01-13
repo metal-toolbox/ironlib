@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
@@ -24,7 +25,8 @@ type Controller struct {
 }
 
 type CommandStatus struct {
-	Status string `json:"Status"`
+	Status      string `json:"Status"`
+	Description string `json:"Description"`
 }
 
 type ResponseData struct {
@@ -65,6 +67,11 @@ func (s *StoreCLI) Components() ([]*model.Component, error) {
 
 	uid, _ := uuid.NewRandom()
 	for idx, c := range list.Controllers {
+
+		if strings.Contains(c.CommandStatus.Description, "not found") || c.CommandStatus.Status == "Failure" {
+			continue
+		}
+
 		item := &model.Component{
 			ID:                uid.String(),
 			Serial:            c.ResponseData.SerialNumber,
