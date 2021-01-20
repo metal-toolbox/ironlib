@@ -71,7 +71,7 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 	}
 
 	// collect current component firmware versions
-	d.Logger.Info("Collecting component firmware versions...")
+	d.Logger.Info("Identifying component firmware versions...")
 	componentInventory, err := d.Dsu.ComponentInventory()
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 	}
 
 	// collect firmware updates available for components
-	d.Logger.Info("Identifying available component firmware updates...")
+	d.Logger.Info("Identifying component firmware updates...")
 	// set d.ComponentUpdates with available updates
 	err = d.listUpdatesAvailable()
 	if err != nil {
@@ -100,9 +100,10 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 
 	count := len(d.ComponentUpdates)
 	if count > 0 {
-		d.Logger.WithField("count", count).Info("device has updates available..")
+		d.Logger.WithField("count", count).Info("updates available..")
+		device.ComponentUpdates = d.ComponentUpdates
 	} else {
-		d.Logger.Info("device has no available updates to install")
+		d.Logger.Info("no available updates")
 	}
 
 	// converge component inventory data with firmware update data
@@ -122,7 +123,6 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 		}
 	}
 
-	device.Components = componentInventory
 	return device, nil
 }
 
@@ -143,9 +143,9 @@ func (d *Dell) GetUpdatesAvailable(ctx context.Context) (*model.Device, error) {
 
 	count := len(d.ComponentUpdates)
 	if count > 0 {
-		d.Logger.WithField("count", count).Info("device has updates available..")
+		d.Logger.WithField("count", count).Info("updates available..")
 	} else {
-		d.Logger.Info("device has no available updates to install")
+		d.Logger.Info("no available updates")
 	}
 
 	device := &model.Device{
@@ -184,6 +184,7 @@ func (d *Dell) listUpdatesAvailable() error {
 	return nil
 }
 
+// nolint: gocyclo
 func (d *Dell) ApplyUpdatesAvailable(ctx context.Context, config *model.FirmwareUpdateConfig, dryRun bool) (err error) {
 
 	if config == nil {
