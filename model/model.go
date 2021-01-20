@@ -40,7 +40,7 @@ type FirmwareUpdateConfig struct {
 }
 
 // Component specific firmware config
-// each of the fields enable targetting the configuration to specific components
+// each of the fields enable targeting the configuration to specific components
 type ComponentFirmwareConfig struct {
 	Slug           string   `yaml:"slug"        json:"slug"` // component name
 	Vendor         string   `yaml:"vendor"      json:"vendor"`

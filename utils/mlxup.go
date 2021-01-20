@@ -40,8 +40,6 @@ func NewMlxupCmd(trace bool) Collector {
 	return &Mlxup{Executor: e}
 }
 
-
-
 func (m *Mlxup) Components() ([]*model.Component, error) {
 
 	devices, err := m.Query()

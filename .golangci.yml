@@ -63,7 +63,7 @@ run:
     - scripts
     - docker
     - samples
-  modules-download-mode: vendor
+      #modules-download-mode: vendor
   
 issues:
   exclude-rules:

@@ -114,6 +114,7 @@ func (s *Supermicro) GetDeviceFirmwareRevision(ctx context.Context) (string, err
 	return tokens[0], nil
 }
 
+// nolint: gocyclo
 // Identify components firmware revisions and apply updates
 func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.FirmwareUpdateConfig, dryRun bool) (err error) {
 
@@ -214,7 +215,7 @@ func (s *Supermicro) componentsForUpdate(components []*model.Component, config *
 func (s *Supermicro) componentConfig(slug string) *model.ComponentFirmwareConfig {
 
 	for _, config := range s.FirmwareUpdateConfig.Components {
-		if strings.ToLower(slug) == strings.ToLower(config.Slug) {
+		if strings.EqualFold(slug, config.Slug) {
 			return config
 		}
 	}
