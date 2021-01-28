@@ -17,6 +17,7 @@ import (
 type Dell struct {
 	ID                      string
 	PendingReboot           bool // set when the device requires a reboot after running an upgrade
+	UpdatesInstalled        bool // set when updates were installed on the device
 	DsuPrequisitesInstalled bool
 	Vendor                  string
 	Model                   string
@@ -59,6 +60,10 @@ func (d *Dell) SetFirmwareUpdateConfig(config *model.FirmwareUpdateConfig) {
 
 func (d *Dell) RebootRequired() bool {
 	return d.PendingReboot
+}
+
+func (d *Dell) UpdatesApplied() bool {
+	return d.UpdatesInstalled
 }
 
 // nolint: gocyclo
@@ -209,7 +214,7 @@ func (d *Dell) ApplyUpdatesAvailable(ctx context.Context, config *model.Firmware
 	}
 
 	if len(d.ComponentUpdates) == 0 {
-		d.Logger.Info("No updates available to apply")
+		d.Logger.Info("No updates to be applied, all components are up to date as per firmware configuration")
 		return nil
 	}
 
@@ -232,6 +237,7 @@ func (d *Dell) ApplyUpdatesAvailable(ctx context.Context, config *model.Firmware
 	// check exit code - see dsu_return_codes.md
 	switch exitCode {
 	case utils.DSUExitCodeUpdatesApplied:
+		d.UpdatesInstalled = true
 		d.Logger.Infoln("updates applied successfully")
 		return nil
 	case utils.DSUExitCodeNoUpdatesAvailable: // no applicable updates

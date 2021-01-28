@@ -14,6 +14,7 @@ type Supermicro struct {
 	ID                   string
 	PendingReboot        bool // set when the device requires a reboot after update
 	UpdatesAvailable     int
+	UpdatesInstalled     bool // set when updates were installed on the device
 	Vendor               string
 	Model                string
 	Serial               string
@@ -51,6 +52,10 @@ func (s *Supermicro) SetFirmwareUpdateConfig(config *model.FirmwareUpdateConfig)
 
 func (s *Supermicro) SetOptions(options map[string]interface{}) error {
 	return nil
+}
+
+func (s *Supermicro) UpdatesApplied() bool {
+	return s.UpdatesInstalled
 }
 
 // Returns hardware inventory for the device
@@ -136,7 +141,7 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 	}
 
 	if len(components) == 0 {
-		s.Logger.Info("No components identified for updates")
+		s.Logger.Info("No updates to be applied, all components are up to date as per firmware configuration")
 	}
 
 	// fetch and apply component updates
@@ -167,6 +172,7 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 		// this flag can be optimized further
 		// BMC updates don't require a reboot, and some devices
 		s.PendingReboot = true
+		s.UpdatesInstalled = true
 	}
 
 	return nil

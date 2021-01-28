@@ -15,6 +15,7 @@ type Getter interface {
 	GetModel() string
 	GetVendor() string
 	RebootRequired() bool
+	UpdatesApplied() bool
 	GetInventory(ctx context.Context, listUpdates bool) (*model.Device, error)
 	GetUpdatesAvailable(ctx context.Context) (*model.Device, error)
 	GetDeviceFirmwareRevision(ctx context.Context) (string, error)
