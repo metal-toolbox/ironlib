@@ -5,25 +5,59 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 type Supermicro struct {
 	ID                   string
-	PendingReboot        bool // set when the device requires a reboot after update
-	UpdatesAvailable     int
-	UpdatesInstalled     bool // set when updates were installed on the device
 	Vendor               string
 	Model                string
 	Serial               string
-	Components           []*model.Component
-	Collectors           map[string]utils.Collector
 	Updater              utils.Updater
-	Logger               *logrus.Logger
+	Collectors           map[string]utils.Collector
 	Dmidecode            *utils.Dmidecode
 	FirmwareUpdateConfig *model.FirmwareUpdateConfig
+	Logger               *logrus.Logger
+	Components           []*model.Component
+	UpdatesAvailable     int
+	PendingReboot        bool // set when the device requires a reboot after update
+	UpdatesInstalled     bool // set when updates were installed on the device
+}
+
+func New(vendor, model string, l *logrus.Logger) (model.Manager, error) {
+
+	dmidecode, err := utils.NewDmidecode()
+	if err != nil {
+		errors.Wrap(err, "erorr in dmidecode init")
+	}
+
+	var trace bool
+
+	if l.GetLevel().String() == "trace" {
+		trace = true
+	}
+
+	// register inventory collectors
+	collectors := map[string]utils.Collector{
+		"ipmi":     utils.NewIpmicfgCmd(trace),
+		"smartctl": utils.NewSmartctlCmd(trace),
+		"storecli": utils.NewStoreCLICmd(trace),
+		"mlxup":    utils.NewMlxupCmd(trace),
+	}
+
+	uid, _ := uuid.NewRandom()
+	return &Supermicro{
+		ID:         uid.String(),
+		Vendor:     vendor,
+		Model:      utils.FormatProductName(model),
+		Dmidecode:  dmidecode,
+		Collectors: collectors,
+		Logger:     l,
+	}, nil
 }
 
 func (s *Supermicro) GetModel() string {

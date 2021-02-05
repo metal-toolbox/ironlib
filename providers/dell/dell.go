@@ -6,8 +6,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,6 +31,31 @@ type Dell struct {
 	Dnf                     *utils.Dnf
 	Dsu                     *utils.Dsu
 	FirmwareUpdateConfig    *model.FirmwareUpdateConfig
+}
+
+func New(vendor, model string, l *logrus.Logger) (model.Manager, error) {
+
+	var trace bool
+
+	if l.GetLevel().String() == "trace" {
+		trace = true
+	}
+
+	dmidecode, err := utils.NewDmidecode()
+	if err != nil {
+		errors.Wrap(err, "erorr in dmidecode init")
+	}
+
+	uid, _ := uuid.NewRandom()
+	return &Dell{
+		ID:        uid.String(),
+		Vendor:    vendor,
+		Model:     model,
+		Dmidecode: dmidecode,
+		Dnf:       utils.NewDnf(trace),
+		Dsu:       utils.NewDsu(trace),
+		Logger:    l,
+	}, nil
 }
 
 type Component struct {
