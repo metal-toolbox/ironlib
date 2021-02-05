@@ -32,6 +32,8 @@ func FormatVendorName(v string) string {
 		return "gigabyte"
 	case "Intel Corporation":
 		return "intel"
+	case "Packet":
+		return "packet"
 	default:
 		return v
 	}
@@ -203,4 +205,24 @@ func VersionIsNewer(newVersion, oldVersion string) (bool, error) {
 	}
 
 	return newV.GreaterThan(oldV), nil
+}
+
+// Updates device data based on the components data
+func UpdateComponentData(device *model.Device, components []*model.Component) *model.Device {
+
+	// update drive information
+	for _, component := range components {
+		for _, drive := range device.Drives {
+			if strings.EqualFold(component.Serial, drive.Serial) {
+				drive.FirmwareInstalled = component.FirmwareInstalled
+			}
+		}
+	}
+
+	// TODO
+	// update BMC information
+
+	// add TPM information if any
+
+	return device
 }

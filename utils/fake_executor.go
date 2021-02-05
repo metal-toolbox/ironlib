@@ -102,7 +102,12 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 		if e.Args[1] == "-1" && e.Args[2] == "dell-system-update" {
 			e.Stdout = []byte("1.8.0-20.04.00")
 		}
-
+	case "lshw":
+		b, err := ioutil.ReadFile("test_data/lshw_e3c246d4I-nl.json")
+		if err != nil {
+			return nil, err
+		}
+		e.Stdout = b
 	}
 
 	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: 0}, nil
