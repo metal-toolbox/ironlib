@@ -1,0 +1,1632 @@
+[
+  {
+    "id": "device.example.net",
+    "class": "system",
+    "claimed": true,
+    "handle": "DMI:0001",
+    "description": "System",
+    "product": "c3.small.x86 (To Be Filled By O.E.M.)",
+    "vendor": "Packet",
+    "version": "R1.00",
+    "serial": "D5S0R8000105",
+    "width": 64,
+    "configuration": {
+      "boot": "normal",
+      "chassis": "server",
+      "family": "To Be Filled By O.E.M.",
+      "sku": "To Be Filled By O.E.M.",
+      "uuid": "00000000-0000-0000-0000-D05099F030C4"
+    },
+    "capabilities": {
+      "smbios-3.2.0": "SMBIOS version 3.2.0",
+      "dmi-3.2.0": "DMI version 3.2.0",
+      "smp": "Symmetric Multi-Processing",
+      "vsyscall32": "32-bit processes"
+    },
+    "children": [
+      {
+        "id": "core",
+        "class": "bus",
+        "claimed": true,
+        "handle": "DMI:0002",
+        "description": "Motherboard",
+        "product": "E3C246D4I-NL",
+        "vendor": "ASRockRack",
+        "physid": "0",
+        "serial": "196231220000153",
+        "children": [
+          {
+            "id": "firmware",
+            "class": "memory",
+            "claimed": true,
+            "description": "BIOS",
+            "vendor": "American Megatrends Inc.",
+            "physid": "0",
+            "version": "L2.07B",
+            "date": "04/08/2020",
+            "units": "bytes",
+            "size": 65536,
+            "capacity": 33554432,
+            "capabilities": {
+              "pci": "PCI bus",
+              "upgrade": "BIOS EEPROM can be upgraded",
+              "shadowing": "BIOS shadowing",
+              "cdboot": "Booting from CD-ROM/DVD",
+              "bootselect": "Selectable boot path",
+              "socketedrom": "BIOS ROM is socketed",
+              "edd": "Enhanced Disk Drive extensions",
+              "int13floppy1200": "5.25\" 1.2MB floppy",
+              "int13floppy720": "3.5\" 720KB floppy",
+              "int13floppy2880": "3.5\" 2.88MB floppy",
+              "int5printscreen": "Print Screen key",
+              "int14serial": "INT14 serial line control",
+              "int17printer": "INT17 printer control",
+              "acpi": "ACPI",
+              "usb": "USB legacy emulation",
+              "biosbootspecification": "BIOS boot specification",
+              "uefi": "UEFI specification is supported"
+            }
+          },
+          {
+            "id": "memory",
+            "class": "memory",
+            "claimed": true,
+            "handle": "DMI:0015",
+            "description": "System Memory",
+            "physid": "15",
+            "slot": "System board or motherboard",
+            "units": "bytes",
+            "size": 34359738368,
+            "configuration": {
+              "errordetection": "ecc"
+            },
+            "capabilities": {
+              "ecc": "Single-bit error-correcting code (ECC)"
+            },
+            "children": [
+              {
+                "id": "bank:0",
+                "class": "memory",
+                "claimed": true,
+                "handle": "DMI:0025",
+                "description": "SODIMM DDR4 Synchronous 2666 MHz (0.4 ns)",
+                "product": "18ASF2G72HZ-2G6E1",
+                "vendor": "Micron",
+                "physid": "0",
+                "serial": "F0F9053F",
+                "slot": "ChannelA-DIMM0",
+                "units": "bytes",
+                "size": 17179869184,
+                "width": 64,
+                "clock": 2666000000
+              },
+              {
+                "id": "bank:1",
+                "class": "memory",
+                "claimed": true,
+                "handle": "DMI:0026",
+                "description": "DIMM [empty]",
+                "vendor": "NO DIMM",
+                "physid": "1",
+                "slot": "ChannelA-DIMM1"
+              },
+              {
+                "id": "bank:2",
+                "class": "memory",
+                "claimed": true,
+                "handle": "DMI:0027",
+                "description": "SODIMM DDR4 Synchronous 2666 MHz (0.4 ns)",
+                "product": "18ASF2G72HZ-2G6E1",
+                "vendor": "Micron",
+                "physid": "2",
+                "serial": "F0F90894",
+                "slot": "ChannelB-DIMM0",
+                "units": "bytes",
+                "size": 17179869184,
+                "width": 64,
+                "clock": 2666000000
+              },
+              {
+                "id": "bank:3",
+                "class": "memory",
+                "claimed": true,
+                "handle": "DMI:0028",
+                "description": "DIMM [empty]",
+                "vendor": "NO DIMM",
+                "physid": "3",
+                "slot": "ChannelB-DIMM1"
+              }
+            ]
+          },
+          {
+            "id": "cache:0",
+            "class": "memory",
+            "claimed": true,
+            "handle": "DMI:0021",
+            "description": "L1 cache",
+            "physid": "21",
+            "slot": "L1 Cache",
+            "units": "bytes",
+            "size": 524288,
+            "capacity": 524288,
+            "configuration": {
+              "level": "1"
+            },
+            "capabilities": {
+              "synchronous": "Synchronous",
+              "internal": "Internal",
+              "write-back": "Write-back",
+              "unified": "Unified cache"
+            }
+          },
+          {
+            "id": "cache:1",
+            "class": "memory",
+            "claimed": true,
+            "handle": "DMI:0022",
+            "description": "L2 cache",
+            "physid": "22",
+            "slot": "L2 Cache",
+            "units": "bytes",
+            "size": 2097152,
+            "capacity": 2097152,
+            "configuration": {
+              "level": "2"
+            },
+            "capabilities": {
+              "synchronous": "Synchronous",
+              "internal": "Internal",
+              "write-back": "Write-back",
+              "unified": "Unified cache"
+            }
+          },
+          {
+            "id": "cache:2",
+            "class": "memory",
+            "claimed": true,
+            "handle": "DMI:0023",
+            "description": "L3 cache",
+            "physid": "23",
+            "slot": "L3 Cache",
+            "units": "bytes",
+            "size": 16777216,
+            "capacity": 16777216,
+            "configuration": {
+              "level": "3"
+            },
+            "capabilities": {
+              "synchronous": "Synchronous",
+              "internal": "Internal",
+              "write-back": "Write-back",
+              "unified": "Unified cache"
+            }
+          },
+          {
+            "id": "cpu",
+            "class": "processor",
+            "claimed": true,
+            "handle": "DMI:0024",
+            "description": "CPU",
+            "product": "Intel(R) Xeon(R) E-2278G CPU @ 3.40GHz",
+            "vendor": "Intel Corp.",
+            "physid": "24",
+            "businfo": "cpu@0",
+            "version": "Intel(R) Xeon(R) E-2278G CPU @ 3.40GHz",
+            "slot": "CPU1",
+            "units": "Hz",
+            "size": 4829567000,
+            "capacity": 5000000000,
+            "width": 64,
+            "clock": 100000000,
+            "configuration": {
+              "cores": "8",
+              "enabledcores": "8",
+              "threads": "16"
+            },
+            "capabilities": {
+              "lm": "64bits extensions (x86-64)",
+              "fpu": "mathematical co-processor",
+              "fpu_exception": "FPU exceptions reporting",
+              "wp": true,
+              "vme": "virtual mode extensions",
+              "de": "debugging extensions",
+              "pse": "page size extensions",
+              "tsc": "time stamp counter",
+              "msr": "model-specific registers",
+              "pae": "4GB+ memory addressing (Physical Address Extension)",
+              "mce": "machine check exceptions",
+              "cx8": "compare and exchange 8-byte",
+              "apic": "on-chip advanced programmable interrupt controller (APIC)",
+              "sep": "fast system calls",
+              "mtrr": "memory type range registers",
+              "pge": "page global enable",
+              "mca": "machine check architecture",
+              "cmov": "conditional move instruction",
+              "pat": "page attribute table",
+              "pse36": "36-bit page size extensions",
+              "clflush": true,
+              "dts": "debug trace and EMON store MSRs",
+              "acpi": "thermal control (ACPI)",
+              "mmx": "multimedia extensions (MMX)",
+              "fxsr": "fast floating point save/restore",
+              "sse": "streaming SIMD extensions (SSE)",
+              "sse2": "streaming SIMD extensions (SSE2)",
+              "ss": "self-snoop",
+              "ht": "HyperThreading",
+              "tm": "thermal interrupt and status",
+              "pbe": "pending break event",
+              "syscall": "fast system calls",
+              "nx": "no-execute bit (NX)",
+              "pdpe1gb": true,
+              "rdtscp": true,
+              "x86-64": "64bits extensions (x86-64)",
+              "constant_tsc": true,
+              "art": true,
+              "arch_perfmon": true,
+              "pebs": true,
+              "bts": true,
+              "rep_good": true,
+              "nopl": true,
+              "xtopology": true,
+              "nonstop_tsc": true,
+              "cpuid": true,
+              "aperfmperf": true,
+              "pni": true,
+              "pclmulqdq": true,
+              "dtes64": true,
+              "monitor": true,
+              "ds_cpl": true,
+              "vmx": true,
+              "smx": true,
+              "est": true,
+              "tm2": true,
+              "ssse3": true,
+              "sdbg": true,
+              "fma": true,
+              "cx16": true,
+              "xtpr": true,
+              "pdcm": true,
+              "pcid": true,
+              "sse4_1": true,
+              "sse4_2": true,
+              "x2apic": true,
+              "movbe": true,
+              "popcnt": true,
+              "tsc_deadline_timer": true,
+              "aes": true,
+              "xsave": true,
+              "avx": true,
+              "f16c": true,
+              "rdrand": true,
+              "lahf_lm": true,
+              "abm": true,
+              "3dnowprefetch": true,
+              "cpuid_fault": true,
+              "epb": true,
+              "invpcid_single": true,
+              "ssbd": true,
+              "ibrs": true,
+              "ibpb": true,
+              "stibp": true,
+              "ibrs_enhanced": true,
+              "tpr_shadow": true,
+              "vnmi": true,
+              "flexpriority": true,
+              "ept": true,
+              "vpid": true,
+              "ept_ad": true,
+              "fsgsbase": true,
+              "tsc_adjust": true,
+              "bmi1": true,
+              "avx2": true,
+              "smep": true,
+              "bmi2": true,
+              "erms": true,
+              "invpcid": true,
+              "mpx": true,
+              "rdseed": true,
+              "adx": true,
+              "smap": true,
+              "clflushopt": true,
+              "intel_pt": true,
+              "xsaveopt": true,
+              "xsavec": true,
+              "xgetbv1": true,
+              "xsaves": true,
+              "dtherm": true,
+              "ida": true,
+              "arat": true,
+              "pln": true,
+              "pts": true,
+              "hwp": true,
+              "hwp_notify": true,
+              "hwp_act_window": true,
+              "hwp_epp": true,
+              "md_clear": true,
+              "flush_l1d": true,
+              "arch_capabilities": true,
+              "cpufreq": "CPU Frequency scaling"
+            }
+          },
+          {
+            "id": "pci",
+            "class": "bridge",
+            "claimed": true,
+            "handle": "PCIBUS:0000:00",
+            "description": "Host bridge",
+            "product": "Intel Corporation",
+            "vendor": "Intel Corporation",
+            "physid": "100",
+            "businfo": "pci@0000:00:00.0",
+            "version": "0d",
+            "width": 32,
+            "clock": 33000000,
+            "configuration": {
+              "driver": "skl_uncore"
+            },
+            "children": [
+              {
+                "id": "pci:0",
+                "class": "bridge",
+                "claimed": true,
+                "handle": "PCIBUS:0000:01",
+                "description": "PCI bridge",
+                "product": "Xeon E3-1200 v5/E3-1500 v5/6th Gen Core Processor PCIe Controller (x16)",
+                "vendor": "Intel Corporation",
+                "physid": "1",
+                "businfo": "pci@0000:00:01.0",
+                "version": "0d",
+                "width": 32,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "pcieport"
+                },
+                "capabilities": {
+                  "pci": true,
+                  "pm": "Power Management",
+                  "msi": "Message Signalled Interrupts",
+                  "pciexpress": "PCI Express",
+                  "normal_decode": true,
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                },
+                "children": [
+                  {
+                    "id": "network:0",
+                    "class": "network",
+                    "claimed": true,
+                    "handle": "PCI:0000:01:00.0",
+                    "description": "Ethernet interface",
+                    "product": "Ethernet Controller X710 for 10GbE SFP+",
+                    "vendor": "Intel Corporation",
+                    "physid": "0",
+                    "businfo": "pci@0000:01:00.0",
+                    "logicalname": "eno1",
+                    "version": "02",
+                    "serial": "b4:96:91:70:26:c8",
+                    "units": "bit/s",
+                    "size": 10000000000,
+                    "capacity": 10000000000,
+                    "width": 64,
+                    "clock": 33000000,
+                    "configuration": {
+                      "autonegotiation": "off",
+                      "broadcast": "yes",
+                      "driver": "i40e",
+                      "driverversion": "2.8.20-k",
+                      "duplex": "full",
+                      "firmware": "6.01 0x80003fa1 1.1853.0",
+                      "latency": "0",
+                      "link": "yes",
+                      "multicast": "yes",
+                      "slave": "yes",
+                      "speed": "10Gbit/s"
+                    },
+                    "capabilities": {
+                      "pm": "Power Management",
+                      "msi": "Message Signalled Interrupts",
+                      "msix": "MSI-X",
+                      "pciexpress": "PCI Express",
+                      "vpd": "Vital Product Data",
+                      "bus_master": "bus mastering",
+                      "cap_list": "PCI capabilities listing",
+                      "rom": "extension ROM",
+                      "ethernet": true,
+                      "physical": "Physical interface",
+                      "fibre": "optical fibre",
+                      "10000bt-fd": "10Gbit/s (full duplex)"
+                    }
+                  },
+                  {
+                    "id": "network:1",
+                    "class": "network",
+                    "claimed": true,
+                    "handle": "PCI:0000:01:00.1",
+                    "description": "Ethernet interface",
+                    "product": "Ethernet Controller X710 for 10GbE SFP+",
+                    "vendor": "Intel Corporation",
+                    "physid": "0.1",
+                    "businfo": "pci@0000:01:00.1",
+                    "logicalname": "eno2",
+                    "version": "02",
+                    "serial": "b4:96:91:70:26:c8",
+                    "units": "bit/s",
+                    "size": 10000000000,
+                    "capacity": 10000000000,
+                    "width": 64,
+                    "clock": 33000000,
+                    "configuration": {
+                      "autonegotiation": "off",
+                      "broadcast": "yes",
+                      "driver": "i40e",
+                      "driverversion": "2.8.20-k",
+                      "duplex": "full",
+                      "firmware": "6.01 0x80003fa1 1.1853.0",
+                      "latency": "0",
+                      "link": "yes",
+                      "multicast": "yes",
+                      "slave": "yes",
+                      "speed": "10Gbit/s"
+                    },
+                    "capabilities": {
+                      "pm": "Power Management",
+                      "msi": "Message Signalled Interrupts",
+                      "msix": "MSI-X",
+                      "pciexpress": "PCI Express",
+                      "vpd": "Vital Product Data",
+                      "bus_master": "bus mastering",
+                      "cap_list": "PCI capabilities listing",
+                      "rom": "extension ROM",
+                      "ethernet": true,
+                      "physical": "Physical interface",
+                      "fibre": "optical fibre",
+                      "10000bt-fd": "10Gbit/s (full duplex)"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "display",
+                "class": "display",
+                "claimed": true,
+                "handle": "PCI:0000:00:02.0",
+                "description": "Display controller",
+                "product": "Intel Corporation",
+                "vendor": "Intel Corporation",
+                "physid": "2",
+                "businfo": "pci@0000:00:02.0",
+                "version": "02",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "i915",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pciexpress": "PCI Express",
+                  "msi": "Message Signalled Interrupts",
+                  "pm": "Power Management",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "generic:0",
+                "class": "generic",
+                "handle": "PCI:0000:00:08.0",
+                "description": "System peripheral",
+                "product": "Xeon E3-1200 v5/v6 / E3-1500 v5 / 6th/7th/8th Gen Core Processor Gaussian Mixture Model",
+                "vendor": "Intel Corporation",
+                "physid": "8",
+                "businfo": "pci@0000:00:08.0",
+                "version": "00",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "msi": "Message Signalled Interrupts",
+                  "pm": "Power Management",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "generic:1",
+                "class": "generic",
+                "claimed": true,
+                "handle": "PCI:0000:00:12.0",
+                "description": "Signal processing controller",
+                "product": "Cannon Lake PCH Thermal Controller",
+                "vendor": "Intel Corporation",
+                "physid": "12",
+                "businfo": "pci@0000:00:12.0",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "intel_pch_thermal",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "msi": "Message Signalled Interrupts",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "usb",
+                "class": "bus",
+                "claimed": true,
+                "handle": "PCI:0000:00:14.0",
+                "description": "USB controller",
+                "product": "Cannon Lake PCH USB 3.1 xHCI Host Controller",
+                "vendor": "Intel Corporation",
+                "physid": "14",
+                "businfo": "pci@0000:00:14.0",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "xhci_hcd",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "msi": "Message Signalled Interrupts",
+                  "xhci": true,
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                },
+                "children": [
+                  {
+                    "id": "usbhost:0",
+                    "class": "bus",
+                    "claimed": true,
+                    "handle": "USB:1:1",
+                    "product": "xHCI Host Controller",
+                    "vendor": "Linux 5.4.0-52-generic xhci-hcd",
+                    "physid": "0",
+                    "businfo": "usb@1",
+                    "logicalname": "usb1",
+                    "version": "5.04",
+                    "configuration": {
+                      "driver": "hub",
+                      "slots": "16",
+                      "speed": "480Mbit/s"
+                    },
+                    "capabilities": {
+                      "usb-2.00": "USB 2.0"
+                    },
+                    "children": [
+                      {
+                        "id": "usb",
+                        "class": "bus",
+                        "claimed": true,
+                        "handle": "USB:1:2",
+                        "description": "USB hub",
+                        "product": "Virtual Hub",
+                        "vendor": "American Megatrends Inc.",
+                        "physid": "5",
+                        "businfo": "usb@1:5",
+                        "version": "1.00",
+                        "serial": "serial",
+                        "configuration": {
+                          "driver": "hub",
+                          "maxpower": "100mA",
+                          "slots": "5",
+                          "speed": "480Mbit/s"
+                        },
+                        "capabilities": {
+                          "usb-2.00": "USB 2.0"
+                        },
+                        "children": [
+                          {
+                            "id": "usb:0",
+                            "class": "storage",
+                            "claimed": true,
+                            "handle": "USB:1:3",
+                            "description": "Mass storage device",
+                            "product": "Virtual Cdrom Device",
+                            "vendor": "American Megatrends Inc.",
+                            "physid": "1",
+                            "businfo": "usb@1:5.1",
+                            "version": "1.00",
+                            "serial": "AAAABBBBCCCC1",
+                            "configuration": {
+                              "driver": "usb-storage",
+                              "speed": "480Mbit/s"
+                            },
+                            "capabilities": {
+                              "usb-2.00": "USB 2.0",
+                              "scsi": "SCSI"
+                            }
+                          },
+                          {
+                            "id": "usb:1",
+                            "class": "communication",
+                            "claimed": true,
+                            "handle": "USB:1:4",
+                            "description": "Communication device",
+                            "product": "Virtual Ethernet",
+                            "vendor": "American Megatrends Inc.",
+                            "physid": "2",
+                            "businfo": "usb@1:5.2",
+                            "version": "1.00",
+                            "serial": "1234567890",
+                            "configuration": {
+                              "driver": "cdc_ether",
+                              "speed": "480Mbit/s"
+                            },
+                            "capabilities": {
+                              "usb-2.00": "USB 2.0"
+                            }
+                          },
+                          {
+                            "id": "usb:2",
+                            "class": "input",
+                            "claimed": true,
+                            "handle": "USB:1:5",
+                            "description": "Keyboard",
+                            "product": "Virtual Keyboard and Mouse",
+                            "vendor": "American Megatrends Inc.",
+                            "physid": "3",
+                            "businfo": "usb@1:5.3",
+                            "version": "1.00",
+                            "configuration": {
+                              "driver": "usbhid",
+                              "speed": "2Mbit/s"
+                            },
+                            "capabilities": {
+                              "usb-1.10": "USB 1.1"
+                            }
+                          },
+                          {
+                            "id": "usb:3",
+                            "class": "storage",
+                            "claimed": true,
+                            "handle": "USB:1:6",
+                            "description": "Mass storage device",
+                            "product": "Virtual Floppy Device",
+                            "vendor": "American Megatrends Inc.",
+                            "physid": "4",
+                            "businfo": "usb@1:5.4",
+                            "version": "1.00",
+                            "serial": "AAAABBBBCCCC2",
+                            "configuration": {
+                              "driver": "usb-storage",
+                              "speed": "480Mbit/s"
+                            },
+                            "capabilities": {
+                              "usb-2.00": "USB 2.0",
+                              "scsi": "SCSI"
+                            }
+                          },
+                          {
+                            "id": "usb:4",
+                            "class": "storage",
+                            "claimed": true,
+                            "handle": "USB:1:7",
+                            "description": "Mass storage device",
+                            "product": "Virtual HardDisk Device",
+                            "vendor": "American Megatrends Inc.",
+                            "physid": "5",
+                            "businfo": "usb@1:5.5",
+                            "version": "1.00",
+                            "serial": "AAAABBBBCCCC3",
+                            "configuration": {
+                              "driver": "usb-storage",
+                              "speed": "480Mbit/s"
+                            },
+                            "capabilities": {
+                              "usb-2.00": "USB 2.0",
+                              "scsi": "SCSI"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "usbhost:1",
+                    "class": "bus",
+                    "claimed": true,
+                    "handle": "USB:2:1",
+                    "product": "xHCI Host Controller",
+                    "vendor": "Linux 5.4.0-52-generic xhci-hcd",
+                    "physid": "1",
+                    "businfo": "usb@2",
+                    "logicalname": "usb2",
+                    "version": "5.04",
+                    "configuration": {
+                      "driver": "hub",
+                      "slots": "10",
+                      "speed": "10000Mbit/s"
+                    },
+                    "capabilities": {
+                      "usb-3.10": true
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "memory",
+                "class": "memory",
+                "handle": "PCI:0000:00:14.2",
+                "description": "RAM memory",
+                "product": "Cannon Lake PCH Shared SRAM",
+                "vendor": "Intel Corporation",
+                "physid": "14.2",
+                "businfo": "pci@0000:00:14.2",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "serial:0",
+                "class": "bus",
+                "claimed": true,
+                "handle": "PCI:0000:00:15.0",
+                "description": "Serial bus controller",
+                "product": "Cannon Lake PCH Serial IO I2C Controller #0",
+                "vendor": "Intel Corporation",
+                "physid": "15",
+                "businfo": "pci@0000:00:15.0",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "intel-lpss",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "serial:1",
+                "class": "bus",
+                "claimed": true,
+                "handle": "PCI:0000:00:15.1",
+                "description": "Serial bus controller",
+                "product": "Cannon Lake PCH Serial IO I2C Controller #1",
+                "vendor": "Intel Corporation",
+                "physid": "15.1",
+                "businfo": "pci@0000:00:15.1",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "intel-lpss",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "communication:0",
+                "class": "communication",
+                "claimed": true,
+                "handle": "PCI:0000:00:16.0",
+                "description": "Communication controller",
+                "product": "Cannon Lake PCH HECI Controller",
+                "vendor": "Intel Corporation",
+                "physid": "16",
+                "businfo": "pci@0000:00:16.0",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "mei_me",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "msi": "Message Signalled Interrupts",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "communication:1",
+                "class": "communication",
+                "handle": "PCI:0000:00:16.1",
+                "description": "Communication controller",
+                "product": "Intel Corporation",
+                "vendor": "Intel Corporation",
+                "physid": "16.1",
+                "businfo": "pci@0000:00:16.1",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "msi": "Message Signalled Interrupts",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "communication:2",
+                "class": "communication",
+                "claimed": true,
+                "handle": "PCI:0000:00:16.4",
+                "description": "Communication controller",
+                "product": "Cannon Lake PCH HECI Controller #2",
+                "vendor": "Intel Corporation",
+                "physid": "16.4",
+                "businfo": "pci@0000:00:16.4",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "mei_me",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "msi": "Message Signalled Interrupts",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "sata",
+                "class": "storage",
+                "claimed": true,
+                "handle": "PCI:0000:00:17.0",
+                "description": "SATA controller",
+                "product": "Cannon Lake PCH SATA AHCI Controller",
+                "vendor": "Intel Corporation",
+                "physid": "17",
+                "businfo": "pci@0000:00:17.0",
+                "version": "10",
+                "width": 32,
+                "clock": 66000000,
+                "configuration": {
+                  "driver": "ahci",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "sata": true,
+                  "msi": "Message Signalled Interrupts",
+                  "pm": "Power Management",
+                  "ahci_1.0": true,
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "pci:1",
+                "class": "bridge",
+                "claimed": true,
+                "handle": "PCIBUS:0000:02",
+                "description": "PCI bridge",
+                "product": "Cannon Lake PCH PCI Express Root Port #17",
+                "vendor": "Intel Corporation",
+                "physid": "1b",
+                "businfo": "pci@0000:00:1b.0",
+                "version": "f0",
+                "width": 32,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "pcieport"
+                },
+                "capabilities": {
+                  "pci": true,
+                  "pciexpress": "PCI Express",
+                  "msi": "Message Signalled Interrupts",
+                  "pm": "Power Management",
+                  "normal_decode": true,
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "pci:2",
+                "class": "bridge",
+                "claimed": true,
+                "handle": "PCIBUS:0000:03",
+                "description": "PCI bridge",
+                "product": "Cannon Lake PCH PCI Express Root Port #1",
+                "vendor": "Intel Corporation",
+                "physid": "1c",
+                "businfo": "pci@0000:00:1c.0",
+                "version": "f0",
+                "width": 32,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "pcieport"
+                },
+                "capabilities": {
+                  "pci": true,
+                  "pciexpress": "PCI Express",
+                  "msi": "Message Signalled Interrupts",
+                  "pm": "Power Management",
+                  "normal_decode": true,
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                },
+                "children": [
+                  {
+                    "id": "pci",
+                    "class": "bridge",
+                    "claimed": true,
+                    "handle": "PCIBUS:0000:04",
+                    "description": "PCI bridge",
+                    "product": "AST1150 PCI-to-PCI Bridge",
+                    "vendor": "ASPEED Technology, Inc.",
+                    "physid": "0",
+                    "businfo": "pci@0000:03:00.0",
+                    "version": "04",
+                    "width": 32,
+                    "clock": 33000000,
+                    "capabilities": {
+                      "pci": true,
+                      "msi": "Message Signalled Interrupts",
+                      "pm": "Power Management",
+                      "pciexpress": "PCI Express",
+                      "normal_decode": true,
+                      "bus_master": "bus mastering",
+                      "cap_list": "PCI capabilities listing"
+                    },
+                    "children": [
+                      {
+                        "id": "display",
+                        "class": "display",
+                        "claimed": true,
+                        "handle": "PCI:0000:04:00.0",
+                        "description": "VGA compatible controller",
+                        "product": "ASPEED Graphics Family",
+                        "vendor": "ASPEED Technology, Inc.",
+                        "physid": "0",
+                        "businfo": "pci@0000:04:00.0",
+                        "version": "41",
+                        "width": 32,
+                        "clock": 33000000,
+                        "configuration": {
+                          "driver": "ast",
+                          "latency": "0"
+                        },
+                        "capabilities": {
+                          "pm": "Power Management",
+                          "msi": "Message Signalled Interrupts",
+                          "vga_controller": true,
+                          "cap_list": "PCI capabilities listing",
+                          "rom": "extension ROM"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pci:3",
+                "class": "bridge",
+                "claimed": true,
+                "handle": "PCIBUS:0000:05",
+                "description": "PCI bridge",
+                "product": "Cannon Lake PCH PCI Express Root Port #9",
+                "vendor": "Intel Corporation",
+                "physid": "1d",
+                "businfo": "pci@0000:00:1d.0",
+                "version": "f0",
+                "width": 32,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "pcieport"
+                },
+                "capabilities": {
+                  "pci": true,
+                  "pciexpress": "PCI Express",
+                  "msi": "Message Signalled Interrupts",
+                  "pm": "Power Management",
+                  "normal_decode": true,
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "pci:4",
+                "class": "bridge",
+                "claimed": true,
+                "handle": "PCIBUS:0000:06",
+                "description": "PCI bridge",
+                "product": "Cannon Lake PCH PCI Express Root Port #13",
+                "vendor": "Intel Corporation",
+                "physid": "1d.4",
+                "businfo": "pci@0000:00:1d.4",
+                "version": "f0",
+                "width": 32,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "pcieport"
+                },
+                "capabilities": {
+                  "pci": true,
+                  "pciexpress": "PCI Express",
+                  "msi": "Message Signalled Interrupts",
+                  "pm": "Power Management",
+                  "normal_decode": true,
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "communication:3",
+                "class": "communication",
+                "claimed": true,
+                "handle": "PCI:0000:00:1e.0",
+                "description": "Communication controller",
+                "product": "Cannon Lake PCH Serial IO UART Host Controller",
+                "vendor": "Intel Corporation",
+                "physid": "1e",
+                "businfo": "pci@0000:00:1e.0",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "intel-lpss",
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "pm": "Power Management",
+                  "bus_master": "bus mastering",
+                  "cap_list": "PCI capabilities listing"
+                }
+              },
+              {
+                "id": "isa",
+                "class": "bridge",
+                "claimed": true,
+                "handle": "PCI:0000:00:1f.0",
+                "description": "ISA bridge",
+                "product": "Cannon Point-LP LPC Controller",
+                "vendor": "Intel Corporation",
+                "physid": "1f",
+                "businfo": "pci@0000:00:1f.0",
+                "version": "10",
+                "width": 32,
+                "clock": 33000000,
+                "configuration": {
+                  "latency": "0"
+                },
+                "capabilities": {
+                  "isa": true,
+                  "bus_master": "bus mastering"
+                }
+              },
+              {
+                "id": "serial:2",
+                "class": "bus",
+                "claimed": true,
+                "handle": "PCI:0000:00:1f.4",
+                "description": "SMBus",
+                "product": "Cannon Lake PCH SMBus Controller",
+                "vendor": "Intel Corporation",
+                "physid": "1f.4",
+                "businfo": "pci@0000:00:1f.4",
+                "version": "10",
+                "width": 64,
+                "clock": 33000000,
+                "configuration": {
+                  "driver": "i801_smbus",
+                  "latency": "0"
+                }
+              },
+              {
+                "id": "serial:3",
+                "class": "bus",
+                "handle": "PCI:0000:00:1f.5",
+                "description": "Serial bus controller",
+                "product": "Cannon Lake PCH SPI Controller",
+                "vendor": "Intel Corporation",
+                "physid": "1f.5",
+                "businfo": "pci@0000:00:1f.5",
+                "version": "10",
+                "width": 32,
+                "clock": 33000000,
+                "configuration": {
+                  "latency": "0"
+                }
+              }
+            ]
+          },
+          {
+            "id": "pnp00:00",
+            "class": "system",
+            "claimed": true,
+            "product": "PnP device PNP0c02",
+            "physid": "1",
+            "configuration": {
+              "driver": "system"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:01",
+            "class": "system",
+            "claimed": true,
+            "product": "PnP device PNP0c02",
+            "physid": "2",
+            "configuration": {
+              "driver": "system"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:02",
+            "class": "communication",
+            "claimed": true,
+            "product": "PnP device PNP0501",
+            "physid": "3",
+            "configuration": {
+              "driver": "serial"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:03",
+            "class": "communication",
+            "claimed": true,
+            "product": "PnP device PNP0501",
+            "physid": "4",
+            "configuration": {
+              "driver": "serial"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:04",
+            "class": "system",
+            "claimed": true,
+            "product": "PnP device PNP0c02",
+            "physid": "5",
+            "configuration": {
+              "driver": "system"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:05",
+            "class": "generic",
+            "claimed": true,
+            "product": "PnP device INT3f0d",
+            "physid": "6",
+            "configuration": {
+              "driver": "system"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:06",
+            "class": "system",
+            "claimed": true,
+            "product": "PnP device PNP0c02",
+            "physid": "7",
+            "configuration": {
+              "driver": "system"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:07",
+            "class": "system",
+            "claimed": true,
+            "product": "PnP device PNP0c02",
+            "physid": "8",
+            "configuration": {
+              "driver": "system"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:08",
+            "class": "system",
+            "claimed": true,
+            "product": "PnP device PNP0c02",
+            "physid": "9",
+            "configuration": {
+              "driver": "system"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "pnp00:09",
+            "class": "system",
+            "claimed": true,
+            "product": "PnP device PNP0c02",
+            "physid": "a",
+            "configuration": {
+              "driver": "system"
+            },
+            "capabilities": {
+              "pnp": true
+            }
+          },
+          {
+            "id": "scsi:0",
+            "class": "storage",
+            "claimed": true,
+            "physid": "b",
+            "logicalname": "scsi4",
+            "capabilities": {
+              "emulated": "Emulated device"
+            },
+            "children": [
+              {
+                "id": "disk",
+                "class": "disk",
+                "claimed": true,
+                "handle": "SCSI:04:00:00:00",
+                "description": "ATA Disk",
+                "product": "INTEL SSDSC2KB48",
+                "physid": "0.0.0",
+                "businfo": "scsi@4:0.0.0",
+                "logicalname": "/dev/sda",
+                "dev": "8:0",
+                "version": "0110",
+                "serial": "PHYF001300HB480BGN",
+                "units": "bytes",
+                "size": 480103981056,
+                "configuration": {
+                  "ansiversion": "5",
+                  "logicalsectorsize": "512",
+                  "sectorsize": "4096"
+                }
+              }
+            ]
+          },
+          {
+            "id": "scsi:1",
+            "class": "storage",
+            "claimed": true,
+            "physid": "c",
+            "logicalname": "scsi5",
+            "capabilities": {
+              "emulated": "Emulated device"
+            },
+            "children": [
+              {
+                "id": "disk",
+                "class": "disk",
+                "claimed": true,
+                "handle": "GUID:c065e04e-46ae-4a6a-ab90-28ef87139784",
+                "description": "ATA Disk",
+                "product": "INTEL SSDSC2KB48",
+                "physid": "0.0.0",
+                "businfo": "scsi@5:0.0.0",
+                "logicalname": "/dev/sdb",
+                "dev": "8:16",
+                "version": "0110",
+                "serial": "PHYF001209KL480BGN",
+                "units": "bytes",
+                "size": 480103981056,
+                "configuration": {
+                  "ansiversion": "5",
+                  "guid": "c065e04e-46ae-4a6a-ab90-28ef87139784",
+                  "logicalsectorsize": "512",
+                  "sectorsize": "4096"
+                },
+                "capabilities": {
+                  "gpt-1.00": "GUID Partition Table version 1.00",
+                  "partitioned": "Partitioned disk",
+                  "partitioned:gpt": "GUID partition table"
+                },
+                "children": [
+                  {
+                    "id": "volume:0",
+                    "class": "volume",
+                    "claimed": true,
+                    "handle": "GUID:c192160e-d9b4-4ee1-9ba5-3e53d01ddf29",
+                    "description": "BIOS Boot partition",
+                    "vendor": "EFI",
+                    "physid": "1",
+                    "businfo": "scsi@5:0.0.0,1",
+                    "logicalname": "/dev/sdb1",
+                    "dev": "8:17",
+                    "serial": "c192160e-d9b4-4ee1-9ba5-3e53d01ddf29",
+                    "capacity": 2096640,
+                    "configuration": {
+                      "name": "BIOS"
+                    },
+                    "capabilities": {
+                      "nofs": "No filesystem"
+                    }
+                  },
+                  {
+                    "id": "volume:1",
+                    "class": "volume",
+                    "claimed": true,
+                    "handle": "GUID:03c70f6d-b27a-4a68-b8bd-3906b409266d",
+                    "description": "Linux swap volume",
+                    "physid": "2",
+                    "businfo": "scsi@5:0.0.0,2",
+                    "logicalname": "/dev/sdb2",
+                    "dev": "8:18",
+                    "version": "1",
+                    "serial": "688b8437-a204-4ef7-b408-55bd76002f33",
+                    "size": 2044224000,
+                    "capacity": 2044722688,
+                    "configuration": {
+                      "filesystem": "swap",
+                      "name": "SWAP",
+                      "pagesize": "4095"
+                    },
+                    "capabilities": {
+                      "swap": "Linux swap",
+                      "initialized": "initialized volume"
+                    }
+                  },
+                  {
+                    "id": "volume:2",
+                    "class": "volume",
+                    "claimed": true,
+                    "handle": "GUID:26959c46-543e-48d3-bcaf-7ce4cdf07e52",
+                    "description": "EXT4 volume",
+                    "vendor": "Linux",
+                    "physid": "3",
+                    "businfo": "scsi@5:0.0.0,3",
+                    "logicalname": [
+                      "/dev/sdb3",
+                      "/"
+                    ],
+                    "dev": "8:19",
+                    "version": "1.0",
+                    "serial": "5ac2c27f-324c-47d2-a293-421e1d95e3ef",
+                    "size": 478056091648,
+                    "capacity": 478056094720,
+                    "configuration": {
+                      "created": "2021-01-29 09:57:45",
+                      "filesystem": "ext4",
+                      "label": "ROOT",
+                      "lastmountpoint": "/",
+                      "modified": "2021-01-29 09:58:11",
+                      "mount.fstype": "ext4",
+                      "mount.options": "rw,relatime,errors=remount-ro",
+                      "mounted": "2021-01-29 09:58:59",
+                      "name": "ROOT",
+                      "state": "mounted"
+                    },
+                    "capabilities": {
+                      "journaled": true,
+                      "extended_attributes": "Extended Attributes",
+                      "large_files": "4GB+ files",
+                      "huge_files": "16TB+ files",
+                      "dir_nlink": "directories with 65000+ subdirs",
+                      "recover": "needs recovery",
+                      "extents": "extent-based allocation",
+                      "ext4": true,
+                      "ext2": "EXT2/EXT3",
+                      "initialized": "initialized volume"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "scsi:2",
+            "class": "storage",
+            "claimed": true,
+            "handle": "SCSI:08",
+            "physid": "d",
+            "logicalname": "scsi8",
+            "configuration": {
+              "driver": "usb-storage"
+            },
+            "capabilities": {
+              "emulated": "Emulated device",
+              "scsi-host": "SCSI host adapter"
+            },
+            "children": [
+              {
+                "id": "cdrom",
+                "class": "disk",
+                "claimed": true,
+                "handle": "SCSI:08:00:00:00",
+                "description": "SCSI CD-ROM",
+                "product": "Virtual CDROM0",
+                "vendor": "AMI",
+                "physid": "0.0.0",
+                "businfo": "scsi@8:0.0.0",
+                "logicalname": [
+                  "/dev/cdrom",
+                  "/dev/sr0"
+                ],
+                "dev": "11:0",
+                "version": "1.00",
+                "configuration": {
+                  "status": "open"
+                },
+                "capabilities": {
+                  "removable": "support is removable",
+                  "audio": "Audio CD playback"
+                }
+              }
+            ]
+          },
+          {
+            "id": "scsi:3",
+            "class": "storage",
+            "claimed": true,
+            "handle": "SCSI:09",
+            "physid": "e",
+            "logicalname": "scsi9",
+            "configuration": {
+              "driver": "usb-storage"
+            },
+            "capabilities": {
+              "emulated": "Emulated device",
+              "scsi-host": "SCSI host adapter"
+            },
+            "children": [
+              {
+                "id": "disk",
+                "class": "disk",
+                "claimed": true,
+                "handle": "SCSI:09:00:00:00",
+                "description": "SCSI Disk",
+                "product": "Virtual Floppy0",
+                "vendor": "AMI",
+                "physid": "0.0.0",
+                "businfo": "scsi@9:0.0.0",
+                "logicalname": "/dev/sdc",
+                "dev": "8:32",
+                "version": "1.00",
+                "configuration": {
+                  "logicalsectorsize": "512",
+                  "sectorsize": "512"
+                },
+                "capabilities": {
+                  "removable": "support is removable"
+                },
+                "children": [
+                  {
+                    "id": "medium",
+                    "class": "disk",
+                    "claimed": true,
+                    "physid": "0",
+                    "logicalname": "/dev/sdc",
+                    "dev": "8:32"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "scsi:4",
+            "class": "storage",
+            "claimed": true,
+            "handle": "SCSI:10",
+            "physid": "f",
+            "logicalname": "scsi10",
+            "configuration": {
+              "driver": "usb-storage"
+            },
+            "capabilities": {
+              "emulated": "Emulated device",
+              "scsi-host": "SCSI host adapter"
+            },
+            "children": [
+              {
+                "id": "disk",
+                "class": "disk",
+                "claimed": true,
+                "handle": "SCSI:10:00:00:00",
+                "description": "SCSI Disk",
+                "product": "Virtual HDisk0",
+                "vendor": "AMI",
+                "physid": "0.0.0",
+                "businfo": "scsi@10:0.0.0",
+                "logicalname": "/dev/sdd",
+                "dev": "8:48",
+                "version": "1.00",
+                "configuration": {
+                  "logicalsectorsize": "512",
+                  "sectorsize": "512"
+                },
+                "capabilities": {
+                  "removable": "support is removable"
+                },
+                "children": [
+                  {
+                    "id": "medium",
+                    "class": "disk",
+                    "claimed": true,
+                    "physid": "0",
+                    "logicalname": "/dev/sdd",
+                    "dev": "8:48"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "network:0",
+        "class": "network",
+        "claimed": true,
+        "description": "Ethernet interface",
+        "physid": "1",
+        "logicalname": "bond0",
+        "serial": "b4:96:91:70:26:c8",
+        "configuration": {
+          "autonegotiation": "off",
+          "broadcast": "yes",
+          "driver": "bonding",
+          "driverversion": "3.7.1",
+          "duplex": "full",
+          "firmware": "2",
+          "ip": "136.144.59.141",
+          "link": "yes",
+          "master": "yes",
+          "multicast": "yes"
+        },
+        "capabilities": {
+          "ethernet": true,
+          "physical": "Physical interface"
+        }
+      },
+      {
+        "id": "network:1",
+        "class": "network",
+        "disabled": true,
+        "claimed": true,
+        "description": "Ethernet interface",
+        "physid": "2",
+        "businfo": "usb@1:5.2",
+        "logicalname": "enxee6b7558e887",
+        "serial": "ee:6b:75:58:e8:87",
+        "configuration": {
+          "broadcast": "yes",
+          "driver": "cdc_ether",
+          "driverversion": "22-Aug-2005",
+          "firmware": "CDC Ethernet Device",
+          "link": "no",
+          "multicast": "yes"
+        },
+        "capabilities": {
+          "ethernet": true,
+          "physical": "Physical interface"
+        }
+      }
+    ]
+  }
+]
