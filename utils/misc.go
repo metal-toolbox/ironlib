@@ -85,6 +85,8 @@ func purgeTestComponentID(components []*model.Component) []*model.Component {
 
 // Retrieve update file from updateFileURL, validate checksum
 // on success - returns the local filesystem path to the update file that was retrieved and checksummed
+// this expects the update file hosts the checksum file in the same path, suffixed with a '.sha1'
+// e.g: https://updates/foo.bin should exist along with https://updates/foo.bin.sha1
 func RetrieveUpdateFile(updateFileURL, targetDir string) (string, error) {
 
 	if updateFileURL == "" {
