@@ -95,10 +95,7 @@ func (d *Dell) UpdatesApplied() bool {
 // Return device component inventory, including any update information
 func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Device, error) {
 
-	err := d.pre()
-	if err != nil {
-		return nil, err
-	}
+	var err error
 
 	// dsu list inventory
 	d.Logger.Info("Collecting DSU component inventory...")
@@ -107,43 +104,34 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 		return nil, err
 	}
 
-	device := &model.Device{
-		ID:         d.ID,
-		Serial:     d.Serial,
-		Model:      d.Model,
-		Vendor:     d.Vendor,
-		Oem:        true,
-		Components: componentInventory,
+	if len(d.DM.Device.Components) == 0 {
+		d.Logger.Warn("No device components returned by dsu inventory")
 	}
 
 	if !listUpdates {
 		return d.DM.Device, nil
 	}
 
-	// collect firmware updates available for components
-	d.Logger.Info("Identifying component firmware updates...")
-	// set d.ComponentUpdates with available updates
-	err = d.listUpdatesAvailable()
+	// Identify updates to install
+	updates, err := d.identifyUpdatesApplicable(d.DM.Device.Components, d.DM.FirmwareUpdateConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	count := len(d.ComponentUpdates)
-	if count > 0 {
-		d.Logger.WithField("count", count).Info("updates available..")
-		device.ComponentUpdates = d.ComponentUpdates
-	} else {
-		d.Logger.Info("no available updates")
+	count := len(updates)
+	if count == 0 {
+		return d.DM.Device, nil
 	}
 
-	// converge component inventory data with firmware update data
-	for _, component := range componentInventory {
-		component.DeviceID = d.ID
-		for _, update := range d.ComponentUpdates {
-			if component.Slug == update.Slug {
+	// converge component inventory data with firmware update information
+	d.DM.Device.ComponentUpdates = updates
+	for _, component := range d.DM.Device.Components {
+		component.DeviceID = d.DM.Device.ID
+		for _, update := range d.DM.Device.ComponentUpdates {
+			if strings.EqualFold(component.Slug, update.Slug) {
 				component.Metadata = update.Metadata
 				if strings.TrimSpace(update.FirmwareAvailable) != "" {
-					d.Logger.WithFields(logrus.Fields{"component slug": component.Slug, "update": update.FirmwareAvailable}).Trace("update available")
+					d.Logger.WithFields(logrus.Fields{"component slug": component.Slug, "installed": component.FirmwareInstalled, "update": update.FirmwareAvailable}).Trace("update available")
 				}
 				if component.Slug == "Unknown" {
 					d.Logger.WithFields(logrus.Fields{"component name": component.Name}).Warn("component slug is 'Unknown', this needs to be fixed in componentNameSlug()")
@@ -153,7 +141,7 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 		}
 	}
 
-	return device, nil
+	return d.DM.Device, nil
 }
 
 // Return available firmware updates for device

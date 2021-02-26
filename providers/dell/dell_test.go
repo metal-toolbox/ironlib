@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 	"github.com/sirupsen/logrus"
@@ -14,11 +13,14 @@ import (
 
 func newFakeDellDevice() *Dell {
 
-	uid, _ := uuid.NewRandom()
+	// set device
+	device := &model.Device{
+		Model:  "R640",
+		Vendor: "dell",
+		Oem:    true,
+	}
 	return &Dell{
-		ID:        uid.String(),
-		Vendor:    "dell",
-		Model:     "R640",
+		DM:        &model.DeviceManager{Device: device},
 		Dmidecode: utils.NewFakeDmidecode(),
 		Dnf:       utils.NewFakeDnf(),
 		Dsu:       utils.NewFakeDsu(),
@@ -26,7 +28,48 @@ func newFakeDellDevice() *Dell {
 	}
 }
 
+// Get inventory, not listing updates available
 func TestGetInventory(t *testing.T) {
+
+	dell := newFakeDellDevice()
+
+	// skip "/usr/libexec/instsvcdrv-helper start" from being executed
+	os.Setenv("IRONLIB_TEST", "1")
+
+	device, err := dell.GetInventory(context.TODO(), false)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedComponent0 := &model.Component{
+		ID:                "b2b52416-3479-4a7a-8e73-25b43c69199b",
+		DeviceID:          "66e73a31-6abd-4fb3-9f66-d98e83fb785f",
+		Serial:            "",
+		Vendor:            "",
+		Type:              "",
+		Model:             "",
+		Name:              "BIOS",
+		Slug:              "BIOS",
+		FirmwareInstalled: "2.6.4",
+		FirmwareAvailable: "",
+		Oem:               true,
+		FirmwareManaged:   true,
+	}
+
+	assert.Equal(t, "dell", device.Vendor)
+	assert.Equal(t, "R640", device.Model)
+
+	// expect 18 components
+	assert.Equal(t, len(device.Components), 18)
+	// set uuids to match
+	expectedComponent0.ID = device.Components[0].ID
+	expectedComponent0.DeviceID = device.Components[0].DeviceID
+	assert.Equal(t, expectedComponent0, device.Components[0])
+
+}
+
+// Get inventory listing all updates - no components pinned
+func TestGetInventory_ListUpdatesNoPin(t *testing.T) {
 
 	dell := newFakeDellDevice()
 
@@ -88,5 +131,58 @@ func TestGetInventory(t *testing.T) {
 
 	//spewC := spew.ConfigState{DisablePointerAddresses: true, DisableCapacities: true, DisableMethods: true}
 	//spewC.Dump(device.ComponentUpdates)
+
+}
+
+// Get inventory listing all updates applicable - for components pinned
+func TestGetInventory_ComponentsPinned(t *testing.T) {
+
+	dell := newFakeDellDevice()
+
+	config := &model.FirmwareUpdateConfig{
+		Vendor: "dell",
+		Components: []*model.ComponentFirmwareConfig{
+			{
+				Slug:    "bios",
+				Updates: []string{"2.8.1"},
+			},
+		},
+	}
+
+	dell.SetFirmwareUpdateConfig(config)
+
+	// skip "/usr/libexec/instsvcdrv-helper start" from being executed
+	os.Setenv("IRONLIB_TEST", "1")
+
+	device, err := dell.GetInventory(context.TODO(), true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedComponent0 := &model.Component{
+		ID:                "b2b52416-3479-4a7a-8e73-25b43c69199b",
+		DeviceID:          "66e73a31-6abd-4fb3-9f66-d98e83fb785f",
+		Serial:            "",
+		Vendor:            "",
+		Type:              "",
+		Model:             "",
+		Name:              "BIOS",
+		Slug:              "BIOS",
+		FirmwareInstalled: "2.6.4",
+		FirmwareAvailable: "2.8.1",
+		Oem:               true,
+		FirmwareManaged:   true,
+		Config:            config.Components[0],
+	}
+
+	assert.Equal(t, "dell", device.Vendor)
+	assert.Equal(t, "R640", device.Model)
+
+	// expect 18 components
+	assert.Equal(t, len(device.Components), 18)
+	// set uuids to match
+	expectedComponent0.ID = device.Components[0].ID
+	expectedComponent0.DeviceID = device.Components[0].DeviceID
+	assert.Equal(t, expectedComponent0, device.Components[0])
 
 }
