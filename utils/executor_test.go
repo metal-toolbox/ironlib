@@ -1,22 +1,25 @@
 package utils
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_ExecCommandContext(t *testing.T) {
+func Test_Stdin(t *testing.T) {
+	e := new(Execute)
+	e.Cmd = "grep"
+	e.Args = []string{"hello"}
+	e.Stdin = bytes.NewReader([]byte("hello"))
+	e.SetQuiet()
 
-	//	e := new(Execute)
-	//	e.Cmd = "ls"
-	//	e.Args = []string{"-lta"}
-	//	e.Env = []string{}
-	//	e.Quiet = false
-	//
-	//	stdout, stderr, err := e.WithContext(context.Background())
-	//	if err != nil {
-	//		fmt.Println(err.Error())
-	//	}
-	//	print("O>>>" + string(stdout))
-	//	print("E>>>" + string(stderr))
+	result, err := e.ExecWithContext(context.Background())
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
+	assert.Equal(t, []byte("hello\n"), result.Stdout)
 }

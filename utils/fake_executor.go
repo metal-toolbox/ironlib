@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"io"
 	"io/ioutil"
 	"strings"
 )
@@ -12,6 +13,7 @@ type FakeExecute struct {
 	Cmd    string
 	Args   []string
 	Env    []string
+	Stdin  io.Reader
 	Stdout []byte //Set this for the dummy data to be returned
 	Stderr []byte //Set this for the dummy data to be returned
 	Quiet  bool
@@ -135,6 +137,10 @@ func (e *FakeExecute) SetStdout(b []byte) {
 
 func (e *FakeExecute) SetStderr(b []byte) {
 	e.Stderr = b
+}
+
+func (e *FakeExecute) SetStdin(r io.Reader) {
+	e.Stdin = r
 }
 
 func (e *FakeExecute) GetCmd() string {
