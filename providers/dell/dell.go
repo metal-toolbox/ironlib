@@ -147,35 +147,22 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 // Return available firmware updates for device
 func (d *Dell) GetUpdatesAvailable(ctx context.Context) (*model.Device, error) {
 
-	err := d.pre()
-	if err != nil {
-		return nil, err
-	}
-
 	// collect firmware updates available for components
 	d.Logger.Info("Identifying component firmware updates...")
-	err = d.listUpdatesAvailable()
+	updates, err := d.dsuListUpdates()
 	if err != nil {
 		return nil, err
 	}
 
-	count := len(d.ComponentUpdates)
+	count := len(updates)
 	if count > 0 {
+		d.DM.Device.ComponentUpdates = append(d.DM.Device.ComponentUpdates, updates...)
 		d.Logger.WithField("count", count).Info("updates available..")
 	} else {
 		d.Logger.Info("no available updates")
 	}
 
-	device := &model.Device{
-		ID:               d.ID,
-		Serial:           d.Serial,
-		Model:            d.Model,
-		Vendor:           d.Vendor,
-		Oem:              true,
-		ComponentUpdates: d.ComponentUpdates,
-	}
-
-	return device, nil
+	return d.DM.Device, nil
 }
 
 // The installed DSU release is the firmware revision for dells
