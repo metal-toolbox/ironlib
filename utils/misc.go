@@ -240,6 +240,14 @@ func ComponentsForUpdate(components []*model.Component, config *model.FirmwareUp
 
 	forUpdate := make([]*model.Component, 0)
 
+	if components == nil || len(components) == 0 {
+		return nil, fmt.Errorf("expected a slice of components, got none")
+	}
+
+	if config == nil {
+		return nil, fmt.Errorf("expected a slice of firmware config, got nil")
+	}
+
 	// identify and apply update
 	for _, component := range components {
 
@@ -260,6 +268,7 @@ func ComponentsForUpdate(components []*model.Component, config *model.FirmwareUp
 			continue
 		}
 
+		component.FirmwareAvailable = componentConfig.Updates[0]
 		component.Config = componentConfig
 		forUpdate = append(forUpdate, component)
 
