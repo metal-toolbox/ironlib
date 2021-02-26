@@ -1,5 +1,19 @@
 package model
 
+// Device Manager is a base struct that various providers inherit
+type DeviceManager struct {
+	PendingReboot        bool // set when the device requires a reboot after running an upgrade
+	UpdatesInstalled     bool // set when updates were installed on the device
+	UpdatesAvailable     int  // -1 == no update lookup as yet,  0 == no updates available, 1 == updates available
+	Device               *Device
+	FirmwareUpdateConfig *FirmwareUpdateConfig
+}
+
+// New Device manager constructor
+func NewDeviceManager(d *Device) *DeviceManager {
+	return &DeviceManager{Device: d, UpdatesAvailable: -1}
+}
+
 type Component struct {
 	ID                string                   `json:"id"`
 	DeviceID          string                   `json:"device_id"`
