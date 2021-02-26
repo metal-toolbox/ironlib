@@ -80,7 +80,7 @@ func (d *Dell) SetDeviceID(id string) {
 }
 
 func (d *Dell) SetFirmwareUpdateConfig(config *model.FirmwareUpdateConfig) {
-	d.FirmwareUpdateConfig = config
+	d.DM.FirmwareUpdateConfig = config
 }
 
 func (d *Dell) RebootRequired() bool {
