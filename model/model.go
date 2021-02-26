@@ -34,15 +34,14 @@ type Component struct {
 // Component specific firmware config
 // each of the fields enable targeting the configuration to specific components
 type ComponentFirmwareConfig struct {
-	Slug           string   `yaml:"slug"        json:"slug"` // component name
-	Vendor         string   `yaml:"vendor"      json:"vendor"`
-	Model          string   `yaml:"model"       json:"model"`
-	Serial         string   `yaml:"serial"      json:"serial"`
-	Updates        []string `yaml:"updates"     json:"updates"`
-	Method         string   `yaml:"method"      json:"method"`
-	VendorURI      string   `yaml:"vendorURI"   json:"vendorURI"`
-	UpdateFileURL  string   `yaml:"updateFileURL"  json:"updateFileURL"`
-	UpdateFileSHA1 string   `yaml:"updateFileSHA1" json:"updateFileSHA1"`
+	Slug          string   `yaml:"slug"        json:"slug"` // component name
+	Vendor        string   `yaml:"vendor"      json:"vendor"`
+	Model         string   `yaml:"model"       json:"model"`
+	Serial        string   `yaml:"serial"      json:"serial"`
+	Updates       []string `yaml:"updates"     json:"updates"`
+	Method        string   `yaml:"method"      json:"method"`
+	VendorURI     string   `yaml:"vendorURI"   json:"vendorURI"`
+	UpdateFileURL string   `yaml:"updateFileURL"  json:"updateFileURL"`
 }
 
 // The firmware update configuration applicable for the device
