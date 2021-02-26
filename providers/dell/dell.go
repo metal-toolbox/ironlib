@@ -3,37 +3,26 @@ package dell
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-// For the future Joel, it may be worth parsing the inventory catalog
-// /usr/libexec/dell_dup/inv.xml
-
+// The dell device provider struct
 type Dell struct {
-	ID                      string
-	PendingReboot           bool // set when the device requires a reboot after running an upgrade
-	UpdatesInstalled        bool // set when updates were installed on the device
+	DM                      *model.DeviceManager // the device manager holds common fields that is shared among providers
 	DsuPrequisitesInstalled bool
-	Vendor                  string
-	Model                   string
-	Serial                  string
-	Components              []*model.Component
-	ComponentUpdates        []*model.Component
-	Logger                  *logrus.Logger
-	Dmidecode               *utils.Dmidecode
 	Dnf                     *utils.Dnf
 	Dsu                     *utils.Dsu
-	FirmwareUpdateConfig    *model.FirmwareUpdateConfig
+	Dmidecode               *utils.Dmidecode
+	Logger                  *logrus.Logger
 }
 
-func New(vendor, model string, l *logrus.Logger) (model.Manager, error) {
+func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.Manager, error) {
 
 	var trace bool
 
@@ -46,16 +35,25 @@ func New(vendor, model string, l *logrus.Logger) (model.Manager, error) {
 		errors.Wrap(err, "erorr in dmidecode init")
 	}
 
-	uid, _ := uuid.NewRandom()
-	return &Dell{
-		ID:        uid.String(),
-		Vendor:    vendor,
-		Model:     model,
+	// set device
+	device := &model.Device{
+		Model:            deviceModel,
+		Vendor:           deviceVendor,
+		Oem:              true,
+		Components:       []*model.Component{},
+		ComponentUpdates: []*model.Component{},
+	}
+
+	// set device manager
+	dm := &Dell{
+		DM:        &model.DeviceManager{Device: device},
 		Dmidecode: dmidecode,
 		Dnf:       utils.NewDnf(trace),
 		Dsu:       utils.NewDsu(trace),
 		Logger:    l,
-	}, nil
+	}
+
+	return dm, nil
 }
 
 type Component struct {
@@ -66,19 +64,19 @@ type Component struct {
 }
 
 func (d *Dell) GetModel() string {
-	return d.Model
+	return d.DM.Device.Model
 }
 
 func (d *Dell) GetVendor() string {
-	return d.Vendor
+	return d.DM.Device.Vendor
 }
 
 func (d *Dell) GetDeviceID() string {
-	return d.ID
+	return d.DM.Device.ID
 }
 
 func (d *Dell) SetDeviceID(id string) {
-	d.ID = id
+	d.DM.Device.ID = id
 }
 
 func (d *Dell) SetFirmwareUpdateConfig(config *model.FirmwareUpdateConfig) {
@@ -86,11 +84,11 @@ func (d *Dell) SetFirmwareUpdateConfig(config *model.FirmwareUpdateConfig) {
 }
 
 func (d *Dell) RebootRequired() bool {
-	return d.PendingReboot
+	return d.DM.PendingReboot
 }
 
 func (d *Dell) UpdatesApplied() bool {
-	return d.UpdatesInstalled
+	return d.DM.UpdatesInstalled
 }
 
 // nolint: gocyclo
@@ -102,9 +100,9 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 		return nil, err
 	}
 
-	// collect current component firmware versions
-	d.Logger.Info("Identifying component firmware versions...")
-	componentInventory, err := d.Dsu.ComponentInventory()
+	// dsu list inventory
+	d.Logger.Info("Collecting DSU component inventory...")
+	d.DM.Device.Components, err = d.dsuInventory()
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +117,7 @@ func (d *Dell) GetInventory(ctx context.Context, listUpdates bool) (*model.Devic
 	}
 
 	if !listUpdates {
-		return device, nil
+		return d.DM.Device, nil
 	}
 
 	// collect firmware updates available for components
