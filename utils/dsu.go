@@ -58,7 +58,7 @@ func (d *Dsu) FetchUpdateFiles() (int, error) {
 	d.Executor.SetArgs([]string{"--destination-type=CBD", "--destination-location=" + LocalUpdatesDirectory})
 
 	// because... yeah dsu wants to fetch updates interactively
-	d.Executor.SetStdin(bytes.NewReader([]byte(`a\nc\n`)))
+	d.Executor.SetStdin(bytes.NewReader([]byte("a\nc\n")))
 
 	result, err := d.Executor.ExecWithContext(context.Background())
 	if err != nil {
