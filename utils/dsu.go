@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
+	"github.com/pkg/errors"
 )
 
 type Dsu struct {
@@ -75,7 +76,7 @@ func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
 	// ensure the updates directory exists
 	_, err := os.Stat(updateDir)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "expected updates directory not present")
 	}
 
 	// identify the inventory collector bin
@@ -86,6 +87,10 @@ func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
 
 	if matches == nil || len(matches) == 0 {
 		return 0, fmt.Errorf("inventory collector bin missing from: %s", updateDir)
+	}
+
+	if len(matches) > 1 {
+		return 0, fmt.Errorf("expected a single inventory collector bin, found multiple: %s", strings.Join(matches, ","))
 	}
 
 	invcol := matches[0]
