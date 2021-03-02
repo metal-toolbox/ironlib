@@ -46,7 +46,7 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.Manager, err
 
 	// set device manager
 	dm := &Dell{
-		DM:        &model.DeviceManager{Device: device},
+		DM:        model.NewDeviceManager(device),
 		Dmidecode: dmidecode,
 		Dnf:       utils.NewDnf(trace),
 		Dsu:       utils.NewDsu(trace),
