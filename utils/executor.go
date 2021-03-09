@@ -18,6 +18,7 @@ type Executor interface {
 	SetQuiet()
 	SetVerbose()
 	GetCmd() string
+	SetStdin(io.Reader)
 	// for tests
 	SetStdout([]byte)
 	SetStderr([]byte)
@@ -32,6 +33,7 @@ type Execute struct {
 	Cmd   string
 	Args  []string
 	Env   []string
+	Stdin io.Reader
 	Quiet bool
 }
 
@@ -64,6 +66,10 @@ func (e *Execute) SetVerbose() {
 	e.Quiet = false
 }
 
+func (e *Execute) SetStdin(r io.Reader) {
+	e.Stdin = r
+}
+
 func (e *Execute) SetStdout(b []byte) {
 }
 
@@ -83,6 +89,7 @@ func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err erro
 
 	cmd := exec.CommandContext(ctx, e.Cmd, e.Args...)
 	cmd.Env = append(cmd.Env, e.Env...)
+	cmd.Stdin = e.Stdin
 
 	var stdoutBuf, stderrBuf bytes.Buffer
 	if !e.Quiet {

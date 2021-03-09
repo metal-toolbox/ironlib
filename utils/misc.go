@@ -46,6 +46,8 @@ func FormatProductName(s string) string {
 		return "SSG-6029P-E1CR12L"
 	case "SYS-5019C-MR-PH004":
 		return "SYS-5019C-MR"
+	case "PowerEdge R640":
+		return "r640"
 	default:
 		return s
 	}
@@ -83,6 +85,8 @@ func purgeTestComponentID(components []*model.Component) []*model.Component {
 
 // Retrieve update file from updateFileURL, validate checksum
 // on success - returns the local filesystem path to the update file that was retrieved and checksummed
+// this expects the update file hosts the checksum file in the same path, suffixed with a '.sha1'
+// e.g: https://updates/foo.bin should exist along with https://updates/foo.bin.sha1
 func RetrieveUpdateFile(updateFileURL, targetDir string) (string, error) {
 
 	if updateFileURL == "" {
@@ -225,4 +229,64 @@ func UpdateComponentData(device *model.Device, components []*model.Component) *m
 	// add TPM information if any
 
 	return device
+}
+
+// Given a slice of components and the firmware config,
+// compares current installed firmware with the version listed in the config and
+// returns a slice of *model.Component's which are eligible for updates
+// sets Component.Config to the config identified for the component
+// the component config is matched by the Slug attribute
+func ComponentsForUpdate(components []*model.Component, config *model.FirmwareUpdateConfig) ([]*model.Component, error) {
+
+	forUpdate := make([]*model.Component, 0)
+
+	if components == nil || len(components) == 0 {
+		return nil, fmt.Errorf("expected a slice of components, got none")
+	}
+
+	if config == nil {
+		return nil, fmt.Errorf("expected a slice of firmware config, got nil")
+	}
+
+	// identify and apply update
+	for _, component := range components {
+
+		// identify firmware configuration specific to the given component slug
+		componentConfig := ComponentConfig(component.Slug, config.Components)
+		if componentConfig == nil {
+			continue
+		}
+
+		// version compare current firmware version with the configuration
+		hasUpdate, err := VersionIsNewer(componentConfig.Updates[0], component.FirmwareInstalled)
+		if err != nil {
+			return nil, fmt.Errorf("version compare error: component '%s' installed '%s', update '%s': error %s",
+				component.Slug, component.FirmwareInstalled, componentConfig.Updates[0], err.Error())
+		}
+
+		if !hasUpdate {
+			continue
+		}
+
+		component.FirmwareAvailable = componentConfig.Updates[0]
+		component.Config = componentConfig
+		forUpdate = append(forUpdate, component)
+
+	}
+
+	return forUpdate, nil
+
+}
+
+// Returns the configuration that is valid for the component
+// compares the given slug to the component slug in the component firmware configuration
+func ComponentConfig(slug string, config []*model.ComponentFirmwareConfig) *model.ComponentFirmwareConfig {
+
+	for _, config := range config {
+		if strings.EqualFold(slug, config.Slug) {
+			return config
+		}
+	}
+
+	return nil
 }

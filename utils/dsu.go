@@ -1,13 +1,17 @@
 package utils
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
+	"github.com/pkg/errors"
 )
 
 type Dsu struct {
@@ -19,6 +23,8 @@ const (
 	DSUExitCodeUpdatesApplied     = 0
 	DSUExitCodeRebootRequired     = 8
 	DSUExitCodeNoUpdatesAvailable = 34
+
+	LocalUpdatesDirectory = "/root/dsu"
 )
 
 // Returns a executor to run dsu commands
@@ -40,6 +46,63 @@ func NewFakeDsu() *Dsu {
 	return &Dsu{
 		Executor: NewFakeExecutor("dsu"),
 	}
+}
+
+// Fetch updates to local directory - these updates are DSU specific
+// returns the exitcode and error if any
+func (d *Dsu) FetchUpdateFiles() (int, error) {
+
+	// purge any existing update file/directory with the same name
+	_ = os.Remove(LocalUpdatesDirectory)
+
+	d.Executor.SetArgs([]string{"--destination-type=CBD", "--destination-location=" + LocalUpdatesDirectory})
+
+	// because... yeah dsu wants to fetch updates interactively
+	d.Executor.SetStdin(bytes.NewReader([]byte("a\nc\n")))
+
+	result, err := d.Executor.ExecWithContext(context.Background())
+	if err != nil {
+		return result.ExitCode, err
+	}
+
+	return result.ExitCode, nil
+}
+
+// Apply local update files - works for files fetched by FetchUpdateFiles()
+// DSU needs to be pointed to the right inventory bin or it barfs
+// returns the resulting exitcode and error if any
+func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
+
+	// ensure the updates directory exists
+	_, err := os.Stat(updateDir)
+	if err != nil {
+		return 0, errors.Wrap(err, "expected updates directory not present")
+	}
+
+	// identify the inventory collector bin
+	matches, err := filepath.Glob(fmt.Sprintf("%s/invcol_*.BIN", updateDir))
+	if err != nil {
+		return 0, err
+	}
+
+	if matches == nil || len(matches) == 0 {
+		return 0, fmt.Errorf("inventory collector bin missing from: %s", updateDir)
+	}
+
+	if len(matches) > 1 {
+		return 0, fmt.Errorf("expected a single inventory collector bin, found multiple: %s", strings.Join(matches, ","))
+	}
+
+	invcol := matches[0]
+
+	//dsu --log-level=4 --non-interactive --source-type=REPOSITORY --source-location=/root/dsu/dellupdates --ic-location=/root/dsu/invcol_5N2WM_LN64_20_09_200_921_A00.BIN
+	d.Executor.SetArgs([]string{"--non-interactive", "--log-level=4", "--source-type=REPOSITORY", "--source-location=" + updateDir, "--ic-location=" + invcol})
+	result, err := d.Executor.ExecWithContext(context.Background())
+	if err != nil {
+		return result.ExitCode, err
+	}
+
+	return result.ExitCode, nil
 }
 
 // Returns components identified by dell system update and their current firmware revisions
@@ -68,13 +131,15 @@ func (d *Dsu) ComponentFirmwareUpdatePreview() ([]*model.Component, int, error) 
 	return dsuParsePreviewBytes(result.Stdout), result.ExitCode, nil
 }
 
-// Applies available updates
+// Run DSU to apply all available updates
 func (d *Dsu) ApplyUpdates() (int, error) {
 
-	d.Executor.SetArgs([]string{"--non-interactive", "--log-level=4"})
+	args := []string{"--non-interactive", "--log-level=4"}
+	d.Executor.SetArgs(args)
 	result, err := d.Executor.ExecWithContext(context.Background())
 	if err != nil {
 		// our executor returns err if exitcode is not zero
+		// 34 - no updates applicable
 		return result.ExitCode, err
 	}
 

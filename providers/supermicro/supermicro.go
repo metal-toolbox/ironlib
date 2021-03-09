@@ -123,7 +123,7 @@ func (s *Supermicro) GetInventory(ctx context.Context, listUpdates bool) (*model
 
 	// identify components eligible for updates
 	if listUpdates {
-		components, err := s.componentsForUpdate(s.Components, s.FirmwareUpdateConfig)
+		components, err := utils.ComponentsForUpdate(s.Components, s.FirmwareUpdateConfig)
 		if err != nil {
 			s.Logger.WithFields(logrus.Fields{"err": err}).Warn("failed to identify components for update")
 		} else {
@@ -169,7 +169,8 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 		return fmt.Errorf("Failed to get inventory for device before upgrade: " + err.Error())
 	}
 
-	components, err := s.componentsForUpdate(device.Components, config)
+	// identify components that require updates
+	components, err := utils.ComponentsForUpdate(device.Components, config)
 	if err != nil {
 		return err
 	}
@@ -207,57 +208,6 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 		// BMC updates don't require a reboot, and some devices
 		s.PendingReboot = true
 		s.UpdatesInstalled = true
-	}
-
-	return nil
-}
-
-// Given a slice of components and the firmware config,
-// compares current installed firmware with the version listed in the config and
-// returns a slice of *model.Component's which are eligible for updates
-// sets Component.Config to the config identified for the component
-// the component config is matched by the Slug attribute
-func (s *Supermicro) componentsForUpdate(components []*model.Component, config *model.FirmwareUpdateConfig) ([]*model.Component, error) {
-
-	forUpdate := make([]*model.Component, 0)
-
-	// identify and apply update
-	for _, component := range components {
-
-		// identify component firmware config
-		componentConfig := s.componentConfig(component.Slug)
-		if componentConfig == nil {
-			continue
-		}
-
-		// version compare current firmware version with the configuration
-		hasUpdate, err := utils.VersionIsNewer(componentConfig.Updates[0], component.FirmwareInstalled)
-		if err != nil {
-			return nil, fmt.Errorf("version compare error: component '%s' installed '%s', update '%s': error %s",
-				component.Slug, component.FirmwareInstalled, componentConfig.Updates[0], err.Error())
-		}
-
-		if !hasUpdate {
-			continue
-		}
-
-		component.Config = componentConfig
-		forUpdate = append(forUpdate, component)
-
-	}
-
-	return forUpdate, nil
-
-}
-
-// Returns the configuration that is valid for the component
-// compares the given slug to the component slug in the component firmware configuration
-func (s *Supermicro) componentConfig(slug string) *model.ComponentFirmwareConfig {
-
-	for _, config := range s.FirmwareUpdateConfig.Components {
-		if strings.EqualFold(slug, config.Slug) {
-			return config
-		}
 	}
 
 	return nil

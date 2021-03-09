@@ -1,5 +1,9 @@
 package model
 
+func NewDevice() *Device {
+	return &Device{Components: []*Component{}, ComponentUpdates: []*Component{}}
+}
+
 type Device struct {
 	ID                string               `json:"id"`
 	HardwareType      string               `json:"hardware_type,omitempty"`

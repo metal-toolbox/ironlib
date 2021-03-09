@@ -1,7 +1,0 @@
-language: go
-
-before_install:
-  - go get -t -v ./...
-
-script:
-  - sudo -E env "PATH=$PATH" go test -v ./...
