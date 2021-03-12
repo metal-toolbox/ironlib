@@ -83,10 +83,9 @@ func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
 	}
 
 	// identify the inventory collector bin
-	matches, err := filepath.Glob(fmt.Sprintf("%s/invcol_*.BIN", updateDir))
-	if err != nil {
-		return 0, err
-	}
+	// dsu 1.8 drops update files under the given $updateDir
+	// dsu 1.9 creates a directory '$updateDir/dellupdates' and drops the updates in there
+	matches := findDSUInventoryCollector(updateDir)
 
 	if matches == nil || len(matches) == 0 {
 		return 0, fmt.Errorf("inventory collector bin missing from: %s", updateDir)
@@ -97,9 +96,20 @@ func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
 	}
 
 	invcol := matches[0]
+	// the updates directory is where the inventory collector bin is located
+	updateDir = filepath.Dir(invcol)
 
-	//dsu --log-level=4 --non-interactive --source-type=REPOSITORY --source-location=/root/dsu/dellupdates --ic-location=/root/dsu/invcol_5N2WM_LN64_20_09_200_921_A00.BIN
-	d.Executor.SetArgs([]string{"--non-interactive", "--log-level=4", "--source-type=REPOSITORY", "--source-location=" + updateDir, "--ic-location=" + invcol})
+	//dsu --log-level=4 --non-interactive --source-type=REPOSITORY --source-location=/root/dsu/dellupdates --ic-location=/root/dsu/dellupdates/invcol_5N2WM_LN64_20_09_200_921_A00.BIN
+	d.Executor.SetArgs(
+		[]string{
+			"--non-interactive",
+			"--log-level=4",
+			"--source-type=REPOSITORY",
+			"--source-location=" + updateDir,
+			"--ic-location=" + invcol,
+		},
+	)
+
 	result, err := d.Executor.ExecWithContext(context.Background())
 	if err != nil {
 		return result.ExitCode, err
@@ -222,6 +232,26 @@ func dsuParsePreviewBytes(in []byte) []*model.Component {
 
 func trimBytes(b []byte) string {
 	return strings.TrimSpace(string(b))
+}
+
+// Find the DSU inventory collector bin
+func findDSUInventoryCollector(path string) []string {
+
+	var found []string
+
+	globs := []string{
+		fmt.Sprintf("%s/invcol_*.BIN", path),
+		fmt.Sprintf("%s/dellupdates/invcol_*.BIN", path),
+	}
+
+	for _, g := range globs {
+		matches, err := filepath.Glob(g)
+		if err == nil {
+			found = append(found, matches...)
+		}
+	}
+
+	return found
 }
 
 // nolint: gocyclo
