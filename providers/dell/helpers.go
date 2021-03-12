@@ -86,15 +86,11 @@ func (d *Dell) fetchAndApplyUpdates(componentUpdates []*model.Component, config 
 		exitCode, err = d.dsuApplyLocalUpdates(utils.LocalUpdatesDirectory)
 	}
 
-	if err != nil {
-		d.Logger.WithFields(
-			logrus.Fields{"updates": len(componentUpdates), "pinned": pinned, "exit code": exitCode, "err": err},
-		).Error("error applying updates")
-		return err
-	}
+	// err isn't checked and just logged here since DSU exits with various exit codes
+	// which are handled below
 
 	d.Logger.WithFields(
-		logrus.Fields{"updates": len(componentUpdates), "pinned": pinned, "exit code": exitCode},
+		logrus.Fields{"updates": len(componentUpdates), "pinned": pinned, "exit code": exitCode, "err": err},
 	).Trace("update apply complete")
 
 	d.Dsu.Executor.SetQuiet()
