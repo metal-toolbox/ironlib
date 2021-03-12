@@ -86,6 +86,17 @@ func (d *Dell) fetchAndApplyUpdates(componentUpdates []*model.Component, config 
 		exitCode, err = d.dsuApplyLocalUpdates(utils.LocalUpdatesDirectory)
 	}
 
+	if err != nil {
+		d.Logger.WithFields(
+			logrus.Fields{"updates": len(componentUpdates), "pinned": pinned, "exit code": exitCode, "err": err},
+		).Error("error applying updates")
+		return err
+	}
+
+	d.Logger.WithFields(
+		logrus.Fields{"updates": len(componentUpdates), "pinned": pinned, "exit code": exitCode},
+	).Trace("update apply complete")
+
 	d.Dsu.Executor.SetQuiet()
 
 	// check exit code - see dsu_return_codes.md
@@ -105,7 +116,7 @@ func (d *Dell) fetchAndApplyUpdates(componentUpdates []*model.Component, config 
 		d.Logger.Infoln("no applicable updates")
 		return nil
 	default:
-		return fmt.Errorf("executing installing updates - error: %s, exit code: %d", err.Error(), exitCode)
+		return fmt.Errorf("unhandled dsu exit code: %d", exitCode)
 	}
 
 }
@@ -204,7 +215,7 @@ func (d *Dell) dsuApplyLocalUpdates(updatesDir string) (int, error) {
 
 	err := d.pre()
 	if err != nil {
-		return 0, errors.Wrap(err, "error fetching update files for DSU")
+		return 0, errors.Wrap(err, "error setting up DSU pre-requisites")
 	}
 
 	// install updates from the local directory
