@@ -50,12 +50,15 @@ func NewFakeDsu() *Dsu {
 
 // Fetch updates to local directory - these updates are DSU specific
 // returns the exitcode and error if any
-func (d *Dsu) FetchUpdateFiles() (int, error) {
+// NOTE:
+// dsu 1.8 drops update files under the given $updateDir
+// dsu 1.9 creates a directory '$updateDir/dellupdates' and drops the updates in there
+func (d *Dsu) FetchUpdateFiles(dstDir string) (int, error) {
 
 	// purge any existing update file/directory with the same name
-	_ = os.Remove(LocalUpdatesDirectory)
+	_ = os.Remove(dstDir)
 
-	d.Executor.SetArgs([]string{"--destination-type=CBD", "--destination-location=" + LocalUpdatesDirectory})
+	d.Executor.SetArgs([]string{"--destination-type=CBD", "--destination-location=" + dstDir})
 
 	// because... yeah dsu wants to fetch updates interactively
 	d.Executor.SetStdin(bytes.NewReader([]byte("a\nc\n")))

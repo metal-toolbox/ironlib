@@ -54,7 +54,7 @@ func (d *Dell) fetchAndApplyUpdates(componentUpdates []*model.Component, config 
 	} else {
 
 		// fetch update files for install
-		exitCode, err = d.dsuFetchUpdates()
+		exitCode, err = d.dsuFetchUpdates(utils.LocalUpdatesDirectory)
 		if err != nil && exitCode != utils.DSUExitCodeNoUpdatesAvailable {
 			return err
 		}
@@ -188,7 +188,7 @@ func (d *Dell) fetchPinnedUpdates(config *model.FirmwareUpdateConfig) ([]string,
 }
 
 // runs the dell-system-update utility to fetch update files identified by DSU
-func (d *Dell) dsuFetchUpdates() (int, error) {
+func (d *Dell) dsuFetchUpdates(dstDir string) (int, error) {
 
 	err := d.pre()
 	if err != nil {
@@ -196,7 +196,7 @@ func (d *Dell) dsuFetchUpdates() (int, error) {
 	}
 
 	// Fetch DSU identified update files
-	return d.Dsu.FetchUpdateFiles()
+	return d.Dsu.FetchUpdateFiles(dstDir)
 }
 
 // runs DSU to install update files available in the given directory
