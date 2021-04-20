@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,5 +39,36 @@ func Test_dsuParsePreviewBytes(t *testing.T) {
 	assert.Equal(t, "SAS HBA330 Controller", components[0].Slug)
 	assert.Equal(t, "16.17.01.00", components[0].FirmwareAvailable)
 	assert.Equal(t, "SAS-Non-RAID_Firmware_124X2_LN_16.17.01.00_A08", components[0].Metadata["firmware_available_filename"])
+
+}
+
+func Test_findDSUInventoryCollector(t *testing.T) {
+
+	invb := "invcol_5N2WM_LN64_20_09_200_921_A00.BIN"
+	dirs := []string{
+		"/tmp" + "/foo/dsu",
+		"/tmp" + "/foo/dsu" + "/dellupdates",
+	}
+
+	expected := []string{}
+
+	for _, d := range dirs {
+		defer func() { _ = os.RemoveAll(d) }()
+
+		err := os.MkdirAll(d, 0744)
+		if err != nil {
+			t.Error(err)
+		}
+
+		f := d + "/" + invb
+		expected = append(expected, f)
+		_, err = os.Create(f)
+		if err != nil {
+			t.Error(err)
+		}
+
+	}
+
+	assert.ElementsMatch(t, expected, findDSUInventoryCollector(dirs[0]))
 
 }
