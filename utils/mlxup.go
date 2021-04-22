@@ -17,15 +17,16 @@ type Mlxup struct {
 }
 
 type MlxupDevices struct {
-	PartNumber   string
-	DeviceType   string
-	Description  string
-	PSID         string
-	BaseMAC      string
-	Firmware     []string // [version_current, version_available]
-	FirmwarePXE  []string
-	FirmwareUEFI []string
-	Status       string
+	PartNumber    string
+	DeviceType    string
+	Description   string
+	PCIDeviceName string
+	PSID          string
+	BaseMAC       string
+	Firmware      []string // [version_current, version_available]
+	FirmwarePXE   []string
+	FirmwareUEFI  []string
+	Status        string
 }
 
 // Return a new mellanox mlxup command executor
@@ -40,6 +41,17 @@ func NewMlxupCmd(trace bool) Collector {
 	return &Mlxup{Executor: e}
 }
 
+func NewMlxupUpdater(trace bool) Updater {
+	e := NewExecutor(mlxup)
+	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+	if !trace {
+		e.SetQuiet()
+	}
+
+	return &Mlxup{Executor: e}
+}
+
+// Get a list of components
 func (m *Mlxup) Components() ([]*model.Component, error) {
 
 	devices, err := m.Query()
@@ -48,16 +60,16 @@ func (m *Mlxup) Components() ([]*model.Component, error) {
 	}
 
 	inv := []*model.Component{}
-	for idx, d := range devices {
+	for _, d := range devices {
 
 		uid, _ := uuid.NewRandom()
 		item := &model.Component{
 			ID:              uid.String(),
 			Model:           d.DeviceType,
 			Vendor:          vendorFromString(d.DeviceType),
-			Slug:            prefixIndex(idx, "NIC"),
+			Slug:            model.SlugNIC,
 			Name:            d.Description,
-			Serial:          d.PSID,
+			Serial:          d.BaseMAC,
 			FirmwareManaged: true,
 			Metadata:        make(map[string]string),
 		}
@@ -93,6 +105,38 @@ func (m *Mlxup) Components() ([]*model.Component, error) {
 	return inv, nil
 }
 
+// Update mellanox component
+func (m *Mlxup) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
+	// query list of nics
+	nics, err := m.Query()
+	if err != nil {
+		return err
+	}
+
+	// apply update
+	for _, nic := range nics {
+		m.Executor.SetArgs([]string{
+			"--yes",
+			"--dev",
+			nic.PCIDeviceName,
+			"--image-file",
+			updateFile,
+		})
+
+		result, err := m.Executor.ExecWithContext(ctx)
+		if err != nil {
+			return err
+		}
+
+		if result.ExitCode != 0 {
+			return fmt.Errorf("%s returned non-zero exit code: %d, stderr: %s", m.Executor.GetCmd(), result.ExitCode, result.Stderr)
+		}
+	}
+
+	return nil
+}
+
+// Query returns a slice of mellanox devices
 func (m *Mlxup) Query() ([]*MlxupDevices, error) {
 
 	// mlxup --query
@@ -162,6 +206,15 @@ func parseDeviceAttributes(byteSlice [][]byte) *MlxupDevices {
 			t := strings.Split(s, ":")
 			if len(t) > 0 {
 				device.PSID = strings.TrimSpace(t[1])
+			}
+			continue
+		}
+
+		// Parse PCI device name
+		if strings.Contains(s, "PCI Device Name:") {
+			t := strings.Split(s, "PCI Device Name:")
+			if len(t) > 0 {
+				device.PCIDeviceName = strings.TrimSpace(t[1])
 			}
 			continue
 		}
