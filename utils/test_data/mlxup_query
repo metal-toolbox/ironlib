@@ -11,6 +11,7 @@ Device #1:
   Base MAC:         b8599fde86f8
   Versions:         Current        Available
      FW             14.27.1016     14.28.2006
+     FW (Running)   14.27.1016     N/A
      PXE            3.5.0901       3.6.0102
      UEFI           14.20.0019     14.21.0017
 

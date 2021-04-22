@@ -238,7 +238,7 @@ func parseDeviceAttributes(byteSlice [][]byte) *MlxupDevices {
 		}
 
 		// Parse current, available firmware versions
-		if strings.Contains(s, " FW ") {
+		if strings.Contains(s, " FW ") && !strings.Contains(s, "Running") {
 			fields := strings.Fields(s)
 			if len(fields) == 0 {
 				continue
