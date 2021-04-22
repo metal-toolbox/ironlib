@@ -194,11 +194,16 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 			continue
 		}
 
-		// setup SMC sum for executing
-		sum := utils.NewSupermicroSUM(true)
+		var updater utils.Updater
+		switch component.Slug {
+		case model.SlugBIOS, model.SlugBMC:
+			// setup SMC sum for executing
+			updater = utils.NewSupermicroSUM(true)
+		case model.SlugNIC:
+			updater = utils.NewMlxupUpdater(true)
+		}
 
-		// execute sum and apply update for component
-		err = sum.ApplyUpdate(ctx, updateFile, strings.ToLower(component.Slug))
+		err = updater.ApplyUpdate(ctx, updateFile, component.Slug)
 		if err != nil {
 			s.Logger.WithFields(logrus.Fields{"component": component.Slug, "err": err}).Warn("component update error")
 			return err
