@@ -48,6 +48,8 @@ func FormatProductName(s string) string {
 		return "SYS-5019C-MR"
 	case "PowerEdge R640":
 		return "r640"
+	case "Micron_5200_MTFDDAK480TDN":
+		return "5200MAX"
 	default:
 		return s
 	}

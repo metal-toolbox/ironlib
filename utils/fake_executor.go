@@ -110,6 +110,12 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			return nil, err
 		}
 		e.Stdout = b
+	case "msecli":
+		b, err := ioutil.ReadFile("test_data/msecli_list")
+		if err != nil {
+			return nil, err
+		}
+		e.Stdout = b
 	}
 
 	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: 0}, nil
