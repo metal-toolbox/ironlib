@@ -18,6 +18,7 @@ func Test_MlxupComponents(t *testing.T) {
 
 	expected := []*model.Component{
 		{Serial: "b8599fde86f8", Vendor: "Mellanox", Model: "ConnectX4LX", Name: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6", Slug: model.SlugNIC, FirmwareManaged: true, FirmwareInstalled: "14.27.1016", FirmwareAvailable: "14.28.2006", Metadata: map[string]string{"firmware_pxe_installed": "3.5.0901", "firmware_pxe_available": "3.6.0102", "firmware_uefi_installed": "14.20.0019", "firmware_uefi_available": "14.21.0017"}, Oem: false},
+		{Serial: "b8599fde86fd", Vendor: "Mellanox", Model: "ConnectX4LX", Name: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6", Slug: model.SlugNIC, FirmwareManaged: true, FirmwareInstalled: "14.27.1016", FirmwareAvailable: "14.28.2006", Metadata: map[string]string{"firmware_pxe_installed": "3.5.0901", "firmware_pxe_available": "3.6.0102", "firmware_uefi_installed": "14.20.0019", "firmware_uefi_available": "14.21.0017"}, Oem: false},
 	}
 
 	m := newFakeMlxup()
@@ -33,8 +34,9 @@ func Test_MlxupComponents(t *testing.T) {
 
 func Test_MlxupParseQueryOutput(t *testing.T) {
 
-	expected := []*MlxupDevices{
+	expected := []*MlxupDevice{
 		{DeviceType: "ConnectX4LX", PartNumber: "MCX4121A-ACA_Ax", Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6", PSID: "MT_2420110034", BaseMAC: "b8599fde86f8", PCIDeviceName: "0000:d8:00.0", Firmware: []string{"14.27.1016", "14.28.2006"}, FirmwarePXE: []string{"3.5.0901", "3.6.0102"}, FirmwareUEFI: []string{"14.20.0019", "14.21.0017"}, Status: "Update required"},
+		{DeviceType: "ConnectX4LX", PartNumber: "MCX4121A-ACA_Ax", Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6", PSID: "MT_2420110034", BaseMAC: "b8599fde86fd", PCIDeviceName: "0000:d8:00.0", Firmware: []string{"14.27.1016", "14.28.2006"}, FirmwarePXE: []string{"3.5.0901", "3.6.0102"}, FirmwareUEFI: []string{"14.20.0019", "14.21.0017"}, Status: "Update required"},
 	}
 
 	m := newFakeMlxup()
@@ -44,10 +46,7 @@ func Test_MlxupParseQueryOutput(t *testing.T) {
 		t.Error(err)
 	}
 
-	mlxDevices := m.parseQueryOutput(result.Stdout)
-	if err != nil {
-		t.Error(err)
-	}
+	mlxDevices := m.parseMlxQueryOutput(result.Stdout)
 
 	assert.Equal(t, expected, mlxDevices)
 }
