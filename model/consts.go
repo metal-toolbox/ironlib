@@ -6,6 +6,7 @@ const (
 	SlugBMC                         = "BMC"
 	SlugBIOS                        = "BIOS"
 	SlugDiskPciNvmeSsd              = "Disk - NVME PCI SSD"
+	SlugDiskSataSsd                 = "Disk - Sata SSD"
 	SlugNIC                         = "NIC"
 	SlugPowerSupply                 = "Power Supply"
 	SlugSasHba330Controller         = "SAS HBA330 Controller"
