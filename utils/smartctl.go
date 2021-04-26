@@ -51,7 +51,7 @@ func (s *Smartctl) Components() ([]*model.Component, error) {
 		return nil, err
 	}
 
-	for idx, drive := range DrivesList.Drives {
+	for _, drive := range DrivesList.Drives {
 		// collect drive information with smartctl -a <drive>
 		smartctlAll, err := s.All(drive.Name)
 		if err != nil {
@@ -64,8 +64,9 @@ func (s *Smartctl) Components() ([]*model.Component, error) {
 			Vendor:            vendorFromString(smartctlAll.ModelName),
 			Model:             smartctlAll.ModelName,
 			Serial:            smartctlAll.SerialNumber,
-			Slug:              prefixIndex(idx, drive.Type),
-			Name:              drive.Type,
+			Name:              smartctlAll.ModelName,
+			Type:              componentSlugFromModel(smartctlAll.ModelName),
+			Slug:              model.SlugDisk,
 			FirmwareInstalled: smartctlAll.FirmwareVersion,
 		}
 
