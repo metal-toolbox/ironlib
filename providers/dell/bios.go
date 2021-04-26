@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/packethost/ironlib/config"
+	"github.com/packethost/ironlib/utils"
 )
 
 func (d *Dell) SetBIOSConfiguration(ctx context.Context, config *config.BIOSConfiguration) error {
@@ -11,5 +12,6 @@ func (d *Dell) SetBIOSConfiguration(ctx context.Context, config *config.BIOSConf
 }
 
 func (d *Dell) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error) {
-	return &config.BIOSConfiguration{}, nil
+	racadm := utils.NewDellRacadm(false)
+	return racadm.GetBIOSConfiguration(ctx)
 }

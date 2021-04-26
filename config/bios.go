@@ -10,6 +10,9 @@ type BIOSConfiguration struct {
 
 // DellBIOS is an instance with Dell configuration parameters
 type DellBIOS struct {
-	BootMode    string `json:"boot_mode"`
-	TPMSecurity string `json:"tpm_security"`
+	BootMode       string `json:"boot_mode"`
+	AMDSev         int64  `json:"cpu_min_sev_asid"`
+	Hyperthreading string `json:"logical_proc"`
+	SRIOV          string `json:"sriov_global_enable"`
+	TPM            string `json:"tpm_security"`
 }
