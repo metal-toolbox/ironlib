@@ -112,7 +112,7 @@ func (m *Msecli) Query() ([]*MsecliDevice, error) {
 	}
 
 	if len(result.Stdout) == 0 {
-		return nil, errors.Wrap(ErrUtilsNoCommandOutput, m.Executor.GetCmd())
+		return nil, errors.Wrap(ErrNoCommandOutput, m.Executor.GetCmd())
 	}
 
 	return m.parseMsecliQueryOutput(result.Stdout), nil

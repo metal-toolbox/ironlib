@@ -1,10 +1,17 @@
 package model
 
 const (
+	// Vendors
+	VendorDell       = "dell"
+	VendorMicron     = "micron"
+	VendorAsrockrack = "asrockrack"
+	VendorSupermicro = "supermicro"
+
 	// Generic component slugs
 	SlugBackplaneExpander           = "Backplane Expander"
 	SlugBMC                         = "BMC"
 	SlugBIOS                        = "BIOS"
+	SlugDisk                        = "disk"
 	SlugDiskPciNvmeSsd              = "Disk - NVME PCI SSD"
 	SlugDiskSataSsd                 = "Disk - Sata SSD"
 	SlugNIC                         = "NIC"
