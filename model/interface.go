@@ -1,10 +1,15 @@
 package model
 
-import "context"
+import (
+	"context"
+
+	"github.com/packethost/ironlib/config"
+)
 
 type Setter interface {
 	SetDeviceID(string)
 	SetFirmwareUpdateConfig(*FirmwareUpdateConfig)
+	SetBIOSConfiguration(ctx context.Context, config *config.BIOSConfiguration) error
 }
 
 type Getter interface {
@@ -16,6 +21,7 @@ type Getter interface {
 	GetInventory(ctx context.Context, listUpdates bool) (*Device, error)
 	GetUpdatesAvailable(ctx context.Context) (*Device, error)
 	GetDeviceFirmwareRevision(ctx context.Context) (string, error)
+	GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error)
 }
 
 type Updater interface {
