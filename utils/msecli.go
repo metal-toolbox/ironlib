@@ -142,62 +142,47 @@ func (m *Msecli) Query() ([]*MsecliDevice, error) {
 }
 
 // Parse msecli -L output into []*MsecliDevice
-// see tests for details
 func (m *Msecli) parseMsecliQueryOutput(b []byte) []*MsecliDevice {
 
 	devices := []*MsecliDevice{}
 
-	byteSlice := bytes.Split(b, []byte("\n"))
-	for idx, sl := range byteSlice {
-		s := string(sl)
-		if strings.Contains(s, "Device Name") {
-			device := parseMsecliDeviceAttributes(byteSlice[idx:])
-			if device != nil && len(device.FirmwareRevision) > 0 {
-				devices = append(devices, device)
-			}
+	// split
+	byteSlice := bytes.Split(b, []byte("\n\n"))
+	for _, sl := range byteSlice {
+		if !bytes.Contains(sl, []byte("Device Name")) {
+			continue
 		}
+
+		devices = append(devices, parseMsecliDeviceAttributes(sl))
 	}
 
 	return devices
 }
 
-// nolint: gocyclo
-func parseMsecliDeviceAttributes(byteSlice [][]byte) *MsecliDevice {
+// parse a Device information section into *MsecliDevice
+func parseMsecliDeviceAttributes(bSlice []byte) *MsecliDevice {
 
 	device := &MsecliDevice{}
 
-	for _, line := range byteSlice {
-
+	lines := bytes.Split(bSlice, []byte("\n"))
+	for _, line := range lines {
 		s := string(line)
-
-		// Parse Model number
-		if strings.Contains(s, "Model No") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				device.ModelNumber = strings.TrimSpace(t[1])
-			}
-
+		parts := strings.Split(s, ":")
+		if len(parts) < 2 {
 			continue
 		}
 
-		if strings.Contains(s, "Serial No") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				device.SerialNumber = strings.TrimSpace(t[1])
-			}
+		key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
 
-			continue
+		switch key {
+		case "Model No":
+			device.ModelNumber = value
+		case "FW-Rev":
+			device.FirmwareRevision = value
+		case "Serial No":
+			device.SerialNumber = value
 		}
-
-		if strings.Contains(s, "FW-Rev") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				device.FirmwareRevision = strings.TrimSpace(t[1])
-			}
-
-			break
-		}
-
 	}
+
 	return device
 }
