@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/hashicorp/go-version"
 	"github.com/packethost/ironlib/model"
 )
@@ -213,15 +215,22 @@ func ValidateSHA1Checksum(filePath, sha1ChecksumFile string) error {
 // compares the newVersion string with the oldVersion version and returns bool
 func VersionIsNewer(newVersion, oldVersion string) (bool, error) {
 
-	// validate semver versions
-	newV, err := version.NewVersion(newVersion)
-	if err != nil {
-		return false, fmt.Errorf("semver version error: " + err.Error())
+	// skip semver version compare if versions are equal
+	if strings.EqualFold(newVersion, oldVersion) {
+		return false, nil
 	}
 
+	// validate string in semver format
+	// direct comparison if the old version is not a semver
 	oldV, err := version.NewVersion(oldVersion)
+	if err != nil && oldVersion != newVersion {
+		return true, nil
+	}
+
+	// validate new version is valid semver
+	newV, err := version.NewVersion(newVersion)
 	if err != nil {
-		return false, fmt.Errorf("semver version error: " + err.Error())
+		return false, errors.Wrap(ErrVersionStrExpectedSemver, err.Error())
 	}
 
 	return newV.GreaterThan(oldV), nil
