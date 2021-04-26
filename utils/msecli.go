@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"context"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -76,12 +77,26 @@ func (m *Msecli) Components() ([]*model.Component, error) {
 }
 
 // ApplyUpdate installs the updateFile
-func (m *Msecli) ApplyUpdate(ctx context.Context, updateFile, componetSlug string) error {
+func (m *Msecli) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
 
 	// query list of drives
 	drives, err := m.Query()
 	if err != nil {
 		return err
+	}
+
+	// msecli expects the update file to be named 1.bin - don't ask
+	expectedFileName := "1.bin"
+
+	// rename update file
+	if filepath.Base(updateFile) != expectedFileName {
+		newName := filepath.Join(filepath.Dir(updateFile), expectedFileName)
+		err := os.Rename(updateFile, newName)
+		if err != nil {
+			return err
+		}
+
+		updateFile = newName
 	}
 
 	for _, d := range drives {
