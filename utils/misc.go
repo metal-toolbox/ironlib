@@ -77,8 +77,10 @@ func vendorFromString(s string) string {
 
 func componentSlugFromModel(s string) string {
 	switch s {
-	case "Micron_5200_MTFDDAK480TDN":
+	case "Micron_5200_MTFDDAK480TDN", "Micron_5200_MTFDDAK960TDN":
 		return model.SlugDiskSataSsd
+	case "KXG60ZNV256G TOSHIBA":
+		return model.SlugDiskPcieNvmeSsd
 	default:
 		return s
 	}
