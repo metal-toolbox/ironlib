@@ -175,45 +175,70 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 		return err
 	}
 
-	if len(components) == 0 {
-		s.Logger.Info("No updates to be applied, all components are up to date as per firmware configuration")
-	}
+	s.Logger.WithFields(logrus.Fields{"total components": len(device.Components), "pending": len(components)}).Info("component updates")
 
 	// fetch and apply component updates
 	for _, component := range components {
-
 		s.Logger.WithFields(logrus.Fields{"slug": component.Slug, "name": component.Name, "url": component.Config.UpdateFileURL, "dst": "/tmp"}).Info("fetching component update")
+
+		updateDir := fmt.Sprintf("/tmp/updates/%s/%s", component.Vendor, component.Model)
+
 		// retrieve update file under target directory, validate checksum
-		updateFile, err := utils.RetrieveUpdateFile(component.Config.UpdateFileURL, "/tmp")
+		updateFile, err := utils.RetrieveUpdateFile(component.Config.UpdateFileURL, updateDir)
 		if err != nil {
 			return err
 		}
 
 		s.Logger.WithFields(logrus.Fields{"slug": component.Slug, "name": component.Name, "installed": component.FirmwareInstalled, "update": component.Config.Updates[0]}).Info("component update to be applied")
+
 		if dryRun {
 			continue
 		}
 
-		var updater utils.Updater
-		switch component.Slug {
-		case model.SlugBIOS, model.SlugBMC:
-			// setup SMC sum for executing
-			updater = utils.NewSupermicroSUM(true)
-		case model.SlugNIC:
-			updater = utils.NewMlxupUpdater(true)
-		}
-
-		err = updater.ApplyUpdate(ctx, updateFile, component.Slug)
+		// apply update
+		err = s.updateComponent(ctx, component, updateFile)
 		if err != nil {
-			s.Logger.WithFields(logrus.Fields{"component": component.Slug, "err": err}).Warn("component update error")
 			return err
 		}
-
-		// this flag can be optimized further
-		// BMC updates don't require a reboot, and some devices
-		s.PendingReboot = true
-		s.UpdatesInstalled = true
 	}
+
+	return nil
+}
+
+// updateComponent applies the component update based on the component vendor, model
+// TODO: split this method up, as we end up with more components
+func (s *Supermicro) updateComponent(ctx context.Context, component *model.Component, updateFile string) (err error) {
+	var updater utils.Updater
+
+	// set updater based on the component slug, vendor
+	switch component.Slug {
+	case model.SlugBIOS, model.SlugBMC:
+		// setup SMC sum for executing
+		updater = utils.NewSupermicroSUM(true)
+
+	case model.SlugNIC:
+		// mellanox NIC update
+		updater = utils.NewMlxupUpdater(true)
+
+	case model.SlugDisk:
+		// micron disk
+		if strings.EqualFold(component.Vendor, model.VendorMicron) {
+			updater = utils.NewMsecliUpdater(true)
+		} else {
+			s.Logger.WithFields(logrus.Fields{"slug": component.Slug, "name": component.Name, "vendor": model.VendorMicron}).Warn("unsupported disk vendor")
+		}
+	}
+
+	err = updater.ApplyUpdate(ctx, updateFile, component.Slug)
+	if err != nil {
+		s.Logger.WithFields(logrus.Fields{"component": component.Slug, "err": err}).Warn("component update error")
+		return err
+	}
+
+	// this flag can be optimized further
+	// BMC updates don't require a reboot, and some devices
+	s.PendingReboot = true
+	s.UpdatesInstalled = true
 
 	return nil
 }
