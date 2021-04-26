@@ -73,6 +73,15 @@ func vendorFromString(s string) string {
 	}
 }
 
+func componentSlugFromModel(s string) string {
+	switch s {
+	case "Micron_5200_MTFDDAK480TDN":
+		return model.SlugDiskSataSsd
+	default:
+		return s
+	}
+}
+
 // return the given string with the idx prefixed
 func prefixIndex(idx int, s string) string {
 	return fmt.Sprintf("[%d] %s", idx, s)
