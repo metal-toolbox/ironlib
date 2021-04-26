@@ -124,7 +124,7 @@ func RetrieveUpdateFile(updateFileURL, targetDir string) (string, error) {
 
 	// fetch update file
 	for url, dstFile := range m {
-		err := FetchFile(url, dstFile)
+		err = FetchFile(url, dstFile)
 		if err != nil {
 			return "", fmt.Errorf("file retrieve error, url: %s, err: %s", url, err)
 		}
