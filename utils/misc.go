@@ -113,6 +113,11 @@ func RetrieveUpdateFile(updateFileURL, targetDir string) (string, error) {
 		checksumURL:   targetDir + "/" + path.Base(checksumURL),
 	}
 
+	err := os.MkdirAll(targetDir, 0644)
+	if err != nil {
+		return "", err
+	}
+
 	// fetch update file
 	for url, dstFile := range m {
 		err := FetchFile(url, dstFile)
@@ -122,7 +127,7 @@ func RetrieveUpdateFile(updateFileURL, targetDir string) (string, error) {
 	}
 
 	// validate checksum
-	err := ValidateSHA1Checksum(m[updateFileURL], m[checksumURL])
+	err = ValidateSHA1Checksum(m[updateFileURL], m[checksumURL])
 	if err != nil {
 		return "", fmt.Errorf("checksum error, file: %s, err: %s", m[updateFileURL], err.Error())
 	}
