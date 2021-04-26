@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//
+// msecli git executable
 const msecli = "/usr/bin/msecli"
 
 // Msecli is an msecli executor
