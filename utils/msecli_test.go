@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/packethost/ironlib/model"
@@ -81,4 +82,18 @@ func Test_parseMsecliQueryOutput(t *testing.T) {
 	devices := m.parseMsecliQueryOutput(result.Stdout)
 
 	assert.Equal(t, expected, devices)
+}
+
+func Test_parseMsecliQueryOutputCmdFailure(t *testing.T) {
+
+	os.Setenv("FAIL_MICRON_UPDATE", "1")
+	m := newFakeMsecli()
+	m.Executor.SetArgs([]string{"-L"})
+	result, err := m.Executor.ExecWithContext(context.Background())
+	if err != nil {
+		t.Error(err)
+	}
+
+	devices := m.parseMsecliQueryOutput(result.Stdout)
+	assert.Equal(t, 0, len(devices))
 }
