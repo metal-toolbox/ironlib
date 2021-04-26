@@ -26,16 +26,24 @@ type MsecliDevice struct {
 	FirmwareRevision string
 }
 
-// NewMseclicmd returns a new cli command runner
-func NewMsecliCmd(trace bool) Collector {
+// NewMseclicmd returns a new msecli drive info collector
+func NewMsecliCollector(trace bool) Collector {
+	return newMsecli(trace)
+}
 
+// NewMseclicmd returns a new msecli drive info updater
+func NewMsecliUpdater(trace bool) Updater {
+	return newMsecli(trace)
+}
+
+func newMsecli(trace bool) *Msecli {
 	e := NewExecutor(msecli)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 	if !trace {
 		e.SetQuiet()
 	}
 
-	return &Mlxup{Executor: e}
+	return &Msecli{Executor: e}
 }
 
 // Components returns a slice of drive components identified
