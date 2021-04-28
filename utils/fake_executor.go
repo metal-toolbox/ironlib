@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -106,6 +107,24 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 		}
 	case "lshw":
 		b, err := ioutil.ReadFile("test_data/lshw_e3c246d4I-nl.json")
+		if err != nil {
+			return nil, err
+		}
+		e.Stdout = b
+	case "msecli":
+		if os.Getenv("FAIL_MICRON_UPDATE") != "" {
+			return &Result{
+				Stderr:   []byte("Folder /tmp/updates/Micron/D1MU020 is an invalid firmware update directory!"),
+				ExitCode: 1,
+			}, nil
+		}
+		if os.Getenv("FAIL_MICRON_QUERY") != "" {
+			return &Result{
+				Stdout:   []byte(``),
+				ExitCode: 0,
+			}, nil
+		}
+		b, err := ioutil.ReadFile("test_data/msecli_list")
 		if err != nil {
 			return nil, err
 		}

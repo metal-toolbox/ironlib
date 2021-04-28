@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/hashicorp/go-version"
 	"github.com/packethost/ironlib/model"
 )
@@ -48,6 +50,8 @@ func FormatProductName(s string) string {
 		return "SYS-5019C-MR"
 	case "PowerEdge R640":
 		return "r640"
+	case "Micron_5200_MTFDDAK480TDN":
+		return "5200MAX"
 	default:
 		return s
 	}
@@ -68,6 +72,17 @@ func vendorFromString(s string) string {
 		return "Mellanox"
 	default:
 		return "unknown"
+	}
+}
+
+func componentSlugFromModel(s string) string {
+	switch s {
+	case "Micron_5200_MTFDDAK480TDN", "Micron_5200_MTFDDAK960TDN":
+		return model.SlugDiskSataSsd
+	case "KXG60ZNV256G TOSHIBA":
+		return model.SlugDiskPcieNvmeSsd
+	default:
+		return s
 	}
 }
 
@@ -102,16 +117,21 @@ func RetrieveUpdateFile(updateFileURL, targetDir string) (string, error) {
 		checksumURL:   targetDir + "/" + path.Base(checksumURL),
 	}
 
+	err := os.MkdirAll(targetDir, 0644)
+	if err != nil {
+		return "", err
+	}
+
 	// fetch update file
 	for url, dstFile := range m {
-		err := FetchFile(url, dstFile)
+		err = FetchFile(url, dstFile)
 		if err != nil {
 			return "", fmt.Errorf("file retrieve error, url: %s, err: %s", url, err)
 		}
 	}
 
 	// validate checksum
-	err := ValidateSHA1Checksum(m[updateFileURL], m[checksumURL])
+	err = ValidateSHA1Checksum(m[updateFileURL], m[checksumURL])
 	if err != nil {
 		return "", fmt.Errorf("checksum error, file: %s, err: %s", m[updateFileURL], err.Error())
 	}
@@ -197,15 +217,22 @@ func ValidateSHA1Checksum(filePath, sha1ChecksumFile string) error {
 // compares the newVersion string with the oldVersion version and returns bool
 func VersionIsNewer(newVersion, oldVersion string) (bool, error) {
 
-	// validate semver versions
-	newV, err := version.NewVersion(newVersion)
-	if err != nil {
-		return false, fmt.Errorf("semver version error: " + err.Error())
+	// skip semver version compare if versions are equal
+	if strings.EqualFold(newVersion, oldVersion) {
+		return false, nil
 	}
 
+	// validate string in semver format
+	// direct comparison if the old version is not a semver
 	oldV, err := version.NewVersion(oldVersion)
+	if err != nil && oldVersion != newVersion {
+		return true, nil
+	}
+
+	// validate new version is valid semver
+	newV, err := version.NewVersion(newVersion)
 	if err != nil {
-		return false, fmt.Errorf("semver version error: " + err.Error())
+		return false, errors.Wrap(ErrVersionStrExpectedSemver, err.Error())
 	}
 
 	return newV.GreaterThan(oldV), nil

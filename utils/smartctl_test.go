@@ -60,10 +60,10 @@ func Test_SmartctlAllNVME(t *testing.T) {
 
 func Test_SmartctlDeviceAttributes(t *testing.T) {
 	expected := []*model.Component{
-		{Serial: "2013273A99BD", Vendor: "Micron", Model: "Micron_5200_MTFDDAK960TDN", Name: "scsi", Slug: "[0] scsi", FirmwareInstalled: "D1MU020"},
-		{Serial: "2013273A99BD", Vendor: "Micron", Model: "Micron_5200_MTFDDAK960TDN", Name: "scsi", Slug: "[1] scsi", FirmwareInstalled: "D1MU020"},
-		{Serial: "Z9DF70I8FY3L", Vendor: "Toshiba", Model: "KXG60ZNV256G TOSHIBA", Name: "nvme", Slug: "[2] nvme", FirmwareInstalled: "AGGA4104"},
-		{Serial: "Z9DF70I8FY3L", Vendor: "Toshiba", Model: "KXG60ZNV256G TOSHIBA", Name: "nvme", Slug: "[3] nvme", FirmwareInstalled: "AGGA4104"},
+		{Serial: "2013273A99BD", Vendor: "Micron", Model: "Micron_5200_MTFDDAK960TDN", Name: "Micron_5200_MTFDDAK960TDN", Type: model.SlugDiskSataSsd, Slug: model.SlugDisk, FirmwareInstalled: "D1MU020"},
+		{Serial: "2013273A99BD", Vendor: "Micron", Model: "Micron_5200_MTFDDAK960TDN", Name: "Micron_5200_MTFDDAK960TDN", Type: model.SlugDiskSataSsd, Slug: model.SlugDisk, FirmwareInstalled: "D1MU020"},
+		{Serial: "Z9DF70I8FY3L", Vendor: "Toshiba", Model: "KXG60ZNV256G TOSHIBA", Name: "KXG60ZNV256G TOSHIBA", Type: model.SlugDiskPcieNvmeSsd, Slug: model.SlugDisk, FirmwareInstalled: "AGGA4104"},
+		{Serial: "Z9DF70I8FY3L", Vendor: "Toshiba", Model: "KXG60ZNV256G TOSHIBA", Name: "KXG60ZNV256G TOSHIBA", Type: model.SlugDiskPcieNvmeSsd, Slug: model.SlugDisk, FirmwareInstalled: "AGGA4104"},
 	}
 	s := newFakeSmartctl()
 	inv, err := s.Components()

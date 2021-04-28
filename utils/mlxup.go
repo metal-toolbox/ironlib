@@ -154,7 +154,7 @@ func (m *Mlxup) Query() ([]*MlxupDevice, error) {
 	}
 
 	if len(result.Stdout) == 0 {
-		return nil, errors.Wrap(ErrUtilsNoCommandOutput, m.Executor.GetCmd())
+		return nil, errors.Wrap(ErrNoCommandOutput, m.Executor.GetCmd())
 	}
 
 	return m.parseMlxQueryOutput(result.Stdout), nil

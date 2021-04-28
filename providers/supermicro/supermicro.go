@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 	"github.com/pkg/errors"
@@ -28,11 +29,10 @@ type Supermicro struct {
 	UpdatesInstalled     bool // set when updates were installed on the device
 }
 
-func New(vendor, model string, l *logrus.Logger) (model.Manager, error) {
-
+func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.Manager, error) {
 	dmidecode, err := utils.NewDmidecode()
 	if err != nil {
-		errors.Wrap(err, "erorr in dmidecode init")
+		return nil, errors.Wrap(errs.ErrDmiDecodeRun, err.Error())
 	}
 
 	var trace bool
@@ -50,10 +50,11 @@ func New(vendor, model string, l *logrus.Logger) (model.Manager, error) {
 	}
 
 	uid, _ := uuid.NewRandom()
+
 	return &Supermicro{
 		ID:         uid.String(),
-		Vendor:     vendor,
-		Model:      utils.FormatProductName(model),
+		Vendor:     deviceVendor,
+		Model:      utils.FormatProductName(deviceModel),
 		Dmidecode:  dmidecode,
 		Collectors: collectors,
 		Logger:     l,
@@ -94,10 +95,11 @@ func (s *Supermicro) UpdatesApplied() bool {
 
 // Returns hardware inventory for the device
 func (s *Supermicro) GetInventory(ctx context.Context, listUpdates bool) (*model.Device, error) {
-
 	inventory := make([]*model.Component, 0)
+
 	// collect current component firmware versions
 	s.Logger.Info("Identifying component firmware versions...")
+
 	for cmd, collector := range s.Collectors {
 		components, err := collector.Components()
 		if err != nil {
@@ -108,6 +110,7 @@ func (s *Supermicro) GetInventory(ctx context.Context, listUpdates bool) (*model
 			s.Logger.WithFields(logrus.Fields{"cmd": cmd}).Trace("inventory collector returned no items")
 			continue
 		}
+
 		inventory = append(inventory, components...)
 	}
 
@@ -156,9 +159,8 @@ func (s *Supermicro) GetDeviceFirmwareRevision(ctx context.Context) (string, err
 // nolint: gocyclo
 // Identify components firmware revisions and apply updates
 func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.FirmwareUpdateConfig, dryRun bool) (err error) {
-
 	if config == nil || config.Components == nil || len(config.Components) == 0 {
-		return fmt.Errorf("ApplyUpdatesAvailable() requires a valid *model.FirmwareUpdateConfig with a valid slice of Component config")
+		return errs.ErrComponentListExpected
 	}
 
 	s.FirmwareUpdateConfig = config
@@ -166,7 +168,7 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 	// get component firmware inventory
 	device, err := s.GetInventory(ctx, false)
 	if err != nil {
-		return fmt.Errorf("Failed to get inventory for device before upgrade: " + err.Error())
+		return errors.Wrap(errs.ErrDeviceInventory, err.Error())
 	}
 
 	// identify components that require updates
@@ -175,45 +177,70 @@ func (s *Supermicro) ApplyUpdatesAvailable(ctx context.Context, config *model.Fi
 		return err
 	}
 
-	if len(components) == 0 {
-		s.Logger.Info("No updates to be applied, all components are up to date as per firmware configuration")
-	}
+	s.Logger.WithFields(logrus.Fields{"total components": len(device.Components), "pending": len(components)}).Info("component updates")
 
 	// fetch and apply component updates
 	for _, component := range components {
-
 		s.Logger.WithFields(logrus.Fields{"slug": component.Slug, "name": component.Name, "url": component.Config.UpdateFileURL, "dst": "/tmp"}).Info("fetching component update")
+
+		updateDir := fmt.Sprintf("/tmp/updates/%s/%s", component.Vendor, component.Model)
+
 		// retrieve update file under target directory, validate checksum
-		updateFile, err := utils.RetrieveUpdateFile(component.Config.UpdateFileURL, "/tmp")
+		updateFile, err := utils.RetrieveUpdateFile(component.Config.UpdateFileURL, updateDir)
 		if err != nil {
 			return err
 		}
 
 		s.Logger.WithFields(logrus.Fields{"slug": component.Slug, "name": component.Name, "installed": component.FirmwareInstalled, "update": component.Config.Updates[0]}).Info("component update to be applied")
+
 		if dryRun {
 			continue
 		}
 
-		var updater utils.Updater
-		switch component.Slug {
-		case model.SlugBIOS, model.SlugBMC:
-			// setup SMC sum for executing
-			updater = utils.NewSupermicroSUM(true)
-		case model.SlugNIC:
-			updater = utils.NewMlxupUpdater(true)
-		}
-
-		err = updater.ApplyUpdate(ctx, updateFile, component.Slug)
+		// apply update
+		err = s.updateComponent(ctx, component, updateFile)
 		if err != nil {
-			s.Logger.WithFields(logrus.Fields{"component": component.Slug, "err": err}).Warn("component update error")
 			return err
 		}
-
-		// this flag can be optimized further
-		// BMC updates don't require a reboot, and some devices
-		s.PendingReboot = true
-		s.UpdatesInstalled = true
 	}
+
+	return nil
+}
+
+// updateComponent applies the component update based on the component vendor, model
+// TODO: split this method up, as we end up with more components
+func (s *Supermicro) updateComponent(ctx context.Context, component *model.Component, updateFile string) (err error) {
+	var updater utils.Updater
+
+	// set updater based on the component slug, vendor
+	switch component.Slug {
+	case model.SlugBIOS, model.SlugBMC:
+		// setup SMC sum for executing
+		updater = utils.NewSupermicroSUM(true)
+
+	case model.SlugNIC:
+		// mellanox NIC update
+		updater = utils.NewMlxupUpdater(true)
+
+	case model.SlugDisk:
+		// micron disk
+		if strings.EqualFold(component.Vendor, model.VendorMicron) {
+			updater = utils.NewMsecliUpdater(true)
+		} else {
+			s.Logger.WithFields(logrus.Fields{"slug": component.Slug, "name": component.Name, "vendor": model.VendorMicron}).Warn("unsupported disk vendor")
+		}
+	}
+
+	err = updater.ApplyUpdate(ctx, updateFile, component.Slug)
+	if err != nil {
+		s.Logger.WithFields(logrus.Fields{"component": component.Slug, "err": err}).Warn("component update error")
+		return err
+	}
+
+	// this flag can be optimized further
+	// BMC updates don't require a reboot
+	s.PendingReboot = true
+	s.UpdatesInstalled = true
 
 	return nil
 }

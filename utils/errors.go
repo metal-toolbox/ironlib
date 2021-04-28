@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	ErrUtilsNoCommandOutput = errors.New("command returned no output")
+	ErrNoCommandOutput          = errors.New("command returned no output")
+	ErrVersionStrExpectedSemver = errors.New("expected version string to follow semver format")
 )
 
 // UtilsExecError is returned when the command exits with an error or a non zero exit status
