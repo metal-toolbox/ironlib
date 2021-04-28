@@ -238,7 +238,7 @@ func (s *Supermicro) updateComponent(ctx context.Context, component *model.Compo
 	}
 
 	// this flag can be optimized further
-	// BMC updates don't require a reboot, and some devices
+	// BMC updates don't require a reboot
 	s.PendingReboot = true
 	s.UpdatesInstalled = true
 
