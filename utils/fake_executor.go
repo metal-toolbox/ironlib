@@ -118,6 +118,12 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 				ExitCode: 1,
 			}, nil
 		}
+		if os.Getenv("FAIL_MICRON_QUERY") != "" {
+			return &Result{
+				Stdout:   []byte(``),
+				ExitCode: 0,
+			}, nil
+		}
 		b, err := ioutil.ReadFile("test_data/msecli_list")
 		if err != nil {
 			return nil, err

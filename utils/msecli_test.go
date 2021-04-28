@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/packethost/ironlib/model"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -96,4 +97,13 @@ func Test_parseMsecliQueryOutputCmdFailure(t *testing.T) {
 
 	devices := m.parseMsecliQueryOutput(result.Stdout)
 	assert.Equal(t, 0, len(devices))
+}
+
+func Test_QueryOutputEmpty(t *testing.T) {
+
+	os.Setenv("FAIL_MICRON_QUERY", "1")
+	m := newFakeMsecli()
+
+	_, err := m.Query()
+	assert.Equal(t, ErrNoCommandOutput, errors.Cause(err))
 }
