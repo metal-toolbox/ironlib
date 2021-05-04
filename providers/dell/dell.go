@@ -20,6 +20,7 @@ type Dell struct {
 	Dsu                     *utils.Dsu
 	Dmidecode               *utils.Dmidecode
 	Logger                  *logrus.Logger
+	Updater                 utils.Updater
 }
 
 func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.Manager, error) {

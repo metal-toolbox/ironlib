@@ -3,8 +3,13 @@ package utils
 import (
 	"context"
 
+	"github.com/packethost/ironlib/config"
 	"github.com/packethost/ironlib/model"
 )
+
+type BIOSConfiguror interface {
+	GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error)
+}
 
 // InventoryCollector is to replace the Collector interface
 type InventoryCollector interface {
