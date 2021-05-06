@@ -7,6 +7,7 @@ type DeviceManager struct {
 	UpdatesAvailable     int  // -1 == no update lookup as yet,  0 == no updates available, 1 == updates available
 	Device               *Device
 	FirmwareUpdateConfig *FirmwareUpdateConfig
+	Getter
 }
 
 // New Device manager constructor
