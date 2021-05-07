@@ -1,0 +1,9 @@
+{
+   "dell": {
+     "boot_mode": "Bios",
+     "cpu_min_sev_asid": 1,
+     "logical_proc": "Enabled",
+     "sriov_global_enable": "Enabled",
+     "tpm_security": "On"
+   }
+ }
