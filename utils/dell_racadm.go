@@ -19,7 +19,12 @@ type DellRacadm struct {
 
 // Return a new Dell racadm command executor
 func NewDellRacadm(trace bool) BIOSConfiguror {
-	e := NewExecutor(dellRacadm)
+	racadmUtil := os.Getenv("UTIL_RACADM")
+	if racadmUtil == "" {
+		racadmUtil = dellRacadm
+	}
+
+	e := NewExecutor(racadmUtil)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 	if !trace {
 		e.SetQuiet()
