@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 	"github.com/pkg/errors"
 )
@@ -40,6 +39,7 @@ func NewMsecliUpdater(trace bool) Updater {
 func newMsecli(trace bool) *Msecli {
 	e := NewExecutor(msecli)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
 	if !trace {
 		e.SetQuiet()
 	}
@@ -49,7 +49,6 @@ func newMsecli(trace bool) *Msecli {
 
 // Components returns a slice of drive components identified
 func (m *Msecli) Components() ([]*model.Component, error) {
-
 	devices, err := m.Query()
 	if err != nil {
 		return nil, err
@@ -58,13 +57,12 @@ func (m *Msecli) Components() ([]*model.Component, error) {
 	inv := []*model.Component{}
 
 	for _, d := range devices {
-		uid, _ := uuid.NewRandom()
 		item := &model.Component{
-			ID:                uid.String(),
 			Model:             d.ModelNumber,
-			Vendor:            vendorFromString(d.ModelNumber),
-			Slug:              model.SlugDiskSataSsd,
-			Name:              model.SlugDiskSataSsd,
+			Vendor:            model.VendorFromString(d.ModelNumber),
+			Slug:              model.SlugDrive,
+			Type:              model.DriveTypeSlug(d.ModelNumber),
+			Name:              d.ModelNumber,
 			Serial:            d.SerialNumber,
 			FirmwareInstalled: d.FirmwareRevision,
 			FirmwareManaged:   true,
@@ -78,7 +76,6 @@ func (m *Msecli) Components() ([]*model.Component, error) {
 
 // ApplyUpdate installs the updateFile
 func (m *Msecli) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
-
 	// query list of drives
 	drives, err := m.Query()
 	if err != nil {
@@ -91,6 +88,7 @@ func (m *Msecli) ApplyUpdate(ctx context.Context, updateFile, componentSlug stri
 	// rename update file
 	if filepath.Base(updateFile) != expectedFileName {
 		newName := filepath.Join(filepath.Dir(updateFile), expectedFileName)
+
 		err := os.Rename(updateFile, newName)
 		if err != nil {
 			return err
@@ -106,7 +104,7 @@ func (m *Msecli) ApplyUpdate(ctx context.Context, updateFile, componentSlug stri
 			"-U", // update
 			"-m", // model
 			// get the product name from the model number
-			FormatProductName(d.ModelNumber),
+			model.FormatProductName(d.ModelNumber),
 			"-i", // directory containing the update file
 			filepath.Dir(updateFile),
 		},
@@ -143,7 +141,6 @@ func (m *Msecli) Query() ([]*MsecliDevice, error) {
 
 // Parse msecli -L output into []*MsecliDevice
 func (m *Msecli) parseMsecliQueryOutput(b []byte) []*MsecliDevice {
-
 	devices := []*MsecliDevice{}
 
 	// split
@@ -161,14 +158,16 @@ func (m *Msecli) parseMsecliQueryOutput(b []byte) []*MsecliDevice {
 
 // parse a Device information section into *MsecliDevice
 func parseMsecliDeviceAttributes(bSlice []byte) *MsecliDevice {
-
 	device := &MsecliDevice{}
 
 	lines := bytes.Split(bSlice, []byte("\n"))
 	for _, line := range lines {
 		s := string(line)
+
+		cols := 2
 		parts := strings.Split(s, ":")
-		if len(parts) < 2 {
+
+		if len(parts) < cols {
 			continue
 		}
 

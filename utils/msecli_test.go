@@ -17,17 +17,16 @@ func newFakeMsecli() *Msecli {
 }
 
 func Test_MsecliComponents(t *testing.T) {
-
 	expected := []*model.Component{
 		{
 			ID:                "",
 			DeviceID:          "",
 			Serial:            "193423710BDA",
 			Vendor:            "Micron",
-			Type:              "",
+			Type:              model.SlugDriveTypeSATASSD,
 			Model:             "Micron_5200_MTFDDAK480TDN",
-			Name:              "Disk - Sata SSD",
-			Slug:              "Disk - Sata SSD",
+			Name:              "Micron_5200_MTFDDAK480TDN",
+			Slug:              model.SlugDrive,
 			FirmwareInstalled: "D1MU020",
 			FirmwareManaged:   true,
 			Metadata:          map[string]string{},
@@ -37,10 +36,10 @@ func Test_MsecliComponents(t *testing.T) {
 			DeviceID:          "",
 			Serial:            "193423711167",
 			Vendor:            "Micron",
-			Type:              "",
+			Type:              model.SlugDriveTypeSATASSD,
 			Model:             "Micron_5200_MTFDDAK480TDN",
-			Name:              "Disk - Sata SSD",
-			Slug:              "Disk - Sata SSD",
+			Name:              "Micron_5200_MTFDDAK480TDN",
+			Slug:              model.SlugDrive,
 			FirmwareInstalled: "D1MU020",
 			FirmwareManaged:   true,
 			Metadata:          map[string]string{},
@@ -48,18 +47,16 @@ func Test_MsecliComponents(t *testing.T) {
 	}
 
 	m := newFakeMsecli()
+
 	inventory, err := m.Components()
 	if err != nil {
 		t.Error(err)
 	}
 
-	// since the component IDs are unique
-	inventory = purgeTestComponentID(inventory)
 	assert.Equal(t, expected, inventory)
 }
 
 func Test_parseMsecliQueryOutput(t *testing.T) {
-
 	expected := []*MsecliDevice{
 		{
 			ModelNumber:      "Micron_5200_MTFDDAK480TDN",
@@ -75,6 +72,7 @@ func Test_parseMsecliQueryOutput(t *testing.T) {
 
 	m := newFakeMsecli()
 	m.Executor.SetArgs([]string{"-L"})
+
 	result, err := m.Executor.ExecWithContext(context.Background())
 	if err != nil {
 		t.Error(err)
@@ -86,10 +84,11 @@ func Test_parseMsecliQueryOutput(t *testing.T) {
 }
 
 func Test_parseMsecliQueryOutputCmdFailure(t *testing.T) {
-
 	os.Setenv("FAIL_MICRON_UPDATE", "1")
+
 	m := newFakeMsecli()
 	m.Executor.SetArgs([]string{"-L"})
+
 	result, err := m.Executor.ExecWithContext(context.Background())
 	if err != nil {
 		t.Error(err)
@@ -100,8 +99,8 @@ func Test_parseMsecliQueryOutputCmdFailure(t *testing.T) {
 }
 
 func Test_QueryOutputEmpty(t *testing.T) {
-
 	os.Setenv("FAIL_MICRON_QUERY", "1")
+
 	m := newFakeMsecli()
 
 	_, err := m.Query()
