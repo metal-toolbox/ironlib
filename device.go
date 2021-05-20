@@ -14,7 +14,7 @@ import (
 
 // New returns a device Manager interface based on the hardware vendor, model attributes
 // by default returns a Generic device instance that only returns the device inventory
-func New(logger *logrus.Logger) (m model.Manager, err error) {
+func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
 
 	dmidecode, err := utils.NewDmidecode()
 	if err != nil {

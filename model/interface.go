@@ -6,33 +6,36 @@ import (
 	"github.com/packethost/ironlib/config"
 )
 
+type DeviceManager interface {
+	Setter
+	Getter
+	Updater
+}
+
 type Setter interface {
-	SetDeviceID(string)
-	SetFirmwareUpdateConfig(*FirmwareUpdateConfig)
 	SetBIOSConfiguration(ctx context.Context, config *config.BIOSConfiguration) error
 }
 
 type Getter interface {
-	GetDeviceID() string
+	// Get device model
 	GetModel() string
+	// Get device vendor
 	GetVendor() string
+	// Check the device reboot required flag
 	RebootRequired() bool
+	// Check if any updates were applied
 	UpdatesApplied() bool
-	GetInventory(ctx context.Context, listUpdates bool) (*Device, error)
-	GetUpdatesAvailable(ctx context.Context) (*Device, error)
-	GetDeviceFirmwareRevision(ctx context.Context) (string, error)
+	// Retrieve inventory for the device
+	GetInventory(ctx context.Context) (*Device, error)
+	// List updates identifed by the vendor tooling (DSU for dells)
+	ListUpdatesAvailable(ctx context.Context) (*Device, error)
 	GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error)
 }
 
 type Updater interface {
-	ApplyUpdatesAvailable(ctx context.Context, config *FirmwareUpdateConfig, dryRun bool) error
-	//UpdateBMC(ctx context.Context) error
-	//UpdateBIOS(ctx context.Context) error
-}
-
-type Manager interface {
-	Getter
-	Setter
-	//	Configurer
-	Updater
+	// ApplyAvailableUpdates invokes the vendor update tooling (DSU) for the given revision
+	// and applies any and all available updates
+	InstallAvailableUpdates(ctx context.Context, revision string, downloadOnly bool) error
+	// InstallUpdate applies the given update
+	InstallUpdate(ctx context.Context, slug string, updateFile string, downgrade bool) error
 }
