@@ -15,8 +15,8 @@ type FakeExecute struct {
 	Args   []string
 	Env    []string
 	Stdin  io.Reader
-	Stdout []byte //Set this for the dummy data to be returned
-	Stderr []byte //Set this for the dummy data to be returned
+	Stdout []byte // Set this for the dummy data to be returned
+	Stderr []byte // Set this for the dummy data to be returned
 	Quiet  bool
 }
 
@@ -24,7 +24,7 @@ func NewFakeExecutor(cmd string) Executor {
 	return &FakeExecute{Cmd: cmd}
 }
 
-// nolint: gocyclo
+// nolint:gocyclo // TODO: break this method up and move into each $util_test.go
 // FakeExecute method returns whatever you want it to return
 // Set e.Stdout and e.Stderr to data to be returned
 func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
@@ -35,6 +35,7 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			e.Stdout = b
 		}
 	case "mlxup":
@@ -43,6 +44,7 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			e.Stdout = b
 		}
 	case "nvme":
@@ -56,6 +58,7 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		err2 := ioutil.WriteFile(dellBiosTempFilename, json, 0644)
 		if err2 != nil {
 			return nil, err2
@@ -65,12 +68,14 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		e.Stdout = b
 	case "storecli-nocontrollers":
 		b, err := ioutil.ReadFile("test_data/storecli_nocontrollers.json")
 		if err != nil {
 			return nil, err
 		}
+
 		e.Stdout = b
 	case "smartctl":
 		switch e.Args[0] {
@@ -79,6 +84,7 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			e.Stdout = b
 		case "-a":
 			if strings.Join(e.Args, " ") == "-a /dev/sda -j" {
@@ -86,41 +92,41 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 				if err != nil {
 					return nil, err
 				}
+
 				e.Stdout = b
 			}
+
 			if strings.Join(e.Args, " ") == "-a /dev/nvme0 -j" {
 				b, err := ioutil.ReadFile("test_data/smartctl_a_nvme0.json")
 				if err != nil {
 					return nil, err
 				}
+
 				e.Stdout = b
 			}
 		}
 	case "dsu":
 		if e.Args[1] == "--inventory" {
-			b, err := ioutil.ReadFile("test_data/dsu_inventory")
+			b, err := ioutil.ReadFile("test_data/r6515/dsu_inventory")
 			if err != nil {
 				return nil, err
 			}
+
 			e.Stdout = b
 		}
+
 		if e.Args[1] == "--preview" {
 			b, err := ioutil.ReadFile("test_data/dsu_preview")
 			if err != nil {
 				return nil, err
 			}
+
 			e.Stdout = b
 		}
 	case "rpm":
 		if e.Args[1] == "-1" && e.Args[2] == "dell-system-update" {
 			e.Stdout = []byte("1.8.0-20.04.00")
 		}
-	case "lshw":
-		b, err := ioutil.ReadFile("test_data/lshw_e3c246d4I-nl.json")
-		if err != nil {
-			return nil, err
-		}
-		e.Stdout = b
 	case "msecli":
 		if os.Getenv("FAIL_MICRON_UPDATE") != "" {
 			return &Result{
@@ -128,16 +134,19 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 				ExitCode: 1,
 			}, nil
 		}
+
 		if os.Getenv("FAIL_MICRON_QUERY") != "" {
 			return &Result{
 				Stdout:   []byte(``),
 				ExitCode: 0,
 			}, nil
 		}
+
 		b, err := ioutil.ReadFile("test_data/msecli_list")
 		if err != nil {
 			return nil, err
 		}
+
 		e.Stdout = b
 	}
 
@@ -175,6 +184,7 @@ func (e *FakeExecute) SetStdin(r io.Reader) {
 func (e *FakeExecute) GetCmd() string {
 	cmd := []string{e.Cmd}
 	cmd = append(cmd, e.Args...)
+
 	return strings.Join(cmd, " ")
 }
 

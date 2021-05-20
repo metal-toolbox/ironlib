@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -44,49 +43,49 @@ type Result struct {
 	ExitCode int
 }
 
+// GetCmd returns the command with args as a string
 func (e *Execute) GetCmd() string {
 	cmd := []string{e.Cmd}
 	cmd = append(cmd, e.Args...)
+
 	return strings.Join(cmd, " ")
 }
 
+// SetArgs sets the command args
 func (e *Execute) SetArgs(a []string) {
 	e.Args = a
 }
 
+// SetEnv sets the env variabls
 func (e *Execute) SetEnv(env []string) {
 	e.Env = env
 }
 
+// SetQuiet lowers the verbosity
 func (e *Execute) SetQuiet() {
 	e.Quiet = true
 }
 
+// SetVerbose does whats it says
 func (e *Execute) SetVerbose() {
 	e.Quiet = false
 }
 
+// SetStdin sets the reader to the command stdin
 func (e *Execute) SetStdin(r io.Reader) {
 	e.Stdin = r
 }
 
+// SetStdout doesn't do much, is around for tests
 func (e *Execute) SetStdout(b []byte) {
 }
 
+// SetStderr doesn't do much, is around for tests
 func (e *Execute) SetStderr(b []byte) {
 }
 
-// wrapResult wraps command execution results and returns
-func wrapResult(stdout, stderr []byte, exitCode int) *Result {
-	return &Result{
-		Stdout:   stdout,
-		Stderr:   stderr,
-		ExitCode: exitCode,
-	}
-}
-
+// ExecWithContext executes the command and returns the Result object
 func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err error) {
-
 	cmd := exec.CommandContext(ctx, e.Cmd, e.Args...)
 	cmd.Env = append(cmd.Env, e.Env...)
 	cmd.Stdin = e.Stdin
@@ -101,9 +100,11 @@ func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err erro
 	}
 
 	if err := cmd.Run(); err != nil {
-		return wrapResult(stdoutBuf.Bytes(), stderrBuf.Bytes(), cmd.ProcessState.ExitCode()),
-			fmt.Errorf("error executing command: `%s %s`, err: %s", e.Cmd, strings.Join(e.Args, " "), err.Error())
+		result = &Result{stdoutBuf.Bytes(), stderrBuf.Bytes(), cmd.ProcessState.ExitCode()}
+		return result, newUtilsExecError(e.GetCmd(), result)
 	}
 
-	return wrapResult(stdoutBuf.Bytes(), stderrBuf.Bytes(), cmd.ProcessState.ExitCode()), nil
+	result = &Result{stdoutBuf.Bytes(), stderrBuf.Bytes(), cmd.ProcessState.ExitCode()}
+
+	return result, nil
 }
