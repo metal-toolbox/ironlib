@@ -19,8 +19,6 @@ func newFakeMsecli() *Msecli {
 func Test_MsecliComponents(t *testing.T) {
 	expected := []*model.Component{
 		{
-			ID:                "",
-			DeviceID:          "",
 			Serial:            "193423710BDA",
 			Vendor:            "Micron",
 			Type:              model.SlugDriveTypeSATASSD,
@@ -32,8 +30,6 @@ func Test_MsecliComponents(t *testing.T) {
 			Metadata:          map[string]string{},
 		},
 		{
-			ID:                "",
-			DeviceID:          "",
 			Serial:            "193423711167",
 			Vendor:            "Micron",
 			Type:              model.SlugDriveTypeSATASSD,
