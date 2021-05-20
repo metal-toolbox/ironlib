@@ -10,7 +10,6 @@ import (
 
 // Given the test data file returns a Dmidecode with the test dmidecode output loaded
 func InitTestDmidecode(testFile string) (*Dmidecode, error) {
-
 	b, err := ioutil.ReadFile(testFile)
 	if err != nil {
 		return nil, err
@@ -18,6 +17,7 @@ func InitTestDmidecode(testFile string) (*Dmidecode, error) {
 
 	// setup a dmidecode instance
 	d := dmidecode.New()
+
 	err = d.ParseDmidecode(string(b))
 	if err != nil {
 		return nil, err
@@ -28,7 +28,6 @@ func InitTestDmidecode(testFile string) (*Dmidecode, error) {
 }
 
 func Test_dmidecode_asrockrack_E3C246D4I_NL(t *testing.T) {
-
 	dmi, err := InitTestDmidecode("test_data/dmidecode/asrockrack-E3C246D4I-NL")
 	if err != nil {
 		t.Error(err)
@@ -59,5 +58,4 @@ func Test_dmidecode_asrockrack_E3C246D4I_NL(t *testing.T) {
 
 	assert.Equal(t, "ASRockRack", bv)
 	assert.Equal(t, "E3C246D4I-NL", bm)
-
 }
