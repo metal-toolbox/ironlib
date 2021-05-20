@@ -2,8 +2,6 @@ package model
 
 // Component is a low level device component - before its classified into a device type (BMC{}, BIOS{}, NIC{})
 type Component struct {
-	ID                string            `json:"id"`
-	DeviceID          string            `json:"device_id"`
 	Serial            string            `json:"serial"`
 	Vendor            string            `json:"vendor"`
 	Type              string            `json:"type"`
@@ -17,6 +15,19 @@ type Component struct {
 	FirmwareManaged   bool              `json:"firmware_managed"`   // Firmware on the component is managed/unmanaged
 }
 
+// UpdateOptions sets firmware update options for a device component
+type UpdateOptions struct {
+	AllowDowngrade   bool // Allow firmware to be downgraded
+	InstallAll       bool // Install all available updates (specific to dell DSU)
+	Serial           string
+	Vendor           string
+	Model            string
+	Name             string
+	Slug             string
+	UpdateFile       string
+	InstallerVersion string // The all available updates installer version (specific to dell DSU)
+}
+
 // OemComponents are OEM specific device components
 type OemComponents struct {
 	Dell []*Component `json:"dell"`
@@ -28,6 +39,10 @@ type OemComponents struct {
 func ComponentFirmware(c *Component, f *Firmware) {
 	if f.Installed == "" && c.FirmwareInstalled != "" {
 		f.Installed = c.FirmwareInstalled
+	}
+
+	if f.Available == "" && c.FirmwareAvailable != "" {
+		f.Available = c.FirmwareAvailable
 	}
 
 	if !f.Managed && c.FirmwareManaged {
@@ -103,7 +118,6 @@ func ComponentFirmwareStorageControllers(controllers []*StorageController, compo
 
 // SetDeviceComponents populates the device with the given components
 func SetDeviceComponents(device *Device, components []*Component) {
-
 	//  multiples of components are grouped
 	multiples := map[string][]*Component{
 		SlugNIC:               {},
@@ -114,7 +128,6 @@ func SetDeviceComponents(device *Device, components []*Component) {
 
 	// set firmware information for device components
 	for _, c := range components {
-
 		// populate Dell specific OEM components to device
 		_, isOem := OemComponentDell[c.Slug]
 		if isOem {

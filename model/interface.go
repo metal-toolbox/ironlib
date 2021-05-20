@@ -29,13 +29,11 @@ type Getter interface {
 	GetInventory(ctx context.Context) (*Device, error)
 	// List updates identifed by the vendor tooling (DSU for dells)
 	ListUpdatesAvailable(ctx context.Context) (*Device, error)
+	// Retrieve BIOS configuration for device
 	GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error)
 }
 
 type Updater interface {
-	// ApplyAvailableUpdates invokes the vendor update tooling (DSU) for the given revision
-	// and applies any and all available updates
-	InstallAvailableUpdates(ctx context.Context, revision string, downloadOnly bool) error
-	// InstallUpdate applies the given update
-	InstallUpdate(ctx context.Context, slug string, updateFile string, downgrade bool) error
+	// InstallUpdates installs updates based on the update options
+	InstallUpdates(ctx context.Context, updateOptions *UpdateOptions) error
 }

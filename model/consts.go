@@ -133,7 +133,7 @@ func FormatProductName(s string) string {
 	switch s {
 	case "SSG-6029P-E1CR12L-PH004":
 		return "SSG-6029P-E1CR12L"
-	case "SYS-5019C-MR-PH004":
+	case "SYS-5019C-MR-PH004", "PIO-519C-MR-PH004":
 		return "SYS-5019C-MR"
 	case "PowerEdge R640":
 		return "r640"
