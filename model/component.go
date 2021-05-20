@@ -50,7 +50,12 @@ func ComponentFirmware(c *Component, f *Firmware) {
 	}
 
 	if len(f.Metadata) == 0 && len(c.Metadata) > 0 {
-		f.Metadata = c.Metadata
+		for k, v := range c.Metadata {
+			_, exists := f.Metadata[k]
+			if !exists {
+				f.Metadata[k] = v
+			}
+		}
 	}
 }
 
@@ -116,6 +121,7 @@ func ComponentFirmwareStorageControllers(controllers []*StorageController, compo
 	}
 }
 
+// nolint:gocyclo // device component setter is cyclomatic, will break this up at some point if necessary
 // SetDeviceComponents populates the device with the given components
 func SetDeviceComponents(device *Device, components []*Component) {
 	//  multiples of components are grouped

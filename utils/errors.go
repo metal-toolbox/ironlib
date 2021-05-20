@@ -31,22 +31,3 @@ func newUtilsExecError(cmd string, r *Result) *UtilsExecError {
 		ExitCode: r.ExitCode,
 	}
 }
-
-// DmiDecodeValueError is returned when a dmidecode value could not be retrieved
-type DmiDecodeValueError struct {
-	Section string
-	Field   string
-}
-
-// Error implements the error interface
-func (d *DmiDecodeValueError) Error() string {
-	return fmt.Sprintf("unable to read section: %s, field: %s", d.Section, d.Field)
-}
-
-// newDmidevodeValueError returns a DmiDecodeValueError object
-func newDmidecodeValueError(section, field string) *DmiDecodeValueError {
-	return &DmiDecodeValueError{
-		Section: section,
-		Field:   field,
-	}
-}
