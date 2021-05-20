@@ -5,7 +5,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 	"github.com/pkg/errors"
 )
@@ -33,9 +32,10 @@ type MlxupDevice struct {
 
 // Return a new mellanox mlxup command executor
 func NewMlxupCmd(trace bool) Collector {
-
 	e := NewExecutor(mlxup)
+
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
 	if !trace {
 		e.SetQuiet()
 	}
@@ -47,6 +47,7 @@ func NewMlxupCmd(trace bool) Collector {
 func NewMlxupUpdater(trace bool) Updater {
 	e := NewExecutor(mlxup)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
 	if !trace {
 		e.SetQuiet()
 	}
@@ -56,20 +57,17 @@ func NewMlxupUpdater(trace bool) Updater {
 
 // Components returns a slice of mellanox components
 func (m *Mlxup) Components() ([]*model.Component, error) {
-
 	devices, err := m.Query()
 	if err != nil {
 		return nil, err
 	}
 
 	inv := []*model.Component{}
-	for _, d := range devices {
 
-		uid, _ := uuid.NewRandom()
+	for _, d := range devices {
 		item := &model.Component{
-			ID:              uid.String(),
 			Model:           d.DeviceType,
-			Vendor:          vendorFromString(d.DeviceType),
+			Vendor:          model.VendorFromString(d.DeviceType),
 			Slug:            model.SlugNIC,
 			Name:            d.Description,
 			Serial:          d.BaseMAC,
@@ -81,6 +79,7 @@ func (m *Mlxup) Components() ([]*model.Component, error) {
 		if len(d.Firmware) > 0 {
 			item.FirmwareInstalled = d.Firmware[0]
 			fwAvailableElem := 2
+
 			if len(d.Firmware) == fwAvailableElem {
 				item.FirmwareAvailable = d.Firmware[1]
 			}
@@ -92,6 +91,7 @@ func (m *Mlxup) Components() ([]*model.Component, error) {
 		if len(d.FirmwarePXE) > 0 {
 			item.Metadata["firmware_pxe_installed"] = d.FirmwarePXE[0]
 			fwAvailableElem := 2
+
 			if len(d.FirmwarePXE) == fwAvailableElem {
 				item.Metadata["firmware_pxe_available"] = d.FirmwarePXE[1]
 			}
@@ -101,6 +101,7 @@ func (m *Mlxup) Components() ([]*model.Component, error) {
 		if len(d.FirmwareUEFI) > 0 {
 			item.Metadata["firmware_uefi_installed"] = d.FirmwareUEFI[0]
 			fwAvailableElem := 2
+
 			if len(d.FirmwareUEFI) == fwAvailableElem {
 				item.Metadata["firmware_uefi_available"] = d.FirmwareUEFI[1]
 			}
@@ -108,6 +109,7 @@ func (m *Mlxup) Components() ([]*model.Component, error) {
 
 		inv = append(inv, item)
 	}
+
 	return inv, nil
 }
 
@@ -144,7 +146,6 @@ func (m *Mlxup) ApplyUpdate(ctx context.Context, updateFile, componentSlug strin
 
 // Query returns a slice of mellanox devices
 func (m *Mlxup) Query() ([]*MlxupDevice, error) {
-
 	// mlxup --query
 	m.Executor.SetArgs([]string{"--query"})
 
@@ -158,13 +159,11 @@ func (m *Mlxup) Query() ([]*MlxupDevice, error) {
 	}
 
 	return m.parseMlxQueryOutput(result.Stdout), nil
-
 }
 
 // Parse mlxup --query output into MlxupDevice
 // see tests for details
 func (m *Mlxup) parseMlxQueryOutput(b []byte) []*MlxupDevice {
-
 	devices := []*MlxupDevice{}
 
 	byteSlice := bytes.Split(b, []byte("\n"))
@@ -181,13 +180,11 @@ func (m *Mlxup) parseMlxQueryOutput(b []byte) []*MlxupDevice {
 	return devices
 }
 
-// nolint: gocyclo
+// nolint:gocyclo // TODO: use a map instead
 func parseMlxDeviceAttributes(byteSlice [][]byte) *MlxupDevice {
-
 	device := &MlxupDevice{}
 
 	for _, line := range byteSlice {
-
 		s := string(line)
 
 		// Parse device type
