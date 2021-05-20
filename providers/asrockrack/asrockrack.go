@@ -3,112 +3,94 @@ package asrockrack
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
+// A ASRockRack device has methods to collect hardware inventory, regardless of the vendor
 type ASRockRack struct {
-	ID                   string
-	Vendor               string
-	Model                string
-	Serial               string
-	Updater              utils.Updater
-	UpdatesAvailable     int
-	PendingReboot        bool // set when the device requires a reboot after update
-	UpdatesInstalled     bool // set when updates were installed on the device
-	Components           []*model.Component
-	Logger               *logrus.Logger
-	Dmidecode            *utils.Dmidecode
-	FirmwareUpdateConfig *model.FirmwareUpdateConfig
+	hw       *model.Hardware
+	lshw     *utils.Lshw
+	logger   *logrus.Logger
+	smartctl utils.Collector
 }
 
-func New(vendor, model string, l *logrus.Logger) (model.Manager, error) {
-
-	dmidecode, err := utils.NewDmidecode()
-	if err != nil {
-		errors.Wrap(err, "erorr in dmidecode init")
-	}
-
-	uid, _ := uuid.NewRandom()
-	return &ASRockRack{
-		ID:        uid.String(),
-		Vendor:    vendor,
-		Model:     model,
-		Dmidecode: dmidecode,
-		Logger:    l,
-	}, nil
-}
-
-// Returns hardware inventory for the device
-func (a *ASRockRack) GetInventory(ctx context.Context, listUpdates bool) (*model.Device, error) {
-
+// New returns a ASRockRack device manager
+func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManager, error) {
 	var trace bool
-	if a.Logger.GetLevel().String() == "trace" {
+
+	if l.GetLevel().String() == "trace" {
 		trace = true
 	}
 
+	// set device
+	device := &model.Device{
+		Model:  deviceModel,
+		Vendor: deviceVendor,
+	}
+
+	// set device manager
+	dm := &ASRockRack{
+		hw:       model.NewHardware(device),
+		lshw:     utils.NewLshwCmd(trace),
+		smartctl: utils.NewSmartctlCmd(trace),
+		logger:   l,
+	}
+
+	return dm, nil
+}
+
+// Returns hardware inventory for the device
+func (a *ASRockRack) GetInventory(ctx context.Context) (*model.Device, error) {
 	// Collect device inventory from lshw
-	lshw := utils.NewLshwCmd(trace)
-	device, err := lshw.Inventory()
+	a.logger.Info("Collecting inventory with lshw")
+
+	a.hw.Device = model.NewDevice()
+
+	err := a.lshw.Inventory(a.hw.Device)
 	if err != nil {
 		return nil, errors.Wrap(err, "error retrieving device inventory")
 	}
 
-	// Collect additional drives data from smartctl
-	smartctl := utils.NewSmartctlCmd(trace)
-	drives, err := smartctl.Components()
+	// collect drive information
+	drives, err := a.smartctl.Components()
 	if err != nil {
-		return nil, errors.Wrap(err, "error retrieving device inventory")
+		return nil, errors.Wrap(err, "error retrieving drive information")
 	}
 
-	device = utils.UpdateComponentData(device, drives)
+	// update drive information
+	model.ComponentFirmwareDrives(a.hw.Device.Drives, drives, true)
 
-	return device, nil
+	// update device with the components retrieved from inventory
+	model.SetDeviceComponents(a.hw.Device, drives)
+
+	return a.hw.Device, nil
 }
 
 func (a *ASRockRack) GetModel() string {
-	return a.Model
+	return a.hw.Device.Model
 }
 
 func (a *ASRockRack) GetVendor() string {
-	return a.Vendor
-}
-
-func (a *ASRockRack) GetDeviceID() string {
-	return a.ID
-}
-
-func (a *ASRockRack) SetDeviceID(id string) {
-	a.ID = id
+	return a.hw.Device.Vendor
 }
 
 func (a *ASRockRack) RebootRequired() bool {
-	return a.PendingReboot
-}
-
-func (a *ASRockRack) SetFirmwareUpdateConfig(config *model.FirmwareUpdateConfig) {
-	a.FirmwareUpdateConfig = config
-}
-
-func (a *ASRockRack) SetOptions(options map[string]interface{}) error {
-	return nil
+	return a.hw.PendingReboot
 }
 
 func (a *ASRockRack) UpdatesApplied() bool {
-	return a.UpdatesInstalled
+	return a.hw.UpdatesInstalled
 }
 
-func (a *ASRockRack) ApplyUpdatesAvailable(ctx context.Context, config *model.FirmwareUpdateConfig, dryRun bool) (err error) {
+// ListUpdatesAvailable runs the vendor tooling (dsu) to identify updates available
+func (a *ASRockRack) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+	return nil, nil
+}
+
+// InstallUpdates installs updates based on updateOptions
+func (a *ASRockRack) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
 	return nil
-}
-
-func (a *ASRockRack) GetDeviceFirmwareRevision(ctx context.Context) (string, error) {
-	return "", nil
-}
-
-func (a *ASRockRack) GetUpdatesAvailable(ctx context.Context) (*model.Device, error) {
-	return &model.Device{}, nil
 }

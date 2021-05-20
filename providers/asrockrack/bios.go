@@ -6,7 +6,7 @@ import (
 	"github.com/packethost/ironlib/config"
 )
 
-func (a *ASRockRack) SetBIOSConfiguration(ctx context.Context, config *config.BIOSConfiguration) error {
+func (a *ASRockRack) SetBIOSConfiguration(ctx context.Context, cfg *config.BIOSConfiguration) error {
 	return nil
 }
 
