@@ -188,9 +188,12 @@ func (d *Dsu) Version() (string, error) {
 func dsuParseInventoryBytes(in []byte) []*model.Component {
 	components := make([]*model.Component, 0)
 
-	// see test test file for sample data
+	// see test file for sample data
 	r := regexp.MustCompile(`(?m)^\d+\. \w+(:?|, (.*) \( Version : (.*) \))$`)
 	matches := r.FindAllSubmatch(in, -1)
+
+	// each matched line is expected to have 4 parts
+	// 1. BIOS, BIOS  ( Version : 2.6.4 )
 	cols := 4
 
 	for _, m := range matches {
@@ -215,6 +218,8 @@ func dsuParsePreviewBytes(in []byte) []*model.Component {
 	// see test file for sample data
 	r := regexp.MustCompile(`(?m)^\d : \w+.*`)
 	matches := r.FindAllSubmatch(in, -1)
+	// each matched line is expected to have 5 parts
+	// 3 : BIOS : BIOS : 2.8.1 : BIOS_RTWM9_LN_2.8.1
 	cols := 5
 
 	for _, m := range matches {

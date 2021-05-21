@@ -56,7 +56,7 @@ func (e *Execute) SetArgs(a []string) {
 	e.Args = a
 }
 
-// SetEnv sets the env variabls
+// SetEnv sets the env variables
 func (e *Execute) SetEnv(env []string) {
 	e.Env = env
 }
