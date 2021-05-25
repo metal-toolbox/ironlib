@@ -50,11 +50,21 @@ func ComponentFirmware(c *Component, f *Firmware) {
 	}
 
 	if len(f.Metadata) == 0 && len(c.Metadata) > 0 {
-		for k, v := range c.Metadata {
-			_, exists := f.Metadata[k]
-			if !exists {
-				f.Metadata[k] = v
-			}
+		// init dest map if nil
+		if f.Metadata == nil {
+			f.Metadata = make(map[string]string)
+		}
+
+		mergeMaps(f.Metadata, c.Metadata)
+	}
+}
+
+// mergeMaps copy data from b into a only if the a does not have the key in b
+func mergeMaps(a, b map[string]string) {
+	for k, v := range b {
+		_, exists := a[k]
+		if !exists {
+			a[k] = v
 		}
 	}
 }
@@ -134,7 +144,7 @@ func SetDeviceComponents(device *Device, components []*Component) {
 
 	// set firmware information for device components
 	for _, c := range components {
-		// populate Dell specific OEM components to device
+		// populate special OEM device components
 		_, isOem := OemComponentDell[c.Slug]
 		if isOem {
 			device.OemComponents.Dell = append(device.OemComponents.Dell, c)
@@ -154,8 +164,8 @@ func SetDeviceComponents(device *Device, components []*Component) {
 			multiples[SlugPSU] = append(multiples[SlugPSU], c)
 		case SlugDrive:
 			multiples[SlugDrive] = append(multiples[SlugDrive], c)
-		case SlugSASHBA330Controller:
-			multiples[SlugSASHBA330Controller] = append(multiples[SlugSASHBA330Controller], c)
+		case SlugStorageController:
+			multiples[SlugStorageController] = append(multiples[SlugStorageController], c)
 		}
 	}
 
@@ -168,7 +178,7 @@ func SetDeviceComponents(device *Device, components []*Component) {
 			ComponentFirmwarePSUs(device.PSUs, components, true)
 		case SlugDrive:
 			ComponentFirmwareDrives(device.Drives, components, true)
-		case SlugSASHBA330Controller:
+		case SlugStorageController:
 			ComponentFirmwareStorageControllers(device.StorageControllers, components, true)
 		}
 	}

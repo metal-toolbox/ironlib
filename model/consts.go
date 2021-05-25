@@ -29,9 +29,10 @@ const (
 
 	// Dell specific component slugs
 	SlugDellSystemCPLD                  = "Dell System CPLD"
-	SlugDellIdracServiceModel           = "IDrac Service Module"
 	SlugDellBossAdapter                 = "Boss Adapter"
+	SlugDellIdracServiceModule          = "IDrac Service Module"
 	SlugDellBossAdapterDisk0            = "Boss Adapter - Disk 0"
+	SlugDellBossAdapterDisk1            = "Boss Adapter - Disk 1"
 	SlugDellLifeCycleController         = "Lifecycle Controller"
 	SlugDellOSCollector                 = "OS Collector"
 	SlugDell64bitUefiDiagnostics        = "Dell 64 bit uEFI diagnostics"
@@ -63,11 +64,13 @@ var (
 	}
 
 	// OemComponentDell is a lookup table for dell OEM components
+	// these components are specific to the OEMs - in this case Dell
 	OemComponentDell = map[string]struct{}{
 		SlugDellSystemCPLD:                  {},
 		SlugBackplaneExpander:               {},
-		SlugDellIdracServiceModel:           {},
+		SlugDellIdracServiceModule:          {},
 		SlugDellBossAdapterDisk0:            {},
+		SlugDellBossAdapterDisk1:            {},
 		SlugDellBossAdapter:                 {},
 		SlugDellLifeCycleController:         {},
 		SlugDellNonExpanderStorageBackplane: {},
@@ -75,25 +78,26 @@ var (
 		SlugDell64bitUefiDiagnostics:        {},
 	}
 
-	// DellComponentSlug map of dell component names to component slug
-	DellComponentSlug = map[string]string{
-		"bios":                         SlugBIOS,
-		"ethernet":                     SlugNIC,
-		"idrac":                        SlugBMC,
-		"backplane":                    SlugBackplaneExpander,
-		"power supply":                 SlugPSU,
-		"hba330":                       SlugSASHBA330Controller,
-		"nvmepcissd":                   SlugDrive,
-		"system cpld":                  SlugDellSystemCPLD,
-		"sep firmware":                 SlugDellNonExpanderStorageBackplane,
-		"lifecycle controller":         SlugDellLifeCycleController,
-		"os collector":                 SlugDellOSCollector,
-		"idrac service module":         SlugDellIdracServiceModel,
-		"boss":                         SlugDellBossAdapter,
-		"boss adapter":                 SlugDellBossAdapter,
-		"disk 0 of boss adapter":       SlugDellBossAdapterDisk0,
-		"dell 64 bit uefi diagnostics": SlugDell64bitUefiDiagnostics,
-		"integrated dell remote access controller": SlugBMC,
+	// DellComponentSlug is an ordered list of of dell component identifiers to component slug
+	// the list is kept ordered to help identify components right
+	DellComponentSlug = [][]string{
+		{"bios", SlugBIOS},
+		{"ethernet", SlugNIC},
+		{"dell emc idrac service module", SlugDellIdracServiceModule},
+		{"idrac", SlugBMC},
+		{"backplane", SlugBackplaneExpander},
+		{"power supply", SlugPSU},
+		{"hba330", SlugStorageController},
+		{"nvmepcissd", SlugDrive},
+		{"system cpld", SlugDellSystemCPLD},
+		{"sep firmware", SlugDellNonExpanderStorageBackplane},
+		{"lifecycle controller", SlugDellLifeCycleController},
+		{"os collector", SlugDellOSCollector},
+		{"disk 0 of boss adapter", SlugDellBossAdapterDisk0},
+		{"disk 1 of boss adapter", SlugDellBossAdapterDisk1},
+		{"boss", SlugDellBossAdapter},
+		{"dell 64 bit uefi diagnostics", SlugDell64bitUefiDiagnostics},
+		{"integrated dell remote access controller", SlugBMC},
 	}
 )
 
