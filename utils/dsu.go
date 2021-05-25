@@ -201,10 +201,12 @@ func dsuParseInventoryBytes(in []byte) []*model.Component {
 			component := &model.Component{
 				Slug:              dsuComponentNameToSlug(trimBytes(m[2])),
 				Name:              trimBytes(m[2]),
+				Vendor:            "dell",
 				FirmwareInstalled: trimBytes(m[3]),
 				Oem:               true,
 				FirmwareManaged:   true,
 			}
+
 			components = append(components, component)
 		}
 	}
@@ -228,6 +230,7 @@ func dsuParsePreviewBytes(in []byte) []*model.Component {
 			component := &model.Component{
 				Slug:              dsuComponentNameToSlug(strings.TrimSpace(s[2])),
 				Name:              strings.TrimSpace(s[2]),
+				Vendor:            "dell",
 				FirmwareAvailable: strings.TrimSpace(s[3]),
 				Metadata:          make(map[string]string),
 				Oem:               true,
@@ -265,10 +268,21 @@ func findDSUInventoryCollector(path string) []string {
 }
 
 // returns the component slug for the given dell component name
+//
+// since the component name exposed by the dsu command doesn't tell the component name in a unique manner,
+// the model.DellComponentSlug list has be ordered to ensure we don't have incorrect identification.
+// Attempts were made to use fuzzy matching and levenstiens distance,
+//  to identify the components correctly, although none seemed to work as well as an ordered list.
 func dsuComponentNameToSlug(n string) string {
 	componentName := strings.ToLower(n)
-	for str, slug := range model.DellComponentSlug {
-		if strings.Contains(componentName, str) {
+
+	for _, componentSlug := range model.DellComponentSlug {
+		identifier, slug := componentSlug[0], componentSlug[1]
+		if strings.EqualFold(componentName, identifier) {
+			return slug
+		}
+
+		if strings.Contains(componentName, identifier) {
 			return slug
 		}
 	}
