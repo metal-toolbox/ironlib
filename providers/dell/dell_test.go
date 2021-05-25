@@ -8,7 +8,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 	"github.com/sirupsen/logrus"
@@ -66,6 +65,5 @@ func TestListUpdates(t *testing.T) {
 		t.Error(err)
 	}
 
-	spew.Dump(device)
-	assert.DeepEqual(t, nil, device)
+	assert.DeepEqual(t, testdata_R6515UpdatePreview, device)
 }

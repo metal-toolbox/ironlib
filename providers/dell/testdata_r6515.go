@@ -4,6 +4,61 @@ import "github.com/packethost/ironlib/model"
 
 // nolint // test data
 var (
+	testdata_R6515UpdatePreview = &model.Device{
+		BIOS: &model.BIOS{
+			Firmware: &model.Firmware{
+				Available: "2.8.1",
+				Managed:   true,
+				Metadata: map[string]string{
+					"firmware_available_filename": "BIOS_RTWM9_LN_2.8.1",
+				},
+			},
+		},
+		BMC: &model.BMC{
+			Firmware: &model.Firmware{
+				Available: "4.22.00.00",
+				Managed:   true,
+				Metadata: map[string]string{
+					"firmware_available_filename": "iDRAC-with-Lifecycle-Controller_Firmware_9F2TG_LN_4.22.00.00_A00",
+				},
+			},
+		},
+		TPM:                &model.TPM{},
+		Mainboard:          &model.Mainboard{},
+		GPUs:               []*model.GPU{},
+		CPUs:               []*model.CPU{},
+		Memory:             []*model.Memory{},
+		NICs:               []*model.NIC{},
+		Drives:             []*model.Drive{},
+		StorageControllers: []*model.StorageController{},
+		Oem:                true,
+		OemComponents: &model.OemComponents{
+			Dell: []*model.Component{
+				{
+					Name:              "BOSS",
+					Slug:              "Boss Adapter",
+					Vendor:            "dell",
+					FirmwareAvailable: "2.5.13.3024",
+					Metadata:          map[string]string{"firmware_available_filename": "SAS-RAID_Firmware_3P39V_LN64_2.5.13.3024_A07"},
+					Oem:               true,
+					FirmwareManaged:   true,
+				},
+				{
+					Name:              "Dell EMC iDRAC Service Module Embedded Package v3.5.0, A00",
+					Slug:              "IDrac Service Module",
+					Vendor:            "dell",
+					FirmwareAvailable: "3.5.1",
+					Metadata: map[string]string{
+						"firmware_available_filename": "Systems-Management_Application_1K45F_LN64_3.5.1_A00",
+					},
+					Oem:             true,
+					FirmwareManaged: true,
+				},
+			},
+		},
+		PSUs: []*model.PSU{},
+	}
+
 	// data from test_data/r6515/*
 	testdata_R6515Inventory = &model.Device{
 		HardwareType: "",
@@ -411,6 +466,7 @@ var (
 				{
 
 					Name:              "BOSS",
+					Vendor:            "dell",
 					Slug:              "Boss Adapter",
 					FirmwareInstalled: "2.5.13.3024",
 					FirmwareAvailable: "",
@@ -420,6 +476,7 @@ var (
 				{
 
 					Name:              "SEP Firmware, BayID: 1",
+					Vendor:            "dell",
 					Slug:              "Non-Expander Storage Backplane (SEP)",
 					FirmwareInstalled: "4.35",
 					FirmwareAvailable: "",
@@ -430,6 +487,7 @@ var (
 
 					Name:              "Firmware for  - Disk 0 of BOSS Adapter",
 					Slug:              "Boss Adapter - Disk 0",
+					Vendor:            "dell",
 					FirmwareInstalled: "J004",
 					FirmwareAvailable: "",
 					Oem:               true,
@@ -438,7 +496,8 @@ var (
 				{
 
 					Name:              "Firmware for  - Disk 1 of BOSS Adapter",
-					Slug:              "Boss Adapter",
+					Slug:              "Boss Adapter - Disk 1",
+					Vendor:            "dell",
 					FirmwareInstalled: "J004",
 					FirmwareAvailable: "",
 					Oem:               true,
@@ -447,6 +506,7 @@ var (
 				{
 
 					Name:              "Lifecycle Controller",
+					Vendor:            "dell",
 					Slug:              "Lifecycle Controller",
 					FirmwareInstalled: "4.40.00.00",
 					FirmwareAvailable: "",
@@ -457,6 +517,7 @@ var (
 
 					Name:              "Dell 64 Bit uEFI Diagnostics, version 4301, 4301A50, 4301.51",
 					Slug:              "Dell 64 bit uEFI diagnostics",
+					Vendor:            "dell",
 					FirmwareInstalled: "4301A50",
 					FirmwareAvailable: "",
 					Oem:               true,
@@ -466,23 +527,24 @@ var (
 
 					Name:              "OS COLLECTOR, v5.0, A00",
 					Slug:              "OS Collector",
+					Vendor:            "dell",
 					FirmwareInstalled: "5.0",
 					FirmwareAvailable: "",
 					Oem:               true,
 					FirmwareManaged:   true,
 				},
 				{
-
 					Name:              "Dell EMC iDRAC Service Module Embedded Package v3.5.1, A00",
 					Slug:              "IDrac Service Module",
+					Vendor:            "dell",
 					FirmwareInstalled: "3.5.1",
-					FirmwareAvailable: "",
 					Oem:               true,
 					FirmwareManaged:   true,
 				},
 				{
 					Name:              "System CPLD",
 					Slug:              "Dell System CPLD",
+					Vendor:            "dell",
 					FirmwareInstalled: "1.0.3",
 					FirmwareAvailable: "",
 					Oem:               true,
