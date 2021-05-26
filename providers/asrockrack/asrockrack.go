@@ -9,8 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// A ASRockRack device has methods to collect hardware inventory, regardless of the vendor
-type ASRockRack struct {
+// A asrockrack device has methods to collect hardware inventory, regardless of the vendor
+type asrockrack struct {
 	hw       *model.Hardware
 	lshw     *utils.Lshw
 	logger   *logrus.Logger
@@ -32,7 +32,7 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManage
 	}
 
 	// set device manager
-	dm := &ASRockRack{
+	dm := &asrockrack{
 		hw:       model.NewHardware(device),
 		lshw:     utils.NewLshwCmd(trace),
 		smartctl: utils.NewSmartctlCmd(trace),
@@ -43,7 +43,7 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManage
 }
 
 // Returns hardware inventory for the device
-func (a *ASRockRack) GetInventory(ctx context.Context) (*model.Device, error) {
+func (a *asrockrack) GetInventory(ctx context.Context) (*model.Device, error) {
 	// Collect device inventory from lshw
 	a.logger.Info("Collecting inventory with lshw")
 
@@ -69,28 +69,28 @@ func (a *ASRockRack) GetInventory(ctx context.Context) (*model.Device, error) {
 	return a.hw.Device, nil
 }
 
-func (a *ASRockRack) GetModel() string {
+func (a *asrockrack) GetModel() string {
 	return a.hw.Device.Model
 }
 
-func (a *ASRockRack) GetVendor() string {
+func (a *asrockrack) GetVendor() string {
 	return a.hw.Device.Vendor
 }
 
-func (a *ASRockRack) RebootRequired() bool {
+func (a *asrockrack) RebootRequired() bool {
 	return a.hw.PendingReboot
 }
 
-func (a *ASRockRack) UpdatesApplied() bool {
+func (a *asrockrack) UpdatesApplied() bool {
 	return a.hw.UpdatesInstalled
 }
 
 // ListUpdatesAvailable runs the vendor tooling (dsu) to identify updates available
-func (a *ASRockRack) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+func (a *asrockrack) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
 	return nil, nil
 }
 
-// InstallUpdates installs updates based on updateOptions
-func (a *ASRockRack) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
+// InstallUpdates for asrockrack based on updateOptions
+func (a *asrockrack) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
 	return nil
 }

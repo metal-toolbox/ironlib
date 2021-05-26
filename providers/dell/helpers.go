@@ -20,7 +20,7 @@ var (
 )
 
 // dsuInstallUpdates installs DSU identified updates
-func (d *Dell) dsuInstallUpdates(revision string, downloadOnly bool) (int, error) {
+func (d *dell) dsuInstallUpdates(revision string, downloadOnly bool) (int, error) {
 	d.dsuVersion = revision
 
 	// install pre-requisites
@@ -49,7 +49,7 @@ func (d *Dell) dsuInstallUpdates(revision string, downloadOnly bool) (int, error
 }
 
 // installUpdate installs a given dell update file (DUP)
-func (d *Dell) installUpdate(ctx context.Context, updateFile string, downgrade bool) (int, error) {
+func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade bool) (int, error) {
 	//	./BIOS_CR1K4_LN_2.9.4_01.BIN -h
 	//	-c            : Determine if the update can be applied to the system (1)
 	//	-f            : Force a downgrade to an older version. (1)(2)
@@ -85,7 +85,7 @@ func (d *Dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 
 	d.logger.WithFields(
 		logrus.Fields{"file": updateFile},
-	).Info("Installing Dell Update Bin file")
+	).Info("Installing dell Update Bin file")
 
 	result, err := e.ExecWithContext(ctx)
 	if err != nil {
@@ -102,7 +102,7 @@ func (d *Dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 }
 
 // dsuListUpdates runs the dell-system-update utility to retrieve device inventory
-func (d *Dell) dsuListUpdates() ([]*model.Component, error) {
+func (d *dell) dsuListUpdates() ([]*model.Component, error) {
 	err := d.pre()
 	if err != nil {
 		return nil, errors.Wrap(err, "error ensuring prerequisites for dsu update list")
@@ -118,7 +118,7 @@ func (d *Dell) dsuListUpdates() ([]*model.Component, error) {
 }
 
 // runs the dell-system-update utility to identify and list firmware updates available
-func (d *Dell) dsuInventory() ([]*model.Component, error) {
+func (d *dell) dsuInventory() ([]*model.Component, error) {
 	err := d.pre()
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func (d *Dell) dsuInventory() ([]*model.Component, error) {
 }
 
 // pre sets up prequisites for dealing with updates
-func (d *Dell) pre() (err error) {
+func (d *dell) pre() (err error) {
 	errPrefix := "dell dsu prereqs setup error: "
 
 	if d.DsuPrequisitesInstalled {
@@ -152,7 +152,7 @@ func (d *Dell) pre() (err error) {
 	return nil
 }
 
-func (d *Dell) installPkgs() error {
+func (d *dell) installPkgs() error {
 	// install dsu package
 	dsuPkg := "dell-system-update"
 
@@ -178,7 +178,7 @@ func (d *Dell) installPkgs() error {
 }
 
 // enableDnf repo enables the dell system update repository
-func (d *Dell) enableDsuRepo() error {
+func (d *dell) enableDsuRepo() error {
 	// the update environment this dsu package is being installed
 	// environment is one of production, vanguard, canary
 	// the update environment is used by fup to segregate devices under upgrade for testing/production
@@ -197,7 +197,7 @@ func (d *Dell) enableDsuRepo() error {
 // Since we're running dsu within a docker container on the target host,
 // this was found to be required to ensure dsu was able to inventorize the host correctly.
 // else it would not be able to retrieve data over IPMI
-func (d *Dell) startSrvHelper() error {
+func (d *dell) startSrvHelper() error {
 	if os.Getenv("IRONLIB_TEST") != "" {
 		return nil
 	}
@@ -216,7 +216,7 @@ func (d *Dell) startSrvHelper() error {
 
 // checkExitCode looks up the various DSU/update bin exitcodes
 // and returns an error if its an actual error
-func (d *Dell) checkExitCode(exitCode int) error {
+func (d *dell) checkExitCode(exitCode int) error {
 	switch exitCode {
 	// sometimes the installer does not indicate a reboot is required
 	case utils.DSUExitCodeUpdatesApplied:

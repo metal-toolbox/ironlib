@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Supermicro struct {
+type supermicro struct {
 	hw         *model.Hardware
 	logger     *logrus.Logger
 	lshw       *utils.Lshw
@@ -37,7 +37,7 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManage
 		Vendor: deviceVendor,
 	}
 
-	return &Supermicro{
+	return &supermicro{
 		hw:         model.NewHardware(device),
 		lshw:       utils.NewLshwCmd(trace),
 		collectors: collectors,
@@ -45,24 +45,24 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManage
 	}, nil
 }
 
-func (s *Supermicro) GetModel() string {
+func (s *supermicro) GetModel() string {
 	return s.hw.Device.Model
 }
 
-func (s *Supermicro) GetVendor() string {
+func (s *supermicro) GetVendor() string {
 	return s.hw.Device.Vendor
 }
 
-func (s *Supermicro) RebootRequired() bool {
+func (s *supermicro) RebootRequired() bool {
 	return s.hw.PendingReboot
 }
 
-func (s *Supermicro) UpdatesApplied() bool {
+func (s *supermicro) UpdatesApplied() bool {
 	return s.hw.UpdatesInstalled
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (s *Supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
+func (s *supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
 	inventory := make([]*model.Component, 0)
 
 	// Collect device inventory from lshw
@@ -99,12 +99,12 @@ func (s *Supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
 }
 
 // ListUpdatesAvailable does nothing on a SMC device
-func (s *Supermicro) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+func (s *supermicro) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
 	return nil, nil
 }
 
-// InstallUpdates installs updates based on the given options
-func (s *Supermicro) InstallUpdates(ctx context.Context, options *model.UpdateOptions) (err error) {
+// InstallUpdates for Supermicros based on the given options
+func (s *supermicro) InstallUpdates(ctx context.Context, options *model.UpdateOptions) (err error) {
 	var updater utils.Updater
 
 	var trace bool

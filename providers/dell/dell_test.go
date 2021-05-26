@@ -14,7 +14,7 @@ import (
 	"gotest.tools/assert"
 )
 
-func newFakeDellDevice() *Dell {
+func newFakeDellDevice() *dell {
 	device := model.NewDevice()
 	device.Oem = true
 	device.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
@@ -28,7 +28,7 @@ func newFakeDellDevice() *Dell {
 	fakeLshw := utils.NewFakeLshw(bytes.NewReader(b))
 	fakeSmartctl := utils.NewFakeSmartctl("test_data/r6515")
 
-	return &Dell{
+	return &dell{
 		hw:       model.NewHardware(device),
 		dnf:      utils.NewFakeDnf(),
 		dsu:      utils.NewFakeDsu(),

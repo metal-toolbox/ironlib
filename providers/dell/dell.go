@@ -10,7 +10,7 @@ import (
 )
 
 // The dell device provider struct
-type Dell struct {
+type dell struct {
 	hw                      *model.Hardware
 	dnf                     *utils.Dnf
 	dsu                     *utils.Dsu
@@ -38,7 +38,7 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManage
 	}
 
 	// set device manager
-	dm := &Dell{
+	dm := &dell{
 		hw:       model.NewHardware(device),
 		dnf:      utils.NewDnf(trace),
 		dsu:      utils.NewDsu(trace),
@@ -51,27 +51,27 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManage
 }
 
 // GetModel returns the device model
-func (d *Dell) GetModel() string {
+func (d *dell) GetModel() string {
 	return d.hw.Device.Model
 }
 
 // GetVendor returns the device model
-func (d *Dell) GetVendor() string {
+func (d *dell) GetVendor() string {
 	return d.hw.Device.Vendor
 }
 
 // RebootRequired returns a bool value for when a device may be pending a reboot
-func (d *Dell) RebootRequired() bool {
+func (d *dell) RebootRequired() bool {
 	return d.hw.PendingReboot
 }
 
 // UpdatesApplied returns a bool value when updates were applied on a device
-func (d *Dell) UpdatesApplied() bool {
+func (d *dell) UpdatesApplied() bool {
 	return d.hw.UpdatesInstalled
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (d *Dell) GetInventory(ctx context.Context) (*model.Device, error) {
+func (d *dell) GetInventory(ctx context.Context) (*model.Device, error) {
 	var err error
 
 	// Collect device inventory from lshw
@@ -97,7 +97,7 @@ func (d *Dell) GetInventory(ctx context.Context) (*model.Device, error) {
 	d.hw.Device.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
 
 	// collect dell component info
-	d.logger.Info("Collecting Dell specific component inventory with DSU")
+	d.logger.Info("Collecting dell specific component inventory with DSU")
 
 	components, err := d.dsuInventory()
 	if err != nil {
@@ -111,7 +111,7 @@ func (d *Dell) GetInventory(ctx context.Context) (*model.Device, error) {
 }
 
 // ListUpdatesAvailable runs the vendor tooling (dsu) to identify updates available
-func (d *Dell) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+func (d *dell) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
 	// collect firmware updates available for components
 	d.logger.Info("Identifying component firmware updates...")
 
@@ -133,8 +133,8 @@ func (d *Dell) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) 
 	return d.hw.Device, nil
 }
 
-// InstallUpdates installs updates based on updateOptions
-func (d *Dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
+// InstallUpdates for Dells based on updateOptions
+func (d *dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
 	if options.InstallAll {
 		return d.installAvailableUpdates(ctx, options.InstallerVersion, options.AllowDowngrade)
 	}
@@ -149,7 +149,7 @@ func (d *Dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions)
 
 // installAvailableUpdates runs DSU to install all available updates
 // revision is the Dell DSU version to ensure installed
-func (d *Dell) installAvailableUpdates(ctx context.Context, revision string, downloadOnly bool) error {
+func (d *dell) installAvailableUpdates(ctx context.Context, revision string, downloadOnly bool) error {
 	exitCode, err := d.dsuInstallUpdates(revision, downloadOnly)
 	if err != nil {
 		if exitCode == utils.DSUExitCodeNoUpdatesAvailable {
