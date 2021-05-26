@@ -79,7 +79,8 @@ var (
 	}
 
 	// DellComponentSlug is an ordered list of of dell component identifiers to component slug
-	// the list is kept ordered to help identify components right
+	// To identify components correctly, if two components contain a similar string
+	// e.g: "idrac", "dell emc idrac service module" the latter should be positioned before the former in the list.
 	DellComponentSlug = [][]string{
 		{"bios", SlugBIOS},
 		{"ethernet", SlugNIC},

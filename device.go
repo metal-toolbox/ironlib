@@ -39,6 +39,8 @@ func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
 	case "supermicro":
 		return supermicro.New(deviceVendor, deviceModel, logger)
 	case "packet":
+		// The c3.small.x86 are custom Packet hardware in which the device Vendor
+		// is identified in the BaseBoard Manufacturer smbios attribute
 		if deviceModel == "c3.small.x86" {
 			deviceVendor, err = dmidecode.BaseBoardManufacturer()
 			if err != nil {
