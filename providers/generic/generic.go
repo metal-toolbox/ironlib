@@ -11,88 +11,86 @@ import (
 
 // A Generic device has methods to collect hardware inventory, regardless of the vendor
 type Generic struct {
-	ID               string
-	Vendor           string
-	Model            string
-	Serial           string
-	UpdatesAvailable int
-	PendingReboot    bool // set when the device requires a reboot after update
-	UpdatesInstalled bool // set when updates were installed on the device
-	Collectors       map[string]utils.Collector
-	Logger           *logrus.Logger
-	Dmidecode        *utils.Dmidecode
+	hw       *model.Hardware
+	lshw     *utils.Lshw
+	logger   *logrus.Logger
+	smartctl utils.Collector
 }
 
-func New(vendor, model string, l *logrus.Logger) (model.Manager, error) {
-	return nil, nil
-}
-
-// Returns hardware inventory for the device
-func (a *Generic) GetInventory(ctx context.Context, listUpdates bool) (*model.Device, error) {
-
+// New returns a generic device manager
+func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManager, error) {
 	var trace bool
-	if a.Logger.GetLevel().String() == "trace" {
+
+	if l.GetLevel().String() == "trace" {
 		trace = true
 	}
 
+	// set device
+	device := &model.Device{
+		Model:  deviceModel,
+		Vendor: deviceVendor,
+	}
+
+	// set device manager
+	dm := &Generic{
+		hw:       model.NewHardware(device),
+		lshw:     utils.NewLshwCmd(trace),
+		smartctl: utils.NewSmartctlCmd(trace),
+		logger:   l,
+	}
+
+	return dm, nil
+}
+
+// Returns hardware inventory for the device
+func (a *Generic) GetInventory(ctx context.Context) (*model.Device, error) {
 	// Collect device inventory from lshw
-	lshw := utils.NewLshwCmd(trace)
-	device, err := lshw.Inventory()
+	a.logger.Info("Collecting inventory with lshw")
+
+	a.hw.Device = model.NewDevice()
+
+	err := a.lshw.Inventory(a.hw.Device)
 	if err != nil {
 		return nil, errors.Wrap(err, "error retrieving device inventory")
 	}
 
-	// Collect additional drives data from smartctl
-	smartctl := utils.NewSmartctlCmd(trace)
-	drives, err := smartctl.Components()
+	// collect drive information
+	drives, err := a.smartctl.Components()
 	if err != nil {
-		return nil, errors.Wrap(err, "error retrieving device inventory")
+		return nil, errors.Wrap(err, "error retrieving drive information")
 	}
 
-	device = utils.UpdateComponentData(device, drives)
+	// update drive information
+	model.ComponentFirmwareDrives(a.hw.Device.Drives, drives, true)
 
-	return device, nil
+	// update device with the components retrieved from inventory
+	model.SetDeviceComponents(a.hw.Device, drives)
+
+	return a.hw.Device, nil
 }
 
 func (a *Generic) GetModel() string {
-	return a.Model
+	return a.hw.Device.Model
 }
 
 func (a *Generic) GetVendor() string {
-	return a.Vendor
-}
-
-func (a *Generic) GetDeviceID() string {
-	return a.ID
-}
-
-func (a *Generic) SetDeviceID(id string) {
-	a.ID = id
+	return a.hw.Device.Vendor
 }
 
 func (a *Generic) RebootRequired() bool {
-	return a.PendingReboot
-}
-
-func (a *Generic) SetFirmwareUpdateConfig(config *model.FirmwareUpdateConfig) {
-}
-
-func (a *Generic) SetOptions(options map[string]interface{}) error {
-	return nil
+	return a.hw.PendingReboot
 }
 
 func (a *Generic) UpdatesApplied() bool {
-	return a.UpdatesInstalled
+	return a.hw.UpdatesInstalled
 }
 
-func (a *Generic) ApplyUpdatesAvailable(ctx context.Context, config *model.FirmwareUpdateConfig, dryRun bool) (err error) {
+// ListUpdatesAvailable runs the vendor tooling (dsu) to identify updates available
+func (a *Generic) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+	return nil, nil
+}
+
+// InstallUpdates installs updates based on updateOptions
+func (a *Generic) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
 	return nil
-}
-
-func (a *Generic) GetDeviceFirmwareRevision(ctx context.Context) (string, error) {
-	return "", nil
-}
-
-func (a *Generic) GetUpdatesAvailable(ctx context.Context) (*model.Device, error) {
-	return &model.Device{}, nil
 }

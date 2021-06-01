@@ -14,7 +14,7 @@ import (
 
 //
 
-const lshw = "/usr/bin/lshw"
+const lshw = "/usr/sbin/lshw"
 
 var (
 	ErrParseLshwOutput         = errors.New("lshw output parse error")

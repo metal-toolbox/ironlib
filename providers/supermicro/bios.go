@@ -6,10 +6,10 @@ import (
 	"github.com/packethost/ironlib/config"
 )
 
-func (s *Supermicro) SetBIOSConfiguration(ctx context.Context, config *config.BIOSConfiguration) error {
+func (s *supermicro) SetBIOSConfiguration(ctx context.Context, cfg *config.BIOSConfiguration) error {
 	return nil
 }
 
-func (s *Supermicro) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error) {
+func (s *supermicro) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error) {
 	return &config.BIOSConfiguration{}, nil
 }

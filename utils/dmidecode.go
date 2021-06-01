@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/dselans/dmidecode"
+	"github.com/packethost/ironlib/errs"
 	"github.com/pkg/errors"
 )
 
@@ -32,7 +33,7 @@ func (d *Dmidecode) query(section, key string) (value string, err error) {
 
 	records, err := d.dmi.SearchByName(section)
 	if err != nil {
-		return value, errors.Wrap(newDmidecodeValueError(section, key), err.Error())
+		return value, errors.Wrap(errs.NewDmidecodeValueError(section, key), err.Error())
 	}
 
 	for _, m := range records {
@@ -41,7 +42,7 @@ func (d *Dmidecode) query(section, key string) (value string, err error) {
 		}
 	}
 
-	return value, errors.Wrap(newDmidecodeValueError(section, key), err.Error())
+	return value, errors.Wrap(errs.NewDmidecodeValueError(section, key), err.Error())
 }
 
 // Manufacturer queries dmidecode and returns server vendor

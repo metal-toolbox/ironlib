@@ -2,8 +2,6 @@ package model
 
 // Component is a low level device component - before its classified into a device type (BMC{}, BIOS{}, NIC{})
 type Component struct {
-	ID                string            `json:"id"`
-	DeviceID          string            `json:"device_id"`
 	Serial            string            `json:"serial"`
 	Vendor            string            `json:"vendor"`
 	Type              string            `json:"type"`
@@ -15,6 +13,19 @@ type Component struct {
 	Metadata          map[string]string `json:"metadata"`           // Additional metadata if any
 	Oem               bool              `json:"oem"`                // Component is an OEM component
 	FirmwareManaged   bool              `json:"firmware_managed"`   // Firmware on the component is managed/unmanaged
+}
+
+// UpdateOptions sets firmware update options for a device component
+type UpdateOptions struct {
+	AllowDowngrade   bool // Allow firmware to be downgraded
+	InstallAll       bool // Install all available updates (specific to dell DSU)
+	Serial           string
+	Vendor           string
+	Model            string
+	Name             string
+	Slug             string
+	UpdateFile       string
+	InstallerVersion string // The all available updates installer version (specific to dell DSU)
 }
 
 // OemComponents are OEM specific device components
@@ -30,12 +41,31 @@ func ComponentFirmware(c *Component, f *Firmware) {
 		f.Installed = c.FirmwareInstalled
 	}
 
+	if f.Available == "" && c.FirmwareAvailable != "" {
+		f.Available = c.FirmwareAvailable
+	}
+
 	if !f.Managed && c.FirmwareManaged {
 		f.Managed = c.FirmwareManaged
 	}
 
 	if len(f.Metadata) == 0 && len(c.Metadata) > 0 {
-		f.Metadata = c.Metadata
+		// init dest map if nil
+		if f.Metadata == nil {
+			f.Metadata = make(map[string]string)
+		}
+
+		mergeMaps(f.Metadata, c.Metadata)
+	}
+}
+
+// mergeMaps copy data from b into a only if the a does not have the key in b
+func mergeMaps(a, b map[string]string) {
+	for k, v := range b {
+		_, exists := a[k]
+		if !exists {
+			a[k] = v
+		}
 	}
 }
 
@@ -101,9 +131,9 @@ func ComponentFirmwareStorageControllers(controllers []*StorageController, compo
 	}
 }
 
+// nolint:gocyclo // device component setter is cyclomatic, will break this up at some point if necessary
 // SetDeviceComponents populates the device with the given components
 func SetDeviceComponents(device *Device, components []*Component) {
-
 	//  multiples of components are grouped
 	multiples := map[string][]*Component{
 		SlugNIC:               {},
@@ -114,8 +144,7 @@ func SetDeviceComponents(device *Device, components []*Component) {
 
 	// set firmware information for device components
 	for _, c := range components {
-
-		// populate Dell specific OEM components to device
+		// populate special OEM device components
 		_, isOem := OemComponentDell[c.Slug]
 		if isOem {
 			device.OemComponents.Dell = append(device.OemComponents.Dell, c)
@@ -135,8 +164,8 @@ func SetDeviceComponents(device *Device, components []*Component) {
 			multiples[SlugPSU] = append(multiples[SlugPSU], c)
 		case SlugDrive:
 			multiples[SlugDrive] = append(multiples[SlugDrive], c)
-		case SlugSASHBA330Controller:
-			multiples[SlugSASHBA330Controller] = append(multiples[SlugSASHBA330Controller], c)
+		case SlugStorageController:
+			multiples[SlugStorageController] = append(multiples[SlugStorageController], c)
 		}
 	}
 
@@ -149,7 +178,7 @@ func SetDeviceComponents(device *Device, components []*Component) {
 			ComponentFirmwarePSUs(device.PSUs, components, true)
 		case SlugDrive:
 			ComponentFirmwareDrives(device.Drives, components, true)
-		case SlugSASHBA330Controller:
+		case SlugStorageController:
 			ComponentFirmwareStorageControllers(device.StorageControllers, components, true)
 		}
 	}

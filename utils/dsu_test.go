@@ -5,8 +5,33 @@ import (
 	"os"
 	"testing"
 
+	"github.com/packethost/ironlib/model"
 	"github.com/stretchr/testify/assert"
 )
+
+func Test_dsuComponentNameToSlug(t *testing.T) {
+	kv := map[string]string{
+		"BIOS":                    model.SlugBIOS,
+		"Power Supply":            model.SlugPSU,
+		"Disk 0 of BOSS Adapter ": model.SlugDellBossAdapterDisk0,
+		"BOSS":                    model.SlugDellBossAdapter,
+		"Dell HBA330 Mini Controller 0 Firmware ":                    model.SlugStorageController,
+		"Backplane Expander FW ":                                     model.SlugDellBackplaneExpander,
+		"Intel(R) Ethernet 10G 4P X710 SFP+ rNDC":                    model.SlugNIC,
+		"Intel(R) Ethernet 10G X710 rNDC ":                           model.SlugNIC,
+		"Intel(R) Ethernet 10G X710 rNDC":                            model.SlugNIC,
+		"iDRAC":                                                      model.SlugBMC,
+		"NVMePCISSD Model Number: Micron_9200_MTFDHAL3T8TCT":         model.SlugDrive,
+		"Lifecycle Controller":                                       model.SlugDellLifeCycleController,
+		"System CPLD":                                                model.SlugDellSystemCPLD,
+		"Dell EMC iDRAC Service Module Embedded Package v3.5.0, A00": model.SlugDellIdracServiceModule,
+	}
+
+	for componentName, expectedSlug := range kv {
+		slug := dsuComponentNameToSlug(componentName)
+		assert.Equal(t, expectedSlug, slug, "component Name: "+componentName)
+	}
+}
 
 func Test_dsuParseInventoryBytes(t *testing.T) {
 	d := NewFakeDsu()
@@ -35,7 +60,7 @@ func Test_dsuParsePreviewBytes(t *testing.T) {
 	components := dsuParsePreviewBytes(result.Stdout)
 	assert.Equal(t, 5, len(components))
 	assert.Equal(t, "Dell HBA330 Mini Controller 0 Firmware", components[0].Name)
-	assert.Equal(t, "SAS HBA330 Controller", components[0].Slug)
+	assert.Equal(t, model.SlugStorageController, components[0].Slug)
 	assert.Equal(t, "16.17.01.00", components[0].FirmwareAvailable)
 	assert.Equal(t, "SAS-Non-RAID_Firmware_124X2_LN_16.17.01.00_A08", components[0].Metadata["firmware_available_filename"])
 }
