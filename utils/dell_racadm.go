@@ -9,8 +9,9 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-const dellRacadm = "/opt/dell/srvadmin/bin/idracadm7"
-const dellBiosTempFilename = "/tmp/bios.json" // where we dump the BIOS config to before processing it
+const DellRacadmPath = "/opt/dell/srvadmin/bin/idracadm7"
+const EnvVarRacadm7 = "UTIL_RACADM7"
+const DellBiosTempFilename = "/tmp/bios.json" // where we dump the BIOS config to before processing it
 
 // DellRacadm is a dell racadm executor
 type DellRacadm struct {
@@ -20,9 +21,9 @@ type DellRacadm struct {
 
 // Return a new Dell racadm command executor
 func NewDellRacadm(trace bool) BIOSConfiguror {
-	racadmUtil := os.Getenv("UTIL_RACADM")
+	racadmUtil := os.Getenv(EnvVarRacadm7)
 	if racadmUtil == "" {
-		racadmUtil = dellRacadm
+		racadmUtil = DellRacadmPath
 	}
 
 	e := NewExecutor(racadmUtil)
@@ -40,8 +41,7 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConf
 	// Dump the current BIOS config to dellBiosTempFilename. The racadm
 	// command won't dump the config to stdout directly, so we do this in
 	// a two-step process, and read the tempfile during the parsing step.
-	s.Executor.SetArgs([]string{"get", "-t", "json", "-f", dellBiosTempFilename})
-
+	s.Executor.SetArgs([]string{"get", "-t", "json", "-f", DellBiosTempFilename})
 	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
@@ -67,8 +67,9 @@ func (s *DellRacadm) parseRacadmBIOSConfig(ctx context.Context) (*config.DellBIO
 		"SRIOV":          "SystemConfiguration.Components.#(FQDD==\"BIOS.Setup.1-1\").Attributes.#(Name==\"SriovGlobalEnable\").Value",
 		"TPM":            "SystemConfiguration.Components.#(FQDD==\"BIOS.Setup.1-1\").Attributes.#(Name==\"TpmSecurity\").Value",
 	}
-
-	json, err := ioutil.ReadFile(dellBiosTempFilename)
+  
+	json, err := ioutil.ReadFile(DellBiosTempFilename)
+	defer func() { os.Remove(DellBiosTempFilename) }()
 	if err != nil {
 		return nil, err
 	}
