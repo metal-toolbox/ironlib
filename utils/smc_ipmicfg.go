@@ -3,11 +3,10 @@ package utils
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
+	"github.com/pkg/errors"
 )
 
 const ipmicfg = "/usr/sbin/smc-ipmicfg"
@@ -26,9 +25,9 @@ type IpmicfgSummary struct {
 // note: the binary is expected to be available as smc-ipmicfg,
 //       as setup in the fup firmware-update image
 func NewIpmicfgCmd(trace bool) Collector {
-
 	e := NewExecutor(ipmicfg)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
 	if !trace {
 		e.SetQuiet()
 	}
@@ -44,19 +43,14 @@ func NewFakeIpmicfg() *Ipmicfg {
 }
 
 func (i *Ipmicfg) Components() ([]*model.Component, error) {
-
 	summary, err := i.Summary()
 	if err != nil {
 		return nil, err
 	}
 
-	uid1, _ := uuid.NewRandom()
-	uid2, _ := uuid.NewRandom()
-	uid3, _ := uuid.NewRandom()
 	// add CPLD and BIOS firmware inventory
 	inv := []*model.Component{
 		{
-			ID:                uid1.String(),
 			Model:             "Supermicro",
 			Vendor:            "Supermicro",
 			Name:              "CPLD",
@@ -64,7 +58,6 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 			FirmwareInstalled: summary.CPLDVersion,
 		},
 		{
-			ID:                uid2.String(),
 			Model:             "Supermicro",
 			Vendor:            "Supermicro",
 			Name:              "BIOS",
@@ -72,7 +65,6 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 			FirmwareInstalled: summary.BIOSVersion,
 		},
 		{
-			ID:                uid3.String(),
 			Model:             "Supermicro",
 			Vendor:            "Supermicro",
 			Name:              "BMC",
@@ -85,28 +77,26 @@ func (i *Ipmicfg) Components() ([]*model.Component, error) {
 }
 
 func (i *Ipmicfg) Summary() (*IpmicfgSummary, error) {
-
 	// smc-ipmicfg --summary
 	i.Executor.SetArgs([]string{"-summary"})
+
 	result, err := i.Executor.ExecWithContext(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
 	if len(result.Stdout) == 0 {
-		return nil, fmt.Errorf("no output from command: %s", i.Executor.GetCmd())
+		return nil, errors.Wrap(ErrNoCommandOutput, i.Executor.GetCmd())
 	}
 
 	return i.parseQueryOutput(result.Stdout), nil
 }
 
 func (i *Ipmicfg) parseQueryOutput(b []byte) *IpmicfgSummary {
-
 	summary := &IpmicfgSummary{}
-
 	byteSlice := bytes.Split(b, []byte("\n"))
-	for _, line := range byteSlice {
 
+	for _, line := range byteSlice {
 		s := string(line)
 
 		if strings.Contains(s, "Firmware Revision") {
@@ -114,6 +104,7 @@ func (i *Ipmicfg) parseQueryOutput(b []byte) *IpmicfgSummary {
 			if len(t) > 0 {
 				summary.FirmwareRevision = strings.TrimSpace(t[1])
 			}
+
 			continue
 		}
 
@@ -122,6 +113,7 @@ func (i *Ipmicfg) parseQueryOutput(b []byte) *IpmicfgSummary {
 			if len(t) > 0 {
 				summary.BIOSVersion = strings.TrimSpace(t[1])
 			}
+
 			continue
 		}
 
@@ -130,6 +122,7 @@ func (i *Ipmicfg) parseQueryOutput(b []byte) *IpmicfgSummary {
 			if len(t) > 0 {
 				summary.CPLDVersion = strings.TrimSpace(t[1])
 			}
+
 			continue
 		}
 	}

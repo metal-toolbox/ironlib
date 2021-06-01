@@ -6,7 +6,7 @@ import (
 	"github.com/packethost/ironlib/config"
 )
 
-func (g *Generic) SetBIOSConfiguration(ctx context.Context, config *config.BIOSConfiguration) error {
+func (g *Generic) SetBIOSConfiguration(ctx context.Context, cfg *config.BIOSConfiguration) error {
 	return nil
 }
 

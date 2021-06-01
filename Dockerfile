@@ -1,14 +1,11 @@
 FROM centos AS stage0
 ARG FUP_FILES_SOURCE=http://install.packet.net/firmware/fup
 
-WORKDIR /fup
-
 ## collect vendor tooling artifacts
-RUN dnf install -y make unzip
-RUN mkdir -p /etc/fup && \
-    # fetch vendor tools
-    # TODO: switch these to a public s3 bucket
-    curl -sO $FUP_FILES_SOURCE/image-tooling/mlxup && \
+RUN dnf install -y --setopt=tsflags=nodocs make unzip
+## fetch vendor tools
+## TODO: switch these to a public s3 bucket
+RUN curl -sO $FUP_FILES_SOURCE/image-tooling/mlxup && \
     curl -sO $FUP_FILES_SOURCE/image-tooling/msecli_Linux.run && \
     curl -sO $FUP_FILES_SOURCE/image-tooling/IPMICFG_1.32.0_build.200910.zip && \
     curl -sO $FUP_FILES_SOURCE/image-tooling/sum_2.5.0_Linux_x86_64_20200722.tar.gz && \
@@ -75,16 +72,18 @@ RUN mkdir -p /usr/libexec/dell_dup && cd  /usr/libexec/dell_dup && \
     curl -sO https://linux.dell.com/repo/pgp_pubkeys/0x3CA66B4946770C59.asc
 
 # install misc support packages
-RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
-    dnf install -y vim  \
-                   tar   \
+RUN dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+    dnf install -y --setopt=tsflags=nodocs \
+                   vim \
+                   tar  \
+                   lshw  \
                    unzip  \
                    nano    \
                    gzip     \
                    less      \
-                   unzip      \
-                   which       \
-                   strace       \
+                   which      \
+                   strace      \
+                   pciutils     \
                    passwd        \
                    nvme-cli       \
                    dmidecode       \

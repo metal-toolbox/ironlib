@@ -3,10 +3,12 @@ package utils
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"io"
+	"io/ioutil"
+	"strings"
 
-	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
+	"github.com/pkg/errors"
 )
 
 const smartctl = "/usr/sbin/smartctl"
@@ -33,9 +35,9 @@ type SmartctlDrive struct {
 
 // Return a new smartctl executor
 func NewSmartctlCmd(trace bool) Collector {
-
 	e := NewExecutor(smartctl)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
 	if !trace {
 		e.SetQuiet()
 	}
@@ -43,9 +45,10 @@ func NewSmartctlCmd(trace bool) Collector {
 	return &Smartctl{Executor: e}
 }
 
+// Components returns drives identified by smartctl
 func (s *Smartctl) Components() ([]*model.Component, error) {
-
 	components := make([]*model.Component, 0)
+
 	DrivesList, err := s.Scan()
 	if err != nil {
 		return nil, err
@@ -58,15 +61,13 @@ func (s *Smartctl) Components() ([]*model.Component, error) {
 			return nil, err
 		}
 
-		uid, _ := uuid.NewRandom()
 		item := &model.Component{
-			ID:                uid.String(),
-			Vendor:            vendorFromString(smartctlAll.ModelName),
+			Vendor:            model.VendorFromString(smartctlAll.ModelName),
 			Model:             smartctlAll.ModelName,
 			Serial:            smartctlAll.SerialNumber,
 			Name:              smartctlAll.ModelName,
-			Type:              componentSlugFromModel(smartctlAll.ModelName),
-			Slug:              model.SlugDisk,
+			Type:              model.DriveTypeSlug(smartctlAll.ModelName),
+			Slug:              model.SlugDrive,
 			FirmwareInstalled: smartctlAll.FirmwareVersion,
 		}
 
@@ -76,9 +77,8 @@ func (s *Smartctl) Components() ([]*model.Component, error) {
 	return components, nil
 }
 
+// Scan runs smartctl scan -j and returns its value as an object
 func (s *Smartctl) Scan() (*SmartctlScan, error) {
-
-	// smartctl scan -j
 	s.Executor.SetArgs([]string{"--scan", "-j"})
 
 	result, err := s.Executor.ExecWithContext(context.Background())
@@ -87,21 +87,21 @@ func (s *Smartctl) Scan() (*SmartctlScan, error) {
 	}
 
 	if len(result.Stdout) == 0 {
-		return nil, fmt.Errorf("no output from command: %s", s.Executor.GetCmd())
+		return nil, errors.Wrap(ErrNoCommandOutput, s.Executor.GetCmd())
 	}
 
 	list := &SmartctlScan{Drives: []*SmartctlDrive{}}
+
 	err = json.Unmarshal(result.Stdout, list)
 	if err != nil {
 		return nil, err
 	}
 
 	return list, nil
-
 }
 
+// All runs smartctl -a /dev/<device> and returns its value as an object
 func (s *Smartctl) All(device string) (*SmartctlDriveAttributes, error) {
-
 	// smartctl -a /dev/sda1 -j
 	s.Executor.SetArgs([]string{"-a", device, "-j"})
 
@@ -111,15 +111,83 @@ func (s *Smartctl) All(device string) (*SmartctlDriveAttributes, error) {
 	}
 
 	if len(result.Stdout) == 0 {
-		return nil, fmt.Errorf("no output from command: %s", s.Executor.GetCmd())
+		return nil, errors.Wrap(ErrNoCommandOutput, s.Executor.GetCmd())
 	}
 
 	deviceAttributes := &SmartctlDriveAttributes{}
+
 	err = json.Unmarshal(result.Stdout, deviceAttributes)
 	if err != nil {
 		return nil, err
 	}
 
 	return deviceAttributes, nil
+}
 
+// FakeSmartctlExecute implements the utils.Executor interface for testing
+type FakeSmartctlExecute struct {
+	Cmd          string
+	Args         []string
+	Env          []string
+	Stdin        io.Reader
+	Stdout       []byte // Set this for the dummy data to be returned
+	Stderr       []byte // Set this for the dummy data to be returned
+	Quiet        bool
+	JSONFilesDir string
+	// Executor embedded in here to skip having to implement all the utils.Executor methods
+	Executor
+}
+
+// NewFakeSmartctlExecutor returns a fake smartctl executor for tests
+func NewFakeSmartctlExecutor(cmd, dir string) Executor {
+	return &FakeSmartctlExecute{Cmd: cmd, JSONFilesDir: dir}
+}
+
+// NewFakeSmartctl returns a fake smartctl object for testing
+func NewFakeSmartctl(dataDir string) *Smartctl {
+	executor := NewFakeSmartctlExecutor("smartctl", dataDir)
+	return &Smartctl{Executor: executor}
+}
+
+// ExecWithContext implements the utils.Executor interface
+func (e *FakeSmartctlExecute) ExecWithContext(ctx context.Context) (*Result, error) {
+	switch e.Args[0] {
+	case "--scan":
+		b, err := ioutil.ReadFile(e.JSONFilesDir + "/smartctl_scan.json")
+		if err != nil {
+			return nil, err
+		}
+
+		e.Stdout = b
+	case "-a":
+		if strings.Join(e.Args, " ") == "-a /dev/sda -j" {
+			b, err := ioutil.ReadFile(e.JSONFilesDir + "/smartctl_sda.json")
+			if err != nil {
+				return nil, err
+			}
+
+			e.Stdout = b
+		}
+
+		if strings.Join(e.Args, " ") == "-a /dev/nvme0 -j" {
+			b, err := ioutil.ReadFile(e.JSONFilesDir + "/smartctl_nvme0.json")
+			if err != nil {
+				return nil, err
+			}
+
+			e.Stdout = b
+		}
+	}
+
+	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: 0}, nil
+}
+
+// SetStdin is to set input to the fake execute method
+func (e *FakeSmartctlExecute) SetStdin(r io.Reader) {
+	e.Stdin = r
+}
+
+// SetArgs is to set cmd args to the fake execute method
+func (e *FakeSmartctlExecute) SetArgs(a []string) {
+	e.Args = a
 }

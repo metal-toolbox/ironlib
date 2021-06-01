@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
 	"github.com/pkg/errors"
 )
@@ -27,10 +27,16 @@ const (
 	LocalUpdatesDirectory = "/root/dsu"
 )
 
-// Returns a executor to run dsu commands
+var (
+	ErrDsuInventoryCollectorBinMissing   = errors.New("dsu inventory collector executable missing 'invcol_*_*.BIN'")
+	ErrMultipleDsuInventoryCollectorBins = errors.New("multiple inventory collector bins found")
+	ErrDsuUpdatesDirectoryMissing        = errors.New("dsu updates directory missing")
+	ErrDsuVersionQuery                   = errors.New("dsu version query error")
+)
+
+// NewDsu returns a executor to run dsu commands
 // if trace is enabled, stdout is printed to the terminal
 func NewDsu(trace bool) *Dsu {
-
 	e := NewExecutor("dsu")
 	if !trace {
 		e.SetQuiet()
@@ -48,13 +54,12 @@ func NewFakeDsu() *Dsu {
 	}
 }
 
-// Fetch updates to local directory - these updates are DSU specific
+// FetchUpdateFiles executes dsu to fetch applicable updates into to local directory
 // returns the exitcode and error if any
 // NOTE:
 // dsu 1.8 drops update files under the given $updateDir
 // dsu 1.9 creates a directory '$updateDir/dellupdates' and drops the updates in there
 func (d *Dsu) FetchUpdateFiles(dstDir string) (int, error) {
-
 	// purge any existing update file/directory with the same name
 	_ = os.Remove(dstDir)
 
@@ -71,15 +76,14 @@ func (d *Dsu) FetchUpdateFiles(dstDir string) (int, error) {
 	return result.ExitCode, nil
 }
 
-// Apply local update files - works for files fetched by FetchUpdateFiles()
+// ApplyLocalUpdates installs update files fetched by FetchUpdateFiles()
 // DSU needs to be pointed to the right inventory bin or it barfs
 // returns the resulting exitcode and error if any
 func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
-
 	// ensure the updates directory exists
 	_, err := os.Stat(updateDir)
 	if err != nil {
-		return 0, errors.Wrap(err, "expected updates directory not present")
+		return 0, errors.Wrap(err, ErrDsuUpdatesDirectoryMissing.Error())
 	}
 
 	// identify the inventory collector bin
@@ -87,19 +91,19 @@ func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
 	// dsu 1.9 creates a directory '$updateDir/dellupdates' and drops the updates in there
 	matches := findDSUInventoryCollector(updateDir)
 
-	if matches == nil || len(matches) == 0 {
-		return 0, fmt.Errorf("inventory collector bin missing from: %s", updateDir)
+	if len(matches) == 0 {
+		return 0, errors.Wrap(ErrDsuInventoryCollectorBinMissing, updateDir)
 	}
 
 	if len(matches) > 1 {
-		return 0, fmt.Errorf("expected a single inventory collector bin, found multiple: %s", strings.Join(matches, ","))
+		return 0, errors.Wrap(ErrMultipleDsuInventoryCollectorBins, strings.Join(matches, ","))
 	}
 
 	invcol := matches[0]
 	// the updates directory is where the inventory collector bin is located
 	updateDir = filepath.Dir(invcol)
 
-	//dsu --log-level=4 --non-interactive --source-type=REPOSITORY --source-location=/root/dsu/dellupdates --ic-location=/root/dsu/dellupdates/invcol_5N2WM_LN64_20_09_200_921_A00.BIN
+	// dsu --log-level=4 --non-interactive --source-type=REPOSITORY --source-location=/root/dsu/dellupdates --ic-location=/root/dsu/dellupdates/invcol_5N2WM_LN64_20_09_200_921_A00.BIN
 	d.Executor.SetArgs(
 		[]string{
 			"--non-interactive",
@@ -118,9 +122,9 @@ func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
 	return result.ExitCode, nil
 }
 
-// Returns components identified by dell system update and their current firmware revisions
-func (d *Dsu) ComponentInventory() ([]*model.Component, error) {
-
+// Inventory collects inventory with the dell-system-update utility and
+// updates device component firmware based on data listed by the dell system update tool
+func (d *Dsu) Inventory() ([]*model.Component, error) {
 	d.Executor.SetArgs([]string{"--import-public-key", "--inventory"})
 
 	result, err := d.Executor.ExecWithContext(context.Background())
@@ -128,12 +132,16 @@ func (d *Dsu) ComponentInventory() ([]*model.Component, error) {
 		return nil, err
 	}
 
-	return dsuParseInventoryBytes(result.Stdout), nil
+	components := dsuParseInventoryBytes(result.Stdout)
+	if len(components) == 0 {
+		return nil, errors.Wrap(errs.ErrDeviceInventory, "no components returned by dsuParseInventoryBytes()")
+	}
+
+	return components, nil
 }
 
 // Returns component firmware updates available based on the dell system update
 func (d *Dsu) ComponentFirmwareUpdatePreview() ([]*model.Component, int, error) {
-
 	d.Executor.SetArgs([]string{"--import-public-key", "--preview"})
 
 	result, err := d.Executor.ExecWithContext(context.Background())
@@ -144,11 +152,11 @@ func (d *Dsu) ComponentFirmwareUpdatePreview() ([]*model.Component, int, error) 
 	return dsuParsePreviewBytes(result.Stdout), result.ExitCode, nil
 }
 
-// Run DSU to apply all available updates
+// ApplyUpdates installs all available updates
 func (d *Dsu) ApplyUpdates() (int, error) {
-
 	args := []string{"--non-interactive", "--log-level=4"}
 	d.Executor.SetArgs(args)
+
 	result, err := d.Executor.ExecWithContext(context.Background())
 	if err != nil {
 		// our executor returns err if exitcode is not zero
@@ -159,16 +167,16 @@ func (d *Dsu) ApplyUpdates() (int, error) {
 	return result.ExitCode, nil
 }
 
-// Returns the version of dsu currently installed
+// Version returns the dsu currently installed
 func (d *Dsu) Version() (string, error) {
-
 	e := NewExecutor("rpm")
 	e.SetArgs([]string{"-q", "dell-system-update", "--queryformat=%{VERSION}-%{RELEASE}"})
-	result, err := e.ExecWithContext(context.Background())
 	e.SetVerbose()
+
+	result, err := e.ExecWithContext(context.Background())
 	if err != nil {
 		// our executor returns err if exitcode is not zero
-		return "", fmt.Errorf("error querying dsu version: " + err.Error())
+		return "", errors.Wrap(ErrDsuVersionQuery, err.Error())
 	}
 
 	return string(result.Stdout), nil
@@ -178,46 +186,51 @@ func (d *Dsu) Version() (string, error) {
 
 // Parse dsu -i output and return a slice of Component
 func dsuParseInventoryBytes(in []byte) []*model.Component {
-
 	components := make([]*model.Component, 0)
 
-	// see test test file for sample data
+	// see test file for sample data
 	r := regexp.MustCompile(`(?m)^\d+\. \w+(:?|, (.*) \( Version : (.*) \))$`)
 	matches := r.FindAllSubmatch(in, -1)
+
+	// each matched line is expected to have 4 parts
+	// 1. BIOS, BIOS  ( Version : 2.6.4 )
+	cols := 4
+
 	for _, m := range matches {
-		if len(m) == 4 {
-			uid, _ := uuid.NewRandom()
+		if len(m) == cols {
 			component := &model.Component{
-				ID:                uid.String(),
-				Slug:              componentNameToSlug(trimBytes(m[2])),
+				Slug:              dsuComponentNameToSlug(trimBytes(m[2])),
 				Name:              trimBytes(m[2]),
+				Vendor:            "dell",
 				FirmwareInstalled: trimBytes(m[3]),
 				Oem:               true,
 				FirmwareManaged:   true,
 			}
+
 			components = append(components, component)
 		}
 	}
 
 	return components
-
 }
 
 func dsuParsePreviewBytes(in []byte) []*model.Component {
-
 	components := make([]*model.Component, 0)
 
 	// see test file for sample data
 	r := regexp.MustCompile(`(?m)^\d : \w+.*`)
 	matches := r.FindAllSubmatch(in, -1)
+	// each matched line is expected to have 5 parts
+	// 3 : BIOS : BIOS : 2.8.1 : BIOS_RTWM9_LN_2.8.1
+	cols := 5
+
 	for _, m := range matches {
 		s := strings.Split(string(m[0]), ":")
-		if len(s) == 5 {
-			uid, _ := uuid.NewRandom()
+		if len(s) == cols {
 			component := &model.Component{
-				ID:                uid.String(),
-				Slug:              componentNameToSlug(strings.TrimSpace(s[2])),
+				Slug:              dsuComponentNameToSlug(strings.TrimSpace(s[2])),
 				Name:              strings.TrimSpace(s[2]),
+				Vendor:            "dell",
 				FirmwareAvailable: strings.TrimSpace(s[3]),
 				Metadata:          make(map[string]string),
 				Oem:               true,
@@ -227,6 +240,7 @@ func dsuParsePreviewBytes(in []byte) []*model.Component {
 			components = append(components, component)
 		}
 	}
+
 	return components
 }
 
@@ -236,7 +250,6 @@ func trimBytes(b []byte) string {
 
 // Find the DSU inventory collector bin
 func findDSUInventoryCollector(path string) []string {
-
 	var found []string
 
 	globs := []string{
@@ -254,44 +267,25 @@ func findDSUInventoryCollector(path string) []string {
 	return found
 }
 
-// nolint: gocyclo
-// returns the component name normalized
-// The component name slug is used in an index along with the device ID
-// to uniquely identify the component and update its records, each time fup sends across inventory data
-// it is required that components marked as Unknown are identified and given a unique identifier
-func componentNameToSlug(n string) string {
-	switch name := strings.ToLower(n); {
-	case strings.Contains(name, "ethernet"):
-		return "NIC"
-	case strings.Contains(name, "idrac service module"):
-		return "iDrac Service Module"
-	case strings.Contains(name, "idrac"), strings.Contains(name, "integrated dell remote access controller"):
-		return "BMC"
-	case strings.Contains(name, "backplane"):
-		return "Backplane Expander"
-	case strings.Contains(name, "power supply"):
-		return "Power Supply"
-	case strings.Contains(name, "disk 0 of boss adapter"):
-		return "Boss Adapter - Disk 0"
-	case strings.Contains(name, "boss"):
-		return "Boss Adapter"
-	case strings.Contains(name, "bios"):
-		return "BIOS"
-	case strings.Contains(name, "hba330"):
-		return "SAS HBA330 Controller"
-	case strings.Contains(name, "nvmepcissd"):
-		return "Disk - NVME PCI SSD"
-	case strings.Contains(name, "system cpld"):
-		return "System CPLD"
-	case strings.Contains(name, "sep firmware"):
-		return "Non-expander Storage Backplane (SEP)"
-	case strings.Contains(name, "lifecycle controller"):
-		return "Lifecycle Controller"
-	case strings.Contains(name, "os collector"):
-		return "OS collector"
-	case strings.Contains(name, "dell 64 bit uefi diagnostics"):
-		return "Dell 64 bit uEFI diagnostics"
-	default:
-		return "Unknown"
+// returns the component slug for the given dell component name
+//
+// since the component name exposed by the dsu command doesn't tell the component name in a unique manner,
+// the model.DellComponentSlug list has be ordered to ensure we don't have incorrect identification.
+// Attempts were made to use fuzzy matching and levenstiens distance,
+//  to identify the components correctly, although none seemed to work as well as an ordered list.
+func dsuComponentNameToSlug(n string) string {
+	componentName := strings.ToLower(n)
+
+	for _, componentSlug := range model.DellComponentSlug {
+		identifier, slug := componentSlug[0], componentSlug[1]
+		if strings.EqualFold(componentName, identifier) {
+			return slug
+		}
+
+		if strings.Contains(componentName, identifier) {
+			return slug
+		}
 	}
+
+	return "unknown"
 }

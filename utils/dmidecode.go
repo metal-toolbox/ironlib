@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/dselans/dmidecode"
+	"github.com/packethost/ironlib/errs"
+	"github.com/pkg/errors"
 )
 
 type Dmidecode struct {
@@ -13,6 +14,7 @@ type Dmidecode struct {
 
 func NewDmidecode() (d *Dmidecode, err error) {
 	var dmi = dmidecode.New()
+
 	err = dmi.Run()
 	if err != nil {
 		return d, err
@@ -26,12 +28,12 @@ func NewFakeDmidecode() *Dmidecode {
 	return &Dmidecode{}
 }
 
-func (d *Dmidecode) query(section string, key string) (value string, err error) {
+func (d *Dmidecode) query(section, key string) (value string, err error) {
 	var exists bool
 
 	records, err := d.dmi.SearchByName(section)
 	if err != nil {
-		return value, fmt.Errorf("unable to read '%s'. error: %v", section, err)
+		return value, errors.Wrap(errs.NewDmidecodeValueError(section, key), err.Error())
 	}
 
 	for _, m := range records {
@@ -40,7 +42,7 @@ func (d *Dmidecode) query(section string, key string) (value string, err error) 
 		}
 	}
 
-	return value, fmt.Errorf("unable to read '%s[%s]'. error: %v", section, key, err)
+	return value, errors.Wrap(errs.NewDmidecodeValueError(section, key), err.Error())
 }
 
 // Manufacturer queries dmidecode and returns server vendor

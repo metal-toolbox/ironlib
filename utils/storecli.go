@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -39,9 +38,9 @@ type ResponseData struct {
 
 // Return a new nvme executor
 func NewStoreCLICmd(trace bool) Collector {
-
 	e := NewExecutor(storecli)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
 	if !trace {
 		e.SetQuiet()
 	}
@@ -51,7 +50,6 @@ func NewStoreCLICmd(trace bool) Collector {
 
 // Executes nvme list, parses the output and returns a slice of model.Component
 func (s *StoreCLI) Components() ([]*model.Component, error) {
-
 	inv := make([]*model.Component, 0)
 
 	out, err := s.ShowController0()
@@ -60,25 +58,23 @@ func (s *StoreCLI) Components() ([]*model.Component, error) {
 	}
 
 	list := &ShowController{Controllers: []*Controller{}}
+
 	err = json.Unmarshal(out, list)
 	if err != nil {
 		return nil, err
 	}
 
-	uid, _ := uuid.NewRandom()
-	for idx, c := range list.Controllers {
-
+	for _, c := range list.Controllers {
 		if strings.Contains(c.CommandStatus.Description, "not found") || c.CommandStatus.Status == "Failure" {
 			continue
 		}
 
 		item := &model.Component{
-			ID:                uid.String(),
 			Serial:            c.ResponseData.SerialNumber,
-			Vendor:            vendorFromString(c.ResponseData.ProductName),
+			Vendor:            model.VendorFromString(c.ResponseData.ProductName),
 			Model:             c.ResponseData.ProductName,
 			FirmwareInstalled: c.ResponseData.FirmwareVersion,
-			Slug:              prefixIndex(idx, "Serial Attached SCSI controller"),
+			Slug:              model.SlugStorageController,
 			Name:              "Serial Attached SCSI controller", // based on lspci
 		}
 		inv = append(inv, item)

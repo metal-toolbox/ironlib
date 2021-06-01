@@ -2,7 +2,6 @@ package utils
 
 import (
 	"context"
-	"fmt"
 )
 
 const smcSUM = "/usr/sbin/sum"
@@ -13,9 +12,9 @@ type SupermicroSUM struct {
 
 // Return a new Supermicro sum command executor
 func NewSupermicroSUM(trace bool) Updater {
-
 	e := NewExecutor(smcSUM)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
 	if !trace {
 		e.SetQuiet()
 	}
@@ -31,7 +30,6 @@ func NewFakeSupermicroSUM() *SupermicroSUM {
 }
 
 func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
-
 	switch componentSlug {
 	case "bios":
 		s.Executor.SetArgs([]string{"-c", "UpdateBios", "--preserve_setting", "--file", updateFile})
@@ -45,7 +43,7 @@ func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSl
 	}
 
 	if result.ExitCode != 0 {
-		return fmt.Errorf("%s returned non-zero exit code: %d, stderr: %s", s.Executor.GetCmd(), result.ExitCode, result.Stderr)
+		return newUtilsExecError(s.Executor.GetCmd(), result)
 	}
 
 	return nil

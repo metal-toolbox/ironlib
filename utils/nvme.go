@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -31,9 +30,9 @@ type nvmeList struct {
 
 // Return a new nvme executor
 func NewNvmeCmd(trace bool) Collector {
-
 	e := NewExecutor(nvmecli)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
 	if !trace {
 		e.SetQuiet()
 	}
@@ -43,7 +42,6 @@ func NewNvmeCmd(trace bool) Collector {
 
 // Executes nvme list, parses the output and returns a slice of model.Component's
 func (n *Nvme) Components() ([]*model.Component, error) {
-
 	inv := make([]*model.Component, 0)
 
 	out, err := n.List()
@@ -52,29 +50,29 @@ func (n *Nvme) Components() ([]*model.Component, error) {
 	}
 
 	list := &nvmeList{Devices: []*nvmeDeviceAttributes{}}
+
 	err = json.Unmarshal(out, list)
 	if err != nil {
 		return nil, err
 	}
 
-	for idx, d := range list.Devices {
+	for _, d := range list.Devices {
 		dModel := d.ModelNumber
 
 		var vendor string
+
 		modelTokens := strings.Split(d.ModelNumber, " ")
 
 		if len(modelTokens) > 1 {
 			vendor = modelTokens[1]
 		}
 
-		uid, _ := uuid.NewRandom()
 		item := &model.Component{
-			ID:                uid.String(),
 			Serial:            d.SerialNumber,
 			Vendor:            vendor,
 			Model:             dModel,
 			FirmwareInstalled: d.Firmware,
-			Slug:              prefixIndex(idx, "NVME drive"),
+			Slug:              model.SlugDrive,
 			Name:              "NVME drive",
 		}
 

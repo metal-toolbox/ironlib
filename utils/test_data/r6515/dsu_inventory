@@ -1,0 +1,49 @@
+DELL EMC System Update 1.9.0
+Copyright (C) 2014 DELL EMC Proprietary.
+Public keys exists
+Verifying catalog installation ...
+Installing catalog from repository ...
+Fetching dsucatalog ...
+Reading the catalog ...
+Verifying inventory collector installation
+Getting System Inventory ...
+
+1. BIOS, BIOS  ( Version : 1.7.4 )
+
+2. FRMW, BOSS  ( Version : 2.5.13.3024 )
+
+3. FRMW, Power Supply  ( Version : 00.31.50 )
+
+4. FRMW, Power Supply  ( Version : 00.31.50 )
+
+5. FRMW, Intel(R) Ethernet 25G 2P XXV710 Adapter  ( Version : 20.0.17 )
+
+6. FRMW, Intel(R) Ethernet Network Adapter XXV710  ( Version : 20.0.17 )
+
+7. FRMW, SEP Firmware, BayID: 1  ( Version : 4.35 )
+
+8. FRMW, Firmware for  - Disk 0 of BOSS Adapter    ( Version : J004 )
+
+9. FRMW, Firmware for  - Disk 1 of BOSS Adapter    ( Version : J004 )
+
+10. FRMW, Dell HBA330 Mini Controller 0 Firmware  ( Version : 16.17.01.00 )
+
+11. FRMW,  iDRAC  ( Version : 4.40.00.00 )
+
+12. FRMW, NVMePCISSD Model Number: Micron_9300_MTFDHAL3T8TDP  ( Version : 11300DN0 )
+
+13. FRMW, NVMePCISSD Model Number: Micron_9300_MTFDHAL3T8TDP  ( Version : 11300DN0 )
+
+14. APAC, Lifecycle Controller  ( Version : 4.40.00.00 )
+
+15. APAC, Dell 64 Bit uEFI Diagnostics, version 4301, 4301A50, 4301.51  ( Version : 4301A50 )
+
+16. APAC, OS COLLECTOR, v5.0, A00  ( Version : 5.0 )
+
+17. APAC, Dell EMC iDRAC Service Module Embedded Package v3.5.1, A00  ( Version : 3.5.1 )
+
+18. FRMW, System CPLD  ( Version : 1.0.3 )
+
+
+Progress report is available at:/usr/libexec/dell_dup/DSU_STATUS.json
+Exiting DSU!

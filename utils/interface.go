@@ -11,15 +11,17 @@ type BIOSConfiguror interface {
 	GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error)
 }
 
-// InventoryCollector is to replace the Collector interface
+// InventoryCollector returns device inventory
 type InventoryCollector interface {
 	Inventory() (*model.Device, error)
 }
 
+// Collector returns device components
 type Collector interface {
 	Components() ([]*model.Component, error)
 }
 
+// Updater runs updates
 type Updater interface {
 	ApplyUpdate(ctx context.Context, updateFile, component string) error
 }

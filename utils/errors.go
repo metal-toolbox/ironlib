@@ -18,6 +18,7 @@ type UtilsExecError struct {
 	ExitCode int
 }
 
+// Error implements the error interface
 func (u *UtilsExecError) Error() string {
 	return fmt.Sprintf("cmd %s exited with error: %s\n\t exitCode: %d\n\t stdout: %s", u.Cmd, u.Stderr, u.ExitCode, u.Stdout)
 }

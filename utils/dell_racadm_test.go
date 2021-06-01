@@ -26,10 +26,12 @@ func Test_GetBIOSConfiguration(t *testing.T) {
 		},
 	}
 	d := NewFakeDellRacadm()
+
 	cfg, err := d.GetBIOSConfiguration(context.TODO())
 	if err != nil {
 		t.Error(err)
 	}
+
 	assert.Equal(t, expected, cfg)
 }
 
@@ -42,14 +44,16 @@ func Test_parseRacadmBIOSConfig(t *testing.T) {
 		TPM:            "On",
 	}
 	d := NewFakeDellRacadm()
+
 	_, err := d.Executor.ExecWithContext(context.TODO())
 	if err != nil {
 		return
 	}
 
-	config, err := d.parseRacadmBIOSConfig(context.TODO())
+	c, err := d.parseRacadmBIOSConfig(context.TODO())
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, expected, config)
+
+	assert.Equal(t, expected, c)
 }
