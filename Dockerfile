@@ -1,4 +1,4 @@
-FROM registry.centos.org/centos/centos:centos8 AS stage0
+FROM centos:centos8 AS stage0
 ARG FUP_FILES_SOURCE=http://install.packet.net/firmware/fup
 
 ## collect vendor tooling artifacts
@@ -44,7 +44,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o getbiosconf
 
 
 # main
-FROM registry.centos.org/centos/centos:centos8
+FROM centos:centos8
 LABEL author="Joel Rebello<jrebello@packet.com>"
 # copy vendor tooling artifacts
 COPY --from=stage0 /usr/sbin/mlxup /usr/sbin/mlxup
