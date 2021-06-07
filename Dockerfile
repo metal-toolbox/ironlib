@@ -1,4 +1,4 @@
-FROM centos AS stage0
+FROM registry.centos.org/centos/centos:centos8 AS stage0
 ARG FUP_FILES_SOURCE=http://install.packet.net/firmware/fup
 
 ## collect vendor tooling artifacts
@@ -44,7 +44,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o getbiosconf
 
 
 # main
-FROM centos
+FROM registry.centos.org/centos/centos:centos8
+LABEL author="Joel Rebello<jrebello@packet.com>"
 # copy vendor tooling artifacts
 COPY --from=stage0 /usr/sbin/mlxup /usr/sbin/mlxup
 COPY --from=stage0 /usr/sbin/sum /usr/sbin/sum
@@ -91,6 +92,7 @@ RUN dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel
                    smartmontools     \
                    'dnf-command(config-manager)' && \
     dnf config-manager --disable production-dell-system-update_dependent && \
-    dnf config-manager --disable production-dell-system-update_independent
+    dnf config-manager --disable production-dell-system-update_independent && \
+    dnf clean all
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
