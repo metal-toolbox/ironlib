@@ -1,11 +1,28 @@
+export DOCKER_BUILDKIT=1
+GIT_COMMIT_FULL  := $(shell git rev-parse HEAD)
+DOCKER_REGISTRY  := "quay.io/packet/ironlib"
+
 .DEFAULT_GOAL := help
 
 ## Go test
 test:
 	CGO_ENABLED=0 go test -v -covermode=atomic ./...
 
+## lint
 lint:
 	golangci-lint run --config .golangci.yml
+
+## build docker image and tag as quay.io/packet/ironlib:latest
+build-image:
+	docker build --rm=true -f Dockerfile -t ${DOCKER_REGISTRY}:latest  . \
+							 --label org.label-schema.schema-version=1.0 \
+							 --label org.label-schema.vcs-ref=$(GIT_COMMIT_FULL) \
+							 --label org.label-schema.vcs-url=https://github.com/packethost/ironlib.git
+
+## push docker image
+push-image:
+	docker push ${DOCKER_REGISTRY}:latest
+
 
 
 # https://gist.github.com/prwhite/8168133
