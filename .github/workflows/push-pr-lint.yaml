@@ -1,0 +1,17 @@
+name: lint, test and publish image
+on: [pull_request, push]
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        args: --config .golangci.yml
+    - name: Test
+      run: go test ./...
