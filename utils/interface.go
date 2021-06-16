@@ -7,6 +7,14 @@ import (
 	"github.com/packethost/ironlib/model"
 )
 
+// Utility interface provides methods to configure, collect and update
+type Utility interface {
+	BIOSConfiguror
+	InventoryCollector
+	Collector
+	Updater
+}
+
 type BIOSConfiguror interface {
 	GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error)
 }
