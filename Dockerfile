@@ -1,6 +1,7 @@
 FROM centos:centos8 AS stage0
 ARG TOOLING_ENDPOINT=https://equinix-metal-firmware.s3.amazonaws.com/fup/image-tooling
 
+
 ## collect vendor tooling artifacts
 RUN dnf install -y --setopt=tsflags=nodocs make unzip
 ## fetch vendor tools
