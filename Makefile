@@ -1,6 +1,7 @@
 export DOCKER_BUILDKIT=1
 GIT_COMMIT_FULL  := $(shell git rev-parse HEAD)
 DOCKER_REGISTRY  := "quay.io/packet/ironlib"
+LINTER_EXPECTED_VERSION   := "1.41.0"
 
 .DEFAULT_GOAL := help
 
@@ -10,7 +11,8 @@ test:
 
 ## lint
 lint:
-	golangci-lint run --config .golangci.yml
+	(golangci-lint --version | grep -q "${LINTER_EXPECTED_VERSION}" && golangci-lint run --config .golangci.yml) \
+		|| echo "expected linter version: ${LINTER_EXPECTED_VERSION}"
 
 ## build docker image and tag as quay.io/packet/ironlib:latest
 build-image:

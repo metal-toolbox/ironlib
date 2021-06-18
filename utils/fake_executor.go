@@ -59,6 +59,7 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			return nil, err
 		}
 
+		// nolint gocritic: this fs mode declaration is as clear as it gets
 		err2 := ioutil.WriteFile(DellBiosTempFilename, json, 0644)
 		if err2 != nil {
 			return nil, err2
