@@ -64,6 +64,7 @@ func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 	}
 
 	// set files executable
+	// nolint gocritic: this fs mode declaration is as clear as it gets
 	err := os.Chmod(updateFile, 0744)
 	if err != nil {
 		return 0, err

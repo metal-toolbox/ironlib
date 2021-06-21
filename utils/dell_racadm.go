@@ -49,7 +49,7 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConf
 	}
 
 	if result.ExitCode != 0 {
-		return nil, newUtilsExecError(s.Executor.GetCmd(), result)
+		return nil, newExecError(s.Executor.GetCmd(), result)
 	}
 
 	cfg, err := s.parseRacadmBIOSConfig(ctx)

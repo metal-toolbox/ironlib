@@ -43,7 +43,7 @@ func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSl
 	}
 
 	if result.ExitCode != 0 {
-		return newUtilsExecError(s.Executor.GetCmd(), result)
+		return newExecError(s.Executor.GetCmd(), result)
 	}
 
 	return nil

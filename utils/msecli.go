@@ -112,11 +112,11 @@ func (m *Msecli) ApplyUpdate(ctx context.Context, updateFile, componentSlug stri
 
 		result, err := m.Executor.ExecWithContext(ctx)
 		if err != nil {
-			return newUtilsExecError(m.Executor.GetCmd(), result)
+			return newExecError(m.Executor.GetCmd(), result)
 		}
 
 		if result.ExitCode != 0 {
-			return newUtilsExecError(m.Executor.GetCmd(), result)
+			return newExecError(m.Executor.GetCmd(), result)
 		}
 	}
 

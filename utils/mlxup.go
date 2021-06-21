@@ -137,7 +137,7 @@ func (m *Mlxup) ApplyUpdate(ctx context.Context, updateFile, componentSlug strin
 		}
 
 		if result.ExitCode != 0 {
-			return newUtilsExecError(m.Executor.GetCmd(), result)
+			return newExecError(m.Executor.GetCmd(), result)
 		}
 	}
 

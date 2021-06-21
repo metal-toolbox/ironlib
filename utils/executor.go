@@ -101,7 +101,7 @@ func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err erro
 
 	if err := cmd.Run(); err != nil {
 		result = &Result{stdoutBuf.Bytes(), stderrBuf.Bytes(), cmd.ProcessState.ExitCode()}
-		return result, newUtilsExecError(e.GetCmd(), result)
+		return result, newExecError(e.GetCmd(), result)
 	}
 
 	result = &Result{stdoutBuf.Bytes(), stderrBuf.Bytes(), cmd.ProcessState.ExitCode()}

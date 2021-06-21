@@ -1,15 +1,16 @@
 FROM centos:centos8 AS stage0
-ARG FUP_FILES_SOURCE=http://install.packet.net/firmware/fup
+ARG TOOLING_ENDPOINT=https://equinix-metal-firmware.s3.amazonaws.com/fup/image-tooling
+
 
 ## collect vendor tooling artifacts
 RUN dnf install -y --setopt=tsflags=nodocs make unzip
 ## fetch vendor tools
 ## TODO: switch these to a public s3 bucket
-RUN curl -sO $FUP_FILES_SOURCE/image-tooling/mlxup && \
-    curl -sO $FUP_FILES_SOURCE/image-tooling/msecli_Linux.run && \
-    curl -sO $FUP_FILES_SOURCE/image-tooling/IPMICFG_1.32.0_build.200910.zip && \
-    curl -sO $FUP_FILES_SOURCE/image-tooling/sum_2.5.0_Linux_x86_64_20200722.tar.gz && \
-    curl -sO $FUP_FILES_SOURCE/image-tooling/SW_Broadcom_Unified_StorCLI_v007.1316.0000.0000_20200428.ZIP && \
+RUN curl -sO $TOOLING_ENDPOINT/mlxup && \
+    curl -sO $TOOLING_ENDPOINT/msecli_Linux.run && \
+    curl -sO $TOOLING_ENDPOINT/IPMICFG_1.32.0_build.200910.zip && \
+    curl -sO $TOOLING_ENDPOINT/sum_2.5.0_Linux_x86_64_20200722.tar.gz && \
+    curl -sO $TOOLING_ENDPOINT/SW_Broadcom_Unified_StorCLI_v007.1316.0000.0000_20200428.ZIP && \
     # install mlxup
     install -m 755 -D mlxup /usr/sbin/ && \
     # install SMC sum 2.5.0
@@ -50,9 +51,9 @@ LABEL author="Joel Rebello<jrebello@packet.com>"
 COPY --from=stage0 /usr/sbin/mlxup /usr/sbin/mlxup
 COPY --from=stage0 /usr/sbin/sum /usr/sbin/sum
 COPY --from=stage0 /usr/sbin/smc-ipmicfg /usr/sbin/smc-ipmicfg
-COPY --from=stage0 /fup/Unified_storcli_all_os/Linux/pubKey.asc /tmp/storecli_pubkey.asc
-COPY --from=stage0 /fup/Unified_storcli_all_os/Linux/storcli-007.1316.0000.0000-1.noarch.rpm /tmp/
-COPY --from=stage0 /fup/msecli_Linux.run /tmp/
+COPY --from=stage0 Unified_storcli_all_os/Linux/pubKey.asc /tmp/storecli_pubkey.asc
+COPY --from=stage0 Unified_storcli_all_os/Linux/storcli-007.1316.0000.0000-1.noarch.rpm /tmp/
+COPY --from=stage0 msecli_Linux.run /tmp/
 # copy ironlib wrapper binaries
 COPY --from=stage1 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
 # import and install tools
