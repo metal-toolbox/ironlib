@@ -52,18 +52,6 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			e.Stdout = nvmeListDummyJSON
 			break
 		}
-	case "racadm":
-		// copy the test data to a location that the JSON parsing function will expect it
-		json, err := ioutil.ReadFile("test_data/bios_configs/dell_r6515.json")
-		if err != nil {
-			return nil, err
-		}
-
-		// nolint gocritic: this fs mode declaration is as clear as it gets
-		err2 := ioutil.WriteFile(DellBiosTempFilename, json, 0644)
-		if err2 != nil {
-			return nil, err2
-		}
 	case "storecli":
 		b, err := ioutil.ReadFile("test_data/storecli.json")
 		if err != nil {
