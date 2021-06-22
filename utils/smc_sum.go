@@ -63,7 +63,7 @@ func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSl
 }
 
 // GetBIOSConfiguration implements the Getter
-func (s *SupermicroSUM) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error) {
+func (s *SupermicroSUM) GetBIOSConfiguration(ctx context.Context, deviceModel string) (*config.BIOSConfiguration, error) {
 	c, err := s.parseBIOSConfig(ctx)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (s *SupermicroSUM) parseBIOSConfig(ctx context.Context) (*config.Supermicro
 	}
 
 	if result.ExitCode != 0 {
-		return nil, newUtilsExecError(s.Executor.GetCmd(), result)
+		return nil, newExecError(s.Executor.GetCmd(), result)
 	}
 
 	cfg := &supermicro.BiosCfg{}

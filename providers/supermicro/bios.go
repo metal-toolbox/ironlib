@@ -22,5 +22,5 @@ func (s *supermicro) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConf
 
 	sum := utils.NewSupermicroSUM(trace)
 
-	return sum.GetBIOSConfiguration(ctx)
+	return sum.GetBIOSConfiguration(ctx, "")
 }
