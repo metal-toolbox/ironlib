@@ -3,6 +3,7 @@ module github.com/packethost/ironlib
 go 1.16
 
 require (
+	github.com/beevik/etree v1.1.0
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
