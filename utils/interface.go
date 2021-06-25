@@ -16,7 +16,9 @@ type Utility interface {
 }
 
 type BIOSConfiguror interface {
-	GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error)
+	// GetBIOSConfiguration returns the BIOS configuration for the device
+	// deviceModel is an optional parameter depending on the hardware variants
+	GetBIOSConfiguration(ctx context.Context, deviceModel string) (*config.BIOSConfiguration, error)
 }
 
 // InventoryCollector returns device inventory

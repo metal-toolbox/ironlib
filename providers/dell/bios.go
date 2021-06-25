@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/packethost/ironlib/config"
+	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 )
 
@@ -22,5 +23,5 @@ func (d *dell) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfigurat
 
 	racadm := utils.NewDellRacadm(false)
 
-	return racadm.GetBIOSConfiguration(ctx)
+	return racadm.GetBIOSConfiguration(ctx, model.FormatProductName(d.GetModel()))
 }
