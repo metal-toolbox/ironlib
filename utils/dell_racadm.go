@@ -57,15 +57,6 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel strin
 		return nil, ErrDellBiosCfgFileUndefined
 	}
 
-	stat, err := os.Stat(s.BIOSCfgTmpFile)
-	if err != nil {
-		return nil, errors.Wrap(ErrDellBiosCfgFileEmpty, err.Error())
-	}
-
-	if stat.Size() == 0 {
-		return nil, ErrDellBiosCfgFileEmpty
-	}
-
 	// older hardware return BIOS config as XML
 	if strings.EqualFold(deviceModel, "c6320") {
 		cfg, err = s.racadmBIOSConfigXML(ctx)
