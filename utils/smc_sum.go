@@ -29,6 +29,7 @@ func NewSupermicroSUM(trace bool) Utility {
 	} else {
 		e = NewExecutor(smcSumPath)
 	}
+
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {
