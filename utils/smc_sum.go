@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/xml"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/packethost/ironlib/config"
@@ -13,7 +14,8 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-const smcSUM = "/usr/sbin/sum"
+const smcSumPath = "/usr/sbin/sum"
+const EnvVarSumPath = "UTIL_SUM"
 
 type SupermicroSUM struct {
 	Executor Executor
@@ -21,7 +23,13 @@ type SupermicroSUM struct {
 
 // Return a new Supermicro sum command executor
 func NewSupermicroSUM(trace bool) Utility {
-	e := NewExecutor(smcSUM)
+	var e Executor
+	if envSum := os.Getenv(EnvVarSumPath); envSum != "" {
+		e = NewExecutor(envSum)
+	} else {
+		e = NewExecutor(smcSumPath)
+	}
+
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {
