@@ -1,15 +1,27 @@
 package model
 
-import "strings"
+import (
+	"reflect"
+	"strings"
+
+	"github.com/pkg/errors"
+)
 
 const (
-	// Vendors
-	VendorDell       = "dell"
-	VendorMicron     = "micron"
-	VendorAsrockrack = "asrockrack"
-	VendorSupermicro = "supermicro"
+	VendorDell               = "dell"
+	VendorMicron             = "micron"
+	VendorAsrockrack         = "asrockrack"
+	VendorSupermicro         = "supermicro"
+	VendorHPE                = "hp"
+	VendorQuanta             = "quanta"
+	VendorGigabyte           = "gigabyte"
+	VendorIntel              = "intel"
+	VendorPacket             = "packet"
+	VendorMellanox           = "mellanox"
+	VendorAmericanMegatrends = "ami"
 
 	// Generic component slugs
+	// NOTE: when adding slugs here, if the are a multiple -
 	SlugBackplaneExpander     = "Backplane Expander"
 	SlugChassis               = "Chassis"
 	SlugTPM                   = "TPM"
@@ -17,15 +29,21 @@ const (
 	SlugCPU                   = "CPU"
 	SlugPhysicalMem           = "PhysicalMemory"
 	SlugStorageController     = "StorageController"
+	SlugStorageControllers    = "StorageControllers"
 	SlugBMC                   = "BMC"
 	SlugBIOS                  = "BIOS"
 	SlugDrive                 = "Drive"
+	SlugDrives                = "Drives"
 	SlugDriveTypePCIeNVMEeSSD = "NVMe PCIe SSD"
 	SlugDriveTypeSATASSD      = "Sata SSD"
+	SlugDriveTypeSATAHDD      = "Sata HDD"
 	SlugNIC                   = "NIC"
+	SlugNICs                  = "NICs"
 	SlugPSU                   = "Power Supply"
+	SlugPSUs                  = "Power Supplies"
 	SlugSASHBA330Controller   = "SAS HBA330 Controller"
 	SlugCPLD                  = "CPLD"
+	SlugUnknown               = "unknown"
 
 	// Dell specific component slugs
 	SlugDellSystemCPLD                  = "Dell System CPLD"
@@ -49,6 +67,7 @@ func UpdateReleaseEnvironments() []string {
 }
 
 var (
+
 	// ModelDriveTypeSlug is a map of drive models number to slug
 	// Until we figure a better way to differentiate drive information
 	// into SATA vs PCI NVMe or others, this map is going to be annoying to keep updated
@@ -61,6 +80,8 @@ var (
 		// PCI NVMe SSD drives
 		"KXG60ZNV256G TOSHIBA":      SlugDriveTypePCIeNVMEeSSD,
 		"Micron_9300_MTFDHAL3T8TDP": SlugDriveTypePCIeNVMEeSSD,
+		// Sata HDD drives
+		"HGST HUS728T8TALE6L4": SlugDriveTypeSATAHDD,
 	}
 
 	// OemComponentDell is a lookup table for dell OEM components
@@ -100,7 +121,77 @@ var (
 		{"dell 64 bit uefi diagnostics", SlugDell64bitUefiDiagnostics},
 		{"integrated dell remote access controller", SlugBMC},
 	}
+
+	ErrTypeComponentFirmware = errors.New("ironlib.GetComponentFirmware() was passed an object type which is not handled")
 )
+
+// IdentifySlug accepts a device component object and returns its matching slug
+func IdentifySlug(component interface{}) string {
+	switch component.(type) {
+	case *BMC:
+		return SlugBMC
+	case *BIOS:
+		return SlugBIOS
+	case []*NIC:
+		return SlugNICs
+	case []*PSU:
+		return SlugPSUs
+	case []*Drive:
+		return SlugDrives
+	case []*StorageController:
+		return SlugStorageControllers
+	default:
+		return SlugUnknown
+	}
+}
+
+// nolint:gocyclo // type assert is cyclomatic
+// GetComponentFirmware asserts the component type and returns the component []*firmware
+func GetComponentFirmware(component interface{}) ([]*Firmware, error) {
+	f := []*Firmware{}
+
+	switch c := component.(type) {
+	case *BMC:
+		f = append(f, c.Firmware)
+	case *BIOS:
+		f = append(f, c.Firmware)
+	case []*NIC:
+		for _, e := range c {
+			f = append(f, e.Firmware)
+		}
+	case []*PSU:
+		for _, e := range c {
+			f = append(f, e.Firmware)
+		}
+	case []*Drive:
+		for _, e := range c {
+			f = append(f, e.Firmware)
+		}
+	case []*StorageController:
+		for _, e := range c {
+			f = append(f, e.Firmware)
+		}
+	default:
+		return nil, errors.Wrap(ErrTypeComponentFirmware, reflect.TypeOf(c).String())
+	}
+
+	return f, nil
+}
+
+// IsMultipleSlug returns bool if a given slug identifies as a component
+// that is found in multiples - PSUs, NICs, Drives
+func IsMultipleSlug(slug string) bool {
+	m := map[string]bool{
+		SlugDrives:             true,
+		SlugNICs:               true,
+		SlugPSUs:               true,
+		SlugStorageControllers: true,
+	}
+
+	_, exists := m[slug]
+
+	return exists
+}
 
 func DriveTypeSlug(m string) string {
 	t, exists := modelDriveTypeSlug[m]
@@ -115,19 +206,19 @@ func DriveTypeSlug(m string) string {
 func FormatVendorName(v string) string {
 	switch v {
 	case "Dell Inc.":
-		return "dell"
+		return VendorDell
 	case "HP", "HPE":
-		return "hp"
+		return VendorHPE
 	case "Supermicro":
-		return "supermicro"
+		return VendorSupermicro
 	case "Quanta Cloud Technology Inc.":
-		return "quanta"
+		return VendorQuanta
 	case "GIGABYTE":
-		return "gigabyte"
+		return VendorGigabyte
 	case "Intel Corporation":
-		return "intel"
+		return VendorIntel
 	case "Packet":
-		return "packet"
+		return VendorPacket
 	default:
 		return v
 	}
@@ -158,13 +249,13 @@ func VendorFromString(s string) string {
 		return "LSI"
 	case strings.Contains(s, "HGST "):
 		return "HGST"
-	case strings.Contains(s, "Micron_"):
+	case strings.Contains(s, "Micron_"), strings.HasPrefix(s, "MTFD"):
 		return "Micron"
 	case strings.Contains(s, "TOSHIBA"):
 		return "Toshiba"
 	case strings.Contains(s, "ConnectX4LX"):
 		return "Mellanox"
 	default:
-		return "unknown"
+		return ""
 	}
 }
