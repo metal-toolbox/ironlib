@@ -227,8 +227,8 @@ var (
 	// *model.Device without firmware information
 	Testdata_X11DPH_T_Inventory = &model.Device{
 		HardwareType: "",
-		Vendor:       "Supermicro",
-		Model:        "SSG-6029P-E1CR12L-PH004 (To be filled by O.E.M.)",
+		Vendor:       "supermicro",
+		Model:        "x11dph-t",
 		Serial:       "A401031X0502795",
 		Chassis:      "",
 		BIOS: &model.BIOS{

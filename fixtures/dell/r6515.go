@@ -484,8 +484,8 @@ var (
 
 	// r6515 inventory taken with lshw, merged with data from smartctl
 	R6515_inventory_lshw_smartctl = &model.Device{
-		Vendor:       "Dell Inc.",
-		Model:        "PowerEdge R6515 (SKU=NotProvided;ModelName=PowerEdge R6515)",
+		Vendor:       "dell",
+		Model:        "r6515",
 		Serial:       "11WLK93",
 		GPUs:         []*model.GPU{},
 		BMC:          &model.BMC{},
