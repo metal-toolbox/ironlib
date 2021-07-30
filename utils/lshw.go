@@ -96,9 +96,19 @@ func (l *Lshw) Collect(ctx context.Context, device *model.Device) error {
 			continue
 		}
 
-		l.Device.Serial = parentNode.Serial
-		l.Device.Vendor = parentNode.Vendor
-		l.Device.Model = parentNode.Product
+		// overwrite vendor, model serial only if its unset
+		if l.Device.Vendor == "" {
+			l.Device.Vendor = parentNode.Vendor
+		}
+
+		if l.Device.Model == "" {
+			l.Device.Model = parentNode.Product
+		}
+
+		if l.Device.Serial == "" {
+			l.Device.Serial = parentNode.Serial
+		}
+
 		// collect components
 		l.recurseNodes(parentNode.ChildNodes)
 	}
