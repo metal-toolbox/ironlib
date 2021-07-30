@@ -3,13 +3,15 @@ package utils
 import (
 	"bytes"
 	"context"
+	"io"
+	"log"
 	"strings"
 
 	"github.com/packethost/ironlib/model"
 	"github.com/pkg/errors"
 )
 
-const mlxup = "/usr/sbin/mlxup"
+const mlxupBin = "/usr/sbin/mlxup"
 
 // Mlxup is a mlxup command executor object
 type Mlxup struct {
@@ -31,8 +33,8 @@ type MlxupDevice struct {
 }
 
 // Return a new mellanox mlxup command executor
-func NewMlxupCmd(trace bool) Collector {
-	e := NewExecutor(mlxup)
+func NewMlxupCmd(trace bool) *Mlxup {
+	e := NewExecutor(mlxupBin)
 
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
@@ -43,78 +45,86 @@ func NewMlxupCmd(trace bool) Collector {
 	return &Mlxup{Executor: e}
 }
 
-// NewMlxUpdater returns a new mellanox updater
-func NewMlxupUpdater(trace bool) Updater {
-	e := NewExecutor(mlxup)
-	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
-
-	if !trace {
-		e.SetQuiet()
-	}
-
-	return &Mlxup{Executor: e}
-}
-
-// Components returns a slice of mellanox components
-func (m *Mlxup) Components() ([]*model.Component, error) {
+// Collect returns a slice of mellanox components as *model.NIC's
+func (m *Mlxup) NICs(ctx context.Context) ([]*model.NIC, error) {
 	devices, err := m.Query()
 	if err != nil {
 		return nil, err
 	}
 
-	inv := []*model.Component{}
+	nics := []*model.NIC{}
+
+	// serials is a map of serials added to the nics slice
+	serials := map[string]bool{}
 
 	for _, d := range devices {
-		item := &model.Component{
-			Model:           d.DeviceType,
-			Vendor:          model.VendorFromString(d.DeviceType),
-			Slug:            model.SlugNIC,
-			Name:            d.Description,
-			Serial:          d.BaseMAC,
-			FirmwareManaged: true,
-			Metadata:        make(map[string]string),
+		// skip NICs without serials
+		serial := strings.ToLower(d.BaseMAC)
+		if serial == "" {
+			log.Printf("Warn: NIC component without serial, ignored: %+v\n", d)
+			continue
 		}
 
-		// [vInstalled, vAvailable]
-		if len(d.Firmware) > 0 {
-			item.FirmwareInstalled = d.Firmware[0]
-			fwAvailableElem := 2
-
-			if len(d.Firmware) == fwAvailableElem {
-				item.FirmwareAvailable = d.Firmware[1]
-			}
-		} else {
-			item.FirmwareInstalled = "unknown"
+		// skip NICs with duplicate serials
+		if serials[serial] {
+			continue
 		}
 
-		// [vInstalled, vAvailable]
-		if len(d.FirmwarePXE) > 0 {
-			item.Metadata["firmware_pxe_installed"] = d.FirmwarePXE[0]
-			fwAvailableElem := 2
+		serials[serial] = true
 
-			if len(d.FirmwarePXE) == fwAvailableElem {
-				item.Metadata["firmware_pxe_available"] = d.FirmwarePXE[1]
-			}
+		nic := &model.NIC{
+			Model:       d.DeviceType,
+			Vendor:      model.VendorFromString(d.DeviceType),
+			Description: d.Description,
+			Serial:      d.BaseMAC,
+			Metadata:    make(map[string]string),
+			Firmware:    model.NewFirmwareObj(),
 		}
 
-		// [vInstalled, vAvailable]
-		if len(d.FirmwareUEFI) > 0 {
-			item.Metadata["firmware_uefi_installed"] = d.FirmwareUEFI[0]
-			fwAvailableElem := 2
+		// populate NIC firmware attributes
+		setNICFirmware(d, nic.Firmware)
 
-			if len(d.FirmwareUEFI) == fwAvailableElem {
-				item.Metadata["firmware_uefi_available"] = d.FirmwareUEFI[1]
-			}
-		}
-
-		inv = append(inv, item)
+		nics = append(nics, nic)
 	}
 
-	return inv, nil
+	return nics, nil
 }
 
-// ApplyUpdate updates mellanox components with mlxup
-func (m *Mlxup) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
+// setNICFirmware populates the NIC firmware object
+func setNICFirmware(d *MlxupDevice, firmware *model.Firmware) {
+	// [vInstalled, vAvailable]
+	if len(d.Firmware) > 0 {
+		firmware.Installed = d.Firmware[0]
+		fwAvailableElem := 2
+
+		if len(d.Firmware) == fwAvailableElem {
+			firmware.Available = d.Firmware[1]
+		}
+	}
+
+	// [vInstalled, vAvailable]
+	if len(d.FirmwarePXE) > 0 {
+		firmware.Metadata["firmware_pxe_installed"] = d.FirmwarePXE[0]
+		fwAvailableElem := 2
+
+		if len(d.FirmwarePXE) == fwAvailableElem {
+			firmware.Metadata["firmware_pxe_available"] = d.FirmwarePXE[1]
+		}
+	}
+
+	// [vInstalled, vAvailable]
+	if len(d.FirmwareUEFI) > 0 {
+		firmware.Metadata["firmware_uefi_installed"] = d.FirmwareUEFI[0]
+		fwAvailableElem := 2
+
+		if len(d.FirmwareUEFI) == fwAvailableElem {
+			firmware.Metadata["firmware_uefi_available"] = d.FirmwareUEFI[1]
+		}
+	}
+}
+
+// UpdateNIC updates mellanox NIC with the given update file
+func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string) error {
 	// query list of nics
 	nics, err := m.Query()
 	if err != nil {
@@ -123,6 +133,12 @@ func (m *Mlxup) ApplyUpdate(ctx context.Context, updateFile, componentSlug strin
 
 	// apply update
 	for _, nic := range nics {
+		if modelNumber != "" {
+			if !strings.EqualFold(nic.PartNumber, modelNumber) {
+				continue
+			}
+		}
+
 		m.Executor.SetArgs([]string{
 			"--yes",
 			"--dev",
@@ -161,8 +177,7 @@ func (m *Mlxup) Query() ([]*MlxupDevice, error) {
 	return m.parseMlxQueryOutput(result.Stdout), nil
 }
 
-// Parse mlxup --query output into MlxupDevice
-// see tests for details
+// parseMlxQueryOutput parses the mlxup --query output into a slice of []*MlxupDevice
 func (m *Mlxup) parseMlxQueryOutput(b []byte) []*MlxupDevice {
 	devices := []*MlxupDevice{}
 
@@ -170,7 +185,7 @@ func (m *Mlxup) parseMlxQueryOutput(b []byte) []*MlxupDevice {
 	for idx, sl := range byteSlice {
 		s := string(sl)
 		if strings.Contains(s, "Device #") {
-			device := parseMlxDeviceAttributes(byteSlice[idx:])
+			device := parseMlxDeviceAttributes(byteSlice[idx+1:])
 			if device != nil && len(device.Firmware) > 0 {
 				devices = append(devices, device)
 			}
@@ -180,119 +195,159 @@ func (m *Mlxup) parseMlxQueryOutput(b []byte) []*MlxupDevice {
 	return devices
 }
 
-// nolint:gocyclo // TODO: use a map instead
-func parseMlxDeviceAttributes(byteSlice [][]byte) *MlxupDevice {
+// parseMlxDeviceAttributes a mlx device information section into *MlxupDevice
+// nolint:gocyclo // line parsing is cyclomatic
+func parseMlxDeviceAttributes(bSlice [][]byte) *MlxupDevice {
 	device := &MlxupDevice{}
 
-	for _, line := range byteSlice {
+	for sidx, line := range bSlice {
+		// return if we're on a line that indicates a new device
+		if bytes.Contains(line, []byte(`Device #`)) {
+			return device
+		}
+
 		s := string(line)
 
-		// Parse device type
-		if strings.Contains(s, "Device Type:") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				device.DeviceType = strings.TrimSpace(t[1])
-			}
+		cols := 2
+		parts := strings.Split(s, ": ")
 
+		if len(parts) < cols {
 			continue
 		}
 
-		// Parse part number
-		if strings.Contains(s, "Part Number:") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				device.PartNumber = strings.TrimSpace(t[1])
-			}
+		key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+
+		switch key {
+		case "Device Type":
+			device.DeviceType = value
+		case "Part Number":
+			device.PartNumber = value
+		case "PSID":
+			device.PSID = value
+		case "PCI Device Name":
+			device.PCIDeviceName = value
+		case "Description":
+			device.Description = value
+		case "Base MAC":
+			device.BaseMAC = formatBaseMacAddress(value)
+		case "Status":
+			device.Status = value
+		case "Versions":
+			versions := parseMlxVersions(bSlice[sidx:])
+			device.Firmware = versions["FW"]
+			device.FirmwarePXE = versions["PXE"]
+			device.FirmwareUEFI = versions["UEFI"]
 
 			continue
-		}
-
-		// Parse serial
-		if strings.Contains(s, "PSID:") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				device.PSID = strings.TrimSpace(t[1])
-			}
-
-			continue
-		}
-
-		// Parse PCI device name
-		if strings.Contains(s, "PCI Device Name:") {
-			t := strings.Split(s, "PCI Device Name:")
-			if len(t) > 0 {
-				device.PCIDeviceName = strings.TrimSpace(t[1])
-			}
-
-			continue
-		}
-
-		// Parse description
-		if strings.Contains(s, "Description:") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				device.Description = strings.TrimSpace(t[1])
-			}
-
-			continue
-		}
-
-		// Parse MAC
-		if strings.Contains(s, "Base MAC:") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				device.BaseMAC = strings.TrimSpace(t[1])
-			}
-
-			continue
-		}
-
-		// Parse current, available firmware versions
-		if strings.Contains(s, " FW ") && !strings.Contains(s, "Running") {
-			fields := strings.Fields(s)
-			if len(fields) == 0 {
-				continue
-			}
-
-			device.Firmware = fields[1:]
-
-			continue
-		}
-
-		// Parse current, available PXE versions
-		if strings.Contains(s, " PXE ") {
-			fields := strings.Fields(s)
-			if len(fields) == 0 {
-				continue
-			}
-
-			device.FirmwarePXE = fields[1:]
-
-			continue
-		}
-
-		// Parse current, available UEFI versions
-		if strings.Contains(s, " UEFI ") {
-			fields := strings.Fields(s)
-			if len(fields) == 0 {
-				continue
-			}
-
-			device.FirmwareUEFI = fields[1:]
-
-			continue
-		}
-
-		// Parse status line
-		if strings.Contains(s, " Status:") {
-			status := strings.Split(s, ":")
-			if len(status) > 0 {
-				device.Status = strings.TrimSpace(status[1])
-			}
-
-			break
 		}
 	}
 
 	return device
+}
+
+// parseMlxVersions parses the firmware version info
+// and returns a map of versions
+//
+// version["FW"][0] indicates fw version installed
+// version["FW"][1] indicates fw version available
+//
+// nolint:gocyclo // line based parsing is cyclomatic
+func parseMlxVersions(bSlice [][]byte) map[string][]string {
+	versions := map[string][]string{
+		"FW":   make([]string, 0),
+		"PXE":  make([]string, 0),
+		"UEFI": make([]string, 0),
+	}
+
+	for _, s := range bSlice {
+		// skip line with header
+		// Versions:         Current        Available
+		if bytes.Contains(s, []byte("Versions:")) {
+			continue
+		}
+
+		switch {
+		// line indicating the firmware installed,
+		// ignore line in the form, "FW (Running)   14.27.1016     N/A)"
+		// which indicates NIC has been updated but is running the older firmware.
+		case bytes.Contains(s, []byte(" FW ")) && !bytes.Contains(s, []byte("Running")):
+			fields := strings.Fields(string(s))
+			if len(fields) == 0 {
+				continue
+			}
+
+			// version installed, available
+			versions["FW"] = append(versions["FW"], fields[1:]...)
+		case bytes.Contains(s, []byte(" PXE ")):
+			fields := strings.Fields(string(s))
+			if len(fields) == 0 {
+				continue
+			}
+
+			// version installed, available
+			versions["PXE"] = append(versions["PXE"], fields[1:]...)
+		case bytes.Contains(s, []byte(" UEFI ")):
+			fields := strings.Fields(string(s))
+			if len(fields) == 0 {
+				continue
+			}
+
+			// version installed, available
+			versions["UEFI"] = append(versions["UEFI"], fields[1:]...)
+		}
+
+		// break on line with status
+		// Status:           Update required
+		if bytes.Contains(s, []byte(`Status`)) {
+			return versions
+		}
+	}
+
+	return versions
+}
+
+// formatBaseMacAddress accepts a mac address string in the form "ac1f6bdc19c2"
+// returns it in the delimited format "ac:1f:6b:dc:19:c2"
+//
+// returns an empty string if the hw address isn't 12 chars in length
+func formatBaseMacAddress(str string) string {
+	// length of a hwaddress without the separators
+	minLen := 12
+	if len(str) < minLen {
+		return ""
+	}
+
+	if strings.ContainsAny(str, ":") {
+		return str
+	}
+
+	n := 2
+
+	n1 := n - 1
+	l1 := len(str) - 1
+
+	var buffer bytes.Buffer
+	for i, r := range str {
+		buffer.WriteRune(r)
+
+		if i%n == n1 && i != l1 {
+			buffer.WriteRune(':')
+		}
+	}
+
+	return buffer.String()
+}
+
+func NewFakeMlxup(r io.Reader) (*Mlxup, error) {
+	e := NewFakeExecutor("mlxup")
+	b := bytes.Buffer{}
+
+	_, err := b.ReadFrom(r)
+	if err != nil {
+		return nil, err
+	}
+
+	e.SetStdout(b.Bytes())
+
+	return &Mlxup{Executor: e}, nil
 }

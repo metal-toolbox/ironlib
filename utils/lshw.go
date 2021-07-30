@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 
@@ -12,9 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//
-
-const lshw = "/usr/sbin/lshw"
+const lshwBin = "/usr/sbin/lshw"
 
 var (
 	ErrParseLshwOutput         = errors.New("lshw output parse error")
@@ -23,8 +22,9 @@ var (
 
 // The lshw command
 type Lshw struct {
-	Executor Executor
-	Device   *model.Device
+	Executor   Executor
+	Device     *model.Device
+	nicSerials map[string]bool
 }
 
 // lshw JSON unmarshal data structure
@@ -62,21 +62,21 @@ type LshwNode struct {
 	Capabilities  LshwNodeCapabilities  `json:"capabilities,omitempty"`
 }
 
-// Return a new nvme executor
+// Return a new lshw executor
 func NewLshwCmd(trace bool) *Lshw {
-	e := NewExecutor(lshw)
+	e := NewExecutor(lshwBin)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {
 		e.SetQuiet()
 	}
 
-	return &Lshw{Executor: e}
+	return &Lshw{Executor: e, nicSerials: make(map[string]bool)}
 }
 
 // Inventory collects and returns device hardware inventory
 // based on the data parsed from lshw
-func (l *Lshw) Inventory(device *model.Device) error {
+func (l *Lshw) Collect(ctx context.Context, device *model.Device) error {
 	// The device we're taking inventory of
 	l.Device = device
 
@@ -221,7 +221,6 @@ func (l *Lshw) xBIOS(node *LshwNode) *model.BIOS {
 		CapacityBytes: node.Capacity,
 		Firmware: &model.Firmware{
 			Installed: node.Version,
-			Managed:   true,
 		},
 	}
 }
@@ -294,7 +293,19 @@ func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
 		return nil
 	}
 
-	return &model.NIC{
+	if node.Serial == "" {
+		log.Printf("Warn: NIC component without serial, ignored: %+v\n", node)
+		return nil
+	}
+
+	serial := strings.ToLower(node.Serial)
+	if l.nicSerials[serial] {
+		return nil
+	}
+
+	l.nicSerials[serial] = true
+
+	nic := &model.NIC{
 		Description: node.Description,
 		Vendor:      node.Vendor,
 		Model:       node.Product,
@@ -302,11 +313,31 @@ func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
 		SpeedBits:   node.Capacity,
 		PhysicalID:  node.Physid,
 	}
+
+	if node.Configuration != nil && node.Configuration["firmware"] != "" {
+		var version string
+		// The firmware version string returned when not empty is in 3 parts
+		// where the last part is the actual firmware version
+		// lshw uses ethtool netlink under the hood
+		// 7.10 0x800075df 19.5.12
+		want := 3
+
+		parts := strings.Split(node.Configuration["firmware"], " ")
+		if len(parts) >= want {
+			version = parts[want-1]
+		} else {
+			version = node.Configuration["firmware"]
+		}
+
+		nic.Firmware = &model.Firmware{Installed: version}
+	}
+
+	return nic
 }
 
 // Returns Drive information struct populated with the attributes identified by lshw
 func (l *Lshw) xDrive(node *LshwNode) *model.Drive {
-	if strings.Contains(node.Product, "Virtual") || node.Product == "" {
+	if strings.Contains(node.Product, "Virtual") || node.Product == "" || strings.Contains(node.Description, "SATA controller") {
 		return nil
 	}
 
@@ -363,7 +394,7 @@ func NewFakeLshw(stdin io.Reader) *Lshw {
 	executor := NewFakeLshwExecutor("lshw")
 	executor.SetStdin(stdin)
 
-	return &Lshw{Executor: executor}
+	return &Lshw{Executor: executor, nicSerials: make(map[string]bool)}
 }
 
 // ExecWithContext implements the utils.Executor interface

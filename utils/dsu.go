@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -48,10 +49,21 @@ func NewDsu(trace bool) *Dsu {
 }
 
 // Returns a dsu instance with a fake executor for tests
-func NewFakeDsu() *Dsu {
-	return &Dsu{
+func NewFakeDsu(r io.Reader) (*Dsu, error) {
+	dsu := &Dsu{
 		Executor: NewFakeExecutor("dsu"),
 	}
+
+	b := bytes.Buffer{}
+
+	_, err := b.ReadFrom(r)
+	if err != nil {
+		return nil, err
+	}
+
+	dsu.Executor.SetStdout(b.Bytes())
+
+	return dsu, nil
 }
 
 // FetchUpdateFiles executes dsu to fetch applicable updates into to local directory

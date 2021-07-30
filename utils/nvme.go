@@ -29,7 +29,7 @@ type nvmeList struct {
 }
 
 // Return a new nvme executor
-func NewNvmeCmd(trace bool) Collector {
+func NewNvmeCmd(trace bool) *Nvme {
 	e := NewExecutor(nvmecli)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
@@ -40,9 +40,9 @@ func NewNvmeCmd(trace bool) Collector {
 	return &Nvme{Executor: e}
 }
 
-// Executes nvme list, parses the output and returns a slice of model.Component's
-func (n *Nvme) Components() ([]*model.Component, error) {
-	inv := make([]*model.Component, 0)
+// Executes nvme list, parses the output and returns a slice of *model.Drive
+func (n *Nvme) Drives(ctx context.Context) ([]*model.Drive, error) {
+	drives := make([]*model.Drive, 0)
 
 	out, err := n.List()
 	if err != nil {
@@ -67,19 +67,21 @@ func (n *Nvme) Components() ([]*model.Component, error) {
 			vendor = modelTokens[1]
 		}
 
-		item := &model.Component{
-			Serial:            d.SerialNumber,
-			Vendor:            vendor,
-			Model:             dModel,
-			FirmwareInstalled: d.Firmware,
-			Slug:              model.SlugDrive,
-			Name:              "NVME drive",
+		drive := &model.Drive{
+			Serial:      d.SerialNumber,
+			Vendor:      vendor,
+			Model:       dModel,
+			ProductName: d.ProductName,
+			Description: d.ModelNumber,
+			Firmware: &model.Firmware{
+				Installed: d.Firmware,
+			},
 		}
 
-		inv = append(inv, item)
+		drives = append(drives, drive)
 	}
 
-	return inv, nil
+	return drives, nil
 }
 
 func (n *Nvme) List() ([]byte, error) {

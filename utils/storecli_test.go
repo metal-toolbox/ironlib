@@ -1,26 +1,31 @@
 package utils
 
 import (
+	"bytes"
+	"context"
+	"io/ioutil"
 	"testing"
 
 	"github.com/packethost/ironlib/model"
 	"github.com/stretchr/testify/assert"
 )
 
-func newFakeStoreCLI(cmd string) *StoreCLI {
-	return &StoreCLI{
-		Executor: NewFakeExecutor(cmd),
-	}
-}
-
 func Test_StoreCLIDeviceAttributes(t *testing.T) {
-	expected := []*model.Component{
-		{Serial: "500304801c71e8d0", Vendor: "LSI", Model: "LSI3008-IT", Name: "Serial Attached SCSI controller", Slug: model.SlugStorageController, FirmwareInstalled: "16.00.01.00"},
+	expected := []*model.StorageController{
+		{Serial: "500304801c71e8d0", Vendor: "LSI", Model: "LSI3008-IT", Description: "LSI3008-IT", Metadata: map[string]string{"drives_attached": "12"}, Firmware: &model.Firmware{Installed: "16.00.01.00", Metadata: map[string]string{"bios_version": "08.37.00.00_18.00.00.00"}}},
 	}
 
-	n := newFakeStoreCLI("storecli")
+	b, err := ioutil.ReadFile("../fixtures/utils/storecli/show.json")
+	if err != nil {
+		t.Error(err)
+	}
 
-	inventory, err := n.Components()
+	cli, err := NewFakeStoreCLI(bytes.NewReader(b))
+	if err != nil {
+		t.Error(err)
+	}
+
+	inventory, err := cli.StorageControllers(context.TODO())
 	if err != nil {
 		t.Error(err)
 	}
@@ -29,10 +34,17 @@ func Test_StoreCLIDeviceAttributes(t *testing.T) {
 }
 
 func Test_StoreCLIDeviceAttributesNoControllers(t *testing.T) {
-	// see fake_executor.go for how this works
-	n := newFakeStoreCLI("storecli-nocontrollers")
+	b, err := ioutil.ReadFile("../fixtures/utils/storecli/show_nocontrollers.json")
+	if err != nil {
+		t.Error(err)
+	}
 
-	inventory, err := n.Components()
+	cli, err := NewFakeStoreCLI(bytes.NewReader(b))
+	if err != nil {
+		t.Error(err)
+	}
+
+	inventory, err := cli.StorageControllers(context.TODO())
 	if err != nil {
 		t.Error(err)
 	}

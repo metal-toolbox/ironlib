@@ -3,24 +3,26 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
-	"strings"
+	"path"
 
 	"github.com/packethost/ironlib/model"
 	"github.com/pkg/errors"
 )
 
-const smartctl = "/usr/sbin/smartctl"
+const smartctlBin = "/usr/sbin/smartctl"
 
 type Smartctl struct {
 	Executor Executor
 }
 
 type SmartctlDriveAttributes struct {
-	ModelName       string `json:"model_name"`
-	SerialNumber    string `json:"serial_number"`
-	FirmwareVersion string `json:"firmware_version"`
+	ModelName       string          `json:"model_name"`
+	SerialNumber    string          `json:"serial_number"`
+	FirmwareVersion string          `json:"firmware_version"`
+	Status          *SmartctlStatus `json:"smart_status"`
 }
 
 type SmartctlScan struct {
@@ -33,9 +35,13 @@ type SmartctlDrive struct {
 	Protocol string `json:"protocol"` // SCSI / NVMe
 }
 
+type SmartctlStatus struct {
+	Passed bool `json:"passed"`
+}
+
 // Return a new smartctl executor
-func NewSmartctlCmd(trace bool) Collector {
-	e := NewExecutor(smartctl)
+func NewSmartctlCmd(trace bool) *Smartctl {
+	e := NewExecutor(smartctlBin)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {
@@ -45,9 +51,9 @@ func NewSmartctlCmd(trace bool) Collector {
 	return &Smartctl{Executor: e}
 }
 
-// Components returns drives identified by smartctl
-func (s *Smartctl) Components() ([]*model.Component, error) {
-	components := make([]*model.Component, 0)
+// Drives returns drives identified by smartctl
+func (s *Smartctl) Drives(ctx context.Context) ([]*model.Drive, error) {
+	drives := make([]*model.Drive, 0)
 
 	DrivesList, err := s.Scan()
 	if err != nil {
@@ -61,20 +67,31 @@ func (s *Smartctl) Components() ([]*model.Component, error) {
 			return nil, err
 		}
 
-		item := &model.Component{
-			Vendor:            model.VendorFromString(smartctlAll.ModelName),
-			Model:             smartctlAll.ModelName,
-			Serial:            smartctlAll.SerialNumber,
-			Name:              smartctlAll.ModelName,
-			Type:              model.DriveTypeSlug(smartctlAll.ModelName),
-			Slug:              model.SlugDrive,
-			FirmwareInstalled: smartctlAll.FirmwareVersion,
+		item := &model.Drive{
+			Vendor:      model.VendorFromString(smartctlAll.ModelName),
+			Model:       smartctlAll.ModelName,
+			Serial:      smartctlAll.SerialNumber,
+			ProductName: smartctlAll.ModelName,
+			// TODO: use the smartctl form_factor/rotational attributes to determine the drive type
+			Type: model.DriveTypeSlug(smartctlAll.ModelName),
+			Firmware: &model.Firmware{
+				Installed: smartctlAll.FirmwareVersion,
+			},
+			SmartStatus: "unknown",
 		}
 
-		components = append(components, item)
+		if smartctlAll.Status != nil {
+			if smartctlAll.Status.Passed {
+				item.SmartStatus = "true"
+			} else {
+				item.SmartStatus = "false"
+			}
+		}
+
+		drives = append(drives, item)
 	}
 
-	return components, nil
+	return drives, nil
 }
 
 // Scan runs smartctl scan -j and returns its value as an object
@@ -149,34 +166,33 @@ func NewFakeSmartctl(dataDir string) *Smartctl {
 	return &Smartctl{Executor: executor}
 }
 
+// nolint:gocyclo // test code
 // ExecWithContext implements the utils.Executor interface
 func (e *FakeSmartctlExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 	switch e.Args[0] {
 	case "--scan":
-		b, err := ioutil.ReadFile(e.JSONFilesDir + "/smartctl_scan.json")
+		b, err := ioutil.ReadFile(e.JSONFilesDir + "/scan.json")
 		if err != nil {
 			return nil, err
 		}
 
 		e.Stdout = b
 	case "-a":
-		if strings.Join(e.Args, " ") == "-a /dev/sda -j" {
-			b, err := ioutil.ReadFile(e.JSONFilesDir + "/smartctl_sda.json")
-			if err != nil {
-				return nil, err
-			}
-
-			e.Stdout = b
+		// -a /dev/sdg -j
+		argLength := 3
+		if len(e.Args) < argLength {
+			return nil, ErrFakeExecutorInvalidArgs
 		}
 
-		if strings.Join(e.Args, " ") == "-a /dev/nvme0 -j" {
-			b, err := ioutil.ReadFile(e.JSONFilesDir + "/smartctl_nvme0.json")
-			if err != nil {
-				return nil, err
-			}
+		driveName := path.Base(e.Args[1])
+		f := fmt.Sprintf("%s/%s.json", e.JSONFilesDir, driveName)
 
-			e.Stdout = b
+		b, err := ioutil.ReadFile(f)
+		if err != nil {
+			return nil, err
 		}
+
+		e.Stdout = b
 	}
 
 	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: 0}, nil

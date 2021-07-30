@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"bytes"
 	"context"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -34,7 +36,16 @@ func Test_dsuComponentNameToSlug(t *testing.T) {
 }
 
 func Test_dsuParseInventoryBytes(t *testing.T) {
-	d := NewFakeDsu()
+	b, err := ioutil.ReadFile("../fixtures/utils/dsu/inventory")
+	if err != nil {
+		t.Error(err)
+	}
+
+	d, err := NewFakeDsu(bytes.NewReader(b))
+	if err != nil {
+		t.Error(err)
+	}
+
 	d.Executor.SetArgs([]string{"--import-public-key", "--inventory"})
 
 	result, err := d.Executor.ExecWithContext(context.Background())
@@ -49,8 +60,15 @@ func Test_dsuParseInventoryBytes(t *testing.T) {
 }
 
 func Test_dsuParsePreviewBytes(t *testing.T) {
-	d := NewFakeDsu()
-	d.Executor.SetArgs([]string{"--import-public-key", "--preview"})
+	b, err := ioutil.ReadFile("../fixtures/utils/dsu/preview")
+	if err != nil {
+		t.Error(err)
+	}
+
+	d, err := NewFakeDsu(bytes.NewReader(b))
+	if err != nil {
+		t.Error(err)
+	}
 
 	result, err := d.Executor.ExecWithContext(context.Background())
 	if err != nil {

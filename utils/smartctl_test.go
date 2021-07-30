@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"testing"
 
 	"github.com/packethost/ironlib/model"
@@ -9,7 +10,7 @@ import (
 
 func newFakeSmartctl() *Smartctl {
 	return &Smartctl{
-		Executor: NewFakeExecutor("smartctl"),
+		Executor: NewFakeSmartctlExecutor("smartctl", "../fixtures/utils/smartctl"),
 	}
 }
 
@@ -34,7 +35,7 @@ func Test_SmartctlScan(t *testing.T) {
 }
 
 func Test_SmartctlAllSCSI(t *testing.T) {
-	expected := &SmartctlDriveAttributes{ModelName: "Micron_5200_MTFDDAK960TDN", SerialNumber: "2013273A99BD", FirmwareVersion: "D1MU020"}
+	expected := &SmartctlDriveAttributes{ModelName: "Micron_5200_MTFDDAK960TDN", SerialNumber: "2013273A99BD", FirmwareVersion: "D1MU020", Status: &SmartctlStatus{Passed: true}}
 	s := newFakeSmartctl()
 
 	results, err := s.All("/dev/sda")
@@ -46,7 +47,7 @@ func Test_SmartctlAllSCSI(t *testing.T) {
 }
 
 func Test_SmartctlAllNVME(t *testing.T) {
-	expected := &SmartctlDriveAttributes{ModelName: "KXG60ZNV256G TOSHIBA", SerialNumber: "Z9DF70I8FY3L", FirmwareVersion: "AGGA4104"}
+	expected := &SmartctlDriveAttributes{ModelName: "KXG60ZNV256G TOSHIBA", SerialNumber: "Z9DF70I8FY3L", FirmwareVersion: "AGGA4104", Status: &SmartctlStatus{Passed: true}}
 	s := newFakeSmartctl()
 
 	results, err := s.All("/dev/nvme0")
@@ -58,18 +59,18 @@ func Test_SmartctlAllNVME(t *testing.T) {
 }
 
 func Test_SmartctlDeviceAttributes(t *testing.T) {
-	expected := []*model.Component{
-		{Serial: "2013273A99BD", Vendor: "Micron", Model: "Micron_5200_MTFDDAK960TDN", Name: "Micron_5200_MTFDDAK960TDN", Type: model.SlugDriveTypeSATASSD, Slug: model.SlugDrive, FirmwareInstalled: "D1MU020"},
-		{Serial: "2013273A99BD", Vendor: "Micron", Model: "Micron_5200_MTFDDAK960TDN", Name: "Micron_5200_MTFDDAK960TDN", Type: model.SlugDriveTypeSATASSD, Slug: model.SlugDrive, FirmwareInstalled: "D1MU020"},
-		{Serial: "Z9DF70I8FY3L", Vendor: "Toshiba", Model: "KXG60ZNV256G TOSHIBA", Name: "KXG60ZNV256G TOSHIBA", Type: model.SlugDriveTypePCIeNVMEeSSD, Slug: model.SlugDrive, FirmwareInstalled: "AGGA4104"},
-		{Serial: "Z9DF70I8FY3L", Vendor: "Toshiba", Model: "KXG60ZNV256G TOSHIBA", Name: "KXG60ZNV256G TOSHIBA", Type: model.SlugDriveTypePCIeNVMEeSSD, Slug: model.SlugDrive, FirmwareInstalled: "AGGA4104"},
+	expected := []*model.Drive{
+		{Serial: "2013273A99BD", Vendor: "Micron", Model: "Micron_5200_MTFDDAK960TDN", ProductName: "Micron_5200_MTFDDAK960TDN", Type: model.SlugDriveTypeSATASSD, Firmware: &model.Firmware{Installed: "D1MU020"}, SmartStatus: "true"},
+		{Serial: "VDJ6SU9K", Vendor: "HGST", Model: "HGST HUS728T8TALE6L4", ProductName: "HGST HUS728T8TALE6L4", Type: model.SlugDriveTypeSATAHDD, Firmware: &model.Firmware{Installed: "V8GNW460"}, SmartStatus: "true"},
+		{Serial: "Z9DF70I8FY3L", Vendor: "Toshiba", Model: "KXG60ZNV256G TOSHIBA", ProductName: "KXG60ZNV256G TOSHIBA", Type: model.SlugDriveTypePCIeNVMEeSSD, Firmware: &model.Firmware{Installed: "AGGA4104"}, SmartStatus: "true"},
+		{Serial: "Z9DF70I9FY3L", Vendor: "Toshiba", Model: "KXG60ZNV256G TOSHIBA", ProductName: "KXG60ZNV256G TOSHIBA", Type: model.SlugDriveTypePCIeNVMEeSSD, Firmware: &model.Firmware{Installed: "AGGA4104"}, SmartStatus: "true"},
 	}
 	s := newFakeSmartctl()
 
-	inv, err := s.Components()
+	drives, err := s.Drives(context.TODO())
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.Equal(t, expected, inv)
+	assert.Equal(t, expected, drives)
 }

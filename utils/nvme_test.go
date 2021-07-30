@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"testing"
 
 	"github.com/packethost/ironlib/model"
@@ -14,17 +15,17 @@ func newFakeNvme() *Nvme {
 }
 
 func Test_NvmeComponents(t *testing.T) {
-	expected := []*model.Component{
-		{Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", FirmwareInstalled: "AGGA4104", Slug: model.SlugDrive, Name: "NVME drive"},
-		{Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", FirmwareInstalled: "AGGA4104", Slug: model.SlugDrive, Name: "NVME drive"},
+	expected := []*model.Drive{
+		{Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &model.Firmware{Installed: "AGGA4104"}, ProductName: "NULL"},
+		{Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &model.Firmware{Installed: "AGGA4104"}, ProductName: "NULL"},
 	}
 
 	n := newFakeNvme()
 
-	components, err := n.Components()
+	drives, err := n.Drives(context.TODO())
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.Equal(t, expected, components)
+	assert.Equal(t, expected, drives)
 }
