@@ -3,10 +3,12 @@ package dell
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/packethost/ironlib/actions"
+	dellFixtures "github.com/packethost/ironlib/fixtures/dell"
 
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
@@ -14,33 +16,67 @@ import (
 	"gotest.tools/assert"
 )
 
-func newFakeDellDevice() *dell {
+var (
+	r6515fixtures = "../../fixtures/dell/r6515"
+)
+
+func newFakeDellDevice() (*dell, error) {
 	device := model.NewDevice()
 	device.Oem = true
 	device.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
 
-	b, err := ioutil.ReadFile("../../utils/test_data/r6515/lshw.json")
+	// set device
+	device.Model = "r6515"
+	device.Vendor = "dell"
+
+	// lshw
+	lshwb, err := ioutil.ReadFile(r6515fixtures + "/lshw.json")
 	if err != nil {
-		fmt.Println(err.Error())
-		return nil
+		return nil, err
 	}
 
-	fakeLshw := utils.NewFakeLshw(bytes.NewReader(b))
-	fakeSmartctl := utils.NewFakeSmartctl("test_data/r6515")
+	lshw := utils.NewFakeLshw(bytes.NewReader(lshwb))
+
+	// smartctl
+	smartctl := utils.NewFakeSmartctl(r6515fixtures + "/smartctl")
+
+	collectors := &actions.Collectors{
+		Inventory: lshw,
+		Drives:    smartctl,
+	}
 
 	return &dell{
-		hw:       model.NewHardware(device),
-		dnf:      utils.NewFakeDnf(),
-		dsu:      utils.NewFakeDsu(),
-		lshw:     fakeLshw,
-		smartctl: fakeSmartctl,
-		logger:   logrus.New(),
-	}
+		hw:         model.NewHardware(device),
+		dnf:        utils.NewFakeDnf(),
+		logger:     logrus.New(),
+		collectors: collectors,
+	}, nil
 }
 
 // Get inventory, not listing updates available
 func TestGetInventory(t *testing.T) {
-	dell := newFakeDellDevice()
+	expected := dellFixtures.R6515_inventory_lshw_smartctl
+	// patch oemcomponent data for expected results
+	expected.Oem = true
+	expected.OemComponents = dellFixtures.R6515_oem_components
+
+	dell, err := newFakeDellDevice()
+	if err != nil {
+		t.Error(err)
+	}
+
+	// dsu
+	b, err := ioutil.ReadFile(r6515fixtures + "/dsu_inventory")
+	if err != nil {
+		t.Error(err)
+	}
+
+	dsu, err := utils.NewFakeDsu(bytes.NewReader(b))
+	if err != nil {
+		t.Error(err)
+	}
+
+	dell.dsu = dsu
 
 	// skip "/usr/libexec/instsvcdrv-helper start" from being executed
 	os.Setenv("IRONLIB_TEST", "1")
@@ -50,12 +86,28 @@ func TestGetInventory(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.DeepEqual(t, testdata_R6515Inventory, device)
+	assert.DeepEqual(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
 }
 
 // Get inventory, not listing updates available
 func TestListUpdates(t *testing.T) {
-	dell := newFakeDellDevice()
+	dell, err := newFakeDellDevice()
+	if err != nil {
+		t.Error(err)
+	}
+
+	// dsu
+	b, err := ioutil.ReadFile(r6515fixtures + "/dsu_preview")
+	if err != nil {
+		t.Error(err)
+	}
+
+	dsu, err := utils.NewFakeDsu(bytes.NewReader(b))
+	if err != nil {
+		t.Error(err)
+	}
+
+	dell.dsu = dsu
 
 	// skip "/usr/libexec/instsvcdrv-helper start" from being executed
 	os.Setenv("IRONLIB_TEST", "1")
@@ -65,5 +117,5 @@ func TestListUpdates(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.DeepEqual(t, testdata_R6515UpdatePreview, device)
+	assert.DeepEqual(t, dellFixtures.R6515_updatePreview, device)
 }

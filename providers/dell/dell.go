@@ -3,21 +3,22 @@ package dell
 import (
 	"context"
 
+	"github.com/packethost/ironlib/actions"
+	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 // The dell device provider struct
 type dell struct {
+	trace                   bool
 	hw                      *model.Hardware
 	dnf                     *utils.Dnf
 	dsu                     *utils.Dsu
-	lshw                    *utils.Lshw
-	smartctl                utils.Collector
 	logger                  *logrus.Logger
 	dsuVersion              string
+	collectors              *actions.Collectors
 	DsuPrequisitesInstalled bool
 }
 
@@ -29,22 +30,18 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManage
 		trace = true
 	}
 
-	// set device
-	device := &model.Device{
-		Model:         deviceModel,
-		Vendor:        deviceVendor,
-		Oem:           true,
-		OemComponents: &model.OemComponents{Dell: []*model.Component{}},
-	}
+	device := model.NewDevice()
+	device.Model = deviceModel
+	device.Vendor = deviceVendor
+	device.Oem = true
+	device.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
 
 	// set device manager
 	dm := &dell{
-		hw:       model.NewHardware(device),
-		dnf:      utils.NewDnf(trace),
-		dsu:      utils.NewDsu(trace),
-		lshw:     utils.NewLshwCmd(trace),
-		smartctl: utils.NewSmartctlCmd(trace),
-		logger:   l,
+		hw:     model.NewHardware(device),
+		dnf:    utils.NewDnf(trace),
+		dsu:    utils.NewDsu(trace),
+		logger: l,
 	}
 
 	return dm, nil
@@ -72,40 +69,23 @@ func (d *dell) UpdatesApplied() bool {
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
 func (d *dell) GetInventory(ctx context.Context) (*model.Device, error) {
-	var err error
-
 	// Collect device inventory from lshw
-	d.logger.Info("Collecting inventory with lshw")
+	d.logger.Info("Collecting hardware inventory")
 
-	d.hw.Device = model.NewDevice()
-
-	err = d.lshw.Inventory(d.hw.Device)
-	if err != nil {
-		return nil, errors.Wrap(err, "error retrieving device inventory")
-	}
-
-	// collect drive information
-	drives, err := d.smartctl.Components()
-	if err != nil {
-		return nil, errors.Wrap(err, "error retrieving drive information")
-	}
-
-	// update drive information
-	model.ComponentFirmwareDrives(d.hw.Device.Drives, drives, true)
-
-	// setup slice for oem components
-	d.hw.Device.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
-
-	// collect dell component info
-	d.logger.Info("Collecting dell specific component inventory with DSU")
-
-	components, err := d.dsuInventory()
+	err := actions.Collect(ctx, d.hw.Device, d.collectors, d.trace)
 	if err != nil {
 		return nil, err
 	}
 
-	// update device with the components retrieved from inventory
-	model.SetDeviceComponents(d.hw.Device, components)
+	// collect dell component info
+	d.logger.Info("Collecting dell OEM component inventory with DSU")
+
+	oemComponents, err := d.dsuInventory()
+	if err != nil {
+		return nil, err
+	}
+
+	d.hw.Device.OemComponents.Dell = append(d.hw.Device.OemComponents.Dell, oemComponents...)
 
 	return d.hw.Device, nil
 }
@@ -115,20 +95,20 @@ func (d *dell) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) 
 	// collect firmware updates available for components
 	d.logger.Info("Identifying component firmware updates...")
 
-	updates, err := d.dsuListUpdates()
+	oemUpdates, err := d.dsuListUpdates()
 	if err != nil {
 		return nil, err
 	}
 
-	count := len(updates)
+	count := len(oemUpdates)
 	if count == 0 {
-		d.logger.Info("no available updates")
+		d.logger.Info("no available dell Oem updates")
 		return nil, nil
 	}
 
 	d.logger.WithField("count", count).Info("component updates identified..")
 
-	model.SetDeviceComponents(d.hw.Device, updates)
+	d.hw.Device.OemComponents.Dell = append(d.hw.Device.OemComponents.Dell, oemUpdates...)
 
 	return d.hw.Device, nil
 }
@@ -136,7 +116,7 @@ func (d *dell) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) 
 // InstallUpdates for Dells based on updateOptions
 func (d *dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
 	if options.InstallAll {
-		return d.installAvailableUpdates(ctx, options.InstallerVersion, options.AllowDowngrade)
+		return d.installAvailableUpdates(ctx, options.InstallerVersion, options.DownloadOnly)
 	}
 
 	exitCode, err := d.installUpdate(ctx, options.Slug, options.AllowDowngrade)
@@ -154,7 +134,7 @@ func (d *dell) installAvailableUpdates(ctx context.Context, revision string, dow
 	if err != nil {
 		if exitCode == utils.DSUExitCodeNoUpdatesAvailable {
 			d.logger.Trace("update(s) not applicable for this device")
-			return nil
+			return errs.ErrNoUpdatesApplicable
 		}
 
 		return err
