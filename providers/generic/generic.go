@@ -4,7 +4,10 @@ import (
 	"context"
 
 	"github.com/packethost/ironlib/actions"
+	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
+	"github.com/packethost/ironlib/utils"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,17 +20,33 @@ type Generic struct {
 }
 
 // New returns a generic device manager
-func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, error) {
 	var trace bool
 
 	if l.GetLevel().String() == "trace" {
 		trace = true
 	}
 
+	deviceVendor, err := dmidecode.Manufacturer()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
+	}
+
+	deviceModel, err := dmidecode.ProductName()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
+	}
+
+	serial, err := dmidecode.SerialNumber()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
+	}
+
 	// set device
 	device := model.NewDevice()
 	device.Model = deviceModel
 	device.Vendor = deviceVendor
+	device.Serial = serial
 
 	// set device manager
 	dm := &Generic{
