@@ -1,7 +1,6 @@
 package model
 
 import (
-	"reflect"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -124,74 +123,6 @@ var (
 
 	ErrTypeComponentFirmware = errors.New("ironlib.GetComponentFirmware() was passed an object type which is not handled")
 )
-
-// IdentifySlug accepts a device component object and returns its matching slug
-func IdentifySlug(component interface{}) string {
-	switch component.(type) {
-	case *BMC:
-		return SlugBMC
-	case *BIOS:
-		return SlugBIOS
-	case []*NIC:
-		return SlugNICs
-	case []*PSU:
-		return SlugPSUs
-	case []*Drive:
-		return SlugDrives
-	case []*StorageController:
-		return SlugStorageControllers
-	default:
-		return SlugUnknown
-	}
-}
-
-// nolint:gocyclo // type assert is cyclomatic
-// GetComponentFirmware asserts the component type and returns the component []*firmware
-func GetComponentFirmware(component interface{}) ([]*Firmware, error) {
-	f := []*Firmware{}
-
-	switch c := component.(type) {
-	case *BMC:
-		f = append(f, c.Firmware)
-	case *BIOS:
-		f = append(f, c.Firmware)
-	case []*NIC:
-		for _, e := range c {
-			f = append(f, e.Firmware)
-		}
-	case []*PSU:
-		for _, e := range c {
-			f = append(f, e.Firmware)
-		}
-	case []*Drive:
-		for _, e := range c {
-			f = append(f, e.Firmware)
-		}
-	case []*StorageController:
-		for _, e := range c {
-			f = append(f, e.Firmware)
-		}
-	default:
-		return nil, errors.Wrap(ErrTypeComponentFirmware, reflect.TypeOf(c).String())
-	}
-
-	return f, nil
-}
-
-// IsMultipleSlug returns bool if a given slug identifies as a component
-// that is found in multiples - PSUs, NICs, Drives
-func IsMultipleSlug(slug string) bool {
-	m := map[string]bool{
-		SlugDrives:             true,
-		SlugNICs:               true,
-		SlugPSUs:               true,
-		SlugStorageControllers: true,
-	}
-
-	_, exists := m[slug]
-
-	return exists
-}
 
 func DriveTypeSlug(m string) string {
 	t, exists := modelDriveTypeSlug[m]
