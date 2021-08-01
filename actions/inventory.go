@@ -317,8 +317,6 @@ func StorageController(ctx context.Context, controllers []*model.StorageControll
 
 // vetChanges looks at the diff changelog and returns an updated Changelog
 // with deletions and changes that zero or unset string, int values are excluded.
-//
-// nolint:gocyclo // type checking is cyclomatic
 func vetChanges(changes diff.Changelog) diff.Changelog {
 	accepted := diff.Changelog{}
 
@@ -329,24 +327,8 @@ func vetChanges(changes diff.Changelog) diff.Changelog {
 		}
 
 		if c.Type == diff.UPDATE {
-			// skip changes when the original value is non-zero or a valid string
-			switch changeFrom := c.From.(type) {
-			case string:
-				if changeFrom != "" {
-					continue
-				}
-			case int:
-				if changeFrom != int(0) {
-					continue
-				}
-			case int64:
-				if changeFrom != int64(0) {
-					continue
-				}
-			case int32:
-				if changeFrom != int32(0) {
-					continue
-				}
+			if structFieldNotEmpty(c.From) {
+				continue
 			}
 		}
 
@@ -354,4 +336,28 @@ func vetChanges(changes diff.Changelog) diff.Changelog {
 	}
 
 	return accepted
+}
+
+// returns true with the given field is empty or zero
+func structFieldNotEmpty(field interface{}) bool {
+	switch changeFrom := field.(type) {
+	case string:
+		if changeFrom != "" {
+			return true
+		}
+	case int:
+		if changeFrom != int(0) {
+			return true
+		}
+	case int64:
+		if changeFrom != int64(0) {
+			return true
+		}
+	case int32:
+		if changeFrom != int32(0) {
+			return true
+		}
+	}
+
+	return false
 }
