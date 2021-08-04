@@ -1,0 +1,16 @@
+# dmidecode -t43
+# dmidecode 3.2
+Getting SMBIOS data from sysfs.
+SMBIOS 3.2.1 present.
+# SMBIOS implementations newer than version 3.2.0 are not
+# fully supported by this version of dmidecode.
+
+Handle 0x0028, DMI type 43, 31 bytes
+TPM Device
+        Vendor ID: 
+        Specification Version: 2.0
+        Firmware Revision: 7.62
+        Description: INFINEON
+        Characteristics:
+                Family configurable via platform software support
+        OEM-specific Information: 0x00000000

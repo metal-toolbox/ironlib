@@ -25,32 +25,17 @@ func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
 	}
 
-	deviceModel, err := dmidecode.ProductName()
-	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
-	}
-
 	deviceVendor = model.FormatVendorName(deviceVendor)
-	deviceModel = model.FormatProductName(deviceModel)
 
 	switch deviceVendor {
-	case "dell":
-		return dell.New(deviceVendor, deviceModel, logger)
-	case "supermicro":
-		return supermicro.New(deviceVendor, deviceModel, logger)
-	case "packet":
-		// The c3.small.x86 are custom Packet hardware in which the device Vendor
-		// is identified in the BaseBoard Manufacturer smbios attribute
-		if deviceModel == "c3.small.x86" {
-			deviceVendor, err = dmidecode.BaseBoardManufacturer()
-			if err != nil {
-				return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard Manufacturer", ""), err.Error())
-			}
-		}
-
-		return asrockrack.New(deviceVendor, deviceModel, logger)
+	case model.VendorDell:
+		return dell.New(dmidecode, logger)
+	case model.VendorSupermicro:
+		return supermicro.New(dmidecode, logger)
+	case model.VendorPacket:
+		return asrockrack.New(dmidecode, logger)
 	default:
-		return generic.New(deviceVendor, deviceModel, logger)
+		return generic.New(dmidecode, logger)
 	}
 }
 

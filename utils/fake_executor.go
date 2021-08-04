@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"bytes"
 	"context"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -31,87 +31,23 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 	switch e.Cmd {
 	case "ipmicfg":
 		if e.Args[0] == "-summary" {
-			b, err := ioutil.ReadFile("test_data/ipmicfg_summary")
+			buf := new(bytes.Buffer)
+
+			_, err := buf.ReadFrom(e.Stdin)
 			if err != nil {
 				return nil, err
 			}
 
-			e.Stdout = b
+			e.Stdout = buf.Bytes()
 		}
 	case "mlxup":
-		if e.Args[0] == "--query" {
-			b, err := ioutil.ReadFile("test_data/mlxup_query")
-			if err != nil {
-				return nil, err
-			}
-
-			e.Stdout = b
-		}
 	case "nvme":
 		if e.Args[0] == "list" {
 			e.Stdout = nvmeListDummyJSON
 			break
 		}
-	case "storecli":
-		b, err := ioutil.ReadFile("test_data/storecli.json")
-		if err != nil {
-			return nil, err
-		}
 
-		e.Stdout = b
-	case "storecli-nocontrollers":
-		b, err := ioutil.ReadFile("test_data/storecli_nocontrollers.json")
-		if err != nil {
-			return nil, err
-		}
-
-		e.Stdout = b
-	case "smartctl":
-		switch e.Args[0] {
-		case "--scan":
-			b, err := ioutil.ReadFile("test_data/smartctl_scan.json")
-			if err != nil {
-				return nil, err
-			}
-
-			e.Stdout = b
-		case "-a":
-			if strings.Join(e.Args, " ") == "-a /dev/sda -j" {
-				b, err := ioutil.ReadFile("test_data/smartctl_a_sda1.json")
-				if err != nil {
-					return nil, err
-				}
-
-				e.Stdout = b
-			}
-
-			if strings.Join(e.Args, " ") == "-a /dev/nvme0 -j" {
-				b, err := ioutil.ReadFile("test_data/smartctl_a_nvme0.json")
-				if err != nil {
-					return nil, err
-				}
-
-				e.Stdout = b
-			}
-		}
 	case "dsu":
-		if e.Args[1] == "--inventory" {
-			b, err := ioutil.ReadFile("test_data/r6515/dsu_inventory")
-			if err != nil {
-				return nil, err
-			}
-
-			e.Stdout = b
-		}
-
-		if e.Args[1] == "--preview" {
-			b, err := ioutil.ReadFile("test_data/dsu_preview")
-			if err != nil {
-				return nil, err
-			}
-
-			e.Stdout = b
-		}
 	case "rpm":
 		if e.Args[1] == "-1" && e.Args[2] == "dell-system-update" {
 			e.Stdout = []byte("1.8.0-20.04.00")
@@ -130,13 +66,6 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 				ExitCode: 0,
 			}, nil
 		}
-
-		b, err := ioutil.ReadFile("test_data/msecli_list")
-		if err != nil {
-			return nil, err
-		}
-
-		e.Stdout = b
 	}
 
 	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: 0}, nil

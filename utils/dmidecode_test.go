@@ -28,7 +28,7 @@ func InitTestDmidecode(testFile string) (*Dmidecode, error) {
 }
 
 func Test_dmidecode_asrockrack_E3C246D4I_NL(t *testing.T) {
-	dmi, err := InitTestDmidecode("test_data/dmidecode/asrockrack-E3C246D4I-NL")
+	dmi, err := InitTestDmidecode("../fixtures/asrr/e3c246d4i-nl/dmidecode")
 	if err != nil {
 		t.Error(err)
 	}

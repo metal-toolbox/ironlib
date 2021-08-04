@@ -19,6 +19,7 @@ func NewDevice() *Device {
 		BIOS:               &BIOS{},
 		Mainboard:          &Mainboard{},
 		TPM:                &TPM{},
+		CPLD:               &CPLD{},
 		PSUs:               []*PSU{},
 		NICs:               []*NIC{},
 		GPUs:               []*GPU{},
@@ -39,6 +40,7 @@ type Device struct {
 	BMC                *BMC                 `json:"bmc,omitempty"`
 	TPM                *TPM                 `json:"tpm,omitempty"`
 	Mainboard          *Mainboard           `json:"mainboard,omitempty"`
+	CPLD               *CPLD                `json:"cpld"`
 	GPUs               []*GPU               `json:"gpu,omitempty"`
 	CPUs               []*CPU               `json:"cpu,omitempty"`
 	Memory             []*Memory            `json:"memory,omitempty"`
@@ -54,8 +56,12 @@ type Device struct {
 type Firmware struct {
 	Available string            `json:"available,omitempty"`
 	Installed string            `json:"installed,omitempty"`
-	Managed   bool              `json:"managed,omitempty"`
 	Metadata  map[string]string `json:"metadata,omitempty"`
+}
+
+// NewFirmwareObj returns a *Firmware object
+func NewFirmwareObj() *Firmware {
+	return &Firmware{Metadata: make(map[string]string)}
 }
 
 type GPU struct {
@@ -86,7 +92,7 @@ type BIOS struct {
 	Description   string    `json:"description,omitempty"`
 	Vendor        string    `json:"vendor,omitempty"`
 	SizeBytes     int64     `json:"size_bytes,omitempty"`
-	CapacityBytes int64     `json:"capacity_bytes,omitempty"`
+	CapacityBytes int64     `json:"capacity_bytes,omitempty" diff:"immutable"`
 	Firmware      *Firmware `json:"firmware,omitempty"`
 }
 
@@ -125,25 +131,27 @@ type Memory struct {
 }
 
 type NIC struct {
-	Description string    `json:"description,omitempty"`
-	Vendor      string    `json:"vendor,omitempty"`
-	Model       string    `json:"model,omitempty"`
-	Serial      string    `json:"serial,omitempty"`
-	SpeedBits   int64     `json:"speed_bits,omitempty"`
-	PhysicalID  string    `json:"physid,omitempty"`
-	Oem         bool      `json:"oem"`
-	Firmware    *Firmware `json:"firmware,omitempty"`
+	Description string            `json:"description,omitempty"`
+	Vendor      string            `json:"vendor,omitempty"`
+	Model       string            `json:"model,omitempty"`
+	Serial      string            `json:"serial,omitempty" diff:"identifier"`
+	SpeedBits   int64             `json:"speed_bits,omitempty"`
+	PhysicalID  string            `json:"physid,omitempty"`
+	Oem         bool              `json:"oem"`
+	Metadata    map[string]string `json:"metadata"`
+	Firmware    *Firmware         `json:"firmware,omitempty"`
 }
 
 type StorageController struct {
-	Description string    `json:"description,omitempty"`
-	Vendor      string    `json:"vendor,omitempty"`
-	Model       string    `json:"model,omitempty"`
-	Serial      string    `json:"serial,omitempty"`
-	Interface   string    `json:"interface,omitempty"` // SATA | SAS
-	PhysicalID  string    `json:"physid,omitempty"`
-	Oem         bool      `json:"oem"`
-	Firmware    *Firmware `json:"firmware,omitempty"`
+	Description string            `json:"description,omitempty"`
+	Vendor      string            `json:"vendor,omitempty"`
+	Model       string            `json:"model,omitempty"`
+	Serial      string            `json:"serial,omitempty"`
+	Interface   string            `json:"interface,omitempty"` // SATA | SAS
+	PhysicalID  string            `json:"physid,omitempty"`
+	Oem         bool              `json:"oem"`
+	Metadata    map[string]string `json:"metadata"`
+	Firmware    *Firmware         `json:"firmware,omitempty"`
 }
 
 type Mainboard struct {
@@ -157,8 +165,10 @@ type Mainboard struct {
 }
 
 type Drive struct {
+	ProductName       string            `json:"name,omitempty"`
+	Type              string            `json:"drive_type,omitempty"`
 	Description       string            `json:"description,omitempty"`
-	Serial            string            `json:"serial,omitempty"`
+	Serial            string            `json:"serial,omitempty" diff:"identifier"`
 	StorageController string            `json:"storage_controller,omitempty"`
 	Vendor            string            `json:"vendor,omitempty"`
 	Model             string            `json:"model,omitempty"`
@@ -169,4 +179,5 @@ type Drive struct {
 	Metadata          map[string]string `json:"metadata,omitempty"` // Additional metadata if any
 	Oem               bool              `json:"oem,omitempty"`      // Component is an OEM component
 	Firmware          *Firmware         `json:"firmware,omitempty"`
+	SmartStatus       string            `json:"smart_status,omitempty"`
 }

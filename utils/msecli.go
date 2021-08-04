@@ -11,8 +11,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	ErrMseCliDriveNotIdentified = errors.New("failed to identify drive for update")
+)
+
 // msecli git executable
-const msecli = "/usr/bin/msecli"
+const msecliBin = "/usr/bin/msecli"
 
 // Msecli is an msecli executor
 type Msecli struct {
@@ -26,18 +30,8 @@ type MsecliDevice struct {
 	FirmwareRevision string
 }
 
-// NewMseclicmd returns a new msecli drive info collector
-func NewMsecliCollector(trace bool) Collector {
-	return newMsecli(trace)
-}
-
-// NewMseclicmd returns a new msecli drive info updater
-func NewMsecliUpdater(trace bool) Updater {
-	return newMsecli(trace)
-}
-
-func newMsecli(trace bool) *Msecli {
-	e := NewExecutor(msecli)
+func NewMsecli(trace bool) *Msecli {
+	e := NewExecutor(msecliBin)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {
@@ -48,34 +42,33 @@ func newMsecli(trace bool) *Msecli {
 }
 
 // Components returns a slice of drive components identified
-func (m *Msecli) Components() ([]*model.Component, error) {
+func (m *Msecli) Drives(ctx context.Context) ([]*model.Drive, error) {
 	devices, err := m.Query()
 	if err != nil {
 		return nil, err
 	}
 
-	inv := []*model.Component{}
+	drives := []*model.Drive{}
 
 	for _, d := range devices {
-		item := &model.Component{
-			Model:             d.ModelNumber,
-			Vendor:            model.VendorFromString(d.ModelNumber),
-			Slug:              model.SlugDrive,
-			Type:              model.DriveTypeSlug(d.ModelNumber),
-			Name:              d.ModelNumber,
-			Serial:            d.SerialNumber,
-			FirmwareInstalled: d.FirmwareRevision,
-			FirmwareManaged:   true,
-			Metadata:          make(map[string]string),
+		item := &model.Drive{
+			Model:       d.ModelNumber,
+			Vendor:      model.VendorFromString(d.ModelNumber),
+			Type:        model.DriveTypeSlug(d.ModelNumber),
+			Description: d.ModelNumber,
+			Serial:      d.SerialNumber,
+			Firmware:    &model.Firmware{Installed: d.FirmwareRevision},
+			Metadata:    make(map[string]string),
 		}
-		inv = append(inv, item)
+
+		drives = append(drives, item)
 	}
 
-	return inv, nil
+	return drives, nil
 }
 
-// ApplyUpdate installs the updateFile
-func (m *Msecli) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
+// UpdateDrives installs drive updates
+func (m *Msecli) UpdateDrive(ctx context.Context, updateFile, modelNumber, serialNumber string) error {
 	// query list of drives
 	drives, err := m.Query()
 	if err != nil {
@@ -98,26 +91,49 @@ func (m *Msecli) ApplyUpdate(ctx context.Context, updateFile, componentSlug stri
 	}
 
 	for _, d := range drives {
-		// echo 'y'
-		m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))
-		m.Executor.SetArgs([]string{
-			"-U", // update
-			"-m", // model
-			// get the product name from the model number
-			model.FormatProductName(d.ModelNumber),
-			"-i", // directory containing the update file
-			filepath.Dir(updateFile),
-		},
-		)
-
-		result, err := m.Executor.ExecWithContext(ctx)
-		if err != nil {
-			return newExecError(m.Executor.GetCmd(), result)
+		// filter by serial number
+		if serialNumber != "" {
+			if !strings.EqualFold(d.SerialNumber, serialNumber) {
+				continue
+			}
 		}
 
-		if result.ExitCode != 0 {
-			return newExecError(m.Executor.GetCmd(), result)
+		// filter by model number
+		if modelNumber != "" {
+			if !strings.EqualFold(d.ModelNumber, modelNumber) {
+				continue
+			}
 		}
+
+		// get the product name from the model number - msecli expects the product name
+		modelNForMsecli := model.FormatProductName(d.ModelNumber)
+
+		return m.updateDrive(ctx, modelNForMsecli, updateFile)
+	}
+
+	return ErrMseCliDriveNotIdentified
+}
+
+// update drive installs the given updatefile
+func (m *Msecli) updateDrive(ctx context.Context, modelNumber, updateFile string) error {
+	// echo 'y'
+	m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))
+	m.Executor.SetArgs([]string{
+		"-U", // update
+		"-m", // model
+		modelNumber,
+		"-i", // directory containing the update file
+		filepath.Dir(updateFile),
+	},
+	)
+
+	result, err := m.Executor.ExecWithContext(ctx)
+	if err != nil {
+		return newExecError(m.Executor.GetCmd(), result)
+	}
+
+	if result.ExitCode != 0 {
+		return newExecError(m.Executor.GetCmd(), result)
 	}
 
 	return nil

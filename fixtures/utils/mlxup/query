@@ -8,9 +8,9 @@ Device #1:
   Description:      ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6
   PSID:             MT_2420110034
   PCI Device Name:  0000:d8:00.0
-  Base MAC:         b8599fde86f8
+  Base MAC:         b8599fde86fd
   Versions:         Current        Available
-     FW             14.27.1016     14.28.2006
+     FW             14.27.1016     14.28.2007
      FW (Running)   14.27.1016     N/A
      PXE            3.5.0901       3.6.0102
      UEFI           14.20.0019     14.21.0017
@@ -25,8 +25,8 @@ Device #2:
   Part Number:      MCX4121A-ACA_Ax   
   Description:      ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6
   PSID:             MT_2420110034
-  PCI Device Name:  0000:d8:00.0
-  Base MAC:         b8599fde86fd
+  PCI Device Name:  0000:d8:00.1
+  Base MAC:         b8599fde86f8
   Versions:         Current        Available
      FW             14.27.1016     14.28.2006
      PXE            3.5.0901       3.6.0102

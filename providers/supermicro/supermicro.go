@@ -2,8 +2,9 @@ package supermicro
 
 import (
 	"context"
-	"strings"
 
+	"github.com/packethost/ironlib/actions"
+	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 	"github.com/pkg/errors"
@@ -11,37 +12,57 @@ import (
 )
 
 type supermicro struct {
+	trace      bool
 	hw         *model.Hardware
 	logger     *logrus.Logger
-	lshw       *utils.Lshw
-	collectors map[string]utils.Collector
+	dmidecode  *utils.Dmidecode
+	collectors *actions.Collectors
 }
 
-func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, error) {
 	var trace bool
-
 	if l.GetLevel().String() == "trace" {
 		trace = true
 	}
 
 	// register inventory collectors
-	collectors := map[string]utils.Collector{
-		"ipmi":     utils.NewIpmicfgCmd(trace),
-		"smartctl": utils.NewSmartctlCmd(trace),
-		"storecli": utils.NewStoreCLICmd(trace),
-		"mlxup":    utils.NewMlxupCmd(trace),
+	collectors := &actions.Collectors{
+		BMC:                utils.NewIpmicfgCmd(trace),
+		BIOS:               utils.NewIpmicfgCmd(trace),
+		CPLD:               utils.NewIpmicfgCmd(trace),
+		Drives:             utils.NewSmartctlCmd(trace),
+		StorageControllers: utils.NewStoreCLICmd(trace),
+		NICs:               utils.NewMlxupCmd(trace),
 	}
 
-	device := &model.Device{
-		Model:  deviceModel,
-		Vendor: deviceVendor,
+	deviceVendor, err := dmidecode.Manufacturer()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
 	}
+
+	// Supermicro's have a consistent baseboard product name
+	// compared to the marketing product name which varies based on location
+	deviceModel, err := dmidecode.BaseBoardProductName()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
+	}
+
+	serial, err := dmidecode.SerialNumber()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
+	}
+
+	device := model.NewDevice()
+	device.Model = deviceModel
+	device.Vendor = deviceVendor
+	device.Serial = serial
 
 	return &supermicro{
 		hw:         model.NewHardware(device),
-		lshw:       utils.NewLshwCmd(trace),
 		collectors: collectors,
 		logger:     l,
+		dmidecode:  dmidecode,
+		trace:      trace,
 	}, nil
 }
 
@@ -63,37 +84,17 @@ func (s *supermicro) UpdatesApplied() bool {
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
 func (s *supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
-	inventory := make([]*model.Component, 0)
-
 	// Collect device inventory from lshw
-	s.logger.Info("Collecting inventory with lshw")
+	s.logger.Info("Collecting hardware inventory")
 
-	s.hw.Device = model.NewDevice()
-
-	err := s.lshw.Inventory(s.hw.Device)
+	err := actions.Collect(ctx, s.hw.Device, s.collectors, s.trace)
 	if err != nil {
-		return nil, errors.Wrap(err, "error retrieving device inventory")
+		return nil, err
 	}
 
-	// collect current component firmware versions
-	s.logger.Info("Identifying component firmware versions...")
-
-	for cmd, collector := range s.collectors {
-		components, err := collector.Components()
-		if err != nil {
-			s.logger.WithFields(logrus.Fields{"cmd": cmd, "err": err}).Error("inventory collector error")
-		}
-
-		if len(components) == 0 {
-			s.logger.WithFields(logrus.Fields{"cmd": cmd}).Trace("inventory collector returned no items")
-			continue
-		}
-
-		inventory = append(inventory, components...)
-	}
-
-	// update device with the components retrieved from inventory
-	model.SetDeviceComponents(s.hw.Device, inventory)
+	// the BIOS is generally identifed as AMI, overwrite that to be SMC
+	// so updates can be applied based on the hardware vendor tooling
+	s.hw.Device.BIOS.Vendor = model.VendorSupermicro
 
 	return s.hw.Device, nil
 }
@@ -104,41 +105,19 @@ func (s *supermicro) ListUpdatesAvailable(ctx context.Context) (*model.Device, e
 }
 
 // InstallUpdates for Supermicros based on the given options
+//
+// errors are returned when the updater fails to apply updates
 func (s *supermicro) InstallUpdates(ctx context.Context, options *model.UpdateOptions) (err error) {
-	var updater utils.Updater
-
-	var trace bool
-	if s.logger.Level == logrus.TraceLevel {
-		trace = true
-	}
-
-	// set updater based on the component slug, vendor
-	switch options.Slug {
-	case model.SlugBIOS, model.SlugBMC:
-		// setup SMC sum for executing
-		updater = utils.NewSupermicroSUM(trace)
-
-	case model.SlugNIC:
-		// mellanox NIC update
-		updater = utils.NewMlxupUpdater(trace)
-
-	case model.SlugDrive:
-		// micron disk
-		if strings.EqualFold(options.Vendor, model.VendorMicron) {
-			updater = utils.NewMsecliUpdater(trace)
-		} else {
-			s.logger.WithFields(
-				logrus.Fields{"slug": options.Slug, "name": options.Name, "vendor": options.Vendor},
-			).Warn("unsupported disk vendor")
+	// collect device inventory if it isn't added already
+	if s.hw.Device == nil || s.hw.Device.BIOS == nil {
+		s.hw.Device, err = s.GetInventory(ctx)
+		if err != nil {
+			return err
 		}
 	}
 
-	err = updater.ApplyUpdate(ctx, options.UpdateFile, options.Slug)
+	err = actions.Update(ctx, s.hw.Device, options)
 	if err != nil {
-		s.logger.WithFields(
-			logrus.Fields{"component": options.Slug, "err": err},
-		).Warn("component update error")
-
 		return err
 	}
 

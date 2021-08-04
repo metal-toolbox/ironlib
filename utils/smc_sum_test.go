@@ -19,7 +19,7 @@ func Test_parseSMCBIOSConfig_X11SCHFF(t *testing.T) {
 		IntelSGX:       "Software Controlled",
 	}
 
-	b, err := ioutil.ReadFile("test_data/bios_configs/config_X11SCHF-F.xml")
+	b, err := ioutil.ReadFile("../fixtures/supermicro/x11schf-f/bios.xml")
 	if err != nil {
 		t.Error(err)
 	}
@@ -38,7 +38,7 @@ func Test_parseSMCBIOSConfig_X11DPHT(t *testing.T) {
 		SecureBoot:     "Disabled",
 	}
 
-	b, err := ioutil.ReadFile("test_data/bios_configs/config_X11DPH-T.xml")
+	b, err := ioutil.ReadFile("../fixtures/supermicro/x11dph-t/bios.xml")
 	if err != nil {
 		t.Error(err)
 	}

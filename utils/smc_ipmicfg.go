@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"context"
+	"io"
 	"strings"
 
 	"github.com/packethost/ironlib/model"
@@ -16,15 +17,17 @@ type Ipmicfg struct {
 }
 
 type IpmicfgSummary struct {
-	FirmwareRevision string // BMC
-	BIOSVersion      string
-	CPLDVersion      string
+	FirmwareRevision  string // BMC
+	FirmwareBuildDate string
+	BIOSVersion       string
+	BIOSBuildDate     string
+	CPLDVersion       string
 }
 
 // Return a new Supermicro IPMICFG executor
 // note: the binary is expected to be available as smc-ipmicfg,
 //       as setup in the fup firmware-update image
-func NewIpmicfgCmd(trace bool) Collector {
+func NewIpmicfgCmd(trace bool) *Ipmicfg {
 	e := NewExecutor(ipmicfg)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
@@ -36,44 +39,68 @@ func NewIpmicfgCmd(trace bool) Collector {
 }
 
 // Fake IPMI executor for tests
-func NewFakeIpmicfg() *Ipmicfg {
+func NewFakeIpmicfg(r io.Reader) *Ipmicfg {
+	e := NewFakeExecutor("ipmicfg")
+	e.SetStdin(r)
+
 	return &Ipmicfg{
-		Executor: NewFakeExecutor("ipmicfg"),
+		Executor: e,
 	}
 }
 
-func (i *Ipmicfg) Components() ([]*model.Component, error) {
+// BMC returns a SMC BMC component
+func (i Ipmicfg) BMC(ctx context.Context) (*model.BMC, error) {
+	summary, err := i.Summary()
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.BMC{
+		Vendor:      "Supermicro",
+		Description: model.SlugBMC,
+		Firmware: &model.Firmware{
+			Installed: summary.FirmwareRevision,
+			Metadata: map[string]string{
+				"build_date": summary.FirmwareBuildDate,
+			},
+		},
+	}, nil
+}
+
+// BIOS returns a SMC BIOS component
+func (i *Ipmicfg) BIOS(ctx context.Context) (*model.BIOS, error) {
 	summary, err := i.Summary()
 	if err != nil {
 		return nil, err
 	}
 
 	// add CPLD and BIOS firmware inventory
-	inv := []*model.Component{
-		{
-			Model:             "Supermicro",
-			Vendor:            "Supermicro",
-			Name:              "CPLD",
-			Slug:              "CPLD",
-			FirmwareInstalled: summary.CPLDVersion,
+	return &model.BIOS{
+		Vendor:      "Supermicro",
+		Description: model.SlugBIOS,
+		Firmware: &model.Firmware{
+			Installed: summary.BIOSVersion,
+			Metadata: map[string]string{
+				"build_date": summary.BIOSBuildDate,
+			},
 		},
-		{
-			Model:             "Supermicro",
-			Vendor:            "Supermicro",
-			Name:              "BIOS",
-			Slug:              "BIOS",
-			FirmwareInstalled: summary.BIOSVersion,
-		},
-		{
-			Model:             "Supermicro",
-			Vendor:            "Supermicro",
-			Name:              "BMC",
-			Slug:              "BMC",
-			FirmwareInstalled: summary.FirmwareRevision,
-		},
+	}, nil
+}
+
+// CPLD returns a SMC CPLD component
+func (i Ipmicfg) CPLD(ctx context.Context) (*model.CPLD, error) {
+	summary, err := i.Summary()
+	if err != nil {
+		return nil, err
 	}
 
-	return inv, nil
+	return &model.CPLD{
+		Vendor:      "Supermicro",
+		Description: model.SlugCPLD,
+		Firmware: &model.Firmware{
+			Installed: summary.CPLDVersion,
+		},
+	}, nil
 }
 
 func (i *Ipmicfg) Summary() (*IpmicfgSummary, error) {
@@ -92,40 +119,41 @@ func (i *Ipmicfg) Summary() (*IpmicfgSummary, error) {
 	return i.parseQueryOutput(result.Stdout), nil
 }
 
-func (i *Ipmicfg) parseQueryOutput(b []byte) *IpmicfgSummary {
+func (i *Ipmicfg) parseQueryOutput(bSlice []byte) *IpmicfgSummary {
 	summary := &IpmicfgSummary{}
-	byteSlice := bytes.Split(b, []byte("\n"))
 
-	for _, line := range byteSlice {
+	lines := bytes.Split(bSlice, []byte("\n"))
+	for _, line := range lines {
 		s := string(line)
 
-		if strings.Contains(s, "Firmware Revision") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				summary.FirmwareRevision = strings.TrimSpace(t[1])
-			}
+		cols := 2
+		parts := strings.Split(s, ":")
 
+		if len(parts) < cols {
 			continue
 		}
 
-		if strings.Contains(s, "BIOS Version") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				summary.BIOSVersion = strings.TrimSpace(t[1])
-			}
+		key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
 
-			continue
-		}
-
-		if strings.Contains(s, "CPLD Version") {
-			t := strings.Split(s, ":")
-			if len(t) > 0 {
-				summary.CPLDVersion = strings.TrimSpace(t[1])
-			}
-
-			continue
+		switch key {
+		case "Firmware Revision":
+			summary.FirmwareRevision = value
+		case "Firmware Build Time":
+			summary.FirmwareBuildDate = value
+		case "BIOS Version":
+			summary.BIOSVersion = value
+		case "BIOS Build Time":
+			summary.BIOSBuildDate = value
+		case "CPLD Version":
+			summary.CPLDVersion = value
 		}
 	}
 
 	return summary
+}
+
+// NewFakeSMCIpmiCfg returns a fake lshw executor for testing
+func NewFakeSMCIpmiCfg() *SupermicroSUM {
+	executor := &FakeExecute{}
+	return &SupermicroSUM{Executor: executor}
 }

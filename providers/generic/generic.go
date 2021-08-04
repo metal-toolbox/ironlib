@@ -3,6 +3,8 @@ package generic
 import (
 	"context"
 
+	"github.com/packethost/ironlib/actions"
+	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 	"github.com/pkg/errors"
@@ -11,32 +13,46 @@ import (
 
 // A Generic device has methods to collect hardware inventory, regardless of the vendor
 type Generic struct {
-	hw       *model.Hardware
-	lshw     *utils.Lshw
-	logger   *logrus.Logger
-	smartctl utils.Collector
+	trace      bool
+	hw         *model.Hardware
+	logger     *logrus.Logger
+	collectors *actions.Collectors
 }
 
 // New returns a generic device manager
-func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, error) {
 	var trace bool
 
 	if l.GetLevel().String() == "trace" {
 		trace = true
 	}
 
-	// set device
-	device := &model.Device{
-		Model:  deviceModel,
-		Vendor: deviceVendor,
+	deviceVendor, err := dmidecode.Manufacturer()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
 	}
+
+	deviceModel, err := dmidecode.ProductName()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
+	}
+
+	serial, err := dmidecode.SerialNumber()
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
+	}
+
+	// set device
+	device := model.NewDevice()
+	device.Model = deviceModel
+	device.Vendor = deviceVendor
+	device.Serial = serial
 
 	// set device manager
 	dm := &Generic{
-		hw:       model.NewHardware(device),
-		lshw:     utils.NewLshwCmd(trace),
-		smartctl: utils.NewSmartctlCmd(trace),
-		logger:   l,
+		hw:     model.NewHardware(device),
+		logger: l,
+		trace:  trace,
 	}
 
 	return dm, nil
@@ -45,26 +61,12 @@ func New(deviceVendor, deviceModel string, l *logrus.Logger) (model.DeviceManage
 // Returns hardware inventory for the device
 func (a *Generic) GetInventory(ctx context.Context) (*model.Device, error) {
 	// Collect device inventory from lshw
-	a.logger.Info("Collecting inventory with lshw")
+	a.logger.Info("Collecting inventory")
 
-	a.hw.Device = model.NewDevice()
-
-	err := a.lshw.Inventory(a.hw.Device)
+	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace)
 	if err != nil {
-		return nil, errors.Wrap(err, "error retrieving device inventory")
+		return nil, err
 	}
-
-	// collect drive information
-	drives, err := a.smartctl.Components()
-	if err != nil {
-		return nil, errors.Wrap(err, "error retrieving drive information")
-	}
-
-	// update drive information
-	model.ComponentFirmwareDrives(a.hw.Device.Drives, drives, true)
-
-	// update device with the components retrieved from inventory
-	model.SetDeviceComponents(a.hw.Device, drives)
 
 	return a.hw.Device, nil
 }

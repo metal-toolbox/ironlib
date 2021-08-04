@@ -22,7 +22,7 @@ type SupermicroSUM struct {
 }
 
 // Return a new Supermicro sum command executor
-func NewSupermicroSUM(trace bool) Utility {
+func NewSupermicroSUM(trace bool) *SupermicroSUM {
 	var e Executor
 	if envSum := os.Getenv(EnvVarSumPath); envSum != "" {
 		e = NewExecutor(envSum)
@@ -44,17 +44,49 @@ func (s *SupermicroSUM) Components() ([]*model.Component, error) {
 	return nil, nil
 }
 
-// Inventory implements the Utility interface
-func (s *SupermicroSUM) Inventory() (*model.Device, error) {
-	return nil, nil
+// Collect implements the Utility interface
+func (s *SupermicroSUM) Collect(device *model.Device) error {
+	return nil
+}
+
+// UpdateBIOS installs the SMC BIOS update
+func (s *SupermicroSUM) UpdateBIOS(ctx context.Context, updateFile, modelNumber string) error {
+	s.Executor.SetArgs([]string{"-c", "UpdateBios", "--preserve_setting", "--file", updateFile})
+
+	result, err := s.Executor.ExecWithContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	if result.ExitCode != 0 {
+		return newExecError(s.Executor.GetCmd(), result)
+	}
+
+	return nil
+}
+
+// UpdateBMC installs the SMC BMC update
+func (s *SupermicroSUM) UpdateBMC(ctx context.Context, updateFile, modelNumber string) error {
+	s.Executor.SetArgs([]string{"-c", "UpdateBmc", "--file", updateFile})
+
+	result, err := s.Executor.ExecWithContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	if result.ExitCode != 0 {
+		return newExecError(s.Executor.GetCmd(), result)
+	}
+
+	return nil
 }
 
 // ApplyUpdate installs the SMC update based on the component
 func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
 	switch componentSlug {
-	case "bios":
+	case model.SlugBIOS:
 		s.Executor.SetArgs([]string{"-c", "UpdateBios", "--preserve_setting", "--file", updateFile})
-	case "bmc":
+	case model.SlugBMC:
 		s.Executor.SetArgs([]string{"-c", "UpdateBmc", "--file", updateFile})
 	}
 

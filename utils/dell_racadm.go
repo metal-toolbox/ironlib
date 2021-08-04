@@ -30,7 +30,7 @@ type DellRacadm struct {
 }
 
 // Return a new Dell racadm command executor
-func NewDellRacadm(trace bool) BIOSConfiguror {
+func NewDellRacadm(trace bool) *DellRacadm {
 	racadmUtil := os.Getenv(EnvVarRacadm7)
 	if racadmUtil == "" {
 		racadmUtil = DellRacadmPath

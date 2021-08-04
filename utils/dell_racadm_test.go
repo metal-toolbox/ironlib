@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	biosConfigR6515 = "test_data/bios_configs/dell_r6515.json"
-	biosConfigC6320 = "test_data/bios_configs/config_C6320.xml"
+	biosConfigR6515 = "../fixtures/dell/r6515/bios.json"
+	biosConfigC6320 = "../fixtures/dell/c6320/bios.xml"
 )
 
 // Fake Dell Racadm executor for tests
