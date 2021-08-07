@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
 	"github.com/pkg/errors"
@@ -23,28 +24,42 @@ type Updaters struct {
 	StorageControllers StorageControllerUpdater
 }
 
-// Update identifies the updaters based on the hardware and runs the update
-func Update(ctx context.Context, device *model.Device, options *model.UpdateOptions) error {
-	// Update drive
-	err := UpdateDrive(ctx, device.Drives, options)
-	if err != nil {
-		return errors.Wrap(err, "error updating drive")
-	}
+// Update runs updates based on given options
+func Update(ctx context.Context, device *model.Device, options []*model.UpdateOptions) error {
+	var err error
 
-	// Update NIC
-	err = UpdateNIC(ctx, device.NICs, options)
-	if err != nil {
-		return errors.Wrap(err, "error updating nic")
-	}
+	for _, option := range options {
+		switch option.Slug {
+		// Update BIOS
+		case model.SlugBIOS:
+			err = UpdateBIOS(ctx, device.BIOS, option)
+			if err != nil {
+				return errors.Wrap(err, "error updating bios")
+			}
 
-	err = UpdateBIOS(ctx, device.BIOS, options)
-	if err != nil {
-		return errors.Wrap(err, "error updating bios")
-	}
+		// Update Drive
+		case model.SlugDrive:
+			err = UpdateDrive(ctx, device.Drives, option)
+			if err != nil {
+				return errors.Wrap(err, "error updating drive")
+			}
 
-	err = UpdateBMC(ctx, device.BMC, options)
-	if err != nil {
-		return errors.Wrap(err, "error updating bmc")
+		// Update NIC
+		case model.SlugNIC:
+			err = UpdateNIC(ctx, device.NICs, option)
+			if err != nil {
+				return errors.Wrap(err, "error updating nic")
+			}
+
+		// Update BMC
+		case model.SlugBMC:
+			err = UpdateBMC(ctx, device.BMC, option)
+			if err != nil {
+				return errors.Wrap(err, "error updating bmc")
+			}
+		default:
+			return errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
+		}
 	}
 
 	return nil
