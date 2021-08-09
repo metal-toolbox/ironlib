@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	ErrNoUpdatesApplicable   = errors.New("no updates applicable")
-	ErrDmiDecodeRun          = errors.New("error running dmidecode")
-	ErrComponentListExpected = errors.New("expected a list of components to apply updates")
-	ErrDeviceInventory       = errors.New("failed to collect device inventory")
-	ErrComponentSlugUnknown  = errors.New("component slug unknown")
-	ErrUnsupportedDiskVendor = errors.New("unsupported disk vendor")
+	ErrNoUpdatesApplicable         = errors.New("no updates applicable")
+	ErrDmiDecodeRun                = errors.New("error running dmidecode")
+	ErrComponentListExpected       = errors.New("expected a list of components to apply updates")
+	ErrDeviceInventory             = errors.New("failed to collect device inventory")
+	ErrUnsupportedDiskVendor       = errors.New("unsupported disk vendor")
+	ErrNoUpdateHandlerForComponent = errors.New("component slug has no update handler declared")
 )
 
 // DmiDecodeValueError is returned when a dmidecode value could not be retrieved

@@ -107,7 +107,7 @@ func (s *supermicro) ListUpdatesAvailable(ctx context.Context) (*model.Device, e
 // InstallUpdates for Supermicros based on the given options
 //
 // errors are returned when the updater fails to apply updates
-func (s *supermicro) InstallUpdates(ctx context.Context, options *model.UpdateOptions) (err error) {
+func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOptions) (err error) {
 	// collect device inventory if it isn't added already
 	if s.hw.Device == nil || s.hw.Device.BIOS == nil {
 		s.hw.Device, err = s.GetInventory(ctx)
@@ -116,7 +116,7 @@ func (s *supermicro) InstallUpdates(ctx context.Context, options *model.UpdateOp
 		}
 	}
 
-	err = actions.Update(ctx, s.hw.Device, options)
+	err = actions.Update(ctx, s.hw.Device, []*model.UpdateOptions{option})
 	if err != nil {
 		return err
 	}
