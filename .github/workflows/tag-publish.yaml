@@ -32,7 +32,7 @@ jobs:
          context: .
          push: true
          registry: quay.io
-         repository: packethost/ironlib
+         repository: packet/ironlib
          username: ${{ secrets.DOCKER_USERNAME }}
          password: ${{ secrets.DOCKER_PASSWORD }}
          tags: latest
