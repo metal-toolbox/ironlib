@@ -14,6 +14,20 @@ import (
 
 const smartctlBin = "/usr/sbin/smartctl"
 
+var (
+	// map of smartctl error bits to explanation - man 8 smartctl
+	smartclErrors = map[int]string{
+		0: "Command line did not parse",
+		1: "Device open failed, device did not return an IDENTIFY DEVICE structure, or device is in a low-power mode",
+		2: "Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure",
+		3: "SMART status check returned 'DISK FAILING'",
+		4: "We found prefail Attributes <= threshold",
+		5: "SMART status check returned 'DISK OK' but we found that some (usage or prefail) Attributes have been <= threshold at some time in the past",
+		6: "The device error log contains records of errors",
+		7: "The device self-test log contains records of errors. [ATA only] Failed self-tests outdated by a newer successful extended self-test are ignored",
+	}
+)
+
 type Smartctl struct {
 	Executor Executor
 }
@@ -23,6 +37,7 @@ type SmartctlDriveAttributes struct {
 	SerialNumber    string          `json:"serial_number"`
 	FirmwareVersion string          `json:"firmware_version"`
 	Status          *SmartctlStatus `json:"smart_status"`
+	Errors          []string        `json:"-"`
 }
 
 type SmartctlScan struct {
@@ -88,6 +103,10 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*model.Drive, error) {
 			}
 		}
 
+		if len(item.SmartErrors) > 0 {
+			item.SmartErrors = smartctlAll.Errors
+		}
+
 		drives = append(drives, item)
 	}
 
@@ -122,10 +141,10 @@ func (s *Smartctl) All(device string) (*SmartctlDriveAttributes, error) {
 	// smartctl -a /dev/sda1 -j
 	s.Executor.SetArgs([]string{"-a", device, "-j"})
 
-	result, err := s.Executor.ExecWithContext(context.Background())
-	if err != nil {
-		return nil, err
-	}
+	// smartctl can exit with a non-zero status based on drive smart data
+	result, _ := s.Executor.ExecWithContext(context.Background())
+	// determine the errors if any based on the exit code
+	smartCtlErrs := smartCtlExitStatus(result.ExitCode)
 
 	if len(result.Stdout) == 0 {
 		return nil, errors.Wrap(ErrNoCommandOutput, s.Executor.GetCmd())
@@ -133,12 +152,77 @@ func (s *Smartctl) All(device string) (*SmartctlDriveAttributes, error) {
 
 	deviceAttributes := &SmartctlDriveAttributes{}
 
-	err = json.Unmarshal(result.Stdout, deviceAttributes)
+	err := json.Unmarshal(result.Stdout, deviceAttributes)
 	if err != nil {
 		return nil, err
 	}
 
+	// smartctl identified errors are included in returned attributes
+	if len(smartCtlErrs) > 0 {
+		deviceAttributes.Errors = smartCtlErrs
+	}
+
 	return deviceAttributes, nil
+}
+
+// smartCtlExitStatus identifies the error bits in the smartctl exitcode
+// and returns a slice of strings containing one or more errors identified - if any.
+// an empty slice is returned if there are no errors
+func smartCtlExitStatus(exitCode int) []string {
+	// man 8 smartctl
+	// Return Values
+	// The return values of smartctl are defined by a bitmask.
+	// If all is well with the disk, the return value (exit status) of smartctl is 0 (all bits turned off).
+	// If a problem occurs, or an error, potential error, or fault is detected, then a non-zero status is returned.
+	// In this case, the eight different bits in the return value have the following meanings for ATA disks,
+	// some of these values may also be returned for SCSI disks.
+	e := []string{}
+
+	// identify smartctl error bits set
+	bits := maskExitCode(exitCode)
+	if len(bits) == 0 {
+		return e
+	}
+
+	for _, i := range bits {
+		e = append(e, smartclErrors[i])
+	}
+
+	return e
+}
+
+// maskExitCode identifies error bits set based on the smartctl exit code
+// it returns a slice of bits that are set to a value > 0
+// see man 8 smartctl for details
+// nolint:gomnd // comments clarify magic numbers
+func maskExitCode(e int) []int {
+	set := []int{}
+
+	if e == 0 {
+		return set
+	}
+
+	for i := 0; i < 8; i++ {
+		// check exit code has bit set
+		x := (e & exponentInt(2, i))
+		if x != 0 {
+			set = append(set, i)
+		}
+	}
+
+	return set
+}
+
+// exponentInt returns the exponent of n to the power of a
+func exponentInt(a, n int) int {
+	var i, result int
+	result = 1
+
+	for i = 0; i < n; i++ {
+		result *= a
+	}
+
+	return result
 }
 
 // FakeSmartctlExecute implements the utils.Executor interface for testing
@@ -151,13 +235,15 @@ type FakeSmartctlExecute struct {
 	Stderr       []byte // Set this for the dummy data to be returned
 	Quiet        bool
 	JSONFilesDir string
+	ExitCode     int
+	CheckBin     bool
 	// Executor embedded in here to skip having to implement all the utils.Executor methods
 	Executor
 }
 
 // NewFakeSmartctlExecutor returns a fake smartctl executor for tests
 func NewFakeSmartctlExecutor(cmd, dir string) Executor {
-	return &FakeSmartctlExecute{Cmd: cmd, JSONFilesDir: dir}
+	return &FakeSmartctlExecute{Cmd: cmd, JSONFilesDir: dir, CheckBin: false}
 }
 
 // NewFakeSmartctl returns a fake smartctl object for testing
@@ -195,7 +281,7 @@ func (e *FakeSmartctlExecute) ExecWithContext(ctx context.Context) (*Result, err
 		e.Stdout = b
 	}
 
-	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: 0}, nil
+	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: e.ExitCode}, nil
 }
 
 // SetStdin is to set input to the fake execute method
@@ -206,4 +292,8 @@ func (e *FakeSmartctlExecute) SetStdin(r io.Reader) {
 // SetArgs is to set cmd args to the fake execute method
 func (e *FakeSmartctlExecute) SetArgs(a []string) {
 	e.Args = a
+}
+
+func (e *FakeSmartctlExecute) SetExitCode(i int) {
+	e.ExitCode = i
 }
