@@ -760,6 +760,7 @@ var (
 				Model:       "MTFDDAV240TDU",
 				SizeBytes:   240057409536,
 				Firmware:    &model.Firmware{Installed: "D3DJ004"},
+				Oem:         true,
 				SmartStatus: "true",
 			},
 			{
@@ -771,6 +772,7 @@ var (
 				Model:       "MTFDDAV240TDU",
 				SizeBytes:   240057409536,
 				Firmware:    &model.Firmware{Installed: "D3DJ004"},
+				Oem:         true,
 				SmartStatus: "true",
 			},
 		},
