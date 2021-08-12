@@ -25,6 +25,7 @@ type Executor interface {
 	// for tests
 	SetStdout([]byte)
 	SetStderr([]byte)
+	SetExitCode(int)
 }
 
 func NewExecutor(cmd string) Executor {
