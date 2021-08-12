@@ -34,6 +34,8 @@ type Smartctl struct {
 
 type SmartctlDriveAttributes struct {
 	ModelName       string          `json:"model_name"`
+	OemProductID    string          `json:"ata_additional_product_id"`
+	ModelFamily     string          `json:"model_family"`
 	SerialNumber    string          `json:"serial_number"`
 	FirmwareVersion string          `json:"firmware_version"`
 	Status          *SmartctlStatus `json:"smart_status"`
@@ -93,6 +95,14 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*model.Drive, error) {
 				Installed: smartctlAll.FirmwareVersion,
 			},
 			SmartStatus: "unknown",
+		}
+
+		if item.Vendor == "" {
+			item.Vendor = model.VendorFromString(smartctlAll.ModelFamily)
+		}
+
+		if smartctlAll.OemProductID != "" {
+			item.Oem = true
 		}
 
 		if smartctlAll.Status != nil {
