@@ -12,6 +12,9 @@ var (
 	ErrDeviceInventory             = errors.New("failed to collect device inventory")
 	ErrUnsupportedDiskVendor       = errors.New("unsupported disk vendor")
 	ErrNoUpdateHandlerForComponent = errors.New("component slug has no update handler declared")
+	ErrBinNotExecutable            = errors.New("bin has no executable bit set")
+	ErrBinLstat                    = errors.New("failed to run lstat on bin")
+	ErrBinLookupPath               = errors.New("failed to lookup bin path")
 )
 
 // DmiDecodeValueError is returned when a dmidecode value could not be retrieved

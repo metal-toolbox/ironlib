@@ -7,6 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/packethost/ironlib/errs"
+	"github.com/pkg/errors"
 )
 
 // Executor interface lets us implement dummy executors for tests
@@ -17,23 +20,26 @@ type Executor interface {
 	SetQuiet()
 	SetVerbose()
 	GetCmd() string
+	DisableBinCheck()
 	SetStdin(io.Reader)
 	// for tests
 	SetStdout([]byte)
 	SetStderr([]byte)
+	SetExitCode(int)
 }
 
 func NewExecutor(cmd string) Executor {
-	return &Execute{Cmd: cmd}
+	return &Execute{Cmd: cmd, CheckBin: true}
 }
 
 // An execute instace
 type Execute struct {
-	Cmd   string
-	Args  []string
-	Env   []string
-	Stdin io.Reader
-	Quiet bool
+	Cmd      string
+	Args     []string
+	Env      []string
+	Stdin    io.Reader
+	CheckBin bool
+	Quiet    bool
 }
 
 // The result of a command execution
@@ -76,6 +82,11 @@ func (e *Execute) SetStdin(r io.Reader) {
 	e.Stdin = r
 }
 
+// DisableBinCheck disables validating the binary exists and is executable
+func (e *Execute) DisableBinCheck() {
+	e.CheckBin = false
+}
+
 // SetStdout doesn't do much, is around for tests
 func (e *Execute) SetStdout(b []byte) {
 }
@@ -84,8 +95,19 @@ func (e *Execute) SetStdout(b []byte) {
 func (e *Execute) SetStderr(b []byte) {
 }
 
+// SetExitCode doesn't do much, is around for tests
+func (e *Execute) SetExitCode(i int) {
+}
+
 // ExecWithContext executes the command and returns the Result object
 func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err error) {
+	if e.CheckBin {
+		err = checkBinDep(e.Cmd)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	cmd := exec.CommandContext(ctx, e.Cmd, e.Args...)
 	cmd.Env = append(cmd.Env, e.Env...)
 	cmd.Stdin = e.Stdin
@@ -107,4 +129,31 @@ func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err erro
 	result = &Result{stdoutBuf.Bytes(), stderrBuf.Bytes(), cmd.ProcessState.ExitCode()}
 
 	return result, nil
+}
+
+// checkBinDep determines if the given bin exists and is an executable
+func checkBinDep(bin string) error {
+	var path string
+
+	if strings.Contains(bin, "/") {
+		path = bin
+	} else {
+		var err error
+		path, err = exec.LookPath(bin)
+		if err != nil {
+			return errors.Wrap(errs.ErrBinLookupPath, err.Error())
+		}
+	}
+
+	fileInfo, err := os.Lstat(path)
+	if err != nil {
+		return errors.Wrap(errs.ErrBinLstat, err.Error())
+	}
+
+	// bit mask 0111 indicates atleast one of owner, group, others has an executable bit set
+	if fileInfo.Mode()&0111 == 0 {
+		return errs.ErrBinNotExecutable
+	}
+
+	return nil
 }

@@ -180,4 +180,5 @@ type Drive struct {
 	Oem               bool              `json:"oem,omitempty"`      // Component is an OEM component
 	Firmware          *Firmware         `json:"firmware,omitempty"`
 	SmartStatus       string            `json:"smart_status,omitempty"`
+	SmartErrors       []string          `json:"smart_errors,omitempty"`
 }

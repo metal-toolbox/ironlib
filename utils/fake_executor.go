@@ -11,17 +11,19 @@ import (
 // FakeExecute implements the utils.Executor interface
 // to enable testing
 type FakeExecute struct {
-	Cmd    string
-	Args   []string
-	Env    []string
-	Stdin  io.Reader
-	Stdout []byte // Set this for the dummy data to be returned
-	Stderr []byte // Set this for the dummy data to be returned
-	Quiet  bool
+	Cmd      string
+	Args     []string
+	Env      []string
+	CheckBin bool
+	Stdin    io.Reader
+	Stdout   []byte // Set this for the dummy data to be returned
+	Stderr   []byte // Set this for the dummy data to be returned
+	Quiet    bool
+	ExitCode int
 }
 
 func NewFakeExecutor(cmd string) Executor {
-	return &FakeExecute{Cmd: cmd}
+	return &FakeExecute{Cmd: cmd, CheckBin: false}
 }
 
 // nolint:gocyclo // TODO: break this method up and move into each $util_test.go
@@ -97,6 +99,14 @@ func (e *FakeExecute) SetStderr(b []byte) {
 
 func (e *FakeExecute) SetStdin(r io.Reader) {
 	e.Stdin = r
+}
+
+func (e *FakeExecute) DisableBinCheck() {
+	e.CheckBin = false
+}
+
+func (e *FakeExecute) SetExitCode(i int) {
+	e.ExitCode = i
 }
 
 func (e *FakeExecute) GetCmd() string {
