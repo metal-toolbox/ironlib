@@ -148,14 +148,21 @@ func (d *dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions)
 // installAvailableUpdates runs DSU to install all available updates
 // revision is the Dell DSU version to ensure installed
 func (d *dell) installAvailableUpdates(ctx context.Context, revision string, downloadOnly bool) error {
+	// the installer returns non-zero return code on failure,
+	// when no updates are available
+	// or when the device requires a reboot
 	exitCode, err := d.dsuInstallUpdates(revision, downloadOnly)
 	if err != nil {
-		if exitCode == utils.DSUExitCodeNoUpdatesAvailable {
-			d.logger.Trace("update(s) not applicable for this device")
+		switch exitCode {
+		case utils.DSUExitCodeNoUpdatesAvailable:
+			d.logger.Debug("update(s) not applicable for this device")
 			return errs.ErrNoUpdatesApplicable
+		case utils.DSUExitCodeRebootRequired:
+			d.logger.Debug("update(s) applied, device requires a reboot")
+			d.hw.PendingReboot = true
+		default:
+			return err
 		}
-
-		return err
 	}
 
 	d.hw.UpdatesInstalled = true
