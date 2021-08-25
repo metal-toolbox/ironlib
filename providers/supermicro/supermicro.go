@@ -92,10 +92,6 @@ func (s *supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
 		return nil, err
 	}
 
-	// the BIOS is generally identifed as AMI, overwrite that to be SMC
-	// so updates can be applied based on the hardware vendor tooling
-	s.hw.Device.BIOS.Vendor = model.VendorSupermicro
-
 	return s.hw.Device, nil
 }
 
