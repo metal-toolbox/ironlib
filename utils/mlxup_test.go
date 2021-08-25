@@ -20,7 +20,7 @@ func Test_MlxupNICs(t *testing.T) {
 		{
 			Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6",
 			Vendor:      "Mellanox",
-			Model:       "ConnectX4LX",
+			Model:       "MCX4121A-ACA_Ax",
 			Serial:      "b8:59:9f:de:86:fd",
 			SpeedBits:   0,
 			PhysicalID:  "",
@@ -40,7 +40,7 @@ func Test_MlxupNICs(t *testing.T) {
 		{
 			Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6",
 			Vendor:      "Mellanox",
-			Model:       "ConnectX4LX",
+			Model:       "MCX4121A-ACA_Ax",
 			Serial:      "b8:59:9f:de:86:f8",
 			SpeedBits:   0,
 			PhysicalID:  "",

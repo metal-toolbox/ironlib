@@ -456,7 +456,7 @@ var (
 			{
 				Description: "Ethernet interface",
 				Vendor:      "Mellanox",
-				Model:       "ConnectX4LX",
+				Model:       "MCX4121A-ACA_Ax",
 				Serial:      "0c:42:a1:3d:bd:e0",
 				PhysicalID:  "0",
 				Firmware: &model.Firmware{
