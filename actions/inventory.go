@@ -328,7 +328,11 @@ func vetChanges(changes diff.Changelog) diff.Changelog {
 
 		if c.Type == diff.UPDATE {
 			if structFieldNotEmpty(c.From) {
-				continue
+				// Allow changes in the Vendor, Model fields
+				if !utils.StringInSlice("Vendor", c.Path) &&
+					!utils.StringInSlice("Model", c.Path) {
+					continue
+				}
 			}
 		}
 
