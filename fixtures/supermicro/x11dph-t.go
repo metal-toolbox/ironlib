@@ -461,7 +461,7 @@ var (
 				PhysicalID:  "0",
 				Firmware: &model.Firmware{
 					Available: "14.28.2006",
-					Installed: "14.27.1016 (MT_2420110034)",
+					Installed: "14.27.1016",
 					Metadata: map[string]string{
 						"firmware_pxe_available":  "3.6.0102",
 						"firmware_pxe_installed":  "3.6.0204",

@@ -325,24 +325,44 @@ func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
 	}
 
 	if node.Configuration != nil && node.Configuration["firmware"] != "" {
-		var version string
-		// The firmware version string returned when not empty is in 3 parts
-		// where the last part is the actual firmware version
-		// lshw uses ethtool netlink under the hood
-		// 7.10 0x800075df 19.5.12
-		want := 3
-
-		parts := strings.Split(node.Configuration["firmware"], " ")
-		if len(parts) >= want {
-			version = parts[want-1]
-		} else {
-			version = node.Configuration["firmware"]
-		}
-
+		version := lshwNicFwStringParse(node.Configuration["firmware"])
 		nic.Firmware = &model.Firmware{Installed: version}
 	}
 
 	return nic
+}
+
+// lshwNicFwStringParse returns the version component of the firmware string
+func lshwNicFwStringParse(s string) string {
+	if s == "" {
+		return ""
+	}
+
+	// The intel firmware version string returned when not empty is in 3 parts
+	// where the last part is the actual firmware version
+	// 7.10 0x800075df 19.5.12
+	vPartsIntel := 3
+
+	// The mellanox firmware version string returned when not empty is in 2 parts
+	// where the last part is the actual firmware version
+	// 14.27.1016 (MT_2420110034)
+	vPartsMlx := 2
+
+	parts := strings.Split(s, " ")
+
+	if len(parts) == 1 {
+		return s
+	}
+
+	if len(parts) == vPartsMlx && strings.Contains(parts[1], "MT_") {
+		return parts[0]
+	}
+
+	if len(parts) == vPartsIntel && strings.Contains(parts[1], "0x") {
+		return parts[vPartsIntel-1]
+	}
+
+	return s
 }
 
 // Returns Drive information struct populated with the attributes identified by lshw
