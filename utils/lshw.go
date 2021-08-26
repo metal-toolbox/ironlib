@@ -325,7 +325,7 @@ func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
 	}
 
 	if node.Configuration != nil && node.Configuration["firmware"] != "" {
-		version := lshwNicFwStringParse(node.Configuration["firmware"])
+		version := lshwNicFwStringParse(node.Configuration["firmware"], node.Vendor)
 		nic.Firmware = &model.Firmware{Installed: version}
 	}
 
@@ -333,33 +333,84 @@ func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
 }
 
 // lshwNicFwStringParse returns the version component of the firmware string
-func lshwNicFwStringParse(s string) string {
-	if s == "" {
+func lshwNicFwStringParse(fw, vendor string) string {
+	if fw == "" {
 		return ""
 	}
 
+	vendor = strings.ToLower(vendor)
+
+	switch {
+	case strings.Contains(vendor, model.VendorIntel):
+		return nicFwParseIntel(fw)
+	case strings.Contains(vendor, model.VendorMellanox):
+		return nicFwParseMellanox(fw)
+	case strings.Contains(vendor, model.VendorBroadcom):
+		return nicFwParseBroadcom(fw)
+	default:
+		return fw
+	}
+}
+
+func nicFwParseIntel(s string) string {
 	// The intel firmware version string returned when not empty is in 3 parts
 	// where the last part is the actual firmware version
 	// 7.10 0x800075df 19.5.12
-	vPartsIntel := 3
+	vParts := 3
 
-	// The mellanox firmware version string returned when not empty is in 2 parts
-	// where the last part is the actual firmware version
-	// 14.27.1016 (MT_2420110034)
-	vPartsMlx := 2
+	// unrecognized string returned as is
+	if !strings.Contains(s, "0x") {
+		return s
+	}
 
 	parts := strings.Split(s, " ")
-
 	if len(parts) == 1 {
 		return s
 	}
 
-	if len(parts) == vPartsMlx && strings.Contains(parts[1], "MT_") {
+	if len(parts) == vParts {
+		return parts[vParts-1]
+	}
+
+	return s
+}
+
+func nicFwParseMellanox(s string) string {
+	// The mellanox firmware version string returned when not empty is in 2 parts
+	// where the first part is the actual firmware version
+	// 14.27.1016 (MT_2420110034)
+	vParts := 2
+
+	// unrecognized string returned as is
+	if !strings.Contains(s, "MT") {
+		return s
+	}
+
+	parts := strings.Split(s, " ")
+	if len(parts) == 1 {
+		return s
+	}
+
+	if len(parts) == vParts {
 		return parts[0]
 	}
 
-	if len(parts) == vPartsIntel && strings.Contains(parts[1], "0x") {
-		return parts[vPartsIntel-1]
+	return s
+}
+
+func nicFwParseBroadcom(s string) string {
+	// The broadcom firmware version string returned when not empty is in 3 parts
+	// where the last part is the actual firmware version
+	// 5719-v1.46 NCSI v1.5.1.0
+	vParts := 3
+
+	parts := strings.Split(s, " ")
+	if len(parts) == 1 {
+		return s
+	}
+
+	if len(parts) == vParts {
+		return parts[vParts-1]
 	}
 
 	return s
