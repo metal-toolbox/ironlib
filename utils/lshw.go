@@ -364,10 +364,6 @@ func nicFwParseIntel(s string) string {
 	}
 
 	parts := strings.Split(s, " ")
-	if len(parts) == 1 {
-		return s
-	}
-
 	if len(parts) == vParts {
 		return parts[vParts-1]
 	}
@@ -387,10 +383,6 @@ func nicFwParseMellanox(s string) string {
 	}
 
 	parts := strings.Split(s, " ")
-	if len(parts) == 1 {
-		return s
-	}
-
 	if len(parts) == vParts {
 		return parts[0]
 	}
@@ -405,10 +397,6 @@ func nicFwParseBroadcom(s string) string {
 	vParts := 3
 
 	parts := strings.Split(s, " ")
-	if len(parts) == 1 {
-		return s
-	}
-
 	if len(parts) == vParts {
 		return parts[vParts-1]
 	}
