@@ -73,7 +73,7 @@ func (m *Mlxup) NICs(ctx context.Context) ([]*model.NIC, error) {
 		serials[serial] = true
 
 		nic := &model.NIC{
-			Model:       d.DeviceType,
+			Model:       d.PartNumber,
 			Vendor:      model.VendorFromString(d.DeviceType),
 			Description: d.Description,
 			Serial:      d.BaseMAC,

@@ -18,6 +18,7 @@ const (
 	VendorPacket             = "packet"
 	VendorMellanox           = "mellanox"
 	VendorAmericanMegatrends = "ami"
+	VendorBroadcom           = "broadcom"
 
 	// Generic component slugs
 	// NOTE: when adding slugs here, if the are a multiple -
