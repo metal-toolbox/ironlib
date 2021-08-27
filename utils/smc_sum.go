@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/packethost/ironlib/config"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/model/supermicro"
 	"golang.org/x/net/html/charset"
@@ -103,17 +102,12 @@ func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSl
 }
 
 // GetBIOSConfiguration implements the Getter
-func (s *SupermicroSUM) GetBIOSConfiguration(ctx context.Context, deviceModel string) (*config.BIOSConfiguration, error) {
-	c, err := s.parseBIOSConfig(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &config.BIOSConfiguration{Supermicro: c}, nil
+func (s *SupermicroSUM) GetBIOSConfiguration(ctx context.Context, deviceModel string) (map[string]string, error) {
+	return s.parseBIOSConfig(ctx)
 }
 
-// parseBIOSConfig parses the SMC sum command output BIOS config and returns a model.SupermicroBIOS object
-func (s *SupermicroSUM) parseBIOSConfig(ctx context.Context) (*config.SupermicroBIOS, error) {
+// parseBIOSConfig parses the SMC sum command output BIOS config and returns a model.BIOSConfiguration object
+func (s *SupermicroSUM) parseBIOSConfig(ctx context.Context) (map[string]string, error) {
 	s.Executor.SetArgs([]string{"-c", "GetCurrentBiosCfg"})
 
 	result, err := s.Executor.ExecWithContext(ctx)
@@ -137,44 +131,19 @@ func (s *SupermicroSUM) parseBIOSConfig(ctx context.Context) (*config.Supermicro
 		return nil, err
 	}
 
-	// BIOS settings to collect
-	// The map key should be the exact BIOS setting name as it appears in the config
-	// Note: when updating this map, ensure the config attributes returned are updated as well.
-	settings := map[string]string{
-		"Boot mode select":                "",
-		"Hyper-Threading":                 "", // X11SCHF-F
-		"Hyper-Threading [ALL]":           "", // X11DPH-T
-		"Secure Boot":                     "",
-		"Security Device Support":         "",
-		"Software Guard Extensions (SGX)": "",
-	}
-
-	// recurse through the BIOS config, find params we care about
+	settings := map[string]string{}
 	s.recurseMenus(cfg.Menu, settings)
 
-	bios := &config.SupermicroBIOS{
-		BootMode:       settings["Boot mode select"],
-		Hyperthreading: settings["Hyper-Threading"],
-		SecureBoot:     settings["Secure Boot"],
-		TPM:            settings["Security Device Support"],
-		IntelSGX:       settings["Software Guard Extensions (SGX)"],
-	}
-
-	if settings["Hyper-Threading [ALL]"] != "" {
-		bios.Hyperthreading = settings["Hyper-Threading [ALL]"]
-	}
-
-	return bios, nil
+	return normalizeBIOSConfiguration(settings), nil
 }
 
-// recurseMenus recurses through SMC BIOS menu options
+// recurseMenus recurses through SMC BIOS menu options and gathers all settings with a selected option
 func (s *SupermicroSUM) recurseMenus(menus []*supermicro.Menu, kv map[string]string) {
 	for _, menu := range menus {
 		for _, s := range menu.Setting {
 			s.Name = strings.TrimSpace(s.Name)
 
-			_, exists := kv[s.Name]
-			if exists {
+			if s.SelectedOption != "" {
 				kv[s.Name] = s.SelectedOption
 			}
 		}

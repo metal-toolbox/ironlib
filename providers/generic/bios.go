@@ -2,14 +2,12 @@ package generic
 
 import (
 	"context"
-
-	"github.com/packethost/ironlib/config"
 )
 
-func (g *Generic) SetBIOSConfiguration(ctx context.Context, cfg *config.BIOSConfiguration) error {
+func (g *Generic) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) error {
 	return nil
 }
 
-func (g *Generic) GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error) {
-	return &config.BIOSConfiguration{}, nil
+func (g *Generic) GetBIOSConfiguration(ctx context.Context) (map[string]string, error) {
+	return nil, nil
 }

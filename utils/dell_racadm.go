@@ -10,8 +10,6 @@ import (
 	"github.com/beevik/etree"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
-
-	"github.com/packethost/ironlib/config"
 )
 
 const DellRacadmPath = "/opt/dell/srvadmin/bin/idracadm7"
@@ -47,8 +45,8 @@ func NewDellRacadm(trace bool) *DellRacadm {
 }
 
 // GetBIOSConfiguration returns a BIOS configuration object
-func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel string) (*config.BIOSConfiguration, error) {
-	var cfg *config.DellBIOS
+func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel string) (map[string]string, error) {
+	var cfg map[string]string
 
 	var err error
 
@@ -72,11 +70,11 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel strin
 		return nil, ErrDellBiosCfgNil
 	}
 
-	return &config.BIOSConfiguration{Dell: cfg}, nil
+	return normalizeBIOSConfiguration(cfg), nil
 }
 
-// racadmBIOSConfigXML executes racadm to retrieve BIOS config as XML and returns a config.DellBIOS object
-func (s *DellRacadm) racadmBIOSConfigXML(ctx context.Context) (*config.DellBIOS, error) {
+// racadmBIOSConfigXML executes racadm to retrieve BIOS config as XML and returns a map[string]string object
+func (s *DellRacadm) racadmBIOSConfigXML(ctx context.Context) (map[string]string, error) {
 	// Dump the current BIOS config to dellBiosTempFilename. The racadm
 	// command won't dump the config to stdout directly, so we do this in
 	// a two-step process, and read the tempfile during the parsing step.
@@ -96,31 +94,11 @@ func (s *DellRacadm) racadmBIOSConfigXML(ctx context.Context) (*config.DellBIOS,
 		defer os.Remove(s.BIOSCfgTmpFile)
 	}
 
-	// map of attribute name to xpath query
-	// when updating these attributes, ensure the DellBIOS struct below is updated as well
-	queries := map[string]string{
-		"HyperThreading": "//Component[@FQDD='BIOS.Setup.1-1']//Attribute[@Name='LogicalProc']",
-		"BootMode":       "//Component[@FQDD='BIOS.Setup.1-1']//Attribute[@Name='BootMode']",
-		"SRIOV":          "//Component[@FQDD='BIOS.Setup.1-1']//Attribute[@Name='SriovGlobalEnable']",
-		"TPM":            "//Component[@FQDD='BIOS.Setup.1-1']//Attribute[@Name='TpmSecurity']",
-		"IntelTXT":       "//Component[@FQDD='BIOS.Setup.1-1']//Attribute[@Name='IntelTxt']",
-	}
-
-	settings, err := findXMLAttributes(s.BIOSCfgTmpFile, queries)
-	if err != nil {
-		return nil, err
-	}
-
-	return &config.DellBIOS{
-		BootMode:       settings["BootMode"],
-		Hyperthreading: settings["HyperThreading"],
-		SRIOV:          settings["SRIOV"],
-		TPM:            settings["TPM"],
-	}, nil
+	return findXMLAttributes(s.BIOSCfgTmpFile, "//Component[@FQDD='BIOS.Setup.1-1']//Attribute")
 }
 
-// findXMLAttributes runs the xml queries and returns a map of BIOS attributes to values
-func findXMLAttributes(cfgFile string, queries map[string]string) (map[string]string, error) {
+// findXMLAttributes runs the xml query and returns a map of BIOS attributes to values
+func findXMLAttributes(cfgFile, query string) (map[string]string, error) {
 	xml := etree.NewDocument()
 
 	err := xml.ReadFromFile(cfgFile)
@@ -130,20 +108,24 @@ func findXMLAttributes(cfgFile string, queries map[string]string) (map[string]st
 
 	values := make(map[string]string)
 
-	for key, xpath := range queries {
-		e := xml.FindElement(xpath)
-		if e == nil {
-			continue
-		}
+	for _, e := range xml.FindElements(query) {
+		for _, a := range e.Attr {
+			if strings.EqualFold(a.Key, "Name") {
+				n := a.Value
+				v := e.Text()
 
-		values[key] = e.Text()
+				if n != "" && v != "" {
+					values[n] = v
+				}
+			}
+		}
 	}
 
 	return values, nil
 }
 
-// racadmBIOSConfigJSON executes racadm to retrieve BIOS config as JSON and returns a config.DellBIOS object
-func (s *DellRacadm) racadmBIOSConfigJSON(ctx context.Context) (*config.DellBIOS, error) {
+// racadmBIOSConfigJSON executes racadm to retrieve BIOS config as JSON and returns a map with all the settings and their value object
+func (s *DellRacadm) racadmBIOSConfigJSON(ctx context.Context) (map[string]string, error) {
 	// Dump the current BIOS config to dellBiosTempFilename. The racadm
 	// command won't dump the config to stdout directly, so we do this in
 	// a two-step process, and read the tempfile during the parsing step.
@@ -163,14 +145,6 @@ func (s *DellRacadm) racadmBIOSConfigJSON(ctx context.Context) (*config.DellBIOS
 		defer os.Remove(s.BIOSCfgTmpFile)
 	}
 
-	queries := map[string]string{
-		"BootMode":       "SystemConfiguration.Components.#(FQDD==\"BIOS.Setup.1-1\").Attributes.#(Name==\"BootMode\").Value",
-		"AMDSEV":         "SystemConfiguration.Components.#(FQDD==\"BIOS.Setup.1-1\").Attributes.#(Name==\"CpuMinSevAsid\").Value",
-		"Hyperthreading": "SystemConfiguration.Components.#(FQDD==\"BIOS.Setup.1-1\").Attributes.#(Name==\"LogicalProc\").Value",
-		"SRIOV":          "SystemConfiguration.Components.#(FQDD==\"BIOS.Setup.1-1\").Attributes.#(Name==\"SriovGlobalEnable\").Value",
-		"TPM":            "SystemConfiguration.Components.#(FQDD==\"BIOS.Setup.1-1\").Attributes.#(Name==\"TpmSecurity\").Value",
-	}
-
 	json, err := ioutil.ReadFile(s.BIOSCfgTmpFile)
 	if err != nil {
 		return nil, err
@@ -178,13 +152,23 @@ func (s *DellRacadm) racadmBIOSConfigJSON(ctx context.Context) (*config.DellBIOS
 
 	s.ConfigJSON = string(json)
 
-	return &config.DellBIOS{
-		AMDSev:         gjson.Get(s.ConfigJSON, queries["AMDSEV"]).Int(),
-		BootMode:       gjson.Get(s.ConfigJSON, queries["BootMode"]).String(),
-		Hyperthreading: gjson.Get(s.ConfigJSON, queries["Hyperthreading"]).String(),
-		SRIOV:          gjson.Get(s.ConfigJSON, queries["SRIOV"]).String(),
-		TPM:            gjson.Get(s.ConfigJSON, queries["TPM"]).String(),
-	}, nil
+	attrs := map[string]string{}
+
+	attrJSON := gjson.Get(s.ConfigJSON, `SystemConfiguration.Components.#(FQDD=="BIOS.Setup.1-1").Attributes`)
+	attrJSON.ForEach(func(key, value gjson.Result) bool {
+		n := value.Get("Name").String()
+		v := value.Get("Value").String()
+
+		if n == "" || v == "" {
+			return true
+		}
+
+		attrs[n] = v
+
+		return true
+	})
+
+	return attrs, nil
 }
 
 // FakeRacadmExecute implements the utils.Executor interface for testing

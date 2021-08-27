@@ -3,7 +3,6 @@ package actions
 import (
 	"context"
 
-	"github.com/packethost/ironlib/config"
 	"github.com/packethost/ironlib/model"
 )
 
@@ -17,7 +16,7 @@ type Utility interface {
 type BIOSConfiguror interface {
 	// GetBIOSConfiguration returns the BIOS configuration for the device
 	// deviceModel is an optional parameter depending on the hardware variants
-	GetBIOSConfiguration(ctx context.Context, deviceModel string) (*config.BIOSConfiguration, error)
+	GetBIOSConfiguration(ctx context.Context, deviceModel string) (map[string]string, error)
 }
 
 // Updater runs updates

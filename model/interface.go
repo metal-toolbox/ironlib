@@ -2,8 +2,6 @@ package model
 
 import (
 	"context"
-
-	"github.com/packethost/ironlib/config"
 )
 
 type DeviceManager interface {
@@ -13,7 +11,7 @@ type DeviceManager interface {
 }
 
 type Setter interface {
-	SetBIOSConfiguration(ctx context.Context, config *config.BIOSConfiguration) error
+	SetBIOSConfiguration(ctx context.Context, config map[string]string) error
 }
 
 type Getter interface {
@@ -30,7 +28,7 @@ type Getter interface {
 	// List updates identifed by the vendor tooling (DSU for dells)
 	ListUpdatesAvailable(ctx context.Context) (*Device, error)
 	// Retrieve BIOS configuration for device
-	GetBIOSConfiguration(ctx context.Context) (*config.BIOSConfiguration, error)
+	GetBIOSConfiguration(ctx context.Context) (map[string]string, error)
 }
 
 type Updater interface {
