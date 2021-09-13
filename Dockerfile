@@ -1,16 +1,38 @@
 FROM centos:centos8 AS stage0
 ARG TOOLING_ENDPOINT=https://equinix-metal-firmware.s3.amazonaws.com/fup/image-tooling
+ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
 
 
-## collect vendor tooling artifacts
-RUN dnf install -y --setopt=tsflags=nodocs make unzip
+## install build utils
+RUN dnf install -y --setopt=tsflags=nodocs \
+                        gcc \
+                        flex \
+                        make  \
+                        bison  \
+                        patch   \
+                        ctags    \
+                        gcc-c++    \
+                        gettext     \
+                        libtool      \
+                        elfutils      \
+                        autoconf       \
+                        automake        \
+                        binutils         \
+                        pkgconfig         \
+                        patchutils         \
+                        kernel-devel       \
+                        unzip
+
+
 ## fetch vendor tools
-## TODO: switch these to a public s3 bucket
-RUN curl -sO $TOOLING_ENDPOINT/mlxup && \
+RUN set -x; \
+    curl -sO $TOOLING_ENDPOINT/mlxup && \
     curl -sO $TOOLING_ENDPOINT/msecli_Linux.run && \
     curl -sO $TOOLING_ENDPOINT/IPMICFG_1.32.0_build.200910.zip && \
     curl -sO $TOOLING_ENDPOINT/sum_2.5.0_Linux_x86_64_20200722.tar.gz && \
     curl -sO $TOOLING_ENDPOINT/SW_Broadcom_Unified_StorCLI_v007.1316.0000.0000_20200428.ZIP && \
+    curl -sO $TOOLING_ENDPOINT/asrr/BIOSControl_v1.0.3.zip && \
+    curl -sO $TOOLING_ENDPOINT/asrr/asrr_bios_kernel_module/$ASRDEV_KERNEL_MODULE && \
     # install mlxup
     install -m 755 -D mlxup /usr/sbin/ && \
     # install SMC sum 2.5.0
@@ -20,8 +42,9 @@ RUN curl -sO $TOOLING_ENDPOINT/mlxup && \
     unzip IPMICFG_1.32.0_build.200910.zip && \
     install -m 755 -D IPMICFG_1.32.0_build.200910/Linux/64bit/IPMICFG-Linux.x86_64 /usr/sbin/smc-ipmicfg && \
     # install storecli
-    unzip SW_Broadcom_Unified_StorCLI_v007.1316.0000.0000_20200428.ZIP
-
+    unzip SW_Broadcom_Unified_StorCLI_v007.1316.0000.0000_20200428.ZIP && \
+    unzip BIOSControl_v1.0.3.zip && \
+    install -m 755 -D BIOSControl /usr/sbin/asrr-bioscontrol
 
 # build ironlib wrapper binaries
 FROM golang:1.16-alpine AS stage1
@@ -39,10 +62,9 @@ RUN go mod download
 # copy the go sources
 COPY . .
 
-# build
+# build helper util
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o getbiosconfig examples/biosconfig/biosconfig.go && \
     install -m 755 -D getbiosconfig /usr/sbin/
-
 
 # main
 FROM centos:centos8
@@ -54,8 +76,11 @@ COPY --from=stage0 /usr/sbin/smc-ipmicfg /usr/sbin/smc-ipmicfg
 COPY --from=stage0 Unified_storcli_all_os/Linux/pubKey.asc /tmp/storecli_pubkey.asc
 COPY --from=stage0 Unified_storcli_all_os/Linux/storcli-007.1316.0000.0000-1.noarch.rpm /tmp/
 COPY --from=stage0 msecli_Linux.run /tmp/
+
+
 # copy ironlib wrapper binaries
 COPY --from=stage1 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
+
 # import and install tools
 RUN rpm --import /tmp/storecli_pubkey.asc && \
     dnf install -y /tmp/storcli-007.1316.0000.0000-1.noarch.rpm && \
@@ -64,7 +89,13 @@ RUN rpm --import /tmp/storecli_pubkey.asc && \
 ############# Dell ####################
 COPY dell-system-update.repo /etc/yum.repos.d/
 ## Dell BIOS updates fail if this folder doesn't exist
-RUN mkdir -p /lib/firmware
+RUN mkdir -p /lib/firmware /opt/asrr
+
+# asrr
+# asrr bios settings util requires a kernel module, ugh - the module is loaded
+# when the asrr utility is invoked in ironlib
+COPY --from=stage0 /usr/sbin/asrr-bioscontrol /usr/sbin/asrr-bioscontrol
+COPY --from=stage0 $ASRDEV_KERNEL_MODULE /opt/asrr
 
 # Add keys required by the dell-system-update utility
 RUN mkdir -p /usr/libexec/dell_dup && cd  /usr/libexec/dell_dup && \
