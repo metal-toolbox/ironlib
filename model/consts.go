@@ -7,18 +7,19 @@ import (
 )
 
 const (
-	VendorDell               = "dell"
-	VendorMicron             = "micron"
-	VendorAsrockrack         = "asrockrack"
-	VendorSupermicro         = "supermicro"
-	VendorHPE                = "hp"
-	VendorQuanta             = "quanta"
-	VendorGigabyte           = "gigabyte"
-	VendorIntel              = "intel"
-	VendorPacket             = "packet"
-	VendorMellanox           = "mellanox"
-	VendorAmericanMegatrends = "ami"
-	VendorBroadcom           = "broadcom"
+	VendorDell                  = "dell"
+	VendorMicron                = "micron"
+	VendorAsrockrack            = "asrockrack"
+	VendorSupermicro            = "supermicro"
+	VendorHPE                   = "hp"
+	VendorQuanta                = "quanta"
+	VendorGigabyte              = "gigabyte"
+	VendorIntel                 = "intel"
+	VendorPacket                = "packet"
+	VendorMellanox              = "mellanox"
+	VendorAmericanMegatrends    = "ami"
+	VendorBroadcom              = "broadcom"
+	SystemManufacturerUndefined = "To Be Filled By O.E.M."
 
 	// Generic component slugs
 	// NOTE: when adding slugs here, if the are a multiple -
@@ -137,6 +138,8 @@ func DriveTypeSlug(m string) string {
 // downcases and returns a normalized vendor name from the given string
 func FormatVendorName(v string) string {
 	switch v {
+	case "ASRockRack":
+		return VendorAsrockrack
 	case "Dell Inc.":
 		return VendorDell
 	case "HP", "HPE":

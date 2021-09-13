@@ -22,7 +22,14 @@ func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
 
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("system manufacturer", ""), err.Error())
+	}
+
+	if deviceVendor == "" || deviceVendor == model.SystemManufacturerUndefined {
+		deviceVendor, err = dmidecode.BaseBoardManufacturer()
+		if err != nil {
+			return nil, errors.Wrap(errs.NewDmidecodeValueError("baseboard manufacturer", ""), err.Error())
+		}
 	}
 
 	deviceVendor = model.FormatVendorName(deviceVendor)
@@ -32,7 +39,7 @@ func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
 		return dell.New(dmidecode, logger)
 	case model.VendorSupermicro:
 		return supermicro.New(dmidecode, logger)
-	case model.VendorPacket:
+	case model.VendorPacket, model.VendorAsrockrack:
 		return asrockrack.New(dmidecode, logger)
 	default:
 		return generic.New(dmidecode, logger)
