@@ -27,6 +27,7 @@ func copyFile(src, dst string) error {
 		return err
 	}
 
+	// nolint:gomnd // fs mode permissions are easier to read in this form
 	err = ioutil.WriteFile(dst, in, 0644)
 	if err != nil {
 		return err

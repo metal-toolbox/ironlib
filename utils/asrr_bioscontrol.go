@@ -68,7 +68,6 @@ func NewAsrrBioscontrol(trace bool) *AsrrBioscontrol {
 // loadAsrrBiosKernelModule loads the bioscontrol utility kernel module
 func loadAsrrBiosKernelModule(ctx context.Context) error {
 	// begin ick code
-
 	// 1. identify kernel release
 	unameExec := NewExecutor("uname")
 	unameExec.SetArgs([]string{"-r"})
