@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"io/ioutil"
+	"io"
+	"os"
 
 	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
@@ -22,13 +23,23 @@ func StringInSlice(str string, sl []string) bool {
 // copyFile makes a copy of the given file from src to dst
 // setting the default permissions of 0644
 func copyFile(src, dst string) error {
-	in, err := ioutil.ReadFile(src)
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(out, in)
 	if err != nil {
 		return err
 	}
 
 	// nolint:gomnd // fs mode permissions are easier to read in this form
-	err = ioutil.WriteFile(dst, in, 0644)
+	err = os.Chmod(dst, os.FileMode(0644))
 	if err != nil {
 		return err
 	}
