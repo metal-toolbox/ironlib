@@ -9,6 +9,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+type DeviceIdentifiers struct {
+	Vendor string
+	Model  string
+	Serial string
+}
+
 // StringInSlice returns a bool value if the given string was not/found in the given slice.
 func StringInSlice(str string, sl []string) bool {
 	for _, element := range sl {
@@ -48,37 +54,41 @@ func copyFile(src, dst string) error {
 }
 
 // IdentifyVendorModel returns the device vendor, model, serial number attributes
-func IdentifyVendorModel(dmidecode *Dmidecode) (deviceVendor, deviceModel, deviceSerial string, err error) {
-	deviceVendor, err = dmidecode.Manufacturer()
+func IdentifyVendorModel(dmidecode *Dmidecode) (*DeviceIdentifiers, error) {
+	device := &DeviceIdentifiers{}
+
+	var err error
+
+	device.Vendor, err = dmidecode.Manufacturer()
 	if err != nil {
-		return deviceVendor, deviceModel, deviceSerial, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
 	}
 
-	deviceModel, err = dmidecode.ProductName()
+	device.Model, err = dmidecode.ProductName()
 	if err != nil {
-		return deviceVendor, deviceModel, deviceSerial, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
 	}
 
 	// identify the vendor from the baseboard manufacturer - if the System Manufacturer attribute is unset
-	if deviceVendor == "" || deviceVendor == model.SystemManufacturerUndefined {
-		deviceVendor, err = dmidecode.BaseBoardManufacturer()
+	if device.Vendor == "" || device.Vendor == model.SystemManufacturerUndefined {
+		device.Vendor, err = dmidecode.BaseBoardManufacturer()
 		if err != nil {
-			return deviceVendor, deviceModel, deviceSerial, errors.Wrap(errs.NewDmidecodeValueError("Baseboard Manufacturer", ""), err.Error())
+			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard Manufacturer", ""), err.Error())
 		}
 	}
 
 	// identify the model from the baseboard - if the System Product Name is unset
-	if deviceModel == model.SystemManufacturerUndefined {
-		deviceModel, err = dmidecode.BaseBoardProductName()
+	if device.Model == model.SystemManufacturerUndefined {
+		device.Model, err = dmidecode.BaseBoardProductName()
 		if err != nil {
-			return deviceVendor, deviceModel, deviceSerial, errors.Wrap(errs.NewDmidecodeValueError("Baseboard ProductName", ""), err.Error())
+			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard ProductName", ""), err.Error())
 		}
 	}
 
-	deviceSerial, err = dmidecode.SerialNumber()
+	device.Serial, err = dmidecode.SerialNumber()
 	if err != nil {
-		return deviceVendor, deviceModel, deviceSerial, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
 	}
 
-	return deviceVendor, deviceModel, deviceSerial, nil
+	return device, nil
 }

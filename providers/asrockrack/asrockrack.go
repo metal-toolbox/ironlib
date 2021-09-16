@@ -30,10 +30,14 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 	// set device
 	device := model.NewDevice()
 
-	device.Vendor, device.Model, device.Serial, err = utils.IdentifyVendorModel(dmidecode)
+	identifiers, err := utils.IdentifyVendorModel(dmidecode)
 	if err != nil {
 		return nil, err
 	}
+
+	device.Vendor = identifiers.Vendor
+	device.Model = identifiers.Model
+	device.Serial = identifiers.Serial
 
 	// set device manager
 	dm := &asrockrack{

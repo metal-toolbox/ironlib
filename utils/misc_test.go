@@ -54,11 +54,11 @@ func Test_IdentifyVendorModel(t *testing.T) {
 		t.Error(err)
 	}
 
-	v, m, _, err := IdentifyVendorModel(dmi)
+	device, err := IdentifyVendorModel(dmi)
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.Equal(t, model.VendorAsrockrack, strings.ToLower(v))
-	assert.Equal(t, "E3C246D4I-NL", m)
+	assert.Equal(t, model.VendorAsrockrack, strings.ToLower(device.Vendor))
+	assert.Equal(t, "E3C246D4I-NL", device.Model)
 }
