@@ -5,23 +5,23 @@ ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
 
 ## install build utils
 RUN dnf install -y --setopt=tsflags=nodocs \
-                        gcc \
-                        flex \
-                        make  \
-                        bison  \
-                        patch   \
-                        ctags    \
-                        gcc-c++    \
-                        gettext     \
-                        libtool      \
-                        elfutils      \
-                        autoconf       \
-                        automake        \
-                        binutils         \
-                        pkgconfig         \
-                        patchutils         \
-                        kernel-devel       \
-                        unzip
+                              gcc          \
+                              flex         \
+                              make         \
+                              bison        \
+                              patch        \
+                              ctags        \
+                              gcc-c++      \
+                              gettext      \
+                              libtool      \
+                              elfutils     \
+                              autoconf     \
+                              automake     \
+                              binutils     \
+                              pkgconfig    \
+                              patchutils   \
+                              kernel-devel \
+                              unzip
 
 
 ## fetch vendor tools
@@ -107,21 +107,21 @@ RUN mkdir -p /usr/libexec/dell_dup && cd  /usr/libexec/dell_dup && \
 # install misc support packages
 RUN dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     dnf install -y --setopt=tsflags=nodocs \
-                   vim \
-                   tar  \
-                   lshw  \
-                   unzip  \
-                   nano    \
-                   gzip     \
-                   less      \
-                   which      \
-                   strace      \
-                   pciutils     \
+                   vim           \
+                   tar           \
+                   lshw          \
+                   unzip         \
+                   nano          \
+                   gzip          \
+                   less          \
+                   which         \
+                   strace        \
+                   pciutils      \
                    passwd        \
-                   nvme-cli       \
-                   dmidecode       \
-                   libssh2-devel    \
-                   smartmontools     \
+                   nvme-cli      \
+                   dmidecode     \
+                   libssh2-devel \
+                   smartmontools \
                    'dnf-command(config-manager)' && \
     dnf config-manager --disable production-dell-system-update_dependent && \
     dnf config-manager --disable production-dell-system-update_independent && \
