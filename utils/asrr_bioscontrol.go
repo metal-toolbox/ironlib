@@ -35,7 +35,7 @@ const (
 	EnvAsrrKernelModule = "KERNEL_MODULE_ASRR"
 
 	// see the Dockerfile for how this module ends up here
-	asrrKernelModule = "/opt/asrr/asrdev-##VERSION##.ko"
+	asrrKernelModule = "/opt/asrr/asrdev-%s.ko"
 
 	asrTmpBIOSConfigJSON = "/tmp/biosconfig-asrr.json"
 )
@@ -80,7 +80,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 	kernelVersion := bytes.TrimSpace(r.Stdout)
 
 	// kernel module path - set from env if defined
-	src := strings.Replace(asrrKernelModule, "##VERSION##", string(kernelVersion), 1)
+	src := fmt.Sprintf(asrrKernelModule, kernelVersion)
 
 	envVar := os.Getenv(EnvAsrrKernelModule)
 	if envVar != "" {
