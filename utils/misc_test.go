@@ -38,7 +38,7 @@ func Test_CopyFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Equal(t, "-rw-r--r--", stat.Mode().String())
+	assert.Equal(t, "-rw-------", stat.Mode().String())
 
 	b, err := os.ReadFile(dstFile)
 	if err != nil {

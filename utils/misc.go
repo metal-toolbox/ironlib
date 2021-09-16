@@ -45,12 +45,7 @@ func copyFile(src, dst string) error {
 	}
 
 	// nolint:gomnd // fs mode permissions are easier to read in this form
-	err = os.Chmod(dst, os.FileMode(0644))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return os.Chmod(dst, os.FileMode(0600))
 }
 
 // IdentifyVendorModel returns the device vendor, model, serial number attributes
