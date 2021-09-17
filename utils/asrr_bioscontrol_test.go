@@ -82,6 +82,18 @@ func Test_asrrBiosConfigValueTitle(t *testing.T) {
 			},
 		},
 		{
+			testName:  "String value returned as is",
+			value:     "foobar",
+			valueType: "UNKNOWN",
+			expected:  "foobar",
+			validValues: []interface{}{
+				map[string]interface{}{
+					"Title": "Enabled",
+					"Value": "foobar",
+				},
+			},
+		},
+		{
 			testName:  "Title for float64 map value enabled",
 			value:     "1",
 			valueType: "UINT8",

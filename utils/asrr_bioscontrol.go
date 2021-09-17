@@ -40,19 +40,19 @@ const (
 	asrTmpBIOSConfigJSON = "/tmp/biosconfig-asrr.json"
 )
 
+var ErrASRRBIOSKernelModule = errors.New("error loading asrr bios kernel module")
+
 // AsrrBiosControl is a asrr-bioscontrol executor
 type AsrrBioscontrol struct {
 	Executor    Executor
 	tmpJSONFile string
 }
 
-// Return a new Asrr bios control utility executor
+// NewAsrrBioscontrol returns a new Asrr bios control utility executor
 func NewAsrrBioscontrol(trace bool) *AsrrBioscontrol {
-	utility := asrrBiosUtility
-
-	envVar := os.Getenv(EnvAsrrBiosUtility)
-	if envVar != "" {
-		utility = envVar
+	utility := os.Getenv(EnvAsrrBiosUtility)
+	if utility == "" {
+		utility = asrrBiosUtility
 	}
 
 	e := NewExecutor(utility)
@@ -80,11 +80,9 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 	kernelVersion := bytes.TrimSpace(r.Stdout)
 
 	// kernel module path - set from env if defined
-	src := fmt.Sprintf(asrrKernelModule, kernelVersion)
-
-	envVar := os.Getenv(EnvAsrrKernelModule)
-	if envVar != "" {
-		src = envVar
+	src := os.Getenv(EnvAsrrKernelModule)
+	if src == "" {
+		src = fmt.Sprintf(asrrKernelModule, kernelVersion)
 	}
 
 	// 2. copy over kernel module
@@ -92,7 +90,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 
 	err = copyFile(src, dst)
 	if err != nil {
-		return errors.Wrap(err, "error setting up asrr bios kernel module")
+		return errors.Wrap(err, ErrASRRBIOSKernelModule.Error())
 	}
 
 	// 3. depmod to rebuild /lib/modules/$(uname -r)/modules.dep
@@ -101,7 +99,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 
 	_, err = depmodExec.ExecWithContext(ctx)
 	if err != nil {
-		return errors.Wrap(err, "error setting up asrr bios kernel module")
+		return errors.Wrap(err, ErrASRRBIOSKernelModule.Error())
 	}
 
 	// 4. load module
@@ -110,7 +108,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 
 	_, err = modprobeExec.ExecWithContext(ctx)
 	if err != nil {
-		return errors.Wrap(err, "error setting up asrr bios kernel module")
+		return errors.Wrap(err, ErrASRRBIOSKernelModule.Error())
 	}
 
 	return nil
@@ -165,7 +163,7 @@ func asrrBiosConfigurationJSON(ctx context.Context, configBytes []byte) (map[str
 	}
 
 	for _, p := range params {
-		// trim garbage characters
+		// trim garbage characters - most likely terminal colors for the parameter titles
 		key := strings.Replace(p.Title, "\x1b{a1#\x1b{f4#\x1b{w1125#", "", -1)
 		key = strings.Replace(key, "\x1b{a1#", "", -1)
 		key = strings.Trim(key, " ")
