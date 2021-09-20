@@ -4,10 +4,8 @@ import (
 	"context"
 
 	"github.com/packethost/ironlib/actions"
-	"github.com/packethost/ironlib/errs"
 	"github.com/packethost/ironlib/model"
 	"github.com/packethost/ironlib/utils"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,35 +25,19 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 		trace = true
 	}
 
-	deviceVendor, err := dmidecode.Manufacturer()
-	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
-	}
-
-	deviceModel, err := dmidecode.ProductName()
-	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
-	}
-
-	serial, err := dmidecode.SerialNumber()
-	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
-	}
+	var err error
 
 	// set device
 	device := model.NewDevice()
-	device.Model = deviceModel
-	device.Vendor = deviceVendor
-	device.Serial = serial
 
-	// The c3.small.x86 are custom Packet hardware in which the device Vendor
-	// is identified in the BaseBoard Manufacturer smbios attribute
-	if deviceModel == "c3.small.x86" {
-		device.Vendor, err = dmidecode.BaseBoardManufacturer()
-		if err != nil {
-			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard Manufacturer", ""), err.Error())
-		}
+	identifiers, err := utils.IdentifyVendorModel(dmidecode)
+	if err != nil {
+		return nil, err
 	}
+
+	device.Vendor = identifiers.Vendor
+	device.Model = identifiers.Model
+	device.Serial = identifiers.Serial
 
 	// set device manager
 	dm := &asrockrack{
