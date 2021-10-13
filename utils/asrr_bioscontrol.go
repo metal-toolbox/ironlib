@@ -65,19 +65,55 @@ func NewAsrrBioscontrol(trace bool) *AsrrBioscontrol {
 	return &AsrrBioscontrol{Executor: e, tmpJSONFile: asrTmpBIOSConfigJSON}
 }
 
+// kernelVersion returns the host kernel version
+func kernelVersion() (string, error) {
+	unameExec := NewExecutor("uname")
+	unameExec.SetArgs([]string{"-r"})
+	unameExec.SetQuiet()
+
+	r, err := unameExec.ExecWithContext(context.TODO())
+	if err != nil {
+		return "", errors.Wrap(err, "error executing uname -r")
+	}
+
+	return string(r.Stdout), nil
+}
+
+// kernelModuleLoaded returns bool if the given module name is loaded
+func kernelModuleLoaded(name string) (bool, error) {
+	lsmodExec := NewExecutor("lsmod")
+	lsmodExec.SetQuiet()
+
+	r, err := lsmodExec.ExecWithContext(context.TODO())
+	if err != nil {
+		return false, errors.Wrap(err, "error executing lsmod")
+	}
+
+	if bytes.Contains(r.Stdout, []byte(name)) {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 // loadAsrrBiosKernelModule loads the bioscontrol utility kernel module
 func loadAsrrBiosKernelModule(ctx context.Context) error {
 	// begin ick code
 	// 1. identify kernel release
-	unameExec := NewExecutor("uname")
-	unameExec.SetArgs([]string{"-r"})
-
-	r, err := unameExec.ExecWithContext(ctx)
+	kernelVersion, err := kernelVersion()
 	if err != nil {
-		return errors.Wrap(err, "error setting up asrr bios kernel module")
+		return errors.Wrap(ErrASRRBIOSKernelModule, err.Error())
 	}
 
-	kernelVersion := bytes.TrimSpace(r.Stdout)
+	// 2. figure if the kernel module is loaded
+	isLoaded, err := kernelModuleLoaded("asrdev")
+	if err != nil {
+		return errors.Wrap(ErrASRRBIOSKernelModule, err.Error())
+	}
+
+	if isLoaded {
+		return nil
+	}
 
 	// kernel module path - set from env if defined
 	src := os.Getenv(EnvAsrrKernelModule)
@@ -96,6 +132,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 	// 3. depmod to rebuild /lib/modules/$(uname -r)/modules.dep
 	depmodExec := NewExecutor("depmod")
 	depmodExec.SetArgs([]string{"-a"})
+	depmodExec.SetQuiet()
 
 	_, err = depmodExec.ExecWithContext(ctx)
 	if err != nil {
@@ -105,6 +142,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 	// 4. load module
 	modprobeExec := NewExecutor("modprobe")
 	modprobeExec.SetArgs([]string{"asrdev"})
+	modprobeExec.SetQuiet()
 
 	_, err = modprobeExec.ExecWithContext(ctx)
 	if err != nil {
