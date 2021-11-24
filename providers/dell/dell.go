@@ -98,20 +98,30 @@ func (d *dell) GetInventory(ctx context.Context) (*model.Device, error) {
 	// collect dell component info
 	d.logger.Info("Collecting dell OEM component inventory with DSU")
 
+	return d.hw.Device, nil
+}
+
+// GetInventoryOEM collects device inventory using vendor specific tooling
+// and updates the given device.OemComponents object with the OEM inventory
+func (d *dell) GetInventoryOEM(ctx context.Context, device *model.Device, options *model.UpdateOptions) error {
+	d.setUpdateOptions(options)
+
 	oemComponents, err := d.dsuInventory()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	d.hw.Device.OemComponents.Dell = append(d.hw.Device.OemComponents.Dell, oemComponents...)
 
-	return d.hw.Device, nil
+	return nil
 }
 
-// ListUpdatesAvailable runs the vendor tooling (dsu) to identify updates available
-func (d *dell) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+// ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
+func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error) {
 	// collect firmware updates available for components
 	d.logger.Info("Identifying component firmware updates...")
+
+	d.setUpdateOptions(options)
 
 	oemUpdates, err := d.dsuListUpdates()
 	if err != nil {

@@ -80,12 +80,18 @@ func (a *asrockrack) UpdatesApplied() bool {
 	return a.hw.UpdatesInstalled
 }
 
-// ListUpdatesAvailable runs the vendor tooling (dsu) to identify updates available
-func (a *asrockrack) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+// ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
+func (a *asrockrack) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error) {
 	return nil, nil
 }
 
 // InstallUpdates for asrockrack based on updateOptions
 func (a *asrockrack) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
+	return nil
+}
+
+// GetInventoryOEM collects device inventory using vendor specific tooling
+// and updates the given device.OemComponents object with the OEM inventory
+func (a *asrockrack) GetInventoryOEM(ctx context.Context, device *model.Device, options *model.UpdateOptions) error {
 	return nil
 }

@@ -87,12 +87,18 @@ func (a *Generic) UpdatesApplied() bool {
 	return a.hw.UpdatesInstalled
 }
 
-// ListUpdatesAvailable runs the vendor tooling (dsu) to identify updates available
-func (a *Generic) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+// ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
+func (a *Generic) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error) {
 	return nil, nil
 }
 
 // InstallUpdates installs updates based on updateOptions
 func (a *Generic) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
+	return nil
+}
+
+// GetInventoryOEM collects device inventory using vendor specific tooling
+// and updates the given device.OemComponents object with the OEM inventory
+func (a *Generic) GetInventoryOEM(ctx context.Context, device *model.Device, options *model.UpdateOptions) error {
 	return nil
 }

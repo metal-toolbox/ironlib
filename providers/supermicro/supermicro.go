@@ -96,7 +96,7 @@ func (s *supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
 }
 
 // ListUpdatesAvailable does nothing on a SMC device
-func (s *supermicro) ListUpdatesAvailable(ctx context.Context) (*model.Device, error) {
+func (s *supermicro) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error) {
 	return nil, nil
 }
 
@@ -122,5 +122,11 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 	s.hw.PendingReboot = true
 	s.hw.UpdatesInstalled = true
 
+	return nil
+}
+
+// GetInventoryOEM collects device inventory using vendor specific tooling
+// and updates the given device.OemComponents object with the OEM inventory
+func (s *supermicro) GetInventoryOEM(ctx context.Context, device *model.Device, options *model.UpdateOptions) error {
 	return nil
 }
