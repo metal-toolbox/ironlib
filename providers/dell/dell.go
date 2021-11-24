@@ -2,6 +2,7 @@ package dell
 
 import (
 	"context"
+	"os"
 
 	"github.com/packethost/ironlib/actions"
 	"github.com/packethost/ironlib/errs"
@@ -14,13 +15,21 @@ import (
 // The dell device provider struct
 type dell struct {
 	trace                   bool
+	DsuPrequisitesInstalled bool
 	hw                      *model.Hardware
 	dnf                     *utils.Dnf
 	dsu                     *utils.Dsu
 	logger                  *logrus.Logger
-	dsuVersion              string
-	collectors              *actions.Collectors
-	DsuPrequisitesInstalled bool
+	// The DSU package version
+	// for example 1.9.1.0-21.03.00 from https://linux.dell.com/repo/hardware/DSU_21.05.01/os_independent/x86_64/dell-system-update-1.9.1.0-21.03.00.x86_64.rpm
+	dsuPackageVersion string
+
+	// The DSU release version
+	// for example: 21.05.01, from https://linux.dell.com/repo/hardware/DSU_21.05.01
+	dsuReleaseVersion string
+
+	updateBaseURL string
+	collectors    *actions.Collectors
 }
 
 // New returns a new Dell device manager
@@ -54,12 +63,31 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 	device.Oem = true
 	device.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
 
+	// when default, the repo URL will point to the default repository
+	// this expects a EnvUpdateStoreURL/dell/default/ is made available
+	dsuReleaseVersion := os.Getenv(model.EnvDellDSURelease)
+	if dsuReleaseVersion == "" {
+		dsuReleaseVersion = "default"
+	}
+
+	// when default, whichever version of DSU is available will be installed
+	dsuPackageVersion := os.Getenv(model.EnvDellDSUVersion)
+	if dsuPackageVersion == "" {
+		dsuPackageVersion = "default"
+	}
+
+	// the base url for updates
+	updateBaseURL := os.Getenv(model.EnvUpdateBaseURL)
+
 	// set device manager
 	dm := &dell{
-		hw:     model.NewHardware(device),
-		dnf:    utils.NewDnf(trace),
-		dsu:    utils.NewDsu(trace),
-		logger: l,
+		hw:                model.NewHardware(device),
+		dnf:               utils.NewDnf(trace),
+		dsu:               utils.NewDsu(trace),
+		dsuReleaseVersion: dsuReleaseVersion,
+		dsuPackageVersion: dsuPackageVersion,
+		updateBaseURL:     updateBaseURL,
+		logger:            l,
 	}
 
 	return dm, nil
@@ -143,8 +171,10 @@ func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOp
 
 // InstallUpdates for Dells based on updateOptions
 func (d *dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
+	d.setUpdateOptions(options)
+
 	if options.InstallAll {
-		return d.installAvailableUpdates(ctx, options.InstallerVersion, options.DownloadOnly)
+		return d.installAvailableUpdates(ctx, options.DownloadOnly)
 	}
 
 	exitCode, err := d.installUpdate(ctx, options.Slug, options.AllowDowngrade)
@@ -157,11 +187,11 @@ func (d *dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions)
 
 // installAvailableUpdates runs DSU to install all available updates
 // revision is the Dell DSU version to ensure installed
-func (d *dell) installAvailableUpdates(ctx context.Context, revision string, downloadOnly bool) error {
+func (d *dell) installAvailableUpdates(ctx context.Context, downloadOnly bool) error {
 	// the installer returns non-zero return code on failure,
 	// when no updates are available
 	// or when the device requires a reboot
-	exitCode, err := d.dsuInstallUpdates(revision, downloadOnly)
+	exitCode, err := d.dsuInstallUpdates(downloadOnly)
 	if err != nil {
 		switch exitCode {
 		case utils.DSUExitCodeNoUpdatesAvailable:
@@ -178,4 +208,27 @@ func (d *dell) installAvailableUpdates(ctx context.Context, revision string, dow
 	d.hw.UpdatesInstalled = true
 
 	return nil
+}
+
+// setUpdateOptions overrides set the DSU version and repository parameters
+func (d *dell) setUpdateOptions(options *model.UpdateOptions) {
+	if options.InstallerVersion != "" {
+		d.dsuPackageVersion = options.InstallerVersion
+	}
+
+	if options.RepositoryVersion != "" {
+		d.dsuReleaseVersion = options.RepositoryVersion
+	}
+
+	if options.BaseURL != "" {
+		d.updateBaseURL = options.BaseURL
+	}
+
+	d.logger.WithFields(
+		logrus.Fields{
+			"dsu version": d.dsuPackageVersion,
+			"dsu repo":    d.dsuReleaseVersion,
+			"base url":    d.updateBaseURL,
+		},
+	).Info("update parameters")
 }

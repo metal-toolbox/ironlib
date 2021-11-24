@@ -17,12 +17,11 @@ const (
 
 var (
 	ErrUnhandledDsuExitCode = errors.New("unhandled dell dsu exit code")
+	ErrDellDnfRepoSetup     = errors.New("error setting up dell dnf repo")
 )
 
 // dsuInstallUpdates installs DSU identified updates
-func (d *dell) dsuInstallUpdates(revision string, downloadOnly bool) (int, error) {
-	d.dsuVersion = revision
-
+func (d *dell) dsuInstallUpdates(downloadOnly bool) (int, error) {
 	// install pre-requisites
 	err := d.pre()
 	if err != nil {
@@ -137,7 +136,7 @@ func (d *dell) pre() (err error) {
 	}
 
 	actions := []func() error{
-		d.enableDsuRepo, d.installPkgs, d.startSrvHelper,
+		d.addDsuRepo, d.installPkgs, d.startSrvHelper,
 	}
 
 	for _, action := range actions {
@@ -157,8 +156,8 @@ func (d *dell) installPkgs() error {
 	// install dsu package
 	dsuPkg := "dell-system-update"
 
-	if d.dsuVersion != "" {
-		dsuPkg += "-" + d.dsuVersion
+	if d.dsuPackageVersion != "" {
+		dsuPkg += "-" + d.dsuPackageVersion
 	}
 
 	// install packages
@@ -178,20 +177,27 @@ func (d *dell) installPkgs() error {
 	return nil
 }
 
-// enableDnf repo enables the dell system update repository
-func (d *dell) enableDsuRepo() error {
-	// the update environment this dsu package is being installed
-	// environment is one of production, vanguard, canary
-	// the update environment is used by fup to segregate devices under upgrade for testing/production
-	updateEnv := os.Getenv(model.EnvDnfPackageRepository)
-
-	if !utils.StringInSlice(updateEnv, model.UpdateReleaseEnvironments()) {
-		updateEnv = "production"
+// addDsuRepo sets up the dell dnf repository
+//
+// expects d.updateBaseURL, d.RepoVersion is set before invocation
+func (d *dell) addDsuRepo() error {
+	params := &utils.DnfRepoParams{
+		GPGCheck:    true,
+		Name:        "dell",
+		BaseURL:     d.updateBaseURL,
+		RepoVersion: d.dsuReleaseVersion,
 	}
 
-	repos := []string{updateEnv + "-dell-system-update_independent", updateEnv + "-dell-system-update_dependent"}
+	if os.Getenv("IRONLIB_TEST") != "" {
+		return nil
+	}
 
-	return d.dnf.EnableRepo(repos)
+	err := d.dnf.AddRepo("/etc/yum.repos.d", params, []byte(utils.DellRepoTemplate))
+	if err != nil {
+		return errors.Wrap(err, ErrDellDnfRepoSetup.Error())
+	}
+
+	return nil
 }
 
 // startSrvHelper starts up the service that loads various ipmi modules,

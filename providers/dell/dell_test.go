@@ -86,6 +86,11 @@ func TestGetInventory(t *testing.T) {
 		t.Error(err)
 	}
 
+	err = dell.GetInventoryOEM(context.TODO(), device, &model.UpdateOptions{})
+	if err != nil {
+		t.Error(err)
+	}
+
 	assert.DeepEqual(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
 }
 
@@ -112,7 +117,7 @@ func TestListUpdates(t *testing.T) {
 	// skip "/usr/libexec/instsvcdrv-helper start" from being executed
 	os.Setenv("IRONLIB_TEST", "1")
 
-	device, err := dell.ListUpdatesAvailable(context.TODO())
+	device, err := dell.ListAvailableUpdates(context.TODO(), &model.UpdateOptions{})
 	if err != nil {
 		t.Error(err)
 	}
