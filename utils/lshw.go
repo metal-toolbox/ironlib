@@ -51,7 +51,7 @@ type LshwNode struct {
 	Dev           string                `json:"dev,omitempty"`
 	Slot          string                `json:"slot,omitempty"`
 	Units         string                `json:"units,omitempty"`
-	Size          int64                 `json:"size,omitempty"`
+	Size          float64               `json:"size,omitempty"`
 	Capacity      int64                 `json:"capacity,omitempty"`
 	Clock         int64                 `json:"clock,omitempty"`
 	Version       string                `json:"version,omitempty"`
@@ -227,7 +227,7 @@ func (l *Lshw) xBIOS(node *LshwNode) *model.BIOS {
 	return &model.BIOS{
 		Description:   node.Description,
 		Vendor:        node.Vendor,
-		SizeBytes:     node.Size,
+		SizeBytes:     int64(node.Size),
 		CapacityBytes: node.Capacity,
 		Firmware: &model.Firmware{
 			Installed: node.Version,
@@ -248,7 +248,7 @@ func (l *Lshw) xMemoryModule(node *LshwNode) *model.Memory {
 		Description:  node.Description,
 		Slot:         node.Slot,
 		Serial:       node.Serial,
-		SizeBytes:    node.Size,
+		SizeBytes:    int64(node.Size),
 		Model:        node.Product,
 		Vendor:       node.Vendor,
 		ClockSpeedHz: node.Clock,
@@ -415,7 +415,7 @@ func (l *Lshw) xDrive(node *LshwNode) *model.Drive {
 		Model:       node.Product,
 		Vendor:      node.Vendor,
 		Serial:      node.Serial,
-		SizeBytes:   node.Size,
+		SizeBytes:   int64(node.Size),
 	}
 }
 

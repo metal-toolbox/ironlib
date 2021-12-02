@@ -58,7 +58,18 @@ const (
 	SlugDellBackplaneExpander           = "Backplane Expander"
 	SlugDellNonExpanderStorageBackplane = "Non-Expander Storage Backplane (SEP)"
 
-	EnvDnfPackageRepository = "DNF_REPO_ENVIRONMENT"
+	// EnvDellDSURelease is the Dell DSU release version
+	//
+	// e.g: 21.11.12 from https://linux.dell.com/repo/hardware/DSU_21.11.12/
+	EnvDellDSURelease = "DELL_DSU_RELEASE"
+	// EnvDellDSUVersion is the Dell DSU utility package version
+	//
+	// e.g: 1.9.2.0-21.07.00 from https://linux.dell.com/repo/hardware/DSU_21.11.12/os_independent/x86_64/dell-system-update-1.9.2.0-21.07.00.x86_64.rpm
+	EnvDellDSUVersion = "DELL_DSU_VERSION"
+	// 	EnvDNFDisableGPGCheck disables GPG checks in DNF package installs
+	EnvDNFDellDisableGPGCheck = "DNF_DISABLE_GPG_CHECK"
+	// EnvUpdateStoreURL defines up the update store base URL prefix
+	EnvUpdateBaseURL = "UPDATE_BASE_URL"
 )
 
 // UpdateReleaseEnvironments is the list of update environments
