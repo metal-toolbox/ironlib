@@ -234,6 +234,7 @@ var (
 		BIOS: &model.BIOS{
 			Description:   "BIOS",
 			Vendor:        "Supermicro",
+			Model:         "x11dph-t",
 			SizeBytes:     65536,
 			CapacityBytes: 67108864,
 			Firmware: &model.Firmware{
@@ -245,6 +246,7 @@ var (
 		BMC: &model.BMC{
 			Description: "BMC",
 			Vendor:      "Supermicro",
+			Model:       "x11dph-t",
 			Firmware: &model.Firmware{
 				Available: "",
 				Installed: "1.71.11",
@@ -254,6 +256,7 @@ var (
 		CPLD: &model.CPLD{
 			Description: "CPLD",
 			Vendor:      "Supermicro",
+			Model:       "x11dph-t",
 			Firmware:    &model.Firmware{Installed: "02.b6.04"},
 		},
 		TPM: &model.TPM{},

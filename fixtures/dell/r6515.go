@@ -488,7 +488,7 @@ var (
 		Model:        "r6515",
 		Serial:       "11WLK93",
 		GPUs:         []*model.GPU{},
-		BMC:          &model.BMC{},
+		BMC:          &model.BMC{Model: "r6515"},
 		TPM:          &model.TPM{},
 		PSUs:         []*model.PSU{},
 		HardwareType: "",
@@ -496,6 +496,7 @@ var (
 		BIOS: &model.BIOS{
 			Description:   "BIOS",
 			Vendor:        "Dell Inc.",
+			Model:         "r6515",
 			SizeBytes:     65536,
 			CapacityBytes: 33554432,
 			Firmware: &model.Firmware{
@@ -503,7 +504,7 @@ var (
 				Installed: "1.7.4",
 			},
 		},
-		CPLD: &model.CPLD{},
+		CPLD: &model.CPLD{Model: "r6515"},
 		Mainboard: &model.Mainboard{
 			Description: "Motherboard",
 			Vendor:      "Dell Inc.",
@@ -904,6 +905,7 @@ var (
 		BMC: &model.BMC{
 			Description: "",
 			Vendor:      "",
+			Model:       "r6515",
 			Firmware: &model.Firmware{
 				Available: "",
 				Installed: "4.40.00.00",
