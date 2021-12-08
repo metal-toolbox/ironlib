@@ -29,30 +29,30 @@ func Update(ctx context.Context, device *model.Device, options []*model.UpdateOp
 	var err error
 
 	for _, option := range options {
-		switch option.Slug {
+		switch {
 		// Update BIOS
-		case model.SlugBIOS:
+		case strings.EqualFold(model.SlugBIOS, option.Slug):
 			err = UpdateBIOS(ctx, device.BIOS, option)
 			if err != nil {
 				return errors.Wrap(err, "error updating bios")
 			}
 
 		// Update Drive
-		case model.SlugDrive:
+		case strings.EqualFold(model.SlugDrive, option.Slug):
 			err = UpdateDrive(ctx, device.Drives, option)
 			if err != nil {
 				return errors.Wrap(err, "error updating drive")
 			}
 
 		// Update NIC
-		case model.SlugNIC:
+		case strings.EqualFold(model.SlugNIC, option.Slug):
 			err = UpdateNIC(ctx, device.NICs, option)
 			if err != nil {
 				return errors.Wrap(err, "error updating nic")
 			}
 
 		// Update BMC
-		case model.SlugBMC:
+		case strings.EqualFold(model.SlugBMC, option.Slug):
 			err = UpdateBMC(ctx, device.BMC, option)
 			if err != nil {
 				return errors.Wrap(err, "error updating bmc")
