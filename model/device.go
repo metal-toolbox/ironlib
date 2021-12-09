@@ -91,6 +91,7 @@ type PSU struct {
 type BIOS struct {
 	Description   string    `json:"description,omitempty"`
 	Vendor        string    `json:"vendor,omitempty"`
+	Model         string    `json:"model,omitempty"`
 	SizeBytes     int64     `json:"size_bytes,omitempty"`
 	CapacityBytes int64     `json:"capacity_bytes,omitempty" diff:"immutable"`
 	Firmware      *Firmware `json:"firmware,omitempty"`
@@ -100,6 +101,7 @@ type BIOS struct {
 type BMC struct {
 	Description string    `json:"description,omitempty"`
 	Vendor      string    `json:"vendor,omitempty"`
+	Model       string    `json:"model,omitempty"`
 	Firmware    *Firmware `json:"firmware,omitempty"`
 }
 

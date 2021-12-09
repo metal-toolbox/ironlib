@@ -104,6 +104,19 @@ func Collect(ctx context.Context, device *model.Device, collectors *Collectors, 
 		return errors.Wrap(err, "error retrieving StorageController inventory")
 	}
 
+	// default set model numbers to device model
+	if device.BMC.Model == "" {
+		device.BMC.Model = device.Model
+	}
+
+	if device.BIOS.Model == "" {
+		device.BIOS.Model = device.Model
+	}
+
+	if device.CPLD.Model == "" {
+		device.CPLD.Model = device.Model
+	}
+
 	return nil
 }
 
