@@ -2,7 +2,6 @@ FROM centos:centos8 AS stage0
 ARG TOOLING_ENDPOINT=https://equinix-metal-firmware.s3.amazonaws.com/fup/image-tooling
 ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
 
-
 ## install build utils
 RUN dnf install -y --setopt=tsflags=nodocs \
                               gcc          \
@@ -44,7 +43,13 @@ RUN set -x; \
     # install storecli
     unzip SW_Broadcom_Unified_StorCLI_v007.1316.0000.0000_20200428.ZIP && \
     unzip BIOSControl_v1.0.3.zip && \
-    install -m 755 -D BIOSControl /usr/sbin/asrr-bioscontrol
+    install -m 755 -D BIOSControl /usr/sbin/asrr-bioscontrol && \
+    # fetch Dell PGP keys
+    mkdir dell_pgp_keys && cd dell_pgp_keys && \
+    curl -sO $TOOLING_ENDPOINT/dell/pgp_keys/0x756ba70b1019ced6.asc && \
+    curl -sO $TOOLING_ENDPOINT/dell/pgp_keys/0xca77951d23b66a9d.asc && \
+    curl -sO $TOOLING_ENDPOINT/dell/pgp_keys/0x1285491434D8786F.asc && \
+    curl -sO $TOOLING_ENDPOINT/dell/pgp_keys/0x3CA66B4946770C59.asc
 
 # build ironlib wrapper binaries
 FROM golang:1.16-alpine AS stage1
@@ -84,27 +89,22 @@ COPY --from=stage1 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
 # import and install tools
 RUN rpm --import /tmp/storecli_pubkey.asc && \
     dnf install -y /tmp/storcli-007.1316.0000.0000-1.noarch.rpm && \
-    chmod 755 /tmp/msecli_Linux.run && /tmp/msecli_Linux.run --mode unattended
+    chmod 755 /tmp/msecli_Linux.run && /tmp/msecli_Linux.run --mode unattended && rm -rf /tmp/*
 
 ############# Dell ####################
 COPY dell-system-update.repo /etc/yum.repos.d/
-## Dell BIOS updates fail if this folder doesn't exist
-RUN mkdir -p /lib/firmware /opt/asrr
+## Prerequisite directories for Dell, ASRR
+## /lib/firmware required for Dell updates to be installed successfullly
+RUN mkdir -p /lib/firmware /opt/asrr /usr/libexec/dell_dup
 
 # asrr
 # asrr bios settings util requires a kernel module, ugh - the module is loaded
 # when the asrr utility is invoked in ironlib
 COPY --from=stage0 /usr/sbin/asrr-bioscontrol /usr/sbin/asrr-bioscontrol
-COPY --from=stage0 $ASRDEV_KERNEL_MODULE /opt/asrr
+COPY --from=stage0 asrdev*.*.ko /opt/asrr
+COPY --from=stage0 dell_pgp_keys/* /usr/libexec/dell_dup
 
-# Add keys required by the dell-system-update utility
-RUN mkdir -p /usr/libexec/dell_dup && cd  /usr/libexec/dell_dup && \
-    curl -sO https://linux.dell.com/repo/pgp_pubkeys/0x756ba70b1019ced6.asc && \
-    curl -sO https://linux.dell.com/repo/pgp_pubkeys/0xca77951d23b66a9d.asc && \
-    curl -sO https://linux.dell.com/repo/pgp_pubkeys/0x1285491434D8786F.asc && \
-    curl -sO https://linux.dell.com/repo/pgp_pubkeys/0x3CA66B4946770C59.asc
-
-# install misc support packages
+# Add keys required by the dell-system-update utility and install misc support packages
 RUN dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     dnf install -y --setopt=tsflags=nodocs \
                    vim           \
