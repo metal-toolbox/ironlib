@@ -104,7 +104,7 @@ COPY --from=stage0 /usr/sbin/asrr-bioscontrol /usr/sbin/asrr-bioscontrol
 COPY --from=stage0 asrdev*.*.ko /opt/asrr
 COPY --from=stage0 dell_pgp_keys/* /usr/libexec/dell_dup
 
-# Add keys required by the dell-system-update utility and install misc support packages
+# install misc support packages
 RUN dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     dnf install -y --setopt=tsflags=nodocs \
                    vim           \
