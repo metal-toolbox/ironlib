@@ -86,6 +86,17 @@ COPY --from=stage0 msecli_Linux.run /tmp/
 # copy ironlib wrapper binaries
 COPY --from=stage1 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
 
+# point centos mirrors to vault - since Centos 8 is deprecated
+# - comment out mirrorlist URL
+# - point baseurl to vault
+# - un-comment baseurl
+RUN sed -e '/mirrorlist=/ s/^#*/#/' \
+        -e '/baseurl=/ s/mirror.centos.org/vault.centos.org/' \
+        -e '/baseurl=/ s/^#*//' -i \
+           /etc/yum.repos.d/CentOS-Linux-AppStream.repo \
+           /etc/yum.repos.d/CentOS-Linux-BaseOS.repo \
+           /etc/yum.repos.d/CentOS-Linux-Extras.repo
+
 # import and install tools
 RUN rpm --import /tmp/storecli_pubkey.asc && \
     dnf install -y /tmp/storcli-007.1316.0000.0000-1.noarch.rpm && \
