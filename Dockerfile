@@ -117,7 +117,7 @@ RUN mkdir -p /lib/firmware /opt/asrr /usr/libexec/dell_dup
 # when the asrr utility is invoked in ironlib
 COPY --from=stage0 /usr/sbin/asrr-bioscontrol /usr/sbin/asrr-bioscontrol
 COPY --from=stage0 asrdev*.*.ko /opt/asrr
-COPY --from=stage0 dell_pgp_keys/* /usr/libexec/dell_dup
+COPY --from=stage0 dell_pgp_keys/* /usr/libexec/dell_dup/
 
 # install misc support packages
 RUN dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
