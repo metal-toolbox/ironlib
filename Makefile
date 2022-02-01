@@ -16,10 +16,19 @@ lint:
 
 ## build docker image and tag as quay.io/packet/ironlib:latest
 build-image:
+	@echo ">>>> NOTE: You may want to execute 'make build-image-nocache' depending on the Docker stages changed"
 	docker build --rm=true -f Dockerfile -t ${DOCKER_REGISTRY}:latest  . \
 							 --label org.label-schema.schema-version=1.0 \
 							 --label org.label-schema.vcs-ref=$(GIT_COMMIT_FULL) \
 							 --label org.label-schema.vcs-url=https://github.com/packethost/ironlib.git
+
+## build docker image, ignoring the cache
+build-image-nocache:
+	docker build --no-cache --rm=true -f Dockerfile -t ${DOCKER_REGISTRY}:latest  . \
+							 --label org.label-schema.schema-version=1.0 \
+							 --label org.label-schema.vcs-ref=$(GIT_COMMIT_FULL) \
+							 --label org.label-schema.vcs-url=https://github.com/packethost/ironlib.git
+
 
 ## push docker image
 push-image:
