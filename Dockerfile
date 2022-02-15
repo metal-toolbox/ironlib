@@ -7,7 +7,7 @@ ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
 # - point baseurl to vault
 # - un-comment baseurl
 RUN sed -e '/mirrorlist=/ s/^#*/#/' \
-        -e '/baseurl=/ s/mirror.centos.org/vault.centos.org/' \
+        -e '/baseurl=/ s/mirror.centos.org/install.packet.net/' \
         -e '/baseurl=/ s/^#*//' -i \
            /etc/yum.repos.d/CentOS-Linux-AppStream.repo \
            /etc/yum.repos.d/CentOS-Linux-BaseOS.repo \
