@@ -1,0 +1,40 @@
+# dmidecode -t39
+# dmidecode 3.2
+Getting SMBIOS data from sysfs.
+SMBIOS 3.2.1 present.
+# SMBIOS implementations newer than version 3.2.0 are not
+# fully supported by this version of dmidecode.
+
+Handle 0x0018, DMI type 39, 22 bytes
+System Power Supply
+        Power Unit Group: 1
+        Location: PSU1
+        Name: PWS-1K23A-1R
+        Manufacturer: SUPERMICRO
+        Serial Number: P1K2ACK07HB0670
+        Asset Tag: N/A
+        Model Part Number: PWS-1K23A-1R
+        Revision: 1.4
+        Max Power Capacity: 1200 W
+        Status: Present, OK
+        Type: Switching
+        Input Voltage Range Switching: Auto-switch
+        Plugged: Yes
+        Hot Replaceable: Yes
+
+Handle 0x0019, DMI type 39, 22 bytes
+System Power Supply
+        Power Unit Group: 2
+        Location: PSU2
+        Name: PWS-1K23A-1R
+        Manufacturer: SUPERMICRO
+        Serial Number: P1K2ACK07HB0669
+        Asset Tag: N/A
+        Model Part Number: PWS-1K23A-1R
+        Revision: 1.4
+        Max Power Capacity: 1200 W
+        Status: Present, OK
+        Type: Switching
+        Input Voltage Range Switching: Auto-switch
+        Plugged: Yes
+        Hot Replaceable: Yes

@@ -1,0 +1,106 @@
+{
+  "json_format_version": [
+    1,
+    0
+  ],
+  "smartctl": {
+    "version": [
+      7,
+      1
+    ],
+    "svn_revision": "5022",
+    "platform_info": "x86_64-linux-5.4.0-52-generic",
+    "build_info": "(local build)",
+    "argv": [
+      "smartctl",
+      "-a",
+      "/dev/nvme1",
+      "-j"
+    ],
+    "exit_status": 0
+  },
+  "device": {
+    "name": "/dev/nvme1",
+    "info_name": "/dev/nvme1",
+    "type": "nvme",
+    "protocol": "NVMe"
+  },
+  "model_name": "KXG60ZNV256G TOSHIBA",
+  "serial_number": "Z9DF70I9FY3L",
+  "firmware_version": "AGGA4104",
+  "nvme_pci_vendor": {
+    "id": 4473,
+    "subsystem_id": 4473
+  },
+  "nvme_ieee_oui_identifier": 9233294,
+  "nvme_total_capacity": 256060514304,
+  "nvme_unallocated_capacity": 0,
+  "nvme_controller_id": 0,
+  "nvme_number_of_namespaces": 1,
+  "nvme_namespaces": [
+    {
+      "id": 1,
+      "size": {
+        "blocks": 500118192,
+        "bytes": 256060514304
+      },
+      "capacity": {
+        "blocks": 500118192,
+        "bytes": 256060514304
+      },
+      "utilization": {
+        "blocks": 500118192,
+        "bytes": 256060514304
+      },
+      "formatted_lba_size": 512,
+      "eui64": {
+        "oui": 9233294,
+        "ext_id": 21476240734
+      }
+    }
+  ],
+  "user_capacity": {
+    "blocks": 500118192,
+    "bytes": 256060514304
+  },
+  "logical_block_size": 512,
+  "local_time": {
+    "time_t": 1608477952,
+    "asctime": "Sun Dec 20 15:25:52 2020 UTC"
+  },
+  "smart_status": {
+    "passed": true,
+    "nvme": {
+      "value": 0
+    }
+  },
+  "nvme_smart_health_information_log": {
+    "critical_warning": 0,
+    "temperature": 56,
+    "available_spare": 100,
+    "available_spare_threshold": 10,
+    "percentage_used": 0,
+    "data_units_read": 676396,
+    "data_units_written": 673353,
+    "host_reads": 74886731,
+    "host_writes": 74705903,
+    "controller_busy_time": 55,
+    "power_cycles": 130,
+    "power_on_hours": 3462,
+    "unsafe_shutdowns": 37,
+    "media_errors": 0,
+    "num_err_log_entries": 0,
+    "warning_temp_time": 0,
+    "critical_comp_time": 0,
+    "temperature_sensors": [
+      56
+    ]
+  },
+  "temperature": {
+    "current": 56
+  },
+  "power_cycle_count": 130,
+  "power_on_time": {
+    "hours": 3462
+  }
+}

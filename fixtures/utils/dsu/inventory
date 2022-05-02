@@ -1,0 +1,74 @@
+# dsu -i 
+                                                                                                                                             
+DELL EMC System Update 1.8.0
+Copyright (C) 2014 DELL EMC Proprietary.
+Verifying catalog installation ...
+Installing catalog from repository ...
+Fetching dsucatalog ...
+Reading the catalog ...
+Verifying inventory collector installation ...
+Getting System Inventory ...
+
+1. BIOS, BIOS  ( Version : 2.6.4 )
+
+2. Firmware, BOSS  ( Version : 2.5.13.3022 )
+
+3. Firmware, Power Supply  ( Version : 00.24.32 )
+
+4. Firmware, Power Supply  ( Version : 00.24.32 )
+
+5. Firmware, Firmware for  - Disk 0 of BOSS Adapter    ( Version : DL6P )
+
+6. Firmware, Dell HBA330 Mini Controller 0 Firmware  ( Version : 16.17.00.05 )
+
+7. Firmware, Backplane Expander FW   ( Version : 2.46 )
+
+8. Firmware, Intel(R) Ethernet 10G 4P X710 SFP+ rNDC  ( Version : 19.5.12 )
+
+9. Firmware, Intel(R) Ethernet 10G X710 rNDC  ( Version : 19.5.12 )
+
+10. Firmware, Intel(R) Ethernet 10G X710 rNDC  ( Version : 19.5.12 )
+
+11. Firmware, Intel(R) Ethernet 10G X710 rNDC  ( Version : 19.5.12 )
+
+12. Firmware,  iDRAC  ( Version : 4.10.10.10 )
+
+13. Firmware, NVMePCISSD Model Number: Micron_9200_MTFDHAL3T8TCT  ( Version : 101008S0 )
+
+14. Application, Lifecycle Controller  ( Version : 4.10.10.10 )
+
+15. Application, Dell 64 Bit uEFI Diagnostics, version 4301, 4301A42, 4301.43  ( Version : 4301A42 )
+
+16. Application, OS COLLECTOR, v5.0, A00  ( Version : 5 )
+
+17. Application, Dell EMC iDRAC Service Module Embedded Package v3.5.0, A00  ( Version : 3.5.0 )
+
+18. Firmware, System CPLD  ( Version : 1.0.6 )
+
+
+Progress report is available at:/usr/libexec/dell_dup/DSU_STATUS.json
+Exiting DSU!
+`)
+
+var dsuUpdatePreviewDummy = []byte(`# dsu -p
+DELL EMC System Update 1.8.0
+Copyright (C) 2014 DELL EMC Proprietary.
+Verifying catalog installation ...
+Installing catalog from repository ...
+Fetching dsucatalog ...
+Reading the catalog ...
+Verifying inventory collector installation ...
+Getting System Inventory ...
+Determining Applicable Updates ...
+------------------ Update Preview -----------------
+# : Type : Component : Version : Filename
+---------------------------------------------------
+1 : Firmware : Dell HBA330 Mini Controller 0 Firmware : 16.17.01.00 : SAS-Non-RAID_Firmware_124X2_LN_16.17.01.00_A08
+2 : Firmware : BOSS : 2.5.13.3024 : SAS-RAID_Firmware_3P39V_LN64_2.5.13.3024_A07
+3 : BIOS : BIOS : 2.8.1 : BIOS_RTWM9_LN_2.8.1
+4 : Firmware :  iDRAC : 4.22.00.00 : iDRAC-with-Lifecycle-Controller_Firmware_9F2TG_LN_4.22.00.00_A00
+5 : Application : Dell EMC iDRAC Service Module Embedded Package v3.5.0, A00 : 3.5.1 : Systems-Management_Application_1K45F_LN64_3.5.1_A00
+NOTE: The preview option displays the components which can be updated based on Catalog. This option does not update.
+Run --inventory for checking the component status post DSU commit.
+Progress report is available at:/usr/libexec/dell_dup/DSU_STATUS.json
+Exiting DSU!
