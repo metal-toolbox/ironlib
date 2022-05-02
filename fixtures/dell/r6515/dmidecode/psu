@@ -1,0 +1,38 @@
+# dmidecode -t39
+# dmidecode 3.2
+Getting SMBIOS data from sysfs.
+SMBIOS 3.3 present.
+# SMBIOS implementations newer than version 3.2.0 are not
+# fully supported by this version of dmidecode.
+
+Handle 0x2700, DMI type 39, 22 bytes
+System Power Supply
+        Location: Not Specified
+        Name: PWR SPLY,550W,RDNT,DELTA      
+        Manufacturer: DELL
+        Serial Number: CNDED0009S4FFK
+        Asset Tag: Not Specified
+        Model Part Number: 06V43GA00
+        Revision: Not Specified
+        Max Power Capacity: 550 W
+        Status: Present, Unknown
+        Type: Unknown
+        Input Voltage Range Switching: Unknown
+        Plugged: Yes
+        Hot Replaceable: Yes
+
+Handle 0x2701, DMI type 39, 22 bytes
+System Power Supply
+        Location: Not Specified
+        Name: PWR SPLY,550W,RDNT,DELTA      
+        Manufacturer: DELL
+        Serial Number: CNDED0009S4FGF
+        Asset Tag: Not Specified
+        Model Part Number: 06V43GA00
+        Revision: Not Specified
+        Max Power Capacity: 550 W
+        Status: Present, Unknown
+        Type: Unknown
+        Input Voltage Range Switching: Unknown
+        Plugged: Yes
+        Hot Replaceable: Yes

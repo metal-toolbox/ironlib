@@ -1,0 +1,25 @@
+Device Name          : /dev/sda
+Model No             : Micron_5200_MTFDDAK480TDN
+Serial No            : 193423710BDA        
+FW-Rev               : D1MU020             
+Total Size           : 480.00GB
+Drive Status         : Drive is in good health
+Sata Link Speed      : Gen3 (6.0 Gbps)
+Sata Link Max Speed  : Gen3 (6.0 Gbps)
+Temp(C)              : 21
+
+Device Name          : /dev/sdb
+Model No             : Micron_5200_MTFDDAK480TDN
+Serial No            : 193423711167        
+FW-Rev               : D1MU020             
+Total Size           : 480.00GB
+Drive Status         : Drive is in good health
+Sata Link Speed      : Gen3 (6.0 Gbps)
+Sata Link Max Speed  : Gen3 (6.0 Gbps)
+Temp(C)              : 21
+
+Drive information is retrieved successfully
+CMD_STATUS   : Success 
+STATUS_CODE  : 0 
+
+Copyright (C) 2020 Micron Technology, Inc.
