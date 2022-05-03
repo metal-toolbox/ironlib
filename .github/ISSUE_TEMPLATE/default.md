@@ -6,4 +6,4 @@ Please don't forget to include the following information in your issue:
 
 - What version of ironlib exhibits this behavior (if applicable)
 
-- Detailed steps to verify it
+- Detailed steps to verify the issue(s)
