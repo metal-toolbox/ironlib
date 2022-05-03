@@ -11,7 +11,7 @@ require (
 	github.com/r3labs/diff/v2 v2.13.6
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.6.1
-	github.com/tidwall/gjson v1.9.3
+	github.com/tidwall/gjson v1.14.1
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gotest.tools v2.2.0+incompatible
