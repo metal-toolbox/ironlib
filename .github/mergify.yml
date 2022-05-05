@@ -12,8 +12,8 @@ pull_request_rules:
       - "#approved-reviews-by>=1"
       - "#changes-requested-reviews-by=0"
       - "#review-requested=0"
-      - check-success=lint
-      - check-success=test
+      - check-success='lint-test'
+      - check-success='build'
       - label!=do-not-merge
       - label=ready-to-merge
     actions:
