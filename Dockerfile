@@ -1,17 +1,7 @@
-FROM centos:centos8 AS stage0
+FROM almalinux:8 AS stage0
+
 ARG TOOLING_ENDPOINT=https://equinix-metal-firmware.s3.amazonaws.com/fup/image-tooling
 ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
-
-# point centos mirrors to vault - since Centos 8 is deprecated
-# - comment out mirrorlist URL
-# - point baseurl to vault
-# - un-comment baseurl
-RUN sed -e '/mirrorlist=/ s/^#*/#/' \
-        -e '/baseurl=/ s/mirror.centos.org/install.packet.net/' \
-        -e '/baseurl=/ s/^#*//' -i \
-           /etc/yum.repos.d/CentOS-Linux-AppStream.repo \
-           /etc/yum.repos.d/CentOS-Linux-BaseOS.repo \
-           /etc/yum.repos.d/CentOS-Linux-Extras.repo
 
 ## install build utils
 RUN dnf install -y --setopt=tsflags=nodocs \
@@ -63,7 +53,7 @@ RUN set -x; \
     curl -sO $TOOLING_ENDPOINT/dell/pgp_keys/0x3CA66B4946770C59.asc
 
 # build ironlib wrapper binaries
-FROM golang:1.16-alpine AS stage1
+FROM golang:1.17-alpine AS stage1
 
 WORKDIR /workspace
 
@@ -79,11 +69,12 @@ RUN go mod download
 COPY . .
 
 # build helper util
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o getbiosconfig examples/biosconfig/biosconfig.go && \
-    install -m 755 -D getbiosconfig /usr/sbin/
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on \
+     go build -o getbiosconfig examples/biosconfig/biosconfig.go && \
+     install -m 755 -D getbiosconfig /usr/sbin/
 
 # main
-FROM centos:centos8
+FROM almalinux:latest
 LABEL author="Joel Rebello<jrebello@packet.com>"
 # copy vendor tooling artifacts
 COPY --from=stage0 /usr/sbin/mlxup /usr/sbin/mlxup
@@ -92,11 +83,6 @@ COPY --from=stage0 /usr/sbin/smc-ipmicfg /usr/sbin/smc-ipmicfg
 COPY --from=stage0 Unified_storcli_all_os/Linux/pubKey.asc /tmp/storecli_pubkey.asc
 COPY --from=stage0 Unified_storcli_all_os/Linux/storcli-007.1316.0000.0000-1.noarch.rpm /tmp/
 COPY --from=stage0 msecli_Linux.run /tmp/
-
-# copy updated centos 8 repo files pointing to vault
-COPY --from=stage0 /etc/yum.repos.d/CentOS-Linux-AppStream.repo /etc/yum.repos.d/CentOS-Linux-AppStream.repo
-COPY --from=stage0 /etc/yum.repos.d/CentOS-Linux-BaseOS.repo /etc/yum.repos.d/CentOS-Linux-BaseOS.repo
-COPY --from=stage0 /etc/yum.repos.d/CentOS-Linux-Extras.repo /etc/yum.repos.d/CentOS-Linux-Extras.repo
 
 # copy ironlib wrapper binaries
 COPY --from=stage1 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
