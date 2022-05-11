@@ -29,8 +29,31 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build image - no push
+        id: dockerbuild
         uses: docker/build-push-action@v3
         with:
            context: .
            push: false
-           tags: latest
+           tags: ghcr.io/metal-toolbox/ironlib:latest
+
+      - name: Scan image
+        id: scan
+        uses: anchore/scan-action@v3
+        with:
+          image: ghcr.io/metal-toolbox/ironlib:latest
+          acs-report-enable: true
+          # TODO(jaosorior): Fail build once we migrate off CentOS.
+          fail-build: false
+
+      # TODO(jaosorior): Uncomment once we migrate off CentOS.
+      # - name: upload Anchore scan SARIF report
+      #   uses: github/codeql-action/upload-sarif@v2
+      #   with:
+      #     sarif_file: ${{ steps.scan.outputs.sarif }}
+      #   # This should run even if we fail the container scan
+      #   if: always()
+      
+      - name: Inspect action SARIF report
+        run: cat ${{ steps.scan.outputs.sarif }}
+        # This should run even if we fail the container scan
+        if: always()
