@@ -53,7 +53,7 @@ type DnfRepoParams struct {
 
 // Return a new dnf executor
 func NewDnf(trace bool) *Dnf {
-	e := NewExecutor("dnf")
+	e := NewExecutor("microdnf")
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {
@@ -68,7 +68,7 @@ func NewDnf(trace bool) *Dnf {
 // Returns a fake dnf instance for tests
 func NewFakeDnf() *Dnf {
 	return &Dnf{
-		Executor: NewFakeExecutor("dnf"),
+		Executor: NewFakeExecutor("microdnf"),
 	}
 }
 
@@ -97,20 +97,6 @@ func (d *Dnf) AddRepo(path string, params *DnfRepoParams, tmpl []byte) (err erro
 	err = t.Execute(f, params)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-// Enable the given slice of repo names
-func (d *Dnf) EnableRepo(repos []string) (err error) {
-	for _, r := range repos {
-		d.Executor.SetArgs([]string{"config-manager", "--enable", r})
-
-		_, err = d.Executor.ExecWithContext(context.Background())
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
