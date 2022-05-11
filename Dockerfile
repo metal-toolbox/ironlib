@@ -1,10 +1,10 @@
-FROM almalinux:8 AS stage0
+FROM almalinux:8-minimal AS stage0
 
 ARG TOOLING_ENDPOINT=https://equinix-metal-firmware.s3.amazonaws.com/fup/image-tooling
 ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
 
 ## install build utils
-RUN dnf install -y --setopt=tsflags=nodocs \
+RUN microdnf install -y --setopt=tsflags=nodocs \
                               gcc          \
                               flex         \
                               make         \
@@ -21,8 +21,12 @@ RUN dnf install -y --setopt=tsflags=nodocs \
                               pkgconfig    \
                               patchutils   \
                               kernel-devel \
+                              curl         \
+                              tar          \
                               unzip
 
+# epel repo package
+RUN curl -sO https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 ## fetch vendor tools
 RUN set -x; \
@@ -74,7 +78,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on \
      install -m 755 -D getbiosconfig /usr/sbin/
 
 # main
-FROM almalinux:latest
+FROM almalinux:8-minimal
 LABEL author="Joel Rebello<jrebello@packet.com>"
 # copy vendor tooling artifacts
 COPY --from=stage0 /usr/sbin/mlxup /usr/sbin/mlxup
@@ -83,13 +87,15 @@ COPY --from=stage0 /usr/sbin/smc-ipmicfg /usr/sbin/smc-ipmicfg
 COPY --from=stage0 Unified_storcli_all_os/Linux/pubKey.asc /tmp/storecli_pubkey.asc
 COPY --from=stage0 Unified_storcli_all_os/Linux/storcli-007.1316.0000.0000-1.noarch.rpm /tmp/
 COPY --from=stage0 msecli_Linux.run /tmp/
+COPY --from=stage0 epel-release-latest-8.noarch.rpm /tmp/
 
 # copy ironlib wrapper binaries
 COPY --from=stage1 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
 
 # import and install tools
 RUN rpm --import /tmp/storecli_pubkey.asc && \
-    dnf install -y /tmp/storcli-007.1316.0000.0000-1.noarch.rpm && \
+    rpm -ivh /tmp/storcli-007.1316.0000.0000-1.noarch.rpm && \
+    rpm -ivh /tmp/epel-release-latest-8.noarch.rpm && \
     chmod 755 /tmp/msecli_Linux.run && /tmp/msecli_Linux.run --mode unattended && rm -rf /tmp/*
 
 ############# Dell ####################
@@ -106,8 +112,7 @@ COPY --from=stage0 asrdev*.*.ko /opt/asrr
 COPY --from=stage0 dell_pgp_keys/* /usr/libexec/dell_dup/
 
 # install misc support packages
-RUN dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
-    dnf install -y --setopt=tsflags=nodocs \
+RUN  microdnf install -y --setopt=tsflags=nodocs \
                    vim           \
                    tar           \
                    lshw          \
@@ -122,10 +127,6 @@ RUN dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel
                    nvme-cli      \
                    dmidecode     \
                    libssh2-devel \
-                   smartmontools \
-                   'dnf-command(config-manager)' && \
-    dnf config-manager --disable production-dell-system-update_dependent && \
-    dnf config-manager --disable production-dell-system-update_independent && \
-    dnf clean all
+                   smartmontools  && microdnf clean all
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
