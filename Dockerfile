@@ -113,17 +113,8 @@ COPY --from=stage0 dell_pgp_keys/* /usr/libexec/dell_dup/
 
 # install misc support packages
 RUN  microdnf install -y --setopt=tsflags=nodocs \
-                   vim           \
-                   tar           \
                    lshw          \
-                   unzip         \
-                   nano          \
-                   gzip          \
-                   less          \
-                   which         \
-                   strace        \
                    pciutils      \
-                   passwd        \
                    nvme-cli      \
                    dmidecode     \
                    libssh2-devel \
