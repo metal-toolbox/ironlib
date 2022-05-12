@@ -5,24 +5,9 @@ ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
 
 ## install build utils
 RUN microdnf install -y --setopt=tsflags=nodocs \
-                              gcc          \
-                              flex         \
-                              make         \
-                              bison        \
-                              patch        \
-                              ctags        \
-                              gcc-c++      \
-                              gettext      \
-                              libtool      \
-                              elfutils     \
-                              autoconf     \
-                              automake     \
-                              binutils     \
-                              pkgconfig    \
-                              patchutils   \
-                              kernel-devel \
                               curl         \
                               tar          \
+                              gzip         \
                               unzip
 
 # epel repo package
