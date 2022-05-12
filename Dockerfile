@@ -5,24 +5,9 @@ ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
 
 ## install build utils
 RUN microdnf install -y --setopt=tsflags=nodocs \
-                              gcc          \
-                              flex         \
-                              make         \
-                              bison        \
-                              patch        \
-                              ctags        \
-                              gcc-c++      \
-                              gettext      \
-                              libtool      \
-                              elfutils     \
-                              autoconf     \
-                              automake     \
-                              binutils     \
-                              pkgconfig    \
-                              patchutils   \
-                              kernel-devel \
                               curl         \
                               tar          \
+                              gzip         \
                               unzip
 
 # epel repo package
@@ -113,17 +98,8 @@ COPY --from=stage0 dell_pgp_keys/* /usr/libexec/dell_dup/
 
 # install misc support packages
 RUN  microdnf install -y --setopt=tsflags=nodocs \
-                   vim           \
-                   tar           \
                    lshw          \
-                   unzip         \
-                   nano          \
-                   gzip          \
-                   less          \
-                   which         \
-                   strace        \
                    pciutils      \
-                   passwd        \
                    nvme-cli      \
                    dmidecode     \
                    libssh2-devel \
