@@ -7,8 +7,8 @@ import (
 
 	"github.com/r3labs/diff/v2"
 
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
 )
 

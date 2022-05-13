@@ -1,6 +1,6 @@
 package asrr
 
-import "github.com/packethost/ironlib/model"
+import "github.com/metal-toolbox/ironlib/model"
 
 // nolint //testcode
 // inventory taken with lshw

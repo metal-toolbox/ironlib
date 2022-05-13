@@ -3,7 +3,7 @@ package supermicro
 import (
 	"context"
 
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/sirupsen/logrus"
 )
 

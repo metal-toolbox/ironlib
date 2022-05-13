@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/model/supermicro"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/model/supermicro"
 	"golang.org/x/net/html/charset"
 )
 

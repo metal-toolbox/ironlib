@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/dselans/dmidecode"
-	"github.com/packethost/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/pkg/errors"
 )
 

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/packethost/ironlib"
+	"github.com/metal-toolbox/ironlib"
 	"github.com/sirupsen/logrus"
 )
 

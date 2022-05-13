@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/packethost/ironlib/model"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )

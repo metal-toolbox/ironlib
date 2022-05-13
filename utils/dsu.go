@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/packethost/ironlib/errs"
-	"github.com/packethost/ironlib/model"
+	"github.com/metal-toolbox/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 

@@ -4,10 +4,10 @@ import (
 	"context"
 	"os"
 
-	"github.com/packethost/ironlib/actions"
-	"github.com/packethost/ironlib/errs"
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/actions"
+	"github.com/metal-toolbox/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
