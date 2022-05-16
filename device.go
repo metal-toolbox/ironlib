@@ -1,13 +1,13 @@
 package ironlib
 
 import (
-	"github.com/packethost/ironlib/errs"
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/providers/asrockrack"
-	"github.com/packethost/ironlib/providers/dell"
-	"github.com/packethost/ironlib/providers/generic"
-	"github.com/packethost/ironlib/providers/supermicro"
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/providers/asrockrack"
+	"github.com/metal-toolbox/ironlib/providers/dell"
+	"github.com/metal-toolbox/ironlib/providers/generic"
+	"github.com/metal-toolbox/ironlib/providers/supermicro"
+	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

@@ -1,6 +1,6 @@
 ![](https://img.shields.io/badge/Stability-Maintained-green.svg)
 
-Ironlib wraps various opensource and various vendor utilities to expose a consistent set of [interface methods](https://github.com/packethost/ironlib/blob/main/model/interface.go) to,
+Ironlib wraps various opensource and various vendor utilities to expose a consistent set of [interface methods](https://github.com/metal-toolbox/ironlib/blob/main/model/interface.go) to,
 
  - Collect inventory
  - Update firmware
@@ -35,7 +35,7 @@ The list of tools that ironlib wraps around, in no particular order,
 - supermicro SUM
 - storecli
 
- [For the full list see here](https://github.com/packethost/ironlib/tree/main/utils)
+ [For the full list see here](https://github.com/metal-toolbox/ironlib/tree/main/utils)
 
 
 ## Build ironlib docker image
@@ -56,7 +56,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/packethost/ironlib"
+	"github.com/metal-toolbox/ironlib"
 	"github.com/sirupsen/logrus"
 )
 

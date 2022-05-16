@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/packethost/ironlib/model"
+	"github.com/metal-toolbox/ironlib/model"
 )
 
 const nvmecli = "/usr/sbin/nvme"

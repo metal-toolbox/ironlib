@@ -3,9 +3,9 @@ package asrockrack
 import (
 	"context"
 
-	"github.com/packethost/ironlib/actions"
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/actions"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/sirupsen/logrus"
 )
 

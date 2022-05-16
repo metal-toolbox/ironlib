@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/packethost/ironlib/model"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/stretchr/testify/assert"
 )
 

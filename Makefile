@@ -20,14 +20,14 @@ build-image:
 	docker build --rm=true -f Dockerfile -t ${DOCKER_REGISTRY}:latest  . \
 							 --label org.label-schema.schema-version=1.0 \
 							 --label org.label-schema.vcs-ref=$(GIT_COMMIT_FULL) \
-							 --label org.label-schema.vcs-url=https://github.com/packethost/ironlib.git
+							 --label org.label-schema.vcs-url=https://github.com/metal-toolbox/ironlib.git
 
 ## build docker image, ignoring the cache
 build-image-nocache:
 	docker build --no-cache --rm=true -f Dockerfile -t ${DOCKER_REGISTRY}:latest  . \
 							 --label org.label-schema.schema-version=1.0 \
 							 --label org.label-schema.vcs-ref=$(GIT_COMMIT_FULL) \
-							 --label org.label-schema.vcs-url=https://github.com/packethost/ironlib.git
+							 --label org.label-schema.vcs-url=https://github.com/metal-toolbox/ironlib.git
 
 
 ## push docker image

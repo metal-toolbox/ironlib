@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/packethost/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )

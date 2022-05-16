@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/packethost/ironlib"
-	"github.com/packethost/ironlib/model"
+	"github.com/metal-toolbox/ironlib"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/sirupsen/logrus"
 )
 

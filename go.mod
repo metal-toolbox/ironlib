@@ -1,4 +1,4 @@
-module github.com/packethost/ironlib
+module github.com/metal-toolbox/ironlib
 
 go 1.17
 

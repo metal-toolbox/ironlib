@@ -1,6 +1,6 @@
 package dell
 
-import "github.com/packethost/ironlib/model"
+import "github.com/metal-toolbox/ironlib/model"
 
 // nolint // test data
 var (

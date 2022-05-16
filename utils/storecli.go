@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/packethost/ironlib/model"
+	"github.com/metal-toolbox/ironlib/model"
 )
 
 const storecli = "/opt/MegaRAID/storcli/storcli64"

@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

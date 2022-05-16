@@ -3,8 +3,8 @@ package asrockrack
 import (
 	"context"
 
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 )
 
 func (a *asrockrack) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) error {

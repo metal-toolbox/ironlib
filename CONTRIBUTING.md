@@ -2,12 +2,12 @@
 
 ## Testing
 
-When adding new functionality or implementing a new feature, it would be ideal to have [tests](https://github.com/packethost/ironlib/blob/main/utils/lshw_test.go) and [test_data](https://github.com/packethost/ironlib/blob/main/utils/lshw_test.go#L47) included.
+When adding new functionality or implementing a new feature, it would be ideal to have [tests](https://github.com/metal-toolbox/ironlib/blob/main/utils/lshw_test.go) and [test_data](https://github.com/metal-toolbox/ironlib/blob/main/utils/lshw_test.go#L47) included.
 
 ## Submitting changes
 
 Run `make test` and `make lint` and ensure it all passes before submitting a PR.
-Checkout the [PR template](https://github.com/packethost/ironlib/blob/main/.github/PULL_REQUEST_TEMPLATE.md) and create a pull request at [ironlib PRs](https://github.com/packethost/ironlib/pulls)
+Checkout the [PR template](https://github.com/metal-toolbox/ironlib/blob/main/.github/PULL_REQUEST_TEMPLATE.md) and create a pull request at [ironlib PRs](https://github.com/metal-toolbox/ironlib/pulls)
 
 ## Coding conventions
 

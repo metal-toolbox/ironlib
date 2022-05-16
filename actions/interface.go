@@ -3,7 +3,7 @@ package actions
 import (
 	"context"
 
-	"github.com/packethost/ironlib/model"
+	"github.com/metal-toolbox/ironlib/model"
 )
 
 // Utility interface couples the configuration, collection and update interfaces

@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 )
 
 func (d *dell) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) error {

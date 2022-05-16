@@ -6,11 +6,11 @@ import (
 	"os"
 	"testing"
 
-	dellFixtures "github.com/packethost/ironlib/fixtures/dell"
-	smcFixtures "github.com/packethost/ironlib/fixtures/supermicro"
+	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
+	smcFixtures "github.com/metal-toolbox/ironlib/fixtures/supermicro"
 
-	"github.com/packethost/ironlib/model"
-	"github.com/packethost/ironlib/utils"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 	"gotest.tools/assert"
 )
 

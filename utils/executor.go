@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/packethost/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/pkg/errors"
 )
 
