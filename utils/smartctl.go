@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
@@ -101,15 +102,13 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*model.Drive, error) {
 			item.Vendor = model.VendorFromString(smartctlAll.ModelFamily)
 		}
 
-		if smartctlAll.OemProductID != "" {
-			item.Oem = true
-		}
+		item.OemID = strings.TrimSpace(smartctlAll.OemProductID)
 
 		if smartctlAll.Status != nil {
 			if smartctlAll.Status.Passed {
-				item.SmartStatus = "true"
+				item.SmartStatus = "ok"
 			} else {
-				item.SmartStatus = "false"
+				item.SmartStatus = "failed"
 			}
 		}
 
