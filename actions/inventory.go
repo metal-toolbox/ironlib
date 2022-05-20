@@ -49,71 +49,90 @@ func InitCollectors(trace bool) *Collectors {
 //
 // The lshw collector always executes first and is included by default.
 // nolint:gocyclo //since we're collecting inventory for each type, this is cyclomatic
-func Collect(ctx context.Context, device *model.Device, collectors *Collectors, trace bool) error {
+func Collect(ctx context.Context, device *model.Device, collectors *Collectors, trace, failOnError bool) error {
+	// register default collectors
 	if collectors == nil {
 		collectors = InitCollectors(trace)
 	}
 
+	// initialize a new device object - when a device isn't already provided
 	if device == nil {
-		return ErrInventoryDeviceObjNil
+		device = model.NewDevice()
 	}
 
+	// register inventory collector
 	if collectors.Inventory == nil {
 		collectors.Inventory = utils.NewLshwCmd(trace)
 	}
 
+	// register a TPM inventory collector
+	if collectors.TPM == nil {
+		var err error
+
+		collectors.TPM, err = utils.NewDmidecode()
+		if err != nil && failOnError {
+			return errors.Wrap(err, "error in dmidecode inventory collector")
+		}
+	}
+
 	// Collect initial device inventory
 	err := collectors.Inventory.Collect(ctx, device)
-	if err != nil {
+	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving device inventory")
 	}
 
 	// Collect drive smart data
 	err = Drives(ctx, device.Drives, collectors.Drives)
-	if err != nil {
+	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving drive inventory")
 	}
 
 	// Collect NIC info
 	err = NICs(ctx, device.NICs, collectors.NICs)
-	if err != nil {
+	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving NIC inventory")
 	}
 
 	// Collect BIOS info
 	err = BIOS(ctx, device.BIOS, collectors.BIOS)
-	if err != nil {
+	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving BIOS inventory")
 	}
 
 	// Collect CPLD info
 	err = CPLD(ctx, device.CPLD, collectors.CPLD)
-	if err != nil {
+	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving CPLD inventory")
 	}
 
 	// Collect BMC info
 	err = BMC(ctx, device.BMC, collectors.BMC)
-	if err != nil {
+	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving BMC inventory")
+	}
+
+	// Collect TPM info
+	err = TPM(ctx, device.TPM, collectors.TPM)
+	if err != nil && failOnError {
+		return errors.Wrap(err, "error retrieving TPM inventory")
 	}
 
 	// Collect StorageController info
 	err = StorageController(ctx, device.StorageControllers, collectors.StorageControllers)
-	if err != nil {
+	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving StorageController inventory")
 	}
 
 	// default set model numbers to device model
-	if device.BMC.Model == "" {
+	if device.BMC != nil && device.BMC.Model == "" {
 		device.BMC.Model = device.Model
 	}
 
-	if device.BIOS.Model == "" {
+	if device.BIOS != nil && device.BIOS.Model == "" {
 		device.BIOS.Model = device.Model
 	}
 
-	if device.CPLD.Model == "" {
+	if device.CPLD != nil && device.CPLD.Model == "" {
 		device.CPLD.Model = device.Model
 	}
 
