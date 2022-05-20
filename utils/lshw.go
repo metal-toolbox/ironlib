@@ -76,6 +76,8 @@ func NewLshwCmd(trace bool) *Lshw {
 
 // Inventory collects and returns device hardware inventory
 // based on the data parsed from lshw
+//
+// Implements the InventoryCollector interface
 func (l *Lshw) Collect(ctx context.Context, device *model.Device) error {
 	// The device we're taking inventory of
 	l.Device = device
@@ -316,17 +318,39 @@ func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
 	l.nicSerials[serial] = true
 
 	nic := &model.NIC{
+		ProductName: node.Product,
 		Description: node.Description,
 		Vendor:      node.Vendor,
 		Model:       node.Product,
 		Serial:      node.Serial,
 		SpeedBits:   node.Capacity,
 		PhysicalID:  node.Physid,
+		BusInfo:     node.Businfo,
 	}
 
-	if node.Configuration != nil && node.Configuration["firmware"] != "" {
-		version := lshwNicFwStringParse(node.Configuration["firmware"], node.Vendor)
-		nic.Firmware = &model.Firmware{Installed: version}
+	// include additional attributes
+	if node.Configuration != nil {
+		nic.Metadata = map[string]string{}
+		keys := []string{
+			"link",
+			"speed",
+			"duplex",
+			"firmware",
+			"driver",
+			"driver_version",
+		}
+
+		for _, key := range keys {
+			value, exists := node.Configuration[key]
+			if exists {
+				if key == "firmware" {
+					version := lshwNicFwStringParse(value, node.Vendor)
+					nic.Firmware = &model.Firmware{Installed: version}
+				}
+
+				nic.Metadata[key] = value
+			}
+		}
 	}
 
 	return nic
@@ -410,13 +434,20 @@ func (l *Lshw) xDrive(node *LshwNode) *model.Drive {
 		return nil
 	}
 
-	return &model.Drive{
+	drive := &model.Drive{
 		Description: node.Description,
 		Model:       node.Product,
 		Vendor:      node.Vendor,
 		Serial:      node.Serial,
+		BusInfo:     node.Businfo,
 		SizeBytes:   int64(node.Size),
 	}
+
+	if drive.Vendor == "" {
+		drive.Vendor = model.VendorFromString(node.Product)
+	}
+
+	return drive
 }
 
 // Returns Storage controller information struct populated with the attributes identified by lshw
@@ -437,6 +468,7 @@ func (l *Lshw) xStorageController(node *LshwNode) *model.StorageController {
 		Serial:      node.Serial,
 		Interface:   intf,
 		PhysicalID:  node.Physid,
+		BusInfo:     node.Businfo,
 	}
 }
 
