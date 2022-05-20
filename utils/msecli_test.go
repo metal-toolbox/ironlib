@@ -27,7 +27,7 @@ func Test_MsecliDrives(t *testing.T) {
 	expected := []*model.Drive{
 		{
 			Serial:      "193423710BDA",
-			Vendor:      "Micron",
+			Vendor:      "micron",
 			Type:        model.SlugDriveTypeSATASSD,
 			Model:       "Micron_5200_MTFDDAK480TDN",
 			Description: "Micron_5200_MTFDDAK480TDN",
@@ -38,7 +38,7 @@ func Test_MsecliDrives(t *testing.T) {
 		},
 		{
 			Serial:      "193423711167",
-			Vendor:      "Micron",
+			Vendor:      "micron",
 			Type:        model.SlugDriveTypeSATASSD,
 			Model:       "Micron_5200_MTFDDAK480TDN",
 			Description: "Micron_5200_MTFDDAK480TDN",
