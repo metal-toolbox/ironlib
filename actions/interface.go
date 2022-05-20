@@ -25,7 +25,7 @@ type Updater interface {
 	ApplyUpdate(ctx context.Context, updateFile, component string) error
 }
 
-// InventoryCollector defines an interface to collects device inventory
+// InventoryCollector defines an interface to collect all device inventory
 type InventoryCollector interface {
 	Collect(ctx context.Context, device *model.Device) error
 }
@@ -55,9 +55,14 @@ type BIOSCollector interface {
 	BIOS(ctx context.Context) (*model.BIOS, error)
 }
 
-// StorageControllerCollect defines an interface to returns storage controllers inventory
+// StorageControllerCollector defines an interface to returns storage controllers inventory
 type StorageControllerCollector interface {
 	StorageControllers(ctx context.Context) ([]*model.StorageController, error)
+}
+
+// TPMCollector defines an interface to collect TPM device inventory
+type TPMCollector interface {
+	TPM(ctx context.Context) (*model.TPM, error)
 }
 
 // Updaters

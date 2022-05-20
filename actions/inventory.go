@@ -27,6 +27,7 @@ type Collectors struct {
 	BMC                BMCCollector
 	CPLD               CPLDCollector
 	BIOS               BIOSCollector
+	TPM                TPMCollector
 	StorageControllers StorageControllerCollector
 }
 
@@ -303,6 +304,38 @@ func BIOS(ctx context.Context, bios *model.BIOS, c BIOSCollector) error {
 
 	changelog = vetChanges(changelog)
 	diff.Patch(changelog, bios)
+
+	return nil
+}
+
+// TPM executes the TPM collector and updates device TPM information
+func TPM(ctx context.Context, tpm *model.TPM, c TPMCollector) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("recovered from panic in TPM(): ", r)
+		}
+	}()
+
+	if c == nil {
+		return nil
+	}
+
+	ntpm, err := c.TPM(ctx)
+	if err != nil {
+		return err
+	}
+
+	if ntpm == nil {
+		return nil
+	}
+
+	changelog, err := diff.Diff(tpm, ntpm)
+	if err != nil {
+		return err
+	}
+
+	changelog = vetChanges(changelog)
+	diff.Patch(changelog, tpm)
 
 	return nil
 }
