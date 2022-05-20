@@ -42,17 +42,17 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", "", 0), err.Error())
 	}
 
 	deviceModel, err := dmidecode.ProductName()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", "", 0), err.Error())
 	}
 
 	serial, err := dmidecode.SerialNumber()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", "", 0), err.Error())
 	}
 
 	// set device

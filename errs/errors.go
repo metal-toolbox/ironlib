@@ -21,16 +21,22 @@ var (
 type DmiDecodeValueError struct {
 	Section string
 	Field   string
+	TypeID  int
 }
 
 // Error implements the error interface
 func (d *DmiDecodeValueError) Error() string {
+	if d.TypeID != 0 {
+		return fmt.Sprintf("unable to read type ID: %d", d.TypeID)
+	}
+
 	return fmt.Sprintf("unable to read section: %s, field: %s", d.Section, d.Field)
 }
 
 // NewDmidevodeValueError returns a DmiDecodeValueError object
-func NewDmidecodeValueError(section, field string) *DmiDecodeValueError {
+func NewDmidecodeValueError(section, field string, typeID int) *DmiDecodeValueError {
 	return &DmiDecodeValueError{
+		TypeID:  typeID,
 		Section: section,
 		Field:   field,
 	}

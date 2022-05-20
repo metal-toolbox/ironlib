@@ -33,7 +33,7 @@ func (d *Dmidecode) query(section, key string) (value string, err error) {
 
 	records, err := d.dmi.SearchByName(section)
 	if err != nil {
-		return value, errors.Wrap(errs.NewDmidecodeValueError(section, key), err.Error())
+		return value, errors.Wrap(errs.NewDmidecodeValueError(section, key, 0), err.Error())
 	}
 
 	for _, m := range records {

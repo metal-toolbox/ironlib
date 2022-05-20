@@ -22,13 +22,13 @@ func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
 
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("system manufacturer", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("system manufacturer", "", 0), err.Error())
 	}
 
 	if deviceVendor == "" || deviceVendor == model.SystemManufacturerUndefined {
 		deviceVendor, err = dmidecode.BaseBoardManufacturer()
 		if err != nil {
-			return nil, errors.Wrap(errs.NewDmidecodeValueError("baseboard manufacturer", ""), err.Error())
+			return nil, errors.Wrap(errs.NewDmidecodeValueError("baseboard manufacturer", "", 0), err.Error())
 		}
 	}
 
