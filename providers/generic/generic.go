@@ -63,7 +63,7 @@ func (a *Generic) GetInventory(ctx context.Context) (*model.Device, error) {
 	// Collect device inventory from lshw
 	a.logger.Info("Collecting inventory")
 
-	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace)
+	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace, false)
 	if err != nil {
 		return nil, err
 	}

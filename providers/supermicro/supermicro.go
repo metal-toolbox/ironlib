@@ -87,7 +87,7 @@ func (s *supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
 	// Collect device inventory from lshw
 	s.logger.Info("Collecting hardware inventory")
 
-	err := actions.Collect(ctx, s.hw.Device, s.collectors, s.trace)
+	err := actions.Collect(ctx, s.hw.Device, s.collectors, s.trace, false)
 	if err != nil {
 		return nil, err
 	}

@@ -118,7 +118,7 @@ func (d *dell) GetInventory(ctx context.Context) (*model.Device, error) {
 	// Collect device inventory from lshw
 	d.logger.Info("Collecting hardware inventory")
 
-	err := actions.Collect(ctx, d.hw.Device, d.collectors, d.trace)
+	err := actions.Collect(ctx, d.hw.Device, d.collectors, d.trace, false)
 	if err != nil {
 		return nil, err
 	}
