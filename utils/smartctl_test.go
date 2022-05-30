@@ -63,7 +63,7 @@ func Test_SmartctlDeviceAttributes(t *testing.T) {
 	expected := []*model.Drive{
 		{Serial: "2013273A99BD", Vendor: model.VendorMicron, Model: "Micron_5200_MTFDDAK960TDN", ProductName: "Micron_5200_MTFDDAK960TDN", Type: model.SlugDriveTypeSATASSD, Firmware: &model.Firmware{Installed: "D1MU020"}, SmartStatus: "ok"},
 		{Serial: "VDJ6SU9K", Vendor: model.VendorHGST, Model: "HGST HUS728T8TALE6L4", ProductName: "HGST HUS728T8TALE6L4", Type: model.SlugDriveTypeSATAHDD, Firmware: &model.Firmware{Installed: "V8GNW460"}, SmartStatus: "ok"},
-		{Serial: "PHYH1016001D240J", Vendor: "", Model: "SSDSCKKB240G8R", ProductName: "SSDSCKKB240G8R", Type: "Unknown", Firmware: &model.Firmware{Installed: "XC31DL6R"}, SmartStatus: "ok", OemID: "DELL(tm)"},
+		{Serial: "PHYH1016001D240J", Vendor: model.VendorDell, Model: "SSDSCKKB240G8R", ProductName: "SSDSCKKB240G8R", Type: "Unknown", Firmware: &model.Firmware{Installed: "XC31DL6R"}, SmartStatus: "ok", OemID: "DELL(tm)"},
 		{Serial: "Z9DF70I8FY3L", Vendor: model.VendorToshiba, Model: "KXG60ZNV256G TOSHIBA", ProductName: "KXG60ZNV256G TOSHIBA", Type: model.SlugDriveTypePCIeNVMEeSSD, Firmware: &model.Firmware{Installed: "AGGA4104"}, SmartStatus: "ok"},
 		{Serial: "Z9DF70I9FY3L", Vendor: model.VendorToshiba, Model: "KXG60ZNV256G TOSHIBA", ProductName: "KXG60ZNV256G TOSHIBA", Type: model.SlugDriveTypePCIeNVMEeSSD, Firmware: &model.Firmware{Installed: "AGGA4104"}, SmartStatus: "ok"},
 	}
