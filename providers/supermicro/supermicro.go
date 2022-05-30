@@ -112,6 +112,10 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 		}
 	}
 
+	if option.Model == "" {
+		option.Model = s.hw.Device.Model
+	}
+
 	err = actions.Update(ctx, s.hw.Device, []*model.UpdateOptions{option})
 	if err != nil {
 		return err

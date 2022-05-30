@@ -194,6 +194,7 @@ func FormatProductName(s string) string {
 // Return the product vendor name, given a product name/model string
 func VendorFromString(s string) string {
 	s = strings.ToLower(s)
+
 	switch {
 	case strings.Contains(s, "dell"):
 		return VendorDell
