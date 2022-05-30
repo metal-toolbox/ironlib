@@ -37,19 +37,19 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", "", 0), err.Error())
 	}
 
 	// Supermicro's have a consistent baseboard product name
 	// compared to the marketing product name which varies based on location
 	deviceModel, err := dmidecode.BaseBoardProductName()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", "", 0), err.Error())
 	}
 
 	serial, err := dmidecode.SerialNumber()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", "", 0), err.Error())
 	}
 
 	device := model.NewDevice()
@@ -87,7 +87,7 @@ func (s *supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
 	// Collect device inventory from lshw
 	s.logger.Info("Collecting hardware inventory")
 
-	err := actions.Collect(ctx, s.hw.Device, s.collectors, s.trace)
+	err := actions.Collect(ctx, s.hw.Device, s.collectors, s.trace, false)
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +110,10 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 		if err != nil {
 			return err
 		}
+	}
+
+	if option.Model == "" {
+		option.Model = s.hw.Device.Model
 	}
 
 	err = actions.Update(ctx, s.hw.Device, []*model.UpdateOptions{option})

@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"context"
 	"strings"
 
 	"github.com/dselans/dmidecode"
 	"github.com/metal-toolbox/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -33,7 +35,7 @@ func (d *Dmidecode) query(section, key string) (value string, err error) {
 
 	records, err := d.dmi.SearchByName(section)
 	if err != nil {
-		return value, errors.Wrap(errs.NewDmidecodeValueError(section, key), err.Error())
+		return value, errors.Wrap(errs.NewDmidecodeValueError(section, key, 0), err.Error())
 	}
 
 	for _, m := range records {
@@ -42,7 +44,16 @@ func (d *Dmidecode) query(section, key string) (value string, err error) {
 		}
 	}
 
-	return value, errors.Wrap(errs.NewDmidecodeValueError(section, key), err.Error())
+	return value, errors.Wrap(errs.NewDmidecodeValueError(section, key, 0), err.Error())
+}
+
+func (d *Dmidecode) queryType(id int) (records []dmidecode.Record, err error) {
+	records, err = d.dmi.SearchByType(id)
+	if err != nil {
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("", "", id), err.Error())
+	}
+
+	return records, nil
 }
 
 // Manufacturer queries dmidecode and returns server vendor
@@ -83,4 +94,27 @@ func (d *Dmidecode) ChassisSerialNumber() (string, error) {
 // BIOSVersion queries dmidecode and returns the BIOS version
 func (d *Dmidecode) BIOSVersion() (string, error) {
 	return d.query("BIOS Information", "Version")
+}
+
+func (d *Dmidecode) TPM(ctx context.Context) (*model.TPM, error) {
+	// TPM type ID
+	tpmTypeID := 43
+
+	records, err := d.queryType(tpmTypeID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range records {
+		return &model.TPM{
+			Vendor:      model.VendorFromString(r["Description"]),
+			Description: r["Description"],
+			Firmware:    &model.Firmware{Installed: r["Firmware Revision"]},
+			Metadata: map[string]string{
+				"Specification Version": r["Specification Version"],
+			},
+		}, nil
+	}
+
+	return nil, nil
 }

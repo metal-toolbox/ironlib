@@ -56,19 +56,19 @@ func IdentifyVendorModel(dmidecode *Dmidecode) (*DeviceIdentifiers, error) {
 
 	device.Vendor, err = dmidecode.Manufacturer()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", "", 0), err.Error())
 	}
 
 	device.Model, err = dmidecode.ProductName()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Product name", "", 0), err.Error())
 	}
 
 	// identify the vendor from the baseboard manufacturer - if the System Manufacturer attribute is unset
 	if device.Vendor == "" || device.Vendor == model.SystemManufacturerUndefined {
 		device.Vendor, err = dmidecode.BaseBoardManufacturer()
 		if err != nil {
-			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard Manufacturer", ""), err.Error())
+			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard Manufacturer", "", 0), err.Error())
 		}
 	}
 
@@ -76,13 +76,13 @@ func IdentifyVendorModel(dmidecode *Dmidecode) (*DeviceIdentifiers, error) {
 	if device.Model == model.SystemManufacturerUndefined {
 		device.Model, err = dmidecode.BaseBoardProductName()
 		if err != nil {
-			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard ProductName", ""), err.Error())
+			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard ProductName", "", 0), err.Error())
 		}
 	}
 
 	device.Serial, err = dmidecode.SerialNumber()
 	if err != nil {
-		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", ""), err.Error())
+		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", "", 0), err.Error())
 	}
 
 	return device, nil

@@ -68,6 +68,10 @@ type GPU struct {
 }
 
 type TPM struct {
+	Description string            `json:"description,omitempty"`
+	Vendor      string            `json:"vendor,omitempty"`
+	Firmware    *Firmware         `json:"firmware,omitempty"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 type CPLD struct {
@@ -133,13 +137,15 @@ type Memory struct {
 }
 
 type NIC struct {
+	ProductName string            `json:"name,omitempty"`
 	Description string            `json:"description,omitempty"`
 	Vendor      string            `json:"vendor,omitempty"`
 	Model       string            `json:"model,omitempty"`
 	Serial      string            `json:"serial,omitempty" diff:"identifier"`
 	SpeedBits   int64             `json:"speed_bits,omitempty"`
 	PhysicalID  string            `json:"physid,omitempty"`
-	Oem         bool              `json:"oem"`
+	BusInfo     string            `json:"businfo,omitempty"`
+	Oem         bool              `json:"oem,omitempty"`
 	Metadata    map[string]string `json:"metadata"`
 	Firmware    *Firmware         `json:"firmware,omitempty"`
 }
@@ -151,6 +157,7 @@ type StorageController struct {
 	Serial      string            `json:"serial,omitempty"`
 	Interface   string            `json:"interface,omitempty"` // SATA | SAS
 	PhysicalID  string            `json:"physid,omitempty"`
+	BusInfo     string            `json:"businfo,omitempty"`
 	Oem         bool              `json:"oem"`
 	Metadata    map[string]string `json:"metadata"`
 	Firmware    *Firmware         `json:"firmware,omitempty"`
@@ -172,6 +179,7 @@ type Drive struct {
 	Description       string            `json:"description,omitempty"`
 	Serial            string            `json:"serial,omitempty" diff:"identifier"`
 	StorageController string            `json:"storage_controller,omitempty"`
+	BusInfo           string            `json:"businfo,omitempty"`
 	Vendor            string            `json:"vendor,omitempty"`
 	Model             string            `json:"model,omitempty"`
 	WWN               string            `json:"wwn,omitempty"`
@@ -179,7 +187,7 @@ type Drive struct {
 	CapacityBytes     int64             `json:"capacity_bytes,omitempty"`
 	BlockSize         int64             `json:"block_size,omitempty"`
 	Metadata          map[string]string `json:"metadata,omitempty"` // Additional metadata if any
-	Oem               bool              `json:"oem,omitempty"`      // Component is an OEM component
+	OemID             string            `json:"oem_id,omitempty"`   // Component is an OEM component if it has a OEM ID
 	Firmware          *Firmware         `json:"firmware,omitempty"`
 	SmartStatus       string            `json:"smart_status,omitempty"`
 	SmartErrors       []string          `json:"smart_errors,omitempty"`

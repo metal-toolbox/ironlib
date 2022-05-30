@@ -21,7 +21,7 @@ type asrockrack struct {
 func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, error) {
 	var trace bool
 
-	if l.GetLevel().String() == "trace" {
+	if l.Level == logrus.TraceLevel {
 		trace = true
 	}
 
@@ -56,7 +56,7 @@ func (a *asrockrack) GetInventory(ctx context.Context) (*model.Device, error) {
 
 	a.hw.Device = model.NewDevice()
 
-	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace)
+	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace, false)
 	if err != nil {
 		return nil, err
 	}

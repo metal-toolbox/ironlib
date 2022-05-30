@@ -15,10 +15,14 @@ const (
 	VendorQuanta                = "quanta"
 	VendorGigabyte              = "gigabyte"
 	VendorIntel                 = "intel"
+	VendorLSI                   = "lsi"
+	VendorHGST                  = "hgst"
 	VendorPacket                = "packet"
 	VendorMellanox              = "mellanox"
+	VendorToshiba               = "toshiba"
 	VendorAmericanMegatrends    = "ami"
 	VendorBroadcom              = "broadcom"
+	VendorInfineon              = "infineon"
 	SystemManufacturerUndefined = "To Be Filled By O.E.M."
 
 	// Generic component slugs
@@ -189,19 +193,25 @@ func FormatProductName(s string) string {
 
 // Return the product vendor name, given a product name/model string
 func VendorFromString(s string) string {
+	s = strings.ToLower(s)
+
 	switch {
-	case strings.Contains(s, "Dell"):
+	case strings.Contains(s, "dell"):
 		return VendorDell
-	case strings.Contains(s, "LSI3008-IT"):
-		return "LSI"
-	case strings.Contains(s, "HGST "):
-		return "HGST"
-	case strings.Contains(s, "Micron_"), strings.HasPrefix(s, "MTFD"):
-		return "Micron"
-	case strings.Contains(s, "TOSHIBA"):
-		return "Toshiba"
-	case strings.Contains(s, "ConnectX4LX"):
-		return "Mellanox"
+	case strings.Contains(s, "lsi3008-it"):
+		return VendorLSI
+	case strings.Contains(s, "hgst "):
+		return VendorHGST
+	case strings.Contains(s, "intel "):
+		return VendorIntel
+	case strings.Contains(s, "micron_"), strings.HasPrefix(s, "mtfd"):
+		return VendorMicron
+	case strings.Contains(s, "toshiba"):
+		return VendorToshiba
+	case strings.Contains(s, "connectx4lx"):
+		return VendorMellanox
+	case strings.Contains(s, "infineon"):
+		return VendorInfineon
 	default:
 		return ""
 	}

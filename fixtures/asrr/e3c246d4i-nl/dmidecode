@@ -116,9 +116,10 @@ Memory Array Mapped Address
 Handle 0x001B, DMI type 43, 31 bytes
 TPM Device
 	Vendor ID: 
-	Specification Version: 2.0	Firmware Revision: 5.63
-	Description: INFINEON	Characteristics:
-		Family configurable via platform software support
+	Specification Version: 2.0
+	Firmware Revision: 5.63
+	Description: INFINEON
+	Characteristics: Family configurable via platform software support
 	OEM-specific Information: 0x00000000
 
 Handle 0x001C, DMI type 15, 73 bytes

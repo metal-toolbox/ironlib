@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"context"
 	"os"
 	"testing"
 
 	"github.com/dselans/dmidecode"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -58,4 +60,29 @@ func Test_dmidecode_asrockrack_E3C246D4I_NL(t *testing.T) {
 
 	assert.Equal(t, "ASRockRack", bv)
 	assert.Equal(t, "E3C246D4I-NL", bm)
+}
+
+func Test_dmidecode_asrockrack_E3C246D4I_NL_TPM(t *testing.T) {
+	expected := &model.TPM{
+		Description: "INFINEON",
+		Vendor:      "infineon",
+		Firmware: &model.Firmware{
+			Installed: "5.63",
+		},
+		Metadata: map[string]string{
+			"Specification Version": "2.0",
+		},
+	}
+
+	dmi, err := InitTestDmidecode("../fixtures/asrr/e3c246d4i-nl/dmidecode")
+	if err != nil {
+		t.Error(err)
+	}
+
+	got, err := dmi.TPM(context.TODO())
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, expected, got)
 }
