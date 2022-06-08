@@ -52,6 +52,11 @@ func (s *SupermicroSUM) Collect(device *model.Device) error {
 func (s *SupermicroSUM) UpdateBIOS(ctx context.Context, updateFile, modelNumber string) error {
 	s.Executor.SetArgs([]string{"-c", "UpdateBios", "--preserve_setting", "--file", updateFile})
 
+	// X12STH-SYS does not support the preserve_setting option
+	if strings.EqualFold(modelNumber, "X12STH-SYS") {
+		s.Executor.SetArgs([]string{"-c", "UpdateBios", "--file", updateFile})
+	}
+
 	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return err
@@ -186,9 +191,11 @@ func NewFakeSMCSum(stdin io.Reader) *SupermicroSUM {
 func (e *FakeSMCSumExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 	b := bytes.Buffer{}
 
-	_, err := b.ReadFrom(e.Stdin)
-	if err != nil {
-		return nil, err
+	if e.Stdin != nil {
+		_, err := b.ReadFrom(e.Stdin)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &Result{Stdout: b.Bytes()}, nil
@@ -202,4 +209,9 @@ func (e *FakeSMCSumExecute) SetStdin(r io.Reader) {
 // SetArgs is to set cmd args to the fake execute method
 func (e *FakeSMCSumExecute) SetArgs(a []string) {
 	e.Args = a
+}
+
+// GetCmd is to retrieve the cmd args for the fake execute method
+func (e *FakeSMCSumExecute) GetCmd() string {
+	return strings.Join(e.Args, " ")
 }
