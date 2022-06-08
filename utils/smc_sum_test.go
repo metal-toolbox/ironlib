@@ -9,6 +9,39 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_SMCUpdateBios(t *testing.T) {
+	testCases := []struct {
+		testName    string
+		model       string
+		expectedCmd string
+	}{
+		{
+			"model specific update command",
+			"X12STH-SYS",
+			"-c UpdateBios --file /tmp/foo",
+		},
+		{
+			"generic update command",
+			"generic",
+			"-c UpdateBios --preserve_setting --file /tmp/foo",
+		},
+	}
+
+	sum := NewFakeSMCSum(nil)
+
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			err := sum.UpdateBIOS(context.TODO(), "/tmp/foo", tc.model)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			assert.Equal(t, tc.expectedCmd, sum.Executor.GetCmd())
+		})
+	}
+}
+
 func Test_parseSMCBIOSConfig_X11SCHFF(t *testing.T) {
 	expected := map[string]string{"boot_mode": "BIOS",
 		"intel_sgx":                                 "Software Controlled",
