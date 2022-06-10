@@ -1,0 +1,37 @@
+name: Release docker image
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - 'v.*.*.*'
+      - 'v.*.*.*-dev'
+
+jobs:
+  publish-docker-images:
+      name: 🐳 Build and push docker images
+      runs-on: ubuntu-20.04
+      if: contains(github.ref, 'tags')
+      steps:
+        - name: Set release tag variable
+          id: releaseTag
+          shell: bash
+          run: |
+            # include git tag
+            IMAGE_TAGS=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
+            # include branch name, commit sha
+            IMAGE_TAGS="${TAGS},${GITHUB_REF_NAME},${GITHUB_SHA}"
+            if [[ "$GITHUB_REF" =~ ^refs/tags/v.*.*.*-dev ]]; then
+              # a development release does not include the 'latest' tag
+              echo -n "::set-output name=imageTags::${IMAGE_TAGS}"
+            else
+              echo -n "::set-output name=imageTags::${IMAGE_TAGS},latest"
+            fi
+
+        - name: publish image
+          uses: github.com/joelrebel/container-push/.github/workflows/container-push.yml@multiple-tags
+          with:
+            name: ironlib
+            tag: ${{ steps.releaseTag.outputs.imageTags }}
+            dockerfile_path: Dockerfile
