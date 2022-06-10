@@ -5,8 +5,8 @@ on:
     branches:
       - '*'
     tags:
-      - 'v.*.*.*'
-      - 'v.*.*.*-dev'
+      - 'v*.*.*'
+      - 'v*.*.*-dev'
 
 jobs:
   publish-docker-images:
