@@ -84,7 +84,6 @@ RUN rpm --import /tmp/storecli_pubkey.asc && \
     chmod 755 /tmp/msecli_Linux.run && /tmp/msecli_Linux.run --mode unattended && rm -rf /tmp/*
 
 ############# Dell ####################
-COPY dell-system-update.repo /etc/yum.repos.d/
 ## Prerequisite directories for Dell, ASRR
 ## /lib/firmware required for Dell updates to be installed successfullly
 RUN mkdir -p /lib/firmware /opt/asrr /usr/libexec/dell_dup
