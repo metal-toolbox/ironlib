@@ -8,8 +8,7 @@ RUN microdnf install -y --setopt=tsflags=nodocs \
                               curl         \
                               tar          \
                               gzip         \
-                              unzip        \
-                              kmod
+                              unzip
 
 # epel repo package
 RUN curl -sO https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
@@ -104,6 +103,7 @@ RUN  microdnf install -y --setopt=tsflags=nodocs \
                    nvme-cli      \
                    dmidecode     \
                    libssh2-devel \
+                   kmod           \
                    smartmontools  && microdnf clean all
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
