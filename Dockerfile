@@ -103,7 +103,10 @@ RUN  microdnf install -y --setopt=tsflags=nodocs \
                    nvme-cli      \
                    dmidecode     \
                    libssh2-devel \
-                   kmod           \
-                   smartmontools  && microdnf clean all
+                   kmod          \
+                   tar           \
+                   smartmontools && \
+                   microdnf clean all && \
+                   ln -s /usr/bin/microdnf /usr/bin/yum # since dell dsu expects yum
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
