@@ -104,6 +104,7 @@ RUN  microdnf install -y --setopt=tsflags=nodocs \
                    libssh2-devel \
                    kmod          \
                    tar           \
+                   which         \
                    smartmontools && \
                    microdnf clean all && \
                    ln -s /usr/bin/microdnf /usr/bin/yum # since dell dsu expects yum
