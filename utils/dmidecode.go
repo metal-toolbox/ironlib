@@ -2,11 +2,12 @@ package utils
 
 import (
 	"context"
+	"os"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/dselans/dmidecode"
 	"github.com/metal-toolbox/ironlib/errs"
-	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -25,9 +26,24 @@ func NewDmidecode() (d *Dmidecode, err error) {
 	return &Dmidecode{dmi: dmi}, err
 }
 
-// Returns a fake dmidecode instance for tests
-func NewFakeDmidecode() *Dmidecode {
-	return &Dmidecode{}
+// InitFakeDmidecode Returns a fake dmidecode instance for tests
+// given test data file returns a Dmidecode with the test dmidecode output loaded
+func InitFakeDmidecode(testFile string) (*Dmidecode, error) {
+	b, err := os.ReadFile(testFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// setup a dmidecode instance
+	d := dmidecode.New()
+
+	err = d.ParseDmidecode(string(b))
+	if err != nil {
+		return nil, err
+	}
+
+	// wrap the dmidecode instance in our Dmidecode wrapper
+	return &Dmidecode{dmi: d}, nil
 }
 
 func (d *Dmidecode) query(section, key string) (value string, err error) {
@@ -96,7 +112,7 @@ func (d *Dmidecode) BIOSVersion() (string, error) {
 	return d.query("BIOS Information", "Version")
 }
 
-func (d *Dmidecode) TPM(ctx context.Context) (*model.TPM, error) {
+func (d *Dmidecode) TPMs(ctx context.Context) ([]*common.TPM, error) {
 	// TPM type ID
 	tpmTypeID := 43
 
@@ -105,16 +121,19 @@ func (d *Dmidecode) TPM(ctx context.Context) (*model.TPM, error) {
 		return nil, err
 	}
 
+	tpms := []*common.TPM{}
 	for _, r := range records {
-		return &model.TPM{
-			Vendor:      model.VendorFromString(r["Description"]),
-			Description: r["Description"],
-			Firmware:    &model.Firmware{Installed: r["Firmware Revision"]},
-			Metadata: map[string]string{
-				"Specification Version": r["Specification Version"],
+		tpms = append(tpms, &common.TPM{
+			Common: common.Common{
+				Vendor:      common.VendorFromString(r["Description"]),
+				Description: r["Description"],
+				Firmware:    &common.Firmware{Installed: r["Firmware Revision"]},
+				Metadata: map[string]string{
+					"Specification Version": r["Specification Version"],
+				},
 			},
-		}, nil
+		})
 	}
 
-	return nil, nil
+	return tpms, nil
 }

@@ -2,35 +2,14 @@ package utils
 
 import (
 	"context"
-	"os"
 	"testing"
 
-	"github.com/dselans/dmidecode"
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 	"github.com/stretchr/testify/assert"
 )
 
-// Given the test data file returns a Dmidecode with the test dmidecode output loaded
-func InitTestDmidecode(testFile string) (*Dmidecode, error) {
-	b, err := os.ReadFile(testFile)
-	if err != nil {
-		return nil, err
-	}
-
-	// setup a dmidecode instance
-	d := dmidecode.New()
-
-	err = d.ParseDmidecode(string(b))
-	if err != nil {
-		return nil, err
-	}
-
-	// wrap the dmidecode instance in our Dmidecode wrapper
-	return &Dmidecode{dmi: d}, nil
-}
-
 func Test_dmidecode_asrockrack_E3C246D4I_NL(t *testing.T) {
-	dmi, err := InitTestDmidecode("../fixtures/asrr/e3c246d4i-nl/dmidecode")
+	dmi, err := InitFakeDmidecode("../fixtures/asrr/e3c246d4i-nl/dmidecode")
 	if err != nil {
 		t.Error(err)
 	}
@@ -63,23 +42,27 @@ func Test_dmidecode_asrockrack_E3C246D4I_NL(t *testing.T) {
 }
 
 func Test_dmidecode_asrockrack_E3C246D4I_NL_TPM(t *testing.T) {
-	expected := &model.TPM{
-		Description: "INFINEON",
-		Vendor:      "infineon",
-		Firmware: &model.Firmware{
-			Installed: "5.63",
-		},
-		Metadata: map[string]string{
-			"Specification Version": "2.0",
+	expected := []*common.TPM{
+		{
+			Common: common.Common{
+				Description: "INFINEON",
+				Vendor:      "infineon",
+				Firmware: &common.Firmware{
+					Installed: "5.63",
+				},
+				Metadata: map[string]string{
+					"Specification Version": "2.0",
+				},
+			},
 		},
 	}
 
-	dmi, err := InitTestDmidecode("../fixtures/asrr/e3c246d4i-nl/dmidecode")
+	dmi, err := InitFakeDmidecode("../fixtures/asrr/e3c246d4i-nl/dmidecode")
 	if err != nil {
 		t.Error(err)
 	}
 
-	got, err := dmi.TPM(context.TODO())
+	got, err := dmi.TPMs(context.TODO())
 	if err != nil {
 		t.Error(err)
 	}

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,46 +16,52 @@ func newFakeMlxup() *Mlxup {
 }
 
 func Test_MlxupNICs(t *testing.T) {
-	expected := []*model.NIC{
+	expected := []*common.NIC{
 		{
-			Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6",
-			Vendor:      "mellanox",
-			Model:       "MCX4121A-ACA_Ax",
-			Serial:      "b8:59:9f:de:86:fd",
-			SpeedBits:   0,
-			PhysicalID:  "",
-			Oem:         false,
-			Metadata:    map[string]string{},
-			Firmware: &model.Firmware{
-				Available: "14.28.2007",
-				Installed: "14.27.1016",
-				Metadata: map[string]string{
-					"firmware_pxe_available":  "3.6.0102",
-					"firmware_pxe_installed":  "3.5.0901",
-					"firmware_uefi_available": "14.21.0017",
-					"firmware_uefi_installed": "14.20.0019",
+			Common: common.Common{
+				Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6",
+				Vendor:      "mellanox",
+				Model:       "MCX4121A-ACA_Ax",
+				Serial:      "b8:59:9f:de:86:fd",
+				Oem:         false,
+				Metadata:    map[string]string{},
+				Firmware: &common.Firmware{
+					Available: "14.28.2007",
+					Installed: "14.27.1016",
+					Metadata: map[string]string{
+						"firmware_pxe_available":  "3.6.0102",
+						"firmware_pxe_installed":  "3.5.0901",
+						"firmware_uefi_available": "14.21.0017",
+						"firmware_uefi_installed": "14.20.0019",
+					},
 				},
 			},
+
+			SpeedBits:  0,
+			PhysicalID: "",
 		},
 		{
-			Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6",
-			Vendor:      "mellanox",
-			Model:       "MCX4121A-ACA_Ax",
-			Serial:      "b8:59:9f:de:86:f8",
-			SpeedBits:   0,
-			PhysicalID:  "",
-			Oem:         false,
-			Metadata:    map[string]string{},
-			Firmware: &model.Firmware{
-				Available: "14.28.2006",
-				Installed: "14.27.1016",
-				Metadata: map[string]string{
-					"firmware_pxe_available":  "3.6.0102",
-					"firmware_pxe_installed":  "3.5.0901",
-					"firmware_uefi_available": "14.21.0017",
-					"firmware_uefi_installed": "14.20.0019",
+			Common: common.Common{
+				Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6",
+				Vendor:      "mellanox",
+				Model:       "MCX4121A-ACA_Ax",
+				Serial:      "b8:59:9f:de:86:f8",
+				Oem:         false,
+				Metadata:    map[string]string{},
+				Firmware: &common.Firmware{
+					Available: "14.28.2006",
+					Installed: "14.27.1016",
+					Metadata: map[string]string{
+						"firmware_pxe_available":  "3.6.0102",
+						"firmware_pxe_installed":  "3.5.0901",
+						"firmware_uefi_available": "14.21.0017",
+						"firmware_uefi_installed": "14.20.0019",
+					},
 				},
 			},
+
+			SpeedBits:  0,
+			PhysicalID: "",
 		},
 	}
 

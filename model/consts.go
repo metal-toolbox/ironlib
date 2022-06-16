@@ -1,54 +1,11 @@
 package model
 
 import (
-	"strings"
-
+	"github.com/bmc-toolbox/common"
 	"github.com/pkg/errors"
 )
 
 const (
-	VendorDell                  = "dell"
-	VendorMicron                = "micron"
-	VendorAsrockrack            = "asrockrack"
-	VendorSupermicro            = "supermicro"
-	VendorHPE                   = "hp"
-	VendorQuanta                = "quanta"
-	VendorGigabyte              = "gigabyte"
-	VendorIntel                 = "intel"
-	VendorLSI                   = "lsi"
-	VendorHGST                  = "hgst"
-	VendorPacket                = "packet"
-	VendorMellanox              = "mellanox"
-	VendorToshiba               = "toshiba"
-	VendorAmericanMegatrends    = "ami"
-	VendorBroadcom              = "broadcom"
-	VendorInfineon              = "infineon"
-	SystemManufacturerUndefined = "To Be Filled By O.E.M."
-
-	// Generic component slugs
-	SlugBackplaneExpander     = "Backplane Expander"
-	SlugChassis               = "Chassis"
-	SlugTPM                   = "TPM"
-	SlugGPU                   = "GPU"
-	SlugCPU                   = "CPU"
-	SlugPhysicalMem           = "PhysicalMemory"
-	SlugStorageController     = "StorageController"
-	SlugStorageControllers    = "StorageControllers"
-	SlugBMC                   = "BMC"
-	SlugBIOS                  = "BIOS"
-	SlugDrive                 = "Drive"
-	SlugDrives                = "Drives"
-	SlugDriveTypePCIeNVMEeSSD = "NVMe PCIe SSD"
-	SlugDriveTypeSATASSD      = "Sata SSD"
-	SlugDriveTypeSATAHDD      = "Sata HDD"
-	SlugNIC                   = "NIC"
-	SlugNICs                  = "NICs"
-	SlugPSU                   = "Power Supply"
-	SlugPSUs                  = "Power Supplies"
-	SlugSASHBA330Controller   = "SAS HBA330 Controller"
-	SlugCPLD                  = "CPLD"
-	SlugUnknown               = "unknown"
-
 	// Dell specific component slugs
 	SlugDellSystemCPLD                  = "Dell System CPLD"
 	SlugDellBossAdapter                 = "Boss Adapter"
@@ -58,7 +15,7 @@ const (
 	SlugDellLifeCycleController         = "Lifecycle Controller"
 	SlugDellOSCollector                 = "OS Collector"
 	SlugDell64bitUefiDiagnostics        = "Dell 64 bit uEFI diagnostics"
-	SlugDellBackplaneExpander           = "Backplane Expander"
+	SlugDellBackplaneExpander           = "Backplane-Expander"
 	SlugDellNonExpanderStorageBackplane = "Non-Expander Storage Backplane (SEP)"
 
 	// EnvDellDSURelease is the Dell DSU release version
@@ -89,21 +46,21 @@ var (
 	// As of now - neither lshwn or smartctl clearly points out the difference in the controller
 	modelDriveTypeSlug = map[string]string{
 		// Sata SSD drives
-		"Micron_5200_MTFDDAK480TDN": SlugDriveTypeSATASSD,
-		"Micron_5200_MTFDDAK960TDN": SlugDriveTypeSATASSD,
-		"MTFDDAV240TDU":             SlugDriveTypeSATASSD,
+		"Micron_5200_MTFDDAK480TDN": common.SlugDriveTypeSATASSD,
+		"Micron_5200_MTFDDAK960TDN": common.SlugDriveTypeSATASSD,
+		"MTFDDAV240TDU":             common.SlugDriveTypeSATASSD,
 		// PCI NVMe SSD drives
-		"KXG60ZNV256G TOSHIBA":      SlugDriveTypePCIeNVMEeSSD,
-		"Micron_9300_MTFDHAL3T8TDP": SlugDriveTypePCIeNVMEeSSD,
+		"KXG60ZNV256G TOSHIBA":      common.SlugDriveTypePCIeNVMEeSSD,
+		"Micron_9300_MTFDHAL3T8TDP": common.SlugDriveTypePCIeNVMEeSSD,
 		// Sata HDD drives
-		"HGST HUS728T8TALE6L4": SlugDriveTypeSATAHDD,
+		"HGST HUS728T8TALE6L4": common.SlugDriveTypeSATAHDD,
 	}
 
 	// OemComponentDell is a lookup table for dell OEM components
 	// these components are specific to the OEMs - in this case Dell
 	OemComponentDell = map[string]struct{}{
 		SlugDellSystemCPLD:                  {},
-		SlugBackplaneExpander:               {},
+		common.SlugBackplaneExpander:        {},
 		SlugDellIdracServiceModule:          {},
 		SlugDellBossAdapterDisk0:            {},
 		SlugDellBossAdapterDisk1:            {},
@@ -118,14 +75,14 @@ var (
 	// To identify components correctly, if two components contain a similar string
 	// e.g: "idrac", "dell emc idrac service module" the latter should be positioned before the former in the list.
 	DellComponentSlug = [][]string{
-		{"bios", SlugBIOS},
-		{"ethernet", SlugNIC},
+		{"bios", common.SlugBIOS},
+		{"ethernet", common.SlugNIC},
 		{"dell emc idrac service module", SlugDellIdracServiceModule},
-		{"idrac", SlugBMC},
-		{"backplane", SlugBackplaneExpander},
-		{"power supply", SlugPSU},
-		{"hba330", SlugStorageController},
-		{"nvmepcissd", SlugDrive},
+		{"idrac", common.SlugBMC},
+		{"backplane", common.SlugBackplaneExpander},
+		{"power supply", common.SlugPSU},
+		{"hba330", common.SlugStorageController},
+		{"nvmepcissd", common.SlugDrive},
 		{"system cpld", SlugDellSystemCPLD},
 		{"sep firmware", SlugDellNonExpanderStorageBackplane},
 		{"lifecycle controller", SlugDellLifeCycleController},
@@ -134,7 +91,7 @@ var (
 		{"disk 1 of boss adapter", SlugDellBossAdapterDisk1},
 		{"boss", SlugDellBossAdapter},
 		{"dell 64 bit uefi diagnostics", SlugDell64bitUefiDiagnostics},
-		{"integrated dell remote access controller", SlugBMC},
+		{"integrated dell remote access controller", common.SlugBMC},
 	}
 
 	ErrTypeComponentFirmware = errors.New("ironlib.GetComponentFirmware() was passed an object type which is not handled")
@@ -147,30 +104,6 @@ func DriveTypeSlug(m string) string {
 	}
 
 	return t
-}
-
-// downcases and returns a normalized vendor name from the given string
-func FormatVendorName(v string) string {
-	switch v {
-	case "ASRockRack":
-		return VendorAsrockrack
-	case "Dell Inc.":
-		return VendorDell
-	case "HP", "HPE":
-		return VendorHPE
-	case "Supermicro":
-		return VendorSupermicro
-	case "Quanta Cloud Technology Inc.":
-		return VendorQuanta
-	case "GIGABYTE":
-		return VendorGigabyte
-	case "Intel Corporation":
-		return VendorIntel
-	case "Packet":
-		return VendorPacket
-	default:
-		return v
-	}
 }
 
 // Return a normalized product name given a product name
@@ -188,31 +121,5 @@ func FormatProductName(s string) string {
 		return "5200MAX"
 	default:
 		return s
-	}
-}
-
-// Return the product vendor name, given a product name/model string
-func VendorFromString(s string) string {
-	s = strings.ToLower(s)
-
-	switch {
-	case strings.Contains(s, "dell"):
-		return VendorDell
-	case strings.Contains(s, "lsi3008-it"):
-		return VendorLSI
-	case strings.Contains(s, "hgst "):
-		return VendorHGST
-	case strings.Contains(s, "intel "):
-		return VendorIntel
-	case strings.Contains(s, "micron_"), strings.HasPrefix(s, "mtfd"):
-		return VendorMicron
-	case strings.Contains(s, "toshiba"):
-		return VendorToshiba
-	case strings.Contains(s, "connectx4lx"):
-		return VendorMellanox
-	case strings.Contains(s, "infineon"):
-		return VendorInfineon
-	default:
-		return ""
 	}
 }

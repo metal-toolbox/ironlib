@@ -29,7 +29,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 	collectors := &actions.Collectors{
 		BMC:                utils.NewIpmicfgCmd(trace),
 		BIOS:               utils.NewIpmicfgCmd(trace),
-		CPLD:               utils.NewIpmicfgCmd(trace),
+		CPLDs:              utils.NewIpmicfgCmd(trace),
 		Drives:             utils.NewSmartctlCmd(trace),
 		StorageControllers: utils.NewStoreCLICmd(trace),
 		NICs:               utils.NewMlxupCmd(trace),

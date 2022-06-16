@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,9 +15,9 @@ func newFakeNvme() *Nvme {
 }
 
 func Test_NvmeComponents(t *testing.T) {
-	expected := []*model.Drive{
-		{Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &model.Firmware{Installed: "AGGA4104"}, ProductName: "NULL"},
-		{Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &model.Firmware{Installed: "AGGA4104"}, ProductName: "NULL"},
+	expected := []*common.Drive{
+		{Common: common.Common{Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL"}},
+		{Common: common.Common{Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL"}},
 	}
 
 	n := newFakeNvme()

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
@@ -42,23 +43,26 @@ func NewMsecli(trace bool) *Msecli {
 }
 
 // Components returns a slice of drive components identified
-func (m *Msecli) Drives(ctx context.Context) ([]*model.Drive, error) {
+func (m *Msecli) Drives(ctx context.Context) ([]*common.Drive, error) {
 	devices, err := m.Query()
 	if err != nil {
 		return nil, err
 	}
 
-	drives := []*model.Drive{}
+	drives := []*common.Drive{}
 
 	for _, d := range devices {
-		item := &model.Drive{
-			Model:       d.ModelNumber,
-			Vendor:      model.VendorFromString(d.ModelNumber),
-			Type:        model.DriveTypeSlug(d.ModelNumber),
-			Description: d.ModelNumber,
-			Serial:      d.SerialNumber,
-			Firmware:    &model.Firmware{Installed: d.FirmwareRevision},
-			Metadata:    make(map[string]string),
+		item := &common.Drive{
+			Common: common.Common{
+				Model:       d.ModelNumber,
+				Vendor:      common.VendorFromString(d.ModelNumber),
+				Description: d.ModelNumber,
+				Serial:      d.SerialNumber,
+				Firmware:    &common.Firmware{Installed: d.FirmwareRevision},
+				Metadata:    make(map[string]string),
+			},
+
+			Type: model.DriveTypeSlug(d.ModelNumber),
 		}
 
 		drives = append(drives, item)

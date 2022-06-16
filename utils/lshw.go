@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
@@ -211,34 +212,41 @@ func (l *Lshw) parseNode(node *LshwNode) {
 	}
 }
 
-func (l *Lshw) xMainboard(node *LshwNode) *model.Mainboard {
+func (l *Lshw) xMainboard(node *LshwNode) *common.Mainboard {
 	if !(node.Class == "bus" && node.ID == "core") {
 		return nil
 	}
 
-	return &model.Mainboard{
-		Description: node.Description,
-		Vendor:      node.Vendor,
-		Model:       node.Product,
-		Serial:      node.Serial,
-		PhysicalID:  node.Physid,
+	return &common.Mainboard{
+		Common: common.Common{
+			Description: node.Description,
+			Vendor:      node.Vendor,
+			Model:       node.Product,
+			Serial:      node.Serial,
+			ProductName: node.Product,
+		},
+
+		PhysicalID: node.Physid,
 	}
 }
 
-func (l *Lshw) xBIOS(node *LshwNode) *model.BIOS {
-	return &model.BIOS{
-		Description:   node.Description,
-		Vendor:        node.Vendor,
+func (l *Lshw) xBIOS(node *LshwNode) *common.BIOS {
+	return &common.BIOS{
+		Common: common.Common{
+			Description: node.Description,
+			Vendor:      node.Vendor,
+			Firmware: &common.Firmware{
+				Installed: node.Version,
+			},
+		},
+
 		SizeBytes:     int64(node.Size),
 		CapacityBytes: node.Capacity,
-		Firmware: &model.Firmware{
-			Installed: node.Version,
-		},
 	}
 }
 
 // Returns physical memory module struct populated with the attributes identified by lshw
-func (l *Lshw) xMemoryModule(node *LshwNode) *model.Memory {
+func (l *Lshw) xMemoryModule(node *LshwNode) *common.Memory {
 	// find all populated memory banks
 	if !(strings.Contains(node.ID, "bank") &&
 		node.Class == "memory" &&
@@ -246,19 +254,23 @@ func (l *Lshw) xMemoryModule(node *LshwNode) *model.Memory {
 		return nil
 	}
 
-	return &model.Memory{
-		Description:  node.Description,
+	return &common.Memory{
+		Common: common.Common{
+			Description: node.Description,
+			Vendor:      node.Vendor,
+			Model:       node.Product,
+			Serial:      node.Serial,
+			ProductName: node.Product,
+		},
+
 		Slot:         node.Slot,
-		Serial:       node.Serial,
 		SizeBytes:    int64(node.Size),
-		Model:        node.Product,
-		Vendor:       node.Vendor,
 		ClockSpeedHz: node.Clock,
 	}
 }
 
 // Returns CPU information struct populated with the attributes identified by lshw
-func (l *Lshw) xCPU(node *LshwNode) *model.CPU {
+func (l *Lshw) xCPU(node *LshwNode) *common.CPU {
 	if !(strings.Contains(node.ID, "cpu") && node.Class == "processor") {
 		return nil
 	}
@@ -284,11 +296,16 @@ func (l *Lshw) xCPU(node *LshwNode) *model.CPU {
 		}
 	}
 
-	return &model.CPU{
+	return &common.CPU{
+		Common: common.Common{
+			Description: node.Description,
+			Vendor:      node.Vendor,
+			Model:       node.Product,
+			Serial:      node.Serial,
+			ProductName: node.Product,
+		},
+
 		ClockSpeedHz: node.Clock,
-		Description:  node.Product,
-		Vendor:       node.Vendor,
-		Model:        node.Product,
 		Slot:         node.Slot,
 		Cores:        cores,
 		Threads:      threads,
@@ -296,7 +313,7 @@ func (l *Lshw) xCPU(node *LshwNode) *model.CPU {
 }
 
 // Returns NIC information struct populated with the attributes identified by lshw
-func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
+func (l *Lshw) xNIC(node *LshwNode) *common.NIC {
 	if !(strings.Contains(node.ID, "network") &&
 		node.Class == "network" &&
 		// node.Handle is set to "PCI:-"
@@ -317,12 +334,16 @@ func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
 
 	l.nicSerials[serial] = true
 
-	nic := &model.NIC{
-		ProductName: node.Product,
+	nic := &common.NIC{
+		Common: common.Common{
+			Description: node.Description,
+			Vendor:      node.Vendor,
+			Model:       node.Product,
+			Serial:      node.Serial,
+			ProductName: node.Product,
+		},
+
 		Description: node.Description,
-		Vendor:      node.Vendor,
-		Model:       node.Product,
-		Serial:      node.Serial,
 		SpeedBits:   node.Capacity,
 		PhysicalID:  node.Physid,
 		BusInfo:     node.Businfo,
@@ -345,7 +366,7 @@ func (l *Lshw) xNIC(node *LshwNode) *model.NIC {
 			if exists {
 				if key == "firmware" {
 					version := lshwNicFwStringParse(value, node.Vendor)
-					nic.Firmware = &model.Firmware{Installed: version}
+					nic.Firmware = &common.Firmware{Installed: version}
 				}
 
 				nic.Metadata[key] = value
@@ -365,11 +386,11 @@ func lshwNicFwStringParse(fw, vendor string) string {
 	vendor = strings.ToLower(vendor)
 
 	switch {
-	case strings.Contains(vendor, model.VendorIntel):
+	case strings.Contains(vendor, common.VendorIntel):
 		return nicFwParseIntel(fw)
-	case strings.Contains(vendor, model.VendorMellanox):
+	case strings.Contains(vendor, common.VendorMellanox):
 		return nicFwParseMellanox(fw)
-	case strings.Contains(vendor, model.VendorBroadcom):
+	case strings.Contains(vendor, common.VendorBroadcom):
 		return nicFwParseBroadcom(fw)
 	default:
 		return fw
@@ -429,29 +450,33 @@ func nicFwParseBroadcom(s string) string {
 }
 
 // Returns Drive information struct populated with the attributes identified by lshw
-func (l *Lshw) xDrive(node *LshwNode) *model.Drive {
+func (l *Lshw) xDrive(node *LshwNode) *common.Drive {
 	if strings.Contains(node.Product, "Virtual") || node.Product == "" || strings.Contains(node.Description, "SATA controller") {
 		return nil
 	}
 
-	drive := &model.Drive{
-		Description: node.Description,
-		Model:       node.Product,
-		Vendor:      node.Vendor,
-		Serial:      node.Serial,
-		BusInfo:     node.Businfo,
-		SizeBytes:   int64(node.Size),
+	drive := &common.Drive{
+		Common: common.Common{
+			Description: node.Description,
+			Vendor:      node.Vendor,
+			Model:       node.Product,
+			Serial:      node.Serial,
+			ProductName: node.Product,
+		},
+
+		BusInfo:       node.Businfo,
+		CapacityBytes: int64(node.Size),
 	}
 
 	if drive.Vendor == "" {
-		drive.Vendor = model.VendorFromString(node.Product)
+		drive.Vendor = common.VendorFromString(node.Product)
 	}
 
 	return drive
 }
 
 // Returns Storage controller information struct populated with the attributes identified by lshw
-func (l *Lshw) xStorageController(node *LshwNode) *model.StorageController {
+func (l *Lshw) xStorageController(node *LshwNode) *common.StorageController {
 	if node.Class != "storage" {
 		return nil
 	}
@@ -461,14 +486,18 @@ func (l *Lshw) xStorageController(node *LshwNode) *model.StorageController {
 		return nil
 	}
 
-	return &model.StorageController{
-		Description: node.Description,
-		Vendor:      node.Vendor,
-		Model:       node.Product,
-		Serial:      node.Serial,
-		Interface:   intf,
-		PhysicalID:  node.Physid,
-		BusInfo:     node.Businfo,
+	return &common.StorageController{
+		Common: common.Common{
+			Description: node.Description,
+			Vendor:      node.Vendor,
+			Model:       node.Product,
+			Serial:      node.Serial,
+			ProductName: node.Product,
+		},
+
+		SupportedDeviceProtocols: intf,
+		PhysicalID:               node.Physid,
+		BusInfo:                  node.Businfo,
 	}
 }
 

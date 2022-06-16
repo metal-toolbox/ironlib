@@ -6,12 +6,12 @@ import (
 	"os"
 	"testing"
 
+	"gotest.tools/assert"
+
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	smcFixtures "github.com/metal-toolbox/ironlib/fixtures/supermicro"
-
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"gotest.tools/assert"
 )
 
 func Test_Inventory_dell(t *testing.T) {
@@ -28,7 +28,6 @@ func Test_Inventory_dell(t *testing.T) {
 
 	lshw := utils.NewFakeLshw(bytes.NewReader(lshwb))
 	smartctl := utils.NewFakeSmartctl("../fixtures/dell/r6515/smartctl")
-
 	collectors := &Collectors{
 		Inventory: lshw,
 		Drives:    smartctl,
@@ -94,13 +93,20 @@ func Test_Inventory_smc(t *testing.T) {
 	ipmicfg1 := utils.NewFakeIpmicfg(bytes.NewReader(ipmicfgb))
 	ipmicfg2 := utils.NewFakeIpmicfg(bytes.NewReader(ipmicfgb))
 
+	// tpms
+	dmi, err := utils.InitFakeDmidecode("../fixtures/supermicro/x11dph-t/dmidecode/tpm")
+	if err != nil {
+		t.Error(err)
+	}
+
 	collectors := &Collectors{
 		Inventory:          lshw,
 		Drives:             smartctl,
 		NICs:               mlxup,
-		CPLD:               ipmicfg0,
+		CPLDs:              ipmicfg0,
 		BIOS:               ipmicfg1,
 		BMC:                ipmicfg2,
+		TPMs:               dmi,
 		StorageControllers: storecli,
 	}
 

@@ -4,8 +4,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/errs"
-	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -65,7 +65,7 @@ func IdentifyVendorModel(dmidecode *Dmidecode) (*DeviceIdentifiers, error) {
 	}
 
 	// identify the vendor from the baseboard manufacturer - if the System Manufacturer attribute is unset
-	if device.Vendor == "" || device.Vendor == model.SystemManufacturerUndefined {
+	if device.Vendor == "" || device.Vendor == common.SystemManufacturerUndefined {
 		device.Vendor, err = dmidecode.BaseBoardManufacturer()
 		if err != nil {
 			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard Manufacturer", "", 0), err.Error())
@@ -73,7 +73,7 @@ func IdentifyVendorModel(dmidecode *Dmidecode) (*DeviceIdentifiers, error) {
 	}
 
 	// identify the model from the baseboard - if the System Product Name is unset
-	if device.Model == model.SystemManufacturerUndefined {
+	if device.Model == common.SystemManufacturerUndefined {
 		device.Model, err = dmidecode.BaseBoardProductName()
 		if err != nil {
 			return nil, errors.Wrap(errs.NewDmidecodeValueError("Baseboard ProductName", "", 0), err.Error())

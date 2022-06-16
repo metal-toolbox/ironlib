@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +23,7 @@ func initFakeIPMICfg() (*Ipmicfg, error) {
 }
 
 func Test_Ipmicfg_BIOS(t *testing.T) {
-	expected := &model.BIOS{Description: "BIOS", Vendor: "Supermicro", Firmware: &model.Firmware{Installed: "3.3", Metadata: map[string]string{"build_date": "02/24/2020"}}}
+	expected := &common.BIOS{Common: common.Common{Description: "BIOS", Vendor: "Supermicro", Firmware: &common.Firmware{Installed: "3.3", Metadata: map[string]string{"build_date": "02/24/2020"}}}}
 
 	i, err := initFakeIPMICfg()
 	if err != nil {
@@ -39,7 +39,7 @@ func Test_Ipmicfg_BIOS(t *testing.T) {
 }
 
 func Test_Ipmicfg_BMC(t *testing.T) {
-	expected := &model.BMC{Description: "BMC", Vendor: "Supermicro", Firmware: &model.Firmware{Installed: "1.71.11", Metadata: map[string]string{"build_date": "10/25/2019"}}}
+	expected := &common.BMC{Common: common.Common{Description: "BMC", Vendor: "Supermicro", Firmware: &common.Firmware{Installed: "1.71.11", Metadata: map[string]string{"build_date": "10/25/2019"}}}}
 
 	i, err := initFakeIPMICfg()
 	if err != nil {
@@ -55,14 +55,14 @@ func Test_Ipmicfg_BMC(t *testing.T) {
 }
 
 func Test_Ipmicfg_CPLD(t *testing.T) {
-	expected := &model.CPLD{Description: "CPLD", Vendor: "Supermicro", Firmware: &model.Firmware{Installed: "02.b6.04"}}
+	expected := []*common.CPLD{{Common: common.Common{Description: "CPLD", Vendor: "Supermicro", Firmware: &common.Firmware{Installed: "02.b6.04"}}}}
 
 	i, err := initFakeIPMICfg()
 	if err != nil {
 		t.Error(err)
 	}
 
-	cpld, err := i.CPLD(context.TODO())
+	cpld, err := i.CPLDs(context.TODO())
 	if err != nil {
 		t.Error(err)
 	}
