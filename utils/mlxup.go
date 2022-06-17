@@ -45,7 +45,7 @@ func NewMlxupCmd(trace bool) *Mlxup {
 	return &Mlxup{Executor: e}
 }
 
-// Collect returns a slice of mellanox components as *common.NIC's
+// NICs returns a slice of mellanox components as *common.NIC's
 func (m *Mlxup) NICs(ctx context.Context) ([]*common.NIC, error) {
 	devices, err := m.Query()
 	if err != nil {

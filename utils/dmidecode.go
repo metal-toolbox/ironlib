@@ -26,8 +26,7 @@ func NewDmidecode() (d *Dmidecode, err error) {
 	return &Dmidecode{dmi: dmi}, err
 }
 
-// InitFakeDmidecode Returns a fake dmidecode instance for tests
-// given test data file returns a Dmidecode with the test dmidecode output loaded
+// InitFakeDmidecode returns a fake dmidecode instance loaded with the dmidecode output from testFile
 func InitFakeDmidecode(testFile string) (*Dmidecode, error) {
 	b, err := os.ReadFile(testFile)
 	if err != nil {

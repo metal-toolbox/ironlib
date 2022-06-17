@@ -68,7 +68,7 @@ func NewFakeStoreCLI(r io.Reader) (*StoreCLI, error) {
 	}, nil
 }
 
-// Executes nvme list, parses the output and returns a slice of model.StorageControllers
+// StorageControllers returns a slice of model.StorageControllers from the output of nvme list
 func (s *StoreCLI) StorageControllers(ctx context.Context) ([]*common.StorageController, error) {
 	controllers := make([]*common.StorageController, 0)
 
@@ -108,6 +108,7 @@ func (s *StoreCLI) StorageControllers(ctx context.Context) ([]*common.StorageCon
 	return controllers, nil
 }
 
+// ShowController0 runs storecli to list controller 0
 func (s *StoreCLI) ShowController0() ([]byte, error) {
 	// /opt/MegaRAID/storcli/storcli64 /c0 show J
 	s.Executor.SetArgs([]string{"/c0", "show", "J"})

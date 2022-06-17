@@ -91,7 +91,7 @@ func (i *Ipmicfg) BIOS(ctx context.Context) (*common.BIOS, error) {
 	}, nil
 }
 
-// CPLD returns a SMC CPLD component
+// CPLDs returns a slice of SMC CPLD components
 func (i Ipmicfg) CPLDs(ctx context.Context) ([]*common.CPLD, error) {
 	summary, err := i.Summary()
 	if err != nil {
