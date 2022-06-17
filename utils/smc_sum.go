@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/model/supermicro"
 	"golang.org/x/net/html/charset"
@@ -88,9 +89,9 @@ func (s *SupermicroSUM) UpdateBMC(ctx context.Context, updateFile, modelNumber s
 // ApplyUpdate installs the SMC update based on the component
 func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
 	switch componentSlug {
-	case model.SlugBIOS:
+	case common.SlugBIOS:
 		s.Executor.SetArgs([]string{"-c", "UpdateBios", "--preserve_setting", "--file", updateFile})
-	case model.SlugBMC:
+	case common.SlugBMC:
 		s.Executor.SetArgs([]string{"-c", "UpdateBmc", "--file", updateFile})
 	}
 

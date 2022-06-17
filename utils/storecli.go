@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 )
 
 const storecli = "/opt/MegaRAID/storcli/storcli64"
@@ -68,9 +68,9 @@ func NewFakeStoreCLI(r io.Reader) (*StoreCLI, error) {
 	}, nil
 }
 
-// Executes nvme list, parses the output and returns a slice of model.StorageControllers
-func (s *StoreCLI) StorageControllers(ctx context.Context) ([]*model.StorageController, error) {
-	controllers := make([]*model.StorageController, 0)
+// StorageControllers returns a slice of model.StorageControllers from the output of nvme list
+func (s *StoreCLI) StorageControllers(ctx context.Context) ([]*common.StorageController, error) {
+	controllers := make([]*common.StorageController, 0)
 
 	out, err := s.ShowController0()
 	if err != nil {
@@ -89,15 +89,17 @@ func (s *StoreCLI) StorageControllers(ctx context.Context) ([]*model.StorageCont
 			continue
 		}
 
-		item := &model.StorageController{
-			Serial:      c.ResponseData.SerialNumber,
-			Vendor:      model.VendorFromString(c.ResponseData.ProductName),
-			Model:       c.ResponseData.ProductName,
-			Description: c.ResponseData.ProductName,
-			Metadata:    map[string]string{"drives_attached": strconv.Itoa(c.ResponseData.PhysicalDrives)},
-			Firmware: &model.Firmware{
-				Installed: c.ResponseData.FirmwareVersion,
-				Metadata:  map[string]string{"bios_version": c.ResponseData.BIOSVersion},
+		item := &common.StorageController{
+			Common: common.Common{
+				Serial:      c.ResponseData.SerialNumber,
+				Vendor:      common.VendorFromString(c.ResponseData.ProductName),
+				Model:       c.ResponseData.ProductName,
+				Description: c.ResponseData.ProductName,
+				Metadata:    map[string]string{"drives_attached": strconv.Itoa(c.ResponseData.PhysicalDrives)},
+				Firmware: &common.Firmware{
+					Installed: c.ResponseData.FirmwareVersion,
+					Metadata:  map[string]string{"bios_version": c.ResponseData.BIOSVersion},
+				},
 			},
 		}
 		controllers = append(controllers, item)
@@ -106,6 +108,7 @@ func (s *StoreCLI) StorageControllers(ctx context.Context) ([]*model.StorageCont
 	return controllers, nil
 }
 
+// ShowController0 runs storecli to list controller 0
 func (s *StoreCLI) ShowController0() ([]byte, error) {
 	// /opt/MegaRAID/storcli/storcli64 /c0 show J
 	s.Executor.SetArgs([]string{"/c0", "show", "J"})

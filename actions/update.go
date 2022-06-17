@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
@@ -31,28 +32,28 @@ func Update(ctx context.Context, device *model.Device, options []*model.UpdateOp
 	for _, option := range options {
 		switch {
 		// Update BIOS
-		case strings.EqualFold(model.SlugBIOS, option.Slug):
+		case strings.EqualFold(common.SlugBIOS, option.Slug):
 			err = UpdateBIOS(ctx, device.BIOS, option)
 			if err != nil {
 				return errors.Wrap(err, "error updating bios")
 			}
 
 		// Update Drive
-		case strings.EqualFold(model.SlugDrive, option.Slug):
+		case strings.EqualFold(common.SlugDrive, option.Slug):
 			err = UpdateDrive(ctx, device.Drives, option)
 			if err != nil {
 				return errors.Wrap(err, "error updating drive")
 			}
 
 		// Update NIC
-		case strings.EqualFold(model.SlugNIC, option.Slug):
+		case strings.EqualFold(common.SlugNIC, option.Slug):
 			err = UpdateNIC(ctx, device.NICs, option)
 			if err != nil {
 				return errors.Wrap(err, "error updating nic")
 			}
 
 		// Update BMC
-		case strings.EqualFold(model.SlugBMC, option.Slug):
+		case strings.EqualFold(common.SlugBMC, option.Slug):
 			err = UpdateBMC(ctx, device.BMC, option)
 			if err != nil {
 				return errors.Wrap(err, "error updating bmc")
@@ -67,7 +68,7 @@ func Update(ctx context.Context, device *model.Device, options []*model.UpdateOp
 
 // GetBMCUpdater returns the updater for the given vendor
 func GetBMCUpdater(vendor string) (BMCUpdater, error) {
-	if strings.EqualFold(vendor, model.VendorSupermicro) {
+	if strings.EqualFold(vendor, common.VendorSupermicro) {
 		return utils.NewSupermicroSUM(true), nil
 	}
 
@@ -75,7 +76,7 @@ func GetBMCUpdater(vendor string) (BMCUpdater, error) {
 }
 
 // UpdateBMC identifies the bios eligible for update from the inventory and runs the firmware update utility based on the bmc vendor
-func UpdateBMC(ctx context.Context, bmc *model.BMC, options *model.UpdateOptions) error {
+func UpdateBMC(ctx context.Context, bmc *common.BMC, options *model.UpdateOptions) error {
 	if !strings.EqualFold(options.Vendor, bmc.Vendor) {
 		return ErrVendorComponentOptions
 	}
@@ -90,7 +91,7 @@ func UpdateBMC(ctx context.Context, bmc *model.BMC, options *model.UpdateOptions
 
 // GetBIOSUpdater returns the updater for the given vendor
 func GetBIOSUpdater(vendor string) (BIOSUpdater, error) {
-	if strings.EqualFold(vendor, model.VendorSupermicro) {
+	if strings.EqualFold(vendor, common.VendorSupermicro) {
 		return utils.NewSupermicroSUM(true), nil
 	}
 
@@ -98,7 +99,7 @@ func GetBIOSUpdater(vendor string) (BIOSUpdater, error) {
 }
 
 // UpdateBIOS identifies the bios eligible for update from the inventory and runs the firmware update utility based on the bios vendor
-func UpdateBIOS(ctx context.Context, bios *model.BIOS, options *model.UpdateOptions) error {
+func UpdateBIOS(ctx context.Context, bios *common.BIOS, options *model.UpdateOptions) error {
 	if !strings.EqualFold(options.Vendor, bios.Vendor) {
 		return ErrVendorComponentOptions
 	}
@@ -113,7 +114,7 @@ func UpdateBIOS(ctx context.Context, bios *model.BIOS, options *model.UpdateOpti
 
 // GetNICUpdater returns the updater for the given vendor
 func GetNICUpdater(vendor string) (NICUpdater, error) {
-	if strings.EqualFold(vendor, model.VendorMellanox) {
+	if strings.EqualFold(vendor, common.VendorMellanox) {
 		return utils.NewMlxupCmd(true), nil
 	}
 
@@ -121,7 +122,7 @@ func GetNICUpdater(vendor string) (NICUpdater, error) {
 }
 
 // UpdateNIC identifies the nic eligible for update from the inventory and runs the firmware update utility based on the nic vendor
-func UpdateNIC(ctx context.Context, nics []*model.NIC, options *model.UpdateOptions) error {
+func UpdateNIC(ctx context.Context, nics []*common.NIC, options *model.UpdateOptions) error {
 	for _, nic := range nics {
 		if !strings.EqualFold(options.Vendor, nic.Vendor) {
 			continue
@@ -140,7 +141,7 @@ func UpdateNIC(ctx context.Context, nics []*model.NIC, options *model.UpdateOpti
 
 // GetDriveUpdater returns the updater for the given vendor
 func GetDriveUpdater(vendor string) (DriveUpdater, error) {
-	if strings.EqualFold(vendor, model.VendorMicron) {
+	if strings.EqualFold(vendor, common.VendorMicron) {
 		return utils.NewMsecli(true), nil
 	}
 
@@ -148,7 +149,7 @@ func GetDriveUpdater(vendor string) (DriveUpdater, error) {
 }
 
 // UpdateDrive identifies the drive eligible for update from the inventory and runs the firmware update utility based on the drive vendor
-func UpdateDrive(ctx context.Context, drives []*model.Drive, options *model.UpdateOptions) error {
+func UpdateDrive(ctx context.Context, drives []*common.Drive, options *model.UpdateOptions) error {
 	for _, drive := range drives {
 		if !strings.EqualFold(options.Vendor, drive.Vendor) {
 			continue

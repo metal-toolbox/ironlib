@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 )
 
@@ -32,37 +33,37 @@ type InventoryCollector interface {
 
 // DriveCollector defines an interface to return disk drive inventory
 type DriveCollector interface {
-	Drives(ctx context.Context) ([]*model.Drive, error)
+	Drives(ctx context.Context) ([]*common.Drive, error)
 }
 
 // NICCollector defines an interface to returns NIC inventory
 type NICCollector interface {
-	NICs(ctx context.Context) ([]*model.NIC, error)
+	NICs(ctx context.Context) ([]*common.NIC, error)
 }
 
 // BMCCollector defines an interface to return BMC inventory
 type BMCCollector interface {
-	BMC(ctx context.Context) (*model.BMC, error)
+	BMC(ctx context.Context) (*common.BMC, error)
 }
 
 // CPLDCollector defines an interface to return CPLD inventory
 type CPLDCollector interface {
-	CPLD(ctx context.Context) (*model.CPLD, error)
+	CPLDs(ctx context.Context) ([]*common.CPLD, error)
 }
 
 // BIOSCollector defines an interface to return BIOS inventory
 type BIOSCollector interface {
-	BIOS(ctx context.Context) (*model.BIOS, error)
+	BIOS(ctx context.Context) (*common.BIOS, error)
 }
 
 // StorageControllerCollector defines an interface to returns storage controllers inventory
 type StorageControllerCollector interface {
-	StorageControllers(ctx context.Context) ([]*model.StorageController, error)
+	StorageControllers(ctx context.Context) ([]*common.StorageController, error)
 }
 
 // TPMCollector defines an interface to collect TPM device inventory
 type TPMCollector interface {
-	TPM(ctx context.Context) (*model.TPM, error)
+	TPMs(ctx context.Context) ([]*common.TPM, error)
 }
 
 // Updaters

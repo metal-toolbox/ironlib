@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/beevik/etree v1.1.0
+	github.com/bmc-toolbox/common v0.0.0-20220616154430-b5d9d9b70a69
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
 	github.com/pkg/errors v0.9.1
 	github.com/r3labs/diff/v2 v2.15.1

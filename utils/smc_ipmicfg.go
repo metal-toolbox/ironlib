@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 	"github.com/pkg/errors"
 )
 
@@ -49,58 +49,67 @@ func NewFakeIpmicfg(r io.Reader) *Ipmicfg {
 }
 
 // BMC returns a SMC BMC component
-func (i Ipmicfg) BMC(ctx context.Context) (*model.BMC, error) {
+func (i Ipmicfg) BMC(ctx context.Context) (*common.BMC, error) {
 	summary, err := i.Summary()
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.BMC{
-		Vendor:      "Supermicro",
-		Description: model.SlugBMC,
-		Firmware: &model.Firmware{
-			Installed: summary.FirmwareRevision,
-			Metadata: map[string]string{
-				"build_date": summary.FirmwareBuildDate,
+	return &common.BMC{
+		Common: common.Common{
+			Vendor:      "Supermicro",
+			Description: common.SlugBMC,
+			Firmware: &common.Firmware{
+				Installed: summary.FirmwareRevision,
+				Metadata: map[string]string{
+					"build_date": summary.FirmwareBuildDate,
+				},
 			},
 		},
 	}, nil
 }
 
 // BIOS returns a SMC BIOS component
-func (i *Ipmicfg) BIOS(ctx context.Context) (*model.BIOS, error) {
+func (i *Ipmicfg) BIOS(ctx context.Context) (*common.BIOS, error) {
 	summary, err := i.Summary()
 	if err != nil {
 		return nil, err
 	}
 
 	// add CPLD and BIOS firmware inventory
-	return &model.BIOS{
-		Vendor:      "Supermicro",
-		Description: model.SlugBIOS,
-		Firmware: &model.Firmware{
-			Installed: summary.BIOSVersion,
-			Metadata: map[string]string{
-				"build_date": summary.BIOSBuildDate,
+	return &common.BIOS{
+		Common: common.Common{
+			Vendor:      "Supermicro",
+			Description: common.SlugBIOS,
+			Firmware: &common.Firmware{
+				Installed: summary.BIOSVersion,
+				Metadata: map[string]string{
+					"build_date": summary.BIOSBuildDate,
+				},
 			},
 		},
 	}, nil
 }
 
-// CPLD returns a SMC CPLD component
-func (i Ipmicfg) CPLD(ctx context.Context) (*model.CPLD, error) {
+// CPLDs returns a slice of SMC CPLD components
+func (i Ipmicfg) CPLDs(ctx context.Context) ([]*common.CPLD, error) {
 	summary, err := i.Summary()
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.CPLD{
-		Vendor:      "Supermicro",
-		Description: model.SlugCPLD,
-		Firmware: &model.Firmware{
-			Installed: summary.CPLDVersion,
+	cplds := []*common.CPLD{}
+	cplds = append(cplds, &common.CPLD{
+		Common: common.Common{
+			Vendor:      "Supermicro",
+			Description: common.SlugCPLD,
+			Firmware: &common.Firmware{
+				Installed: summary.CPLDVersion,
+			},
 		},
-	}, nil
+	})
+
+	return cplds, nil
 }
 
 func (i *Ipmicfg) Summary() (*IpmicfgSummary, error) {

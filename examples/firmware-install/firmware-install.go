@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/sirupsen/logrus"
@@ -20,9 +21,9 @@ func main() {
 	}
 
 	options := &model.UpdateOptions{
-		Vendor:     model.VendorSupermicro,
+		Vendor:     common.VendorSupermicro,
 		Model:      "X11SCH-F",
-		Slug:       model.SlugBMC,
+		Slug:       common.SlugBMC,
 		UpdateFile: "/tmp/SMT_CFLAST2500_123_07.bin",
 	}
 

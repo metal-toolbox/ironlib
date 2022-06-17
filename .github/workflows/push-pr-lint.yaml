@@ -15,7 +15,7 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         args: --config .golangci.yml
-        version: v1.45.2
+        version: v1.46.2
     - name: Test
       run: go test ./...
   build:
@@ -52,7 +52,7 @@ jobs:
       #     sarif_file: ${{ steps.scan.outputs.sarif }}
       #   # This should run even if we fail the container scan
       #   if: always()
-      
+
       - name: Inspect action SARIF report
         run: cat ${{ steps.scan.outputs.sarif }}
         # This should run even if we fail the container scan

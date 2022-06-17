@@ -6,13 +6,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_StoreCLIDeviceAttributes(t *testing.T) {
-	expected := []*model.StorageController{
-		{Serial: "500304801c71e8d0", Vendor: "lsi", Model: "LSI3008-IT", Description: "LSI3008-IT", Metadata: map[string]string{"drives_attached": "12"}, Firmware: &model.Firmware{Installed: "16.00.01.00", Metadata: map[string]string{"bios_version": "08.37.00.00_18.00.00.00"}}},
+	expected := []*common.StorageController{
+		{Common: common.Common{Serial: "500304801c71e8d0", Vendor: "lsi", Model: "LSI3008-IT", Description: "LSI3008-IT", Metadata: map[string]string{"drives_attached": "12"}, Firmware: &common.Firmware{Installed: "16.00.01.00", Metadata: map[string]string{"bios_version": "08.37.00.00_18.00.00.00"}}}},
 	}
 
 	b, err := os.ReadFile("../fixtures/utils/storecli/show.json")

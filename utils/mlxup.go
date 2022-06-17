@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 	"github.com/pkg/errors"
 )
 
@@ -45,14 +45,14 @@ func NewMlxupCmd(trace bool) *Mlxup {
 	return &Mlxup{Executor: e}
 }
 
-// Collect returns a slice of mellanox components as *model.NIC's
-func (m *Mlxup) NICs(ctx context.Context) ([]*model.NIC, error) {
+// NICs returns a slice of mellanox components as *common.NIC's
+func (m *Mlxup) NICs(ctx context.Context) ([]*common.NIC, error) {
 	devices, err := m.Query()
 	if err != nil {
 		return nil, err
 	}
 
-	nics := []*model.NIC{}
+	nics := []*common.NIC{}
 
 	// serials is a map of serials added to the nics slice
 	serials := map[string]bool{}
@@ -72,13 +72,15 @@ func (m *Mlxup) NICs(ctx context.Context) ([]*model.NIC, error) {
 
 		serials[serial] = true
 
-		nic := &model.NIC{
-			Model:       d.PartNumber,
-			Vendor:      model.VendorFromString(d.DeviceType),
-			Description: d.Description,
-			Serial:      d.BaseMAC,
-			Metadata:    make(map[string]string),
-			Firmware:    model.NewFirmwareObj(),
+		nic := &common.NIC{
+			Common: common.Common{
+				Model:       d.PartNumber,
+				Vendor:      common.VendorFromString(d.DeviceType),
+				Description: d.Description,
+				Serial:      d.BaseMAC,
+				Metadata:    make(map[string]string),
+				Firmware:    common.NewFirmwareObj(),
+			},
 		}
 
 		// populate NIC firmware attributes
@@ -91,7 +93,7 @@ func (m *Mlxup) NICs(ctx context.Context) ([]*model.NIC, error) {
 }
 
 // setNICFirmware populates the NIC firmware object
-func setNICFirmware(d *MlxupDevice, firmware *model.Firmware) {
+func setNICFirmware(d *MlxupDevice, firmware *common.Firmware) {
 	// [vInstalled, vAvailable]
 	if len(d.Firmware) > 0 {
 		firmware.Installed = d.Firmware[0]

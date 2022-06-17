@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/r3labs/diff/v2"
 
 	"github.com/metal-toolbox/ironlib/model"
@@ -25,9 +26,9 @@ type Collectors struct {
 	Drives             DriveCollector
 	NICs               NICCollector
 	BMC                BMCCollector
-	CPLD               CPLDCollector
+	CPLDs              CPLDCollector
 	BIOS               BIOSCollector
-	TPM                TPMCollector
+	TPMs               TPMCollector
 	StorageControllers StorageControllerCollector
 }
 
@@ -67,10 +68,10 @@ func Collect(ctx context.Context, device *model.Device, collectors *Collectors, 
 	}
 
 	// register a TPM inventory collector
-	if collectors.TPM == nil {
+	if collectors.TPMs == nil {
 		var err error
 
-		collectors.TPM, err = utils.NewDmidecode()
+		collectors.TPMs, err = utils.NewDmidecode()
 		if err != nil && failOnError {
 			return errors.Wrap(err, "error in dmidecode inventory collector")
 		}
@@ -101,7 +102,7 @@ func Collect(ctx context.Context, device *model.Device, collectors *Collectors, 
 	}
 
 	// Collect CPLD info
-	err = CPLD(ctx, device.CPLD, collectors.CPLD)
+	err = CPLDs(ctx, &device.CPLDs, collectors.CPLDs)
 	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving CPLD inventory")
 	}
@@ -113,7 +114,7 @@ func Collect(ctx context.Context, device *model.Device, collectors *Collectors, 
 	}
 
 	// Collect TPM info
-	err = TPM(ctx, device.TPM, collectors.TPM)
+	err = TPMs(ctx, &device.TPMs, collectors.TPMs)
 	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving TPM inventory")
 	}
@@ -133,15 +134,17 @@ func Collect(ctx context.Context, device *model.Device, collectors *Collectors, 
 		device.BIOS.Model = device.Model
 	}
 
-	if device.CPLD != nil && device.CPLD.Model == "" {
-		device.CPLD.Model = device.Model
+	for _, cpld := range device.CPLDs {
+		if cpld != nil {
+			cpld.Model = device.Model
+		}
 	}
 
 	return nil
 }
 
 // Drives executes drive collectors and merges the drive smart data into device.[]*Drive
-func Drives(ctx context.Context, drives []*model.Drive, c DriveCollector) error {
+func Drives(ctx context.Context, drives []*common.Drive, c DriveCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from panic in Drives(): ", r)
@@ -181,7 +184,7 @@ func Drives(ctx context.Context, drives []*model.Drive, c DriveCollector) error 
 }
 
 // NICs executes nic collectors and merges the nic data into device.[]*NIC
-func NICs(ctx context.Context, nics []*model.NIC, c NICCollector) error {
+func NICs(ctx context.Context, nics []*common.NIC, c NICCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from panic in NICs(): ", r)
@@ -221,7 +224,7 @@ func NICs(ctx context.Context, nics []*model.NIC, c NICCollector) error {
 }
 
 // BMC executes the bmc collector and updates device bmc information
-func BMC(ctx context.Context, bmc *model.BMC, c BMCCollector) error {
+func BMC(ctx context.Context, bmc *common.BMC, c BMCCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from panic in BMC(): ", r)
@@ -248,11 +251,11 @@ func BMC(ctx context.Context, bmc *model.BMC, c BMCCollector) error {
 	return nil
 }
 
-// CPLD executes the bmc collector and updates device cpld information
-func CPLD(ctx context.Context, cpld *model.CPLD, c CPLDCollector) error {
+// CPLDs executes the bmc collector and updates device cpld information
+func CPLDs(ctx context.Context, cplds *[]*common.CPLD, c CPLDCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("recovered from panic in CPLD(): ", r)
+			log.Println("recovered from panic in CPLDs(): ", r)
 		}
 	}()
 
@@ -260,24 +263,34 @@ func CPLD(ctx context.Context, cpld *model.CPLD, c CPLDCollector) error {
 		return nil
 	}
 
-	ncpld, err := c.CPLD(ctx)
+	ncplds, err := c.CPLDs(ctx)
 	if err != nil {
 		return err
 	}
 
-	changelog, err := diff.Diff(cpld, ncpld)
-	if err != nil {
-		return err
+	// no new cplds identified
+	if len(ncplds) == 0 {
+		return nil
 	}
 
-	changelog = vetChanges(changelog)
-	diff.Patch(changelog, cpld)
+	// no existing cplds were passed in
+	if len(*cplds) > 0 {
+		changelog, err := diff.Diff(cplds, ncplds)
+		if err != nil {
+			return err
+		}
+
+		changelog = vetChanges(changelog)
+		diff.Patch(changelog, cplds)
+	} else {
+		*cplds = append(*cplds, ncplds...)
+	}
 
 	return nil
 }
 
 // BIOS executes the bios collector and updates device bios information
-func BIOS(ctx context.Context, bios *model.BIOS, c BIOSCollector) error {
+func BIOS(ctx context.Context, bios *common.BIOS, c BIOSCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from panic in BIOS(): ", r)
@@ -308,8 +321,8 @@ func BIOS(ctx context.Context, bios *model.BIOS, c BIOSCollector) error {
 	return nil
 }
 
-// TPM executes the TPM collector and updates device TPM information
-func TPM(ctx context.Context, tpm *model.TPM, c TPMCollector) error {
+// TPMs executes the TPM collector and updates device TPM information
+func TPMs(ctx context.Context, tpms *[]*common.TPM, c TPMCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from panic in TPM(): ", r)
@@ -320,28 +333,38 @@ func TPM(ctx context.Context, tpm *model.TPM, c TPMCollector) error {
 		return nil
 	}
 
-	ntpm, err := c.TPM(ctx)
+	ntpms, err := c.TPMs(ctx)
 	if err != nil {
 		return err
 	}
 
-	if ntpm == nil {
+	if ntpms == nil {
 		return nil
 	}
 
-	changelog, err := diff.Diff(tpm, ntpm)
-	if err != nil {
-		return err
+	// no tpms identified
+	if len(ntpms) == 0 {
+		return nil
 	}
 
-	changelog = vetChanges(changelog)
-	diff.Patch(changelog, tpm)
+	// no existing tpms were passed in
+	if len(*tpms) > 0 {
+		changelog, err := diff.Diff(tpms, ntpms)
+		if err != nil {
+			return err
+		}
+
+		changelog = vetChanges(changelog)
+		diff.Patch(changelog, tpms)
+	} else {
+		*tpms = append(*tpms, ntpms...)
+	}
 
 	return nil
 }
 
 // StorageControllers executes the StorageControllers collector and updates device storage controller data
-func StorageController(ctx context.Context, controllers []*model.StorageController, c StorageControllerCollector) error {
+func StorageController(ctx context.Context, controllers []*common.StorageController, c StorageControllerCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from panic in StorageController(): ", r)

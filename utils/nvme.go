@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 )
 
 const nvmecli = "/usr/sbin/nvme"
@@ -40,9 +40,9 @@ func NewNvmeCmd(trace bool) *Nvme {
 	return &Nvme{Executor: e}
 }
 
-// Executes nvme list, parses the output and returns a slice of *model.Drive
-func (n *Nvme) Drives(ctx context.Context) ([]*model.Drive, error) {
-	drives := make([]*model.Drive, 0)
+// Executes nvme list, parses the output and returns a slice of *common.Drive
+func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
+	drives := make([]*common.Drive, 0)
 
 	out, err := n.List()
 	if err != nil {
@@ -67,14 +67,16 @@ func (n *Nvme) Drives(ctx context.Context) ([]*model.Drive, error) {
 			vendor = modelTokens[1]
 		}
 
-		drive := &model.Drive{
-			Serial:      d.SerialNumber,
-			Vendor:      vendor,
-			Model:       dModel,
-			ProductName: d.ProductName,
-			Description: d.ModelNumber,
-			Firmware: &model.Firmware{
-				Installed: d.Firmware,
+		drive := &common.Drive{
+			Common: common.Common{
+				Serial:      d.SerialNumber,
+				Vendor:      vendor,
+				Model:       dModel,
+				ProductName: d.ProductName,
+				Description: d.ModelNumber,
+				Firmware: &common.Firmware{
+					Installed: d.Firmware,
+				},
 			},
 		}
 

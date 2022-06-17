@@ -6,10 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/metal-toolbox/ironlib/model"
-
 	asrrFixtures "github.com/metal-toolbox/ironlib/fixtures/asrr"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
+	"github.com/metal-toolbox/ironlib/model"
 
 	"github.com/stretchr/testify/assert"
 )

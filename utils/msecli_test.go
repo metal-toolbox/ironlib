@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/metal-toolbox/ironlib/model"
+	"github.com/bmc-toolbox/common"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,28 +24,35 @@ func newFakeMsecli() (*Msecli, error) {
 }
 
 func Test_MsecliDrives(t *testing.T) {
-	expected := []*model.Drive{
+	expected := []*common.Drive{
 		{
-			Serial:      "193423710BDA",
-			Vendor:      "micron",
-			Type:        model.SlugDriveTypeSATASSD,
-			Model:       "Micron_5200_MTFDDAK480TDN",
-			Description: "Micron_5200_MTFDDAK480TDN",
-			Firmware: &model.Firmware{
-				Installed: "D1MU020",
+			Common: common.Common{
+				Serial:      "193423710BDA",
+				Vendor:      "micron",
+				Model:       "Micron_5200_MTFDDAK480TDN",
+				Description: "Micron_5200_MTFDDAK480TDN",
+				Firmware: &common.Firmware{
+					Installed: "D1MU020",
+				},
+				Metadata: map[string]string{},
 			},
-			Metadata: map[string]string{},
+
+			Type: common.SlugDriveTypeSATASSD,
 		},
 		{
-			Serial:      "193423711167",
-			Vendor:      "micron",
-			Type:        model.SlugDriveTypeSATASSD,
-			Model:       "Micron_5200_MTFDDAK480TDN",
-			Description: "Micron_5200_MTFDDAK480TDN",
-			Firmware: &model.Firmware{
-				Installed: "D1MU020",
+			Common: common.Common{
+				Serial: "193423711167",
+				Vendor: "micron",
+
+				Model:       "Micron_5200_MTFDDAK480TDN",
+				Description: "Micron_5200_MTFDDAK480TDN",
+				Firmware: &common.Firmware{
+					Installed: "D1MU020",
+				},
+				Metadata: map[string]string{},
 			},
-			Metadata: map[string]string{},
+
+			Type: common.SlugDriveTypeSATASSD,
 		},
 	}
 

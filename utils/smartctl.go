@@ -9,6 +9,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
@@ -70,8 +71,8 @@ func NewSmartctlCmd(trace bool) *Smartctl {
 }
 
 // Drives returns drives identified by smartctl
-func (s *Smartctl) Drives(ctx context.Context) ([]*model.Drive, error) {
-	drives := make([]*model.Drive, 0)
+func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
+	drives := make([]*common.Drive, 0)
 
 	DrivesList, err := s.Scan()
 	if err != nil {
@@ -85,30 +86,34 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*model.Drive, error) {
 			return nil, err
 		}
 
-		item := &model.Drive{
-			Vendor:      model.VendorFromString(smartctlAll.ModelName),
-			Model:       smartctlAll.ModelName,
-			Serial:      smartctlAll.SerialNumber,
-			ProductName: smartctlAll.ModelName,
-			// TODO: use the smartctl form_factor/rotational attributes to determine the drive type
-			Type: model.DriveTypeSlug(smartctlAll.ModelName),
-			Firmware: &model.Firmware{
-				Installed: smartctlAll.FirmwareVersion,
+		item := &common.Drive{
+			Common: common.Common{
+				Vendor:      common.VendorFromString(smartctlAll.ModelName),
+				Model:       smartctlAll.ModelName,
+				Serial:      smartctlAll.SerialNumber,
+				ProductName: smartctlAll.ModelName,
+				// TODO: use the smartctl form_factor/rotational attributes to determine the drive type
+
+				Firmware: &common.Firmware{
+					Installed: smartctlAll.FirmwareVersion,
+				},
 			},
-			SmartStatus: "unknown",
+
+			Type:        model.DriveTypeSlug(smartctlAll.ModelName),
+			SmartStatus: common.SmartStatusUnknown,
 		}
 
 		if item.Vendor == "" {
-			item.Vendor = model.VendorFromString(smartctlAll.ModelFamily)
+			item.Vendor = common.VendorFromString(smartctlAll.ModelFamily)
 		}
 
 		item.OemID = strings.TrimSpace(smartctlAll.OemProductID)
 
 		if smartctlAll.Status != nil {
 			if smartctlAll.Status.Passed {
-				item.SmartStatus = "ok"
+				item.SmartStatus = common.SmartStatusOK
 			} else {
-				item.SmartStatus = "failed"
+				item.SmartStatus = common.SmartStatusFailed
 			}
 		}
 

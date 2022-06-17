@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
@@ -30,6 +31,7 @@ type MsecliDevice struct {
 	FirmwareRevision string
 }
 
+// NewMsecli returns a Msecli object to run msecli commands
 func NewMsecli(trace bool) *Msecli {
 	e := NewExecutor(msecliBin)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
@@ -41,24 +43,27 @@ func NewMsecli(trace bool) *Msecli {
 	return &Msecli{Executor: e}
 }
 
-// Components returns a slice of drive components identified
-func (m *Msecli) Drives(ctx context.Context) ([]*model.Drive, error) {
+// Drives returns a slice of drive components identified
+func (m *Msecli) Drives(ctx context.Context) ([]*common.Drive, error) {
 	devices, err := m.Query()
 	if err != nil {
 		return nil, err
 	}
 
-	drives := []*model.Drive{}
+	drives := []*common.Drive{}
 
 	for _, d := range devices {
-		item := &model.Drive{
-			Model:       d.ModelNumber,
-			Vendor:      model.VendorFromString(d.ModelNumber),
-			Type:        model.DriveTypeSlug(d.ModelNumber),
-			Description: d.ModelNumber,
-			Serial:      d.SerialNumber,
-			Firmware:    &model.Firmware{Installed: d.FirmwareRevision},
-			Metadata:    make(map[string]string),
+		item := &common.Drive{
+			Common: common.Common{
+				Model:       d.ModelNumber,
+				Vendor:      common.VendorFromString(d.ModelNumber),
+				Description: d.ModelNumber,
+				Serial:      d.SerialNumber,
+				Firmware:    &common.Firmware{Installed: d.FirmwareRevision},
+				Metadata:    make(map[string]string),
+			},
+
+			Type: model.DriveTypeSlug(d.ModelNumber),
 		}
 
 		drives = append(drives, item)
@@ -67,7 +72,7 @@ func (m *Msecli) Drives(ctx context.Context) ([]*model.Drive, error) {
 	return drives, nil
 }
 
-// UpdateDrives installs drive updates
+// UpdateDrive installs drive updates
 func (m *Msecli) UpdateDrive(ctx context.Context, updateFile, modelNumber, serialNumber string) error {
 	// query list of drives
 	drives, err := m.Query()
@@ -114,7 +119,7 @@ func (m *Msecli) UpdateDrive(ctx context.Context, updateFile, modelNumber, seria
 	return ErrMseCliDriveNotIdentified
 }
 
-// update drive installs the given updatefile
+// updateDrive installs the given updatefile
 func (m *Msecli) updateDrive(ctx context.Context, modelNumber, updateFile string) error {
 	// echo 'y'
 	m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))

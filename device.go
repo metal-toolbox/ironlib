@@ -1,6 +1,7 @@
 package ironlib
 
 import (
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/providers/asrockrack"
@@ -25,21 +26,21 @@ func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("system manufacturer", "", 0), err.Error())
 	}
 
-	if deviceVendor == "" || deviceVendor == model.SystemManufacturerUndefined {
+	if deviceVendor == "" || deviceVendor == common.SystemManufacturerUndefined {
 		deviceVendor, err = dmidecode.BaseBoardManufacturer()
 		if err != nil {
 			return nil, errors.Wrap(errs.NewDmidecodeValueError("baseboard manufacturer", "", 0), err.Error())
 		}
 	}
 
-	deviceVendor = model.FormatVendorName(deviceVendor)
+	deviceVendor = common.FormatVendorName(deviceVendor)
 
 	switch deviceVendor {
-	case model.VendorDell:
+	case common.VendorDell:
 		return dell.New(dmidecode, logger)
-	case model.VendorSupermicro:
+	case common.VendorSupermicro:
 		return supermicro.New(dmidecode, logger)
-	case model.VendorPacket, model.VendorAsrockrack:
+	case common.VendorPacket, common.VendorAsrockrack:
 		return asrockrack.New(dmidecode, logger)
 	default:
 		return generic.New(dmidecode, logger)
