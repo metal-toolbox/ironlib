@@ -8,14 +8,14 @@ import (
 
 	"gotest.tools/assert"
 
+	"github.com/bmc-toolbox/common"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	smcFixtures "github.com/metal-toolbox/ironlib/fixtures/supermicro"
-	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 )
 
 func Test_Inventory_dell(t *testing.T) {
-	device := model.NewDevice()
+	device := common.NewDevice()
 
 	// set device
 	device.Model = "r6515"
@@ -33,16 +33,16 @@ func Test_Inventory_dell(t *testing.T) {
 		Drives:    smartctl,
 	}
 
-	err = Collect(context.TODO(), device, collectors, true, false)
+	err = Collect(context.TODO(), &device, collectors, true, false)
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.DeepEqual(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
+	assert.DeepEqual(t, dellFixtures.R6515_inventory_lshw_smartctl, &device)
 }
 
 func Test_Inventory_smc(t *testing.T) {
-	device := model.NewDevice()
+	device := common.NewDevice()
 	// set device
 	device.Model = "x11dph-t"
 	device.Vendor = "supermicro"
@@ -110,10 +110,10 @@ func Test_Inventory_smc(t *testing.T) {
 		StorageControllers: storecli,
 	}
 
-	err = Collect(context.TODO(), device, collectors, true, false)
+	err = Collect(context.TODO(), &device, collectors, true, false)
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.DeepEqual(t, smcFixtures.Testdata_X11DPH_T_Inventory, device)
+	assert.DeepEqual(t, smcFixtures.Testdata_X11DPH_T_Inventory, &device)
 }

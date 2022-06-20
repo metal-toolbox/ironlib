@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bmc-toolbox/common"
 	asrrFixtures "github.com/metal-toolbox/ironlib/fixtures/asrr"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
-	"github.com/metal-toolbox/ironlib/model"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -20,14 +20,14 @@ func Test_lshw_asrr(t *testing.T) {
 	}
 
 	l := NewFakeLshw(bytes.NewReader(b))
-	device := model.NewDevice()
+	device := common.NewDevice()
 
-	err = l.Collect(context.TODO(), device)
+	err = l.Collect(context.TODO(), &device)
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.Equal(t, asrrFixtures.E3C246D4INL, device)
+	assert.Equal(t, asrrFixtures.E3C246D4INL, &device)
 }
 
 func Test_lshw_dell(t *testing.T) {
@@ -37,14 +37,14 @@ func Test_lshw_dell(t *testing.T) {
 	}
 
 	l := NewFakeLshw(bytes.NewReader(b))
-	device := model.NewDevice()
+	device := common.NewDevice()
 
-	err = l.Collect(context.TODO(), device)
+	err = l.Collect(context.TODO(), &device)
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.Equal(t, dellFixtures.R6515_inventory_lshw, device)
+	assert.Equal(t, dellFixtures.R6515_inventory_lshw, &device)
 }
 
 func Test_lshwNicFwStringParse(t *testing.T) {

@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 
@@ -20,9 +21,8 @@ var (
 )
 
 func newFakeDellDevice() (*dell, error) {
-	device := model.NewDevice()
+	device := common.NewDevice()
 	device.Oem = true
-	device.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
 
 	// set device
 	device.Model = "r6515"
@@ -44,8 +44,11 @@ func newFakeDellDevice() (*dell, error) {
 		Drives:    smartctl,
 	}
 
+	hardware := model.NewHardware(&device)
+	hardware.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
+
 	return &dell{
-		hw:         model.NewHardware(device),
+		hw:         hardware,
 		dnf:        utils.NewFakeDnf(),
 		logger:     logrus.New(),
 		collectors: collectors,
@@ -57,7 +60,7 @@ func TestGetInventory(t *testing.T) {
 	expected := dellFixtures.R6515_inventory_lshw_smartctl
 	// patch oemcomponent data for expected results
 	expected.Oem = true
-	expected.OemComponents = dellFixtures.R6515_oem_components
+	expectedOemComponents := dellFixtures.R6515_oem_components
 
 	dell, err := newFakeDellDevice()
 	if err != nil {
@@ -91,6 +94,7 @@ func TestGetInventory(t *testing.T) {
 	}
 
 	assert.DeepEqual(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
+	assert.DeepEqual(t, expectedOemComponents, dell.hw.OemComponents)
 }
 
 // Get inventory, not listing updates available

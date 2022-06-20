@@ -3,6 +3,7 @@ package generic
 import (
 	"context"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
@@ -43,14 +44,14 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 	}
 
 	// set device
-	device := model.NewDevice()
+	device := common.NewDevice()
 	device.Model = deviceModel
 	device.Vendor = deviceVendor
 	device.Serial = serial
 
 	// set device manager
 	dm := &Generic{
-		hw:     model.NewHardware(device),
+		hw:     model.NewHardware(&device),
 		logger: l,
 		trace:  trace,
 	}
@@ -59,7 +60,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 }
 
 // Returns hardware inventory for the device
-func (a *Generic) GetInventory(ctx context.Context) (*model.Device, error) {
+func (a *Generic) GetInventory(ctx context.Context) (*common.Device, error) {
 	// Collect device inventory from lshw
 	a.logger.Info("Collecting inventory")
 
@@ -88,7 +89,7 @@ func (a *Generic) UpdatesApplied() bool {
 }
 
 // ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
-func (a *Generic) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error) {
+func (a *Generic) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error) {
 	return nil, nil
 }
 
@@ -99,6 +100,6 @@ func (a *Generic) InstallUpdates(ctx context.Context, options *model.UpdateOptio
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (a *Generic) GetInventoryOEM(ctx context.Context, device *model.Device, options *model.UpdateOptions) error {
+func (a *Generic) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
 	return nil
 }
