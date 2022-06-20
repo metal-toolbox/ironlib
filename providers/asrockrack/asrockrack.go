@@ -3,6 +3,7 @@ package asrockrack
 import (
 	"context"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
@@ -28,7 +29,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 	var err error
 
 	// set device
-	device := model.NewDevice()
+	device := common.NewDevice()
 
 	identifiers, err := utils.IdentifyVendorModel(dmidecode)
 	if err != nil {
@@ -41,7 +42,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 
 	// set device manager
 	dm := &asrockrack{
-		hw:     model.NewHardware(device),
+		hw:     model.NewHardware(&device),
 		logger: l,
 		trace:  trace,
 	}
@@ -50,11 +51,12 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 }
 
 // Returns hardware inventory for the device
-func (a *asrockrack) GetInventory(ctx context.Context) (*model.Device, error) {
+func (a *asrockrack) GetInventory(ctx context.Context) (*common.Device, error) {
 	// Collect device inventory from lshw
 	a.logger.Info("Collecting inventory")
 
-	a.hw.Device = model.NewDevice()
+	deviceObj := common.NewDevice()
+	a.hw.Device = &deviceObj
 
 	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace, false)
 	if err != nil {
@@ -81,7 +83,7 @@ func (a *asrockrack) UpdatesApplied() bool {
 }
 
 // ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
-func (a *asrockrack) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error) {
+func (a *asrockrack) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error) {
 	return nil, nil
 }
 
@@ -92,6 +94,6 @@ func (a *asrockrack) InstallUpdates(ctx context.Context, options *model.UpdateOp
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (a *asrockrack) GetInventoryOEM(ctx context.Context, device *model.Device, options *model.UpdateOptions) error {
+func (a *asrockrack) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
 	return nil
 }

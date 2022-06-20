@@ -8,7 +8,6 @@ import (
 	"github.com/bmc-toolbox/common"
 	"github.com/r3labs/diff/v2"
 
-	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
 )
@@ -51,7 +50,7 @@ func InitCollectors(trace bool) *Collectors {
 //
 // The lshw collector always executes first and is included by default.
 // nolint:gocyclo //since we're collecting inventory for each type, this is cyclomatic
-func Collect(ctx context.Context, device *model.Device, collectors *Collectors, trace, failOnError bool) error {
+func Collect(ctx context.Context, device *common.Device, collectors *Collectors, trace, failOnError bool) error {
 	// register default collectors
 	if collectors == nil {
 		collectors = InitCollectors(trace)
@@ -59,7 +58,8 @@ func Collect(ctx context.Context, device *model.Device, collectors *Collectors, 
 
 	// initialize a new device object - when a device isn't already provided
 	if device == nil {
-		device = model.NewDevice()
+		deviceObj := common.NewDevice()
+		device = &deviceObj
 	}
 
 	// register inventory collector

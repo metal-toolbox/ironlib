@@ -7,22 +7,11 @@ type Hardware struct {
 	PendingReboot    bool // set when the device requires a reboot after running an upgrade
 	UpdatesInstalled bool // set when updates were installed on the device
 	UpdatesAvailable int  // -1 == no update lookup as yet,  0 == no updates available, 1 == updates available
-	Device           *Device
+	Device           *common.Device
+	OemComponents    *OemComponents // OemComponents hold OEM specific components that may not show up in dmidecode/lshw and other collectors.
 }
 
 // NewHardware returns the base Hardware struct that various providers inherit
-func NewHardware(d *Device) *Hardware {
+func NewHardware(d *common.Device) *Hardware {
 	return &Hardware{Device: d, UpdatesAvailable: -1}
-}
-
-// NewDevice returns an ironlib Device object
-func NewDevice() *Device {
-	return &Device{common.NewDevice(), nil}
-}
-
-// Device is an ironlib device object which extends the common.Device
-type Device struct {
-	common.Device
-
-	OemComponents *OemComponents `json:"oem_components,omitempty"`
 }

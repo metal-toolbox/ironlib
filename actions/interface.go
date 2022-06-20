@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/bmc-toolbox/common"
-	"github.com/metal-toolbox/ironlib/model"
 )
 
 // Utility interface couples the configuration, collection and update interfaces
@@ -28,7 +27,7 @@ type Updater interface {
 
 // InventoryCollector defines an interface to collect all device inventory
 type InventoryCollector interface {
-	Collect(ctx context.Context, device *model.Device) error
+	Collect(ctx context.Context, device *common.Device) error
 }
 
 // DriveCollector defines an interface to return disk drive inventory

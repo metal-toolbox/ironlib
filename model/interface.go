@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+
+	"github.com/bmc-toolbox/common"
 )
 
 type DeviceManager interface {
@@ -24,11 +26,11 @@ type Getter interface {
 	// Check if any updates were applied
 	UpdatesApplied() bool
 	// Retrieve inventory for the device
-	GetInventory(ctx context.Context) (*Device, error)
-	// Retrieve inventory using the OEM tooling for the device
-	GetInventoryOEM(ctx context.Context, device *Device, options *UpdateOptions) error
+	GetInventory(ctx context.Context) (*common.Device, error)
+	// Retrieve inventory using the OEM tooling for the device,
+	GetInventoryOEM(ctx context.Context, device *common.Device, options *UpdateOptions) error
 	// List updates identifed by the vendor tooling (DSU for dells)
-	ListAvailableUpdates(ctx context.Context, options *UpdateOptions) (*Device, error)
+	ListAvailableUpdates(ctx context.Context, options *UpdateOptions) (*common.Device, error)
 	// Retrieve BIOS configuration for device
 	GetBIOSConfiguration(ctx context.Context) (map[string]string, error)
 }

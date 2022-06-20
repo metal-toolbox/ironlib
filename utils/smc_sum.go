@@ -45,7 +45,7 @@ func (s *SupermicroSUM) Components() ([]*model.Component, error) {
 }
 
 // Collect implements the Utility interface
-func (s *SupermicroSUM) Collect(device *model.Device) error {
+func (s *SupermicroSUM) Collect(device *common.Device) error {
 	return nil
 }
 

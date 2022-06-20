@@ -26,7 +26,7 @@ type Updaters struct {
 }
 
 // Update runs updates based on given options
-func Update(ctx context.Context, device *model.Device, options []*model.UpdateOptions) error {
+func Update(ctx context.Context, device *common.Device, options []*model.UpdateOptions) error {
 	var err error
 
 	for _, option := range options {

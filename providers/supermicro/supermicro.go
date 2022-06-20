@@ -3,6 +3,7 @@ package supermicro
 import (
 	"context"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
@@ -52,13 +53,13 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", "", 0), err.Error())
 	}
 
-	device := model.NewDevice()
+	device := common.NewDevice()
 	device.Model = deviceModel
 	device.Vendor = deviceVendor
 	device.Serial = serial
 
 	return &supermicro{
-		hw:         model.NewHardware(device),
+		hw:         model.NewHardware(&device),
 		collectors: collectors,
 		logger:     l,
 		dmidecode:  dmidecode,
@@ -83,7 +84,7 @@ func (s *supermicro) UpdatesApplied() bool {
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (s *supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
+func (s *supermicro) GetInventory(ctx context.Context) (*common.Device, error) {
 	// Collect device inventory from lshw
 	s.logger.Info("Collecting hardware inventory")
 
@@ -96,7 +97,7 @@ func (s *supermicro) GetInventory(ctx context.Context) (*model.Device, error) {
 }
 
 // ListUpdatesAvailable does nothing on a SMC device
-func (s *supermicro) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error) {
+func (s *supermicro) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error) {
 	return nil, nil
 }
 
@@ -131,6 +132,6 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (s *supermicro) GetInventoryOEM(ctx context.Context, device *model.Device, options *model.UpdateOptions) error {
+func (s *supermicro) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
 	return nil
 }

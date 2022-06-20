@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/bmc-toolbox/common"
-	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -24,7 +23,7 @@ var (
 // The lshw command
 type Lshw struct {
 	Executor   Executor
-	Device     *model.Device
+	Device     *common.Device
 	nicSerials map[string]bool
 }
 
@@ -79,7 +78,7 @@ func NewLshwCmd(trace bool) *Lshw {
 // based on the data parsed from lshw
 //
 // Implements the InventoryCollector interface
-func (l *Lshw) Collect(ctx context.Context, device *model.Device) error {
+func (l *Lshw) Collect(ctx context.Context, device *common.Device) error {
 	// The device we're taking inventory of
 	l.Device = device
 
