@@ -42,7 +42,7 @@ RUN set -x; \
     curl -sO $TOOLING_ENDPOINT/dell/pgp_keys/0x3CA66B4946770C59.asc
 
 # build ironlib wrapper binaries
-FROM golang:1.17-alpine AS stage1
+FROM golang:1.19-alpine AS stage1
 
 WORKDIR /workspace
 
