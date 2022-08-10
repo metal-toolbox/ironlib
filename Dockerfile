@@ -1,4 +1,4 @@
-FROM almalinux:8-minimal AS stage0
+FROM almalinux:9-minimal AS stage0
 
 ARG TOOLING_ENDPOINT=https://equinix-metal-firmware.s3.amazonaws.com/fup/image-tooling
 ARG ASRDEV_KERNEL_MODULE=asrdev-5.4.0-73-generic.ko
@@ -63,7 +63,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on \
      install -m 755 -D getbiosconfig /usr/sbin/
 
 # main
-FROM almalinux:8-minimal
+FROM almalinux:9-minimal
 LABEL author="Joel Rebello<jrebello@packet.com>"
 # copy vendor tooling artifacts
 COPY --from=stage0 /usr/sbin/mlxup /usr/sbin/mlxup
