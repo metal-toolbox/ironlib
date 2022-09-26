@@ -1,0 +1,47 @@
+SG driver version 3.5.36.
+
+Physical Disk Information
+----------------------------
+Adapter:             0
+PD ID:               0
+Type:                SATA PD
+Linked at:           HBA port 0
+Size:                234431064 K
+Write cache:         not supported
+SMART:               supported (on)
+NCQ:                 supported (on)
+48 bits LBA:         supported
+supported speed:     1.5 3 6 Gb/s
+Current speed:       6 Gb/s
+model:               MTFDDAV240TCB                           
+Serial:              18341E6651A9
+Firmware version:     D0DE008
+Locate LED status:   Not Support
+Running OS:          no
+SSD Type:            SSD
+block ids:           
+PD valid size:       234365528 K
+
+
+Adapter:             0
+PD ID:               1
+Type:                SATA PD
+Linked at:           HBA port 1
+Size:                234431064 K
+Write cache:         not supported
+SMART:               supported (on)
+NCQ:                 supported (on)
+48 bits LBA:         supported
+supported speed:     1.5 3 6 Gb/s
+Current speed:       6 Gb/s
+model:               MTFDDAV240TCB                           
+Serial:              18341E6651BA
+Firmware version:     D0DE008
+Locate LED status:   Not Support
+Running OS:          no
+SSD Type:            SSD
+block ids:           
+PD valid size:       234365528 K
+
+
+Total # of PD:       2

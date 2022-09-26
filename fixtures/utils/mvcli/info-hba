@@ -1,0 +1,43 @@
+SG driver version 3.5.36.
+
+Adapter ID:                          0
+Product:                             1b4b-9230
+Sub Product:                         1028-1fe2
+Chip revision:                       A1
+slot number:                         0
+Max PCIe speed:                      5Gb/s
+Current PCIe speed:                  5Gb/s
+Max PCIe link:                       2
+Current PCIe link:                   2
+Rom version:                         2.5.13.3016
+BIOS version:                        1.0.13.1003
+Firmware version:                    2.5.13.1210
+Boot loader version:                 2.1.0.1009
+# of ports:                          3
+Buzzer:                              Not supported
+Supported port type:                 SATA 
+Supported RAID mode:                 RAID1 
+Maximum disk in one VD:              2
+PM:                                  Not supported
+Expander:                            Not supported
+Rebuild:                             Supported
+Background init:                     Not supported
+Sync:                                Not supported
+Migrate:                             Not supported
+Media patrol:                        Supported
+Foreground init:                     Not supported
+Copy back:                           Not supported
+Maximum supported disk:              2
+Maximum supported VD:                1
+Max total blocks:                    128
+Features:                            rebuild,media patrol
+Advanced features:                   event sense code,multi VD,spc 4,image health,timer,smart poll,bga rate,spare,ata pass through,access register,oem data
+Advanced features 2:                 scsi pass through,flash
+Max buffer size:                     3
+Stripe size supported:               64K 
+Image health:                        Healthy
+Autoload image health:               Healthy
+Boot loader image health:            Healthy
+Firmware image health:               Healthy
+Boot ROM image health:               Healthy
+HBA info image health:               Healthy
