@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -122,7 +123,7 @@ func (l *Lshw) Collect(ctx context.Context, device *common.Device) error {
 // ListJSON returns the lshw output as a struct
 func (l *Lshw) ListJSON() (*LshwOutput, error) {
 	// lshw -json -notime
-	l.Executor.SetArgs([]string{"-json", "-notime"})
+	l.Executor.SetArgs([]string{"-json", "-notime", "-numeric"})
 
 	result, err := l.Executor.ExecWithContext(context.Background())
 	if err != nil {
@@ -322,6 +323,7 @@ func (l *Lshw) xNIC(node *LshwNode) *common.NIC {
 		return nil
 	}
 
+	// TODO(splaspood) We should merge on something other than serial
 	if node.Serial == "" {
 		log.Printf("Warn: NIC component without serial, ignored: %+v\n", node)
 		return nil
@@ -349,6 +351,9 @@ func (l *Lshw) xNIC(node *LshwNode) *common.NIC {
 		BusInfo:     node.Businfo,
 	}
 
+	nic.Common.PCIVendorID, nic.Common.PCIProductID, nic.Common.ProductName = lshwPciIDParse(node.Product)
+	nic.Common.Model = nic.Common.ProductName
+
 	// include additional attributes
 	if node.Configuration != nil {
 		nic.Metadata = map[string]string{}
@@ -375,6 +380,25 @@ func (l *Lshw) xNIC(node *LshwNode) *common.NIC {
 	}
 
 	return nic
+}
+
+// lshwPciIDParse returns PCI Vendor and Product identifiers from a given string
+func lshwPciIDParse(s string) (vendor, product, sanitizied string) {
+	pciIDRegex := regexp.MustCompile(` \[(\S{4}):?(\S{4})?\]$`)
+
+	if matches := pciIDRegex.FindStringSubmatch(s); matches != nil {
+		vendor = matches[1]
+
+		const PciProductIDMatchLength = 3
+
+		if len(matches) == PciProductIDMatchLength {
+			product = matches[2]
+		}
+	}
+
+	sanitizied = pciIDRegex.ReplaceAllString(s, "")
+
+	return
 }
 
 // lshwNicFwStringParse returns the version component of the firmware string
@@ -493,7 +517,7 @@ func (l *Lshw) xStorageController(node *LshwNode) *common.StorageController {
 		return nil
 	}
 
-	return &common.StorageController{
+	sc := &common.StorageController{
 		Common: common.Common{
 			Description: node.Description,
 			Vendor:      node.Vendor,
@@ -506,6 +530,18 @@ func (l *Lshw) xStorageController(node *LshwNode) *common.StorageController {
 		PhysicalID:               node.Physid,
 		BusInfo:                  node.Businfo,
 	}
+
+	sc.Common.PCIVendorID, sc.Common.PCIProductID, sc.ProductName = lshwPciIDParse(sc.ProductName)
+
+	_, _, sc.Vendor = lshwPciIDParse(sc.Vendor)
+	_, _, sc.Model = lshwPciIDParse(sc.Model)
+
+	// If no serial number is present, derive the serial from the PCI vendor/product id
+	if sc.Serial == "" {
+		sc.Serial = sc.Common.PCIVendorID + ":" + sc.Common.PCIProductID
+	}
+
+	return sc
 }
 
 // FakeLshwExecute implements the utils.Executor interface for testing
