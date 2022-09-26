@@ -19,7 +19,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	inv, err := device.GetInventory(context.TODO())
+	inv, err := device.GetInventory(context.TODO(), false)
 	if err != nil {
 		logger.Fatal(err)
 	}

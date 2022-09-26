@@ -114,11 +114,11 @@ func (d *dell) UpdatesApplied() bool {
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (d *dell) GetInventory(ctx context.Context) (*common.Device, error) {
+func (d *dell) GetInventory(ctx context.Context, dynamic bool) (*common.Device, error) {
 	// Collect device inventory from lshw
 	d.logger.Info("Collecting hardware inventory")
 
-	err := actions.Collect(ctx, d.hw.Device, d.collectors, d.trace, false)
+	err := actions.Collect(ctx, d.hw.Device, d.collectors, d.trace, false, dynamic)
 	if err != nil {
 		return nil, err
 	}
