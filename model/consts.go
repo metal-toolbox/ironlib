@@ -43,7 +43,7 @@ var (
 	// ModelDriveTypeSlug is a map of drive models number to slug
 	// Until we figure a better way to differentiate drive information
 	// into SATA vs PCI NVMe or others, this map is going to be annoying to keep updated
-	// As of now - neither lshwn or smartctl clearly points out the difference in the controller
+	// As of now - neither lshw or smartctl clearly points out the difference in the controller
 	modelDriveTypeSlug = map[string]string{
 		// Sata SSD drives
 		"Micron_5200_MTFDDAK480TDN": common.SlugDriveTypeSATASSD,
