@@ -60,11 +60,11 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 }
 
 // Returns hardware inventory for the device
-func (a *Generic) GetInventory(ctx context.Context) (*common.Device, error) {
+func (a *Generic) GetInventory(ctx context.Context, dynamic bool) (*common.Device, error) {
 	// Collect device inventory from lshw
 	a.logger.Info("Collecting inventory")
 
-	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace, false)
+	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace, false, dynamic)
 	if err != nil {
 		return nil, err
 	}

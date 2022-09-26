@@ -84,11 +84,11 @@ func (s *supermicro) UpdatesApplied() bool {
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (s *supermicro) GetInventory(ctx context.Context) (*common.Device, error) {
+func (s *supermicro) GetInventory(ctx context.Context, dynamic bool) (*common.Device, error) {
 	// Collect device inventory from lshw
 	s.logger.Info("Collecting hardware inventory")
 
-	err := actions.Collect(ctx, s.hw.Device, s.collectors, s.trace, false)
+	err := actions.Collect(ctx, s.hw.Device, s.collectors, s.trace, false, dynamic)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (s *supermicro) ListAvailableUpdates(ctx context.Context, options *model.Up
 func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOptions) (err error) {
 	// collect device inventory if it isn't added already
 	if s.hw.Device == nil || s.hw.Device.BIOS == nil {
-		s.hw.Device, err = s.GetInventory(ctx)
+		s.hw.Device, err = s.GetInventory(ctx, false)
 		if err != nil {
 			return err
 		}

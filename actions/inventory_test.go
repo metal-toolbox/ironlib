@@ -33,7 +33,7 @@ func Test_Inventory_dell(t *testing.T) {
 		Drives:    []DriveCollector{smartctl},
 	}
 
-	err = Collect(context.TODO(), &device, collectors, true, false)
+	err = Collect(context.TODO(), &device, collectors, true, false, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -110,7 +110,7 @@ func Test_Inventory_smc(t *testing.T) {
 		StorageControllers: storecli,
 	}
 
-	err = Collect(context.TODO(), &device, collectors, true, false)
+	err = Collect(context.TODO(), &device, collectors, true, false, false)
 	if err != nil {
 		t.Error(err)
 	}

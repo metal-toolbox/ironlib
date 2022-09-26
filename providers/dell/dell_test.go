@@ -83,7 +83,7 @@ func TestGetInventory(t *testing.T) {
 	// skip "/usr/libexec/instsvcdrv-helper start" from being executed
 	os.Setenv("IRONLIB_TEST", "1")
 
-	device, err := dell.GetInventory(context.TODO())
+	device, err := dell.GetInventory(context.TODO(), false)
 	if err != nil {
 		t.Error(err)
 	}

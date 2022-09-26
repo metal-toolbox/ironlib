@@ -7,6 +7,7 @@ import (
 
 	"github.com/bmc-toolbox/common"
 	"github.com/r3labs/diff/v2"
+	"golang.org/x/exp/slices"
 
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
@@ -50,7 +51,7 @@ func InitCollectors(trace bool) *Collectors {
 //
 // The lshw collector always executes first and is included by default.
 // nolint:gocyclo //since we're collecting inventory for each type, this is cyclomatic
-func Collect(ctx context.Context, device *common.Device, collectors *Collectors, trace, failOnError bool) error {
+func Collect(ctx context.Context, device *common.Device, collectors *Collectors, trace, failOnError, dynamic bool) error {
 	// register default collectors
 	if collectors == nil {
 		collectors = InitCollectors(trace)
@@ -119,10 +120,30 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 		return errors.Wrap(err, "error retrieving TPM inventory")
 	}
 
+	if dynamic {
+		// Update StorageControllerCollectors
+		for _, sc := range device.StorageControllers {
+			collectors.StorageControllers = StorageControllerCollectorByVendor(sc.Vendor, trace)
+		}
+	}
+
 	// Collect StorageController info
 	err = StorageController(ctx, device.StorageControllers, collectors.StorageControllers)
 	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving StorageController inventory")
+	}
+
+	if dynamic {
+		for _, sc := range device.StorageControllers {
+			if sc.SupportedRAIDTypes != "" {
+				collectors.Drives = append(collectors.Drives, DriveCollectorByStorageControllerVendor(sc.Vendor, trace))
+
+				err = Drives(ctx, device.Drives, collectors.Drives)
+				if err != nil && failOnError {
+					return errors.Wrap(err, "error retrieving drive inventory")
+				}
+			}
+		}
 	}
 
 	// default set model numbers to device model
@@ -420,8 +441,7 @@ func vetChanges(changes diff.Changelog) diff.Changelog {
 		if c.Type == diff.UPDATE {
 			if structFieldNotEmpty(c.From) {
 				// Allow changes in the Vendor, Model fields
-				if !utils.StringInSlice("Vendor", c.Path) &&
-					!utils.StringInSlice("Model", c.Path) {
+				if !slices.Contains(c.Path, "Vendor") && !slices.Contains(c.Path, "Model") {
 					continue
 				}
 			}

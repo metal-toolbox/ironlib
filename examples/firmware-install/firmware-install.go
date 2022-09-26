@@ -27,7 +27,7 @@ func main() {
 		UpdateFile: "/tmp/SMT_CFLAST2500_123_07.bin",
 	}
 
-	hardware, err := device.GetInventory(context.TODO())
+	hardware, err := device.GetInventory(context.TODO(), false)
 	if err != nil {
 		logger.Fatal(err)
 	}

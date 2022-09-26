@@ -12,6 +12,20 @@ type DeviceManager interface {
 	Updater
 }
 
+type VirtualDiskCreator interface {
+	CreateVirtualDisk(ctx context.Context, raidLevel string, physicalDisks []uint,
+		name string, blockSize uint) error
+}
+
+type VirtualDiskDestroyer interface {
+	DestroyVirtualDisk(ctx context.Context, deviceIdentifier uint, force bool) error
+}
+
+type RaidController interface {
+	VirtualDiskCreator
+	VirtualDiskDestroyer
+}
+
 type Setter interface {
 	SetBIOSConfiguration(ctx context.Context, config map[string]string) error
 }
@@ -26,7 +40,7 @@ type Getter interface {
 	// Check if any updates were applied
 	UpdatesApplied() bool
 	// Retrieve inventory for the device
-	GetInventory(ctx context.Context) (*common.Device, error)
+	GetInventory(ctx context.Context, dynamic bool) (*common.Device, error)
 	// Retrieve inventory using the OEM tooling for the device,
 	GetInventoryOEM(ctx context.Context, device *common.Device, options *UpdateOptions) error
 	// List updates identifed by the vendor tooling (DSU for dells)
