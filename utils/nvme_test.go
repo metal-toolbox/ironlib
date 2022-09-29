@@ -29,3 +29,71 @@ func Test_NvmeComponents(t *testing.T) {
 
 	assert.Equal(t, expected, drives)
 }
+
+func Test_ParseNvmeFeatures(t *testing.T) {
+	n := newFakeNvme()
+
+	deviceAttributes := &nvmeDeviceAttributes{DevicePath: "/dev/nvme0"}
+
+	features, err := n.parseNvmeFeatures(deviceAttributes)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, fixtureNvmeDevicefeatures, features)
+}
+
+var (
+	fixtureNvmeDevicefeatures = []nvmeDeviceFeatures{
+		{
+			Name:        "sanicap",
+			Description: "Sanitize Support",
+			Enabled:     false,
+		},
+		{
+			Name:        "",
+			Description: "Additional media modification after sanitize operation completes successfully is not defined",
+			Enabled:     false,
+		},
+		{
+			Name:        "",
+			Description: "No-Deallocate After Sanitize bit in Sanitize command Supported",
+			Enabled:     false,
+		},
+		{
+			Name:        "",
+			Description: "Overwrite Sanitize Operation Not Supported",
+			Enabled:     false,
+		},
+		{
+			Name:        "",
+			Description: "Block Erase Sanitize Operation Not Supported",
+			Enabled:     false,
+		},
+		{
+			Name:        "",
+			Description: "Crypto Erase Sanitize Operation Not Supported",
+			Enabled:     false,
+		},
+		{
+			Name:        "fna",
+			Description: "Crypto Erase Support",
+			Enabled:     true,
+		},
+		{
+			Name:        "cesapose",
+			Description: "Crypto Erase Supported as part of Secure Erase",
+			Enabled:     true,
+		},
+		{
+			Name:        "ceatsn",
+			Description: "Crypto Erase Applies to Single Namespace(s)",
+			Enabled:     false,
+		},
+		{
+			Name:        "fatsn",
+			Description: "Format Applies to Single Namespace(s)",
+			Enabled:     false,
+		},
+	}
+)
