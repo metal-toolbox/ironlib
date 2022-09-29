@@ -1,0 +1,204 @@
+NVME Identify Controller:
+vid       : 0x1344
+ssvid     : 0x1344
+sn        : 201327AA90B6        
+mn        : Micron_9300_MTFDHAL3T8TDP               
+fr        : 11300DN0
+rab       : 0
+ieee      : 00a075
+cmic      : 0
+  [3:3] : 0	ANA not supported
+  [2:2] : 0	PCI
+  [1:1] : 0	Single Controller
+  [0:0] : 0	Single Port
+
+mdts      : 5
+cntlid    : 0x1
+ver       : 0x10200
+rtd3r     : 0xe4e1c0
+rtd3e     : 0x989680
+oaes      : 0x300
+[14:14] : 0	Endurance Group Event Aggregate Log Page Change Notice Not Supported
+[13:13] : 0	LBA Status Information Notices Not Supported
+[12:12] : 0	Predictable Latency Event Aggregate Log Change Notices Not Supported
+[11:11] : 0	Asymmetric Namespace Access Change Notices Not Supported
+  [9:9] : 0x1	Firmware Activation Notices Supported
+  [8:8] : 0x1	Namespace Attribute Changed Event Supported
+
+ctratt    : 0
+  [9:9] : 0	UUID List Not Supported
+  [7:7] : 0	Namespace Granularity Not Supported
+  [5:5] : 0	Predictable Latency Mode Not Supported
+  [4:4] : 0	Endurance Groups Not Supported
+  [3:3] : 0	Read Recovery Levels Not Supported
+  [2:2] : 0	NVM Sets Not Supported
+  [1:1] : 0	Non-Operational Power State Permissive Not Supported
+  [0:0] : 0	128-bit Host Identifier Not Supported
+
+rrls      : 0
+crdt1     : 0
+crdt2     : 0
+crdt3     : 0
+oacs      : 0xe
+  [9:9] : 0	Get LBA Status Capability Not Supported
+  [8:8] : 0	Doorbell Buffer Config Not Supported
+  [7:7] : 0	Virtualization Management Not Supported
+  [6:6] : 0	NVMe-MI Send and Receive Not Supported
+  [5:5] : 0	Directives Not Supported
+  [4:4] : 0	Device Self-test Not Supported
+  [3:3] : 0x1	NS Management and Attachment Supported
+  [2:2] : 0x1	FW Commit and Download Supported
+  [1:1] : 0x1	Format NVM Supported
+  [0:0] : 0	Security Send and Receive Not Supported
+
+acl       : 4
+aerl      : 5
+frmw      : 0x17
+  [4:4] : 0x1	Firmware Activate Without Reset Supported
+  [3:1] : 0x3	Number of Firmware Slots
+  [0:0] : 0x1	Firmware Slot 1 Read-Only
+
+lpa       : 0x2
+  [3:3] : 0	Telemetry host/controller initiated log page Not Supported
+  [2:2] : 0	Extended data for Get Log Page Not Supported
+  [1:1] : 0x1	Command Effects Log Page Supported
+  [0:0] : 0	SMART/Health Log Page per NS Not Supported
+
+elpe      : 62
+npss      : 15
+avscc     : 0x1
+  [0:0] : 0x1	Admin Vendor Specific Commands uses NVMe Format
+
+apsta     : 0
+  [0:0] : 0	Autonomous Power State Transitions Not Supported
+
+wctemp    : 348
+cctemp    : 353
+mtfa      : 50
+hmpre     : 0
+hmmin     : 0
+tnvmcap   : 3840755982336
+unvmcap   : 0
+rpmbs     : 0
+ [31:24]: 0	Access Size
+ [23:16]: 0	Total Size
+  [5:3] : 0	Authentication Method
+  [2:0] : 0	Number of RPMB Units
+
+edstt     : 0
+dsto      : 0
+fwug      : 0
+kas       : 0
+hctma     : 0
+  [0:0] : 0	Host Controlled Thermal Management Not Supported
+
+mntmt     : 0
+mxtmt     : 0
+sanicap   : 0
+  [31:30] : 0	Additional media modification after sanitize operation completes successfully is not defined
+  [29:29] : 0	No-Deallocate After Sanitize bit in Sanitize command Supported
+    [2:2] : 0	Overwrite Sanitize Operation Not Supported
+    [1:1] : 0	Block Erase Sanitize Operation Not Supported
+    [0:0] : 0	Crypto Erase Sanitize Operation Not Supported
+
+hmminds   : 0
+hmmaxd    : 0
+nsetidmax : 0
+anatt     : 0
+anacap    : 0
+  [7:7] : 0	Non-zero group ID Not Supported
+  [6:6] : 0	Group ID does not change
+  [4:4] : 0	ANA Change state Not Supported
+  [3:3] : 0	ANA Persistent Loss state Not Supported
+  [2:2] : 0	ANA Inaccessible state Not Supported
+  [1:1] : 0	ANA Non-optimized state Not Supported
+  [0:0] : 0	ANA Optimized state Not Supported
+
+anagrpmax : 0
+nanagrpid : 0
+sqes      : 0x66
+  [7:4] : 0x6	Max SQ Entry Size (64)
+  [3:0] : 0x6	Min SQ Entry Size (64)
+
+cqes      : 0x44
+  [7:4] : 0x4	Max CQ Entry Size (16)
+  [3:0] : 0x4	Min CQ Entry Size (16)
+
+maxcmd    : 0
+nn        : 32
+oncs      : 0x14
+  [7:7] : 0	Verify Not Supported
+  [6:6] : 0	Timestamp Not Supported
+  [5:5] : 0	Reservations Not Supported
+  [4:4] : 0x1	Save and Select Supported
+  [3:3] : 0	Write Zeroes Not Supported
+  [2:2] : 0x1	Data Set Management Supported
+  [1:1] : 0	Write Uncorrectable Not Supported
+  [0:0] : 0	Compare Not Supported
+
+fuses     : 0
+  [0:0] : 0	Fused Compare and Write Not Supported
+
+fna       : 0x4
+  [2:2] : 0x1	Crypto Erase Supported as part of Secure Erase
+  [1:1] : 0	Crypto Erase Applies to Single Namespace(s)
+  [0:0] : 0	Format Applies to Single Namespace(s)
+
+vwc       : 0
+  [0:0] : 0	Volatile Write Cache Not Present
+
+awun      : 0
+awupf     : 0
+nvscc     : 1
+  [0:0] : 0x1	NVM Vendor Specific Commands uses NVMe Format
+
+nwpc      : 0
+  [2:2] : 0	Permanent Write Protect Not Supported
+  [1:1] : 0	Write Protect Until Power Supply Not Supported
+  [0:0] : 0	No Write Protect and Write Protect Namespace Not Supported
+
+acwu      : 0
+sgls      : 0
+ [1:0]  : 0	Scatter-Gather Lists Not Supported
+
+mnan      : 0
+subnqn    : nqn.2016-08.com.micron:nvme:nvm-subsystem-sn-201327AA90B6        
+ioccsz    : 0
+iorcsz    : 0
+icdoff    : 0
+ctrattr   : 0
+  [0:0] : 0	Dynamic Controller Model
+
+msdbd     : 0
+ps    0 : mp:25.00W operational enlat:100 exlat:100 rrt:0 rrl:0
+          rwt:0 rwl:0 idle_power:- active_power:-
+ps    1 : mp:24.00W operational enlat:115 exlat:115 rrt:1 rrl:1
+          rwt:1 rwl:1 idle_power:- active_power:-
+ps    2 : mp:23.00W operational enlat:130 exlat:130 rrt:2 rrl:2
+          rwt:2 rwl:2 idle_power:- active_power:-
+ps    3 : mp:22.00W operational enlat:145 exlat:145 rrt:3 rrl:3
+          rwt:3 rwl:3 idle_power:- active_power:-
+ps    4 : mp:21.00W operational enlat:160 exlat:160 rrt:4 rrl:4
+          rwt:4 rwl:4 idle_power:- active_power:-
+ps    5 : mp:20.00W operational enlat:175 exlat:175 rrt:5 rrl:5
+          rwt:5 rwl:5 idle_power:- active_power:-
+ps    6 : mp:19.00W operational enlat:190 exlat:190 rrt:6 rrl:6
+          rwt:6 rwl:6 idle_power:- active_power:-
+ps    7 : mp:18.00W operational enlat:205 exlat:205 rrt:7 rrl:7
+          rwt:7 rwl:7 idle_power:- active_power:-
+ps    8 : mp:17.00W operational enlat:220 exlat:220 rrt:8 rrl:8
+          rwt:8 rwl:8 idle_power:- active_power:-
+ps    9 : mp:16.00W operational enlat:235 exlat:235 rrt:9 rrl:9
+          rwt:9 rwl:9 idle_power:- active_power:-
+ps   10 : mp:15.00W operational enlat:250 exlat:250 rrt:10 rrl:10
+          rwt:10 rwl:10 idle_power:- active_power:-
+ps   11 : mp:14.00W operational enlat:265 exlat:265 rrt:11 rrl:11
+          rwt:11 rwl:11 idle_power:- active_power:-
+ps   12 : mp:13.00W operational enlat:280 exlat:280 rrt:12 rrl:12
+          rwt:12 rwl:12 idle_power:- active_power:-
+ps   13 : mp:12.00W operational enlat:295 exlat:295 rrt:13 rrl:13
+          rwt:13 rwl:13 idle_power:- active_power:-
+ps   14 : mp:11.00W operational enlat:310 exlat:310 rrt:14 rrl:14
+          rwt:14 rwl:14 idle_power:- active_power:-
+ps   15 : mp:10.00W operational enlat:325 exlat:325 rrt:15 rrl:15
+          rwt:15 rwl:15 idle_power:- active_power:-

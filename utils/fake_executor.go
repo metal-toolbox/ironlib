@@ -44,8 +44,18 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 		}
 	case "mlxup":
 	case "nvme":
-		if e.Args[0] == "list" {
+		switch e.Args[0] {
+		case "list":
 			e.Stdout = nvmeListDummyJSON
+			break
+
+		case "id-ctrl":
+			b, err := os.ReadFile("../fixtures/utils/nvme/nvmecli-id-ctrl")
+			if err != nil {
+				return nil, err
+			}
+
+			e.Stdout = b
 			break
 		}
 
