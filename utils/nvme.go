@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
@@ -80,12 +81,6 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 			vendor = modelTokens[1]
 		}
 
-		// Collect drive features
-		features, err := n.parseNvmeFeatures(d)
-		if err != nil {
-			return nil, err
-		}
-
 		drive := &common.Drive{
 			Common: common.Common{
 				Serial:      d.SerialNumber,
@@ -96,8 +91,18 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 				Firmware: &common.Firmware{
 					Installed: d.Firmware,
 				},
+				Metadata: map[string]string{},
 			},
-			Features: features,
+		}
+
+		// Collect drive features
+		features, err := n.parseNvmeFeatures(d)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, f := range features {
+			drive.Common.Metadata[f.Description] = strconv.FormatBool(f.Enabled)
 		}
 
 		drives = append(drives, drive)
@@ -139,11 +144,14 @@ func (n *Nvme) parseNvmeFeatures(d *nvmeDeviceAttributes) ([]nvmeDeviceFeatures,
 	var features []nvmeDeviceFeatures
 
 	var lines []string
-	s := string(out[:])
+
+	s := string(out)
+
 	scanner := bufio.NewScanner(strings.NewReader(s))
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
+
 	err = scanner.Err()
 	if err != nil {
 		return nil, err
@@ -231,5 +239,6 @@ func (n *Nvme) parseNvmeFeatures(d *nvmeDeviceAttributes) ([]nvmeDeviceFeatures,
 			features = append(features, feature)
 		}
 	}
+
 	return features, err
 }
