@@ -27,7 +27,6 @@ type nvmeDeviceAttributes struct {
 	SerialNumber string `json:"SerialNumber"`
 }
 
-// placeholder common.Drive.Features
 type nvmeDeviceFeatures struct {
 	Name        string `json:"Name"`
 	Description string `json:"Description"`
@@ -36,10 +35,6 @@ type nvmeDeviceFeatures struct {
 
 type nvmeList struct {
 	Devices []*nvmeDeviceAttributes `json:"Devices"`
-}
-
-type nvmeFeatures struct {
-	Features []*nvmeDeviceFeatures `json:Features`
 }
 
 // Return a new nvme executor

@@ -1,0 +1,5 @@
+package hdparm
+
+var (
+	
+)

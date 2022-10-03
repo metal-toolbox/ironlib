@@ -58,7 +58,15 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			e.Stdout = b
 			break
 		}
+	case "hdparm":
+		if e.Args[0] == "-I" {
+			b, err := os.ReadFile("../fixtures/utils/hdparm/hdparm-i")
+			if err != nil {
+				return nil, err
+			}
 
+			e.Stdout = b
+		}
 	case "dsu":
 	case "rpm":
 		if e.Args[1] == "-1" && e.Args[2] == "dell-system-update" {
