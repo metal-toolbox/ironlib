@@ -35,3 +35,14 @@ type UpdateOptions struct {
 type OemComponents struct {
 	Dell []*Component `json:"dell"`
 }
+
+type CreateVirtualDiskOptions struct {
+	RaidMode        string
+	PhysicalDiskIDs []uint
+	Name            string
+	BlockSize       uint
+}
+
+type DestroyVirtualDiskOptions struct {
+	VirtualDiskID int
+}
