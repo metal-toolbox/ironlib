@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/utils"
 )
 
 // Utility interface couples the configuration, collection and update interfaces
@@ -95,4 +96,20 @@ type BIOSUpdater interface {
 // StorageControllerUpdater defines an interface to update storage controller firmware
 type StorageControllerUpdater interface {
 	UpdateStorageController() error
+}
+
+// VirtualDiskCreator defines an interface to create virtual disks, generally via a StorageController
+type VirtualDiskCreator interface {
+	CreateVirtualDisk(ctx context.Context, raidMode string, physicalDisks []uint, name string, blockSize uint) error
+}
+
+// VirtualDiskCreator defines an interface to destroy virtual disks, generally via a StorageController
+type VirtualDiskDestroyer interface {
+	DestroyVirtualDisk(ctx context.Context, virtualDiskID int) error
+}
+
+type VirtualDiskManager interface {
+	VirtualDiskCreator
+	VirtualDiskDestroyer
+	VirtualDisks(ctx context.Context) ([]*utils.MvcliDevice, error)
 }
