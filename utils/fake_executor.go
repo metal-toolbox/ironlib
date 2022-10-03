@@ -47,7 +47,6 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 		switch e.Args[0] {
 		case "list":
 			e.Stdout = nvmeListDummyJSON
-			break
 
 		case "id-ctrl":
 			b, err := os.ReadFile("../fixtures/utils/nvme/nvmecli-id-ctrl")
@@ -56,7 +55,6 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			}
 
 			e.Stdout = b
-			break
 		}
 	case "hdparm":
 		if e.Args[0] == "-I" {

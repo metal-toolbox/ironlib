@@ -130,6 +130,7 @@ func (n *Nvme) ListFeatures(device string) ([]byte, error) {
 	return result.Stdout, nil
 }
 
+// nolint:gocyclo // line parsing is cyclomatic
 func (n *Nvme) parseNvmeFeatures(d *nvmeDeviceAttributes) ([]nvmeDeviceFeatures, error) {
 	out, err := n.ListFeatures(d.DevicePath)
 	if err != nil {
@@ -153,53 +154,59 @@ func (n *Nvme) parseNvmeFeatures(d *nvmeDeviceAttributes) ([]nvmeDeviceFeatures,
 	}
 
 	// Delimiters
-	re_fna_start := regexp.MustCompile(`(?s)^fna\s`)
-	re_fna_end := regexp.MustCompile(`(?s)^vwc\s`)
-	re_sani_start := regexp.MustCompile(`(?s)^sanicap\s`)
-	re_sani_end := regexp.MustCompile(`(?s)^hmminds\s`)
-	re_blank := regexp.MustCompile(`(?m)^\s*$`)
+	reFnaStart := regexp.MustCompile(`(?s)^fna\s`)
+	reFnaEnd := regexp.MustCompile(`(?s)^vwc\s`)
+	reSaniStart := regexp.MustCompile(`(?s)^sanicap\s`)
+	reSaniEnd := regexp.MustCompile(`(?s)^hmminds\s`)
+	reBlank := regexp.MustCompile(`(?m)^\s*$`)
 
-	fna_bool, sani_bool := false, false
+	fnaBool, saniBool := false, false
 
 	for _, line := range lines {
-		line := strings.TrimSpace(line)
-		fna_start := re_fna_start.MatchString(line)
-		fna_end := re_fna_end.MatchString(line)
-		sani_start := re_sani_start.MatchString(line)
-		sani_end := re_sani_end.MatchString(line)
-		is_blank := re_blank.MatchString(line)
+		line = strings.TrimSpace(line)
+		fnaStart := reFnaStart.MatchString(line)
+		fnaEnd := reFnaEnd.MatchString(line)
+		saniStart := reSaniStart.MatchString(line)
+		saniEnd := reSaniEnd.MatchString(line)
+		isBlank := reBlank.MatchString(line)
 
 		// start/end match specific block delimiters
 		// bools are toggled to indicate lines within a given block
 		switch {
-		case fna_start:
-			fna_bool = true
-		case fna_end:
-			fna_bool = false
-		case sani_start:
-			sani_bool = true
-		case sani_end:
-			sani_bool = false
+		case fnaStart:
+			fnaBool = true
+		case fnaEnd:
+			fnaBool = false
+		case saniStart:
+			saniBool = true
+		case saniEnd:
+			saniBool = false
 		}
 
-		if fna_start || sani_start {
+		switch {
+		case (fnaStart || saniStart):
 			var feature nvmeDeviceFeatures
+
 			parts := strings.Split(line, ":")
 			key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
 			feature.Name = key
-			if fna_start {
+
+			if fnaStart {
 				feature.Description = "Crypto Erase Support"
 			} else {
 				feature.Description = "Sanitize Support"
 			}
+
 			if value != "0" {
 				feature.Enabled = true
 			}
+
 			features = append(features, feature)
 
 			// crypto erase
-		} else if fna_bool && !fna_end && !is_blank {
+		case (fnaBool && !fnaEnd && !isBlank):
 			var feature nvmeDeviceFeatures
+
 			parts := strings.Split(line, ":")
 			data := strings.Split(parts[2], "\t")
 			enabled := strings.TrimSpace(data[0])
@@ -212,24 +219,27 @@ func (n *Nvme) parseNvmeFeatures(d *nvmeDeviceAttributes) ([]nvmeDeviceFeatures,
 			if enabled != "0" {
 				feature.Enabled = true
 			}
+
 			feature.Description = data[1]
 			features = append(features, feature)
+
 			// sanitize
-		} else if sani_bool && !sani_end && !is_blank {
+		case (saniBool && !saniEnd && !isBlank):
 			var feature nvmeDeviceFeatures
-			var flag string
+
 			parts := strings.Split(line, ":")
 			data := strings.Split(parts[2], "\t")
 			enabled := strings.TrimSpace(data[0])
 
 			// Generate short flag identifier
 			for _, word := range strings.Fields(data[1]) {
-				flag += strings.ToLower(word[0:1])
+				feature.Name += strings.ToLower(word[0:1])
 			}
 
 			if enabled != "0" {
 				feature.Enabled = true
 			}
+
 			feature.Description = data[1]
 			features = append(features, feature)
 		}

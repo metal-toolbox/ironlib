@@ -1,5 +1,1 @@
 package hdparm
-
-var (
-	
-)
