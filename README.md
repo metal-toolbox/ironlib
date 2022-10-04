@@ -15,8 +15,9 @@ Ironlib wraps various opensource and various vendor utilities to expose a consis
 
 ## Requirements
 
-Ironlib is expected to be executed from within the [ironlib docker image](Dockerfile), on the target host,
-the docker image contains all the utilities required to collect inventory, install updates, get BIOS configuration.
+Ironlib expects various vendor utilities to be made available.
+
+TODO: define a list of utility path env vars a user can set.
 
 ## Invoking ironlib
 
@@ -38,15 +39,8 @@ The list of tools that ironlib wraps around, in no particular order,
  [For the full list see here](https://github.com/metal-toolbox/ironlib/tree/main/utils)
 
 
-## Build ironlib docker image
-
-`make build-image`
-
-
 #### Examples
 
-
-This example 
 More examples can be found in the [examples](examples/) directory
 ```
 package main
