@@ -283,8 +283,8 @@ func findDSUInventoryCollector(path string) []string {
 //
 // since the component name exposed by the dsu command doesn't tell the component name in a unique manner,
 // the model.DellComponentSlug list has be ordered to ensure we don't have incorrect identification.
-// Attempts were made to use fuzzy matching and levenstiens distance,
-//  to identify the components correctly, although none seemed to work as well as an ordered list.
+// Attempts were made to use fuzzy matching and levenstiens distance, to identify the components correctly,
+// although none seemed to work as well as an ordered list.
 func dsuComponentNameToSlug(n string) string {
 	componentName := strings.ToLower(n)
 

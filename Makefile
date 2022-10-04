@@ -1,7 +1,4 @@
-export DOCKER_BUILDKIT=1
-GIT_COMMIT_FULL  := $(shell git rev-parse HEAD)
-DOCKER_REGISTRY  := "quay.io/packet/ironlib"
-LINTER_EXPECTED_VERSION   := "1.46.2"
+LINTER_EXPECTED_VERSION   := "1.50.0"
 
 .DEFAULT_GOAL := help
 
@@ -13,28 +10,6 @@ lint:
 ## Go test
 test:
 	CGO_ENABLED=0 go test -v -covermode=atomic ./...
-
-## build docker image and tag as quay.io/packet/ironlib:latest
-build-image:
-	@echo ">>>> NOTE: You may want to execute 'make build-image-nocache' depending on the Docker stages changed"
-	docker build --rm=true -f Dockerfile -t ${DOCKER_REGISTRY}:latest  . \
-							 --label org.label-schema.schema-version=1.0 \
-							 --label org.label-schema.vcs-ref=$(GIT_COMMIT_FULL) \
-							 --label org.label-schema.vcs-url=https://github.com/metal-toolbox/ironlib.git
-
-## build docker image, ignoring the cache
-build-image-nocache:
-	docker build --no-cache --rm=true -f Dockerfile -t ${DOCKER_REGISTRY}:latest  . \
-							 --label org.label-schema.schema-version=1.0 \
-							 --label org.label-schema.vcs-ref=$(GIT_COMMIT_FULL) \
-							 --label org.label-schema.vcs-url=https://github.com/metal-toolbox/ironlib.git
-
-
-## push docker image
-push-image:
-	docker push ${DOCKER_REGISTRY}:latest
-
-
 
 # https://gist.github.com/prwhite/8168133
 # COLORS
