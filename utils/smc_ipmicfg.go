@@ -26,7 +26,8 @@ type IpmicfgSummary struct {
 
 // Return a new Supermicro IPMICFG executor
 // note: the binary is expected to be available as smc-ipmicfg,
-//       as setup in the fup firmware-update image
+//
+//	as setup in the fup firmware-update image
 func NewIpmicfgCmd(trace bool) *Ipmicfg {
 	e := NewExecutor(ipmicfg)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})

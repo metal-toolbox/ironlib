@@ -1,7 +1,7 @@
 export DOCKER_BUILDKIT=1
 GIT_COMMIT_FULL  := $(shell git rev-parse HEAD)
 DOCKER_REGISTRY  := "quay.io/packet/ironlib"
-LINTER_EXPECTED_VERSION   := "1.46.2"
+LINTER_EXPECTED_VERSION   := "1.50.0"
 
 .DEFAULT_GOAL := help
 

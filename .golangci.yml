@@ -57,19 +57,16 @@ linters:
     - ineffassign
     - stylecheck
     - misspell
-    - deadcode
     - staticcheck
-    - structcheck
     - unused
     - prealloc
     - typecheck
-    - varcheck
+    - revive
     # additional linters
     - bodyclose
     - gocritic
     - goerr113
     - goimports
-    - golint
     - gomnd
     - misspell
     - noctx
