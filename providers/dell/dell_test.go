@@ -41,7 +41,7 @@ func newFakeDellDevice() (*dell, error) {
 
 	collectors := &actions.Collectors{
 		Inventory: lshw,
-		Drives:    smartctl,
+		Drives:    []actions.DriveCollector{smartctl},
 	}
 
 	hardware := model.NewHardware(&device)
