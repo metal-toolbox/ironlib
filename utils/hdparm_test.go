@@ -17,7 +17,7 @@ func Test_ParseHdparmFeatures(t *testing.T) {
 
 	device := "/dev/sda"
 
-	features, err := h.parseHdparmFeatures(device)
+	features, err := h.ParseHdparmFeatures(device)
 
 	if err != nil {
 		t.Fatal(err)
