@@ -22,7 +22,7 @@ var (
 // Collectors is a struct acting as a registry of various inventory collectors
 type Collectors struct {
 	Inventory          InventoryCollector
-	Drives             DriveCollector
+	Drives             []DriveCollector
 	NICs               NICCollector
 	BMC                BMCCollector
 	CPLDs              CPLDCollector
@@ -38,7 +38,7 @@ type Collectors struct {
 func InitCollectors(trace bool) *Collectors {
 	return &Collectors{
 		Inventory: utils.NewLshwCmd(trace),
-		Drives:    utils.NewSmartctlCmd(trace),
+		Drives:    []DriveCollector{utils.NewSmartctlCmd(trace)},
 	}
 }
 
@@ -143,39 +143,42 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 	return nil
 }
 
-// Drives executes drive collectors and merges the drive smart data into device.[]*Drive
-func Drives(ctx context.Context, drives []*common.Drive, c DriveCollector) error {
+// Drives executes drive collectors and merges the data into device.[]*Drive
+// nolint:gocyclo // TODO(joel) if theres more conditionals to be added in here, the method is to be split up.
+func Drives(ctx context.Context, drives []*common.Drive, collectors []DriveCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from panic in Drives(): ", r)
 		}
 	}()
 
-	if c == nil {
+	if collectors == nil {
 		return nil
 	}
 
-	ndrives, err := c.Drives(ctx)
-	if err != nil {
-		return err
-	}
+	for _, collector := range collectors {
+		ndrives, err := collector.Drives(ctx)
+		if err != nil {
+			return err
+		}
 
-	if len(ndrives) == 0 {
-		return nil
-	}
+		if len(ndrives) == 0 {
+			return nil
+		}
 
-	// TODO: handle case where the object may not already be present in device.Drives and needs to be added
-	for _, e := range drives {
-		for _, i := range ndrives {
-			// object is matched by serial identifier and patched
-			if strings.EqualFold(e.Serial, i.Serial) {
-				changelog, err := diff.Diff(e, i)
-				if err != nil {
-					return err
+		// TODO: handle case where the object may not already be present in device.Drives and needs to be added
+		for _, e := range drives {
+			for _, i := range ndrives {
+				// object is matched by serial identifier and patched
+				if strings.EqualFold(e.Serial, i.Serial) {
+					changelog, err := diff.Diff(e, i)
+					if err != nil {
+						return err
+					}
+
+					changelog = vetChanges(changelog)
+					diff.Patch(changelog, e)
 				}
-
-				changelog = vetChanges(changelog)
-				diff.Patch(changelog, e)
 			}
 		}
 	}
