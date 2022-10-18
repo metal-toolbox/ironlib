@@ -683,6 +683,7 @@ var (
 					Model:       "Micron_9300_MTFDHAL3T8TDP",
 					Serial:      "202728F691F5",
 					ProductName: "Micron_9300_MTFDHAL3T8TDP",
+					LogicalName: "/dev/nvme0",
 					Firmware:    nil,
 					Status:      nil,
 				},
@@ -708,6 +709,7 @@ var (
 					Model:       "Micron_9300_MTFDHAL3T8TDP",
 					Serial:      "202728F691C6",
 					ProductName: "Micron_9300_MTFDHAL3T8TDP",
+					LogicalName: "/dev/nvme1",
 					Firmware:    nil,
 					Status:      nil,
 				},
@@ -733,6 +735,7 @@ var (
 					Model:       "MTFDDAV240TDU",
 					Serial:      "203329F89392",
 					ProductName: "MTFDDAV240TDU",
+					LogicalName: "/dev/sda",
 					Firmware:    nil,
 					Status:      nil,
 				},
@@ -758,6 +761,7 @@ var (
 					Model:       "MTFDDAV240TDU",
 					Serial:      "203329F89796",
 					ProductName: "MTFDDAV240TDU",
+					LogicalName: "/dev/sdb",
 					Firmware:    nil,
 					Status:      nil,
 				},
@@ -1305,6 +1309,7 @@ var (
 					Model:       "Micron_9300_MTFDHAL3T8TDP",
 					Serial:      "202728F691F5",
 					ProductName: "Micron_9300_MTFDHAL3T8TDP",
+					LogicalName: "/dev/nvme0",
 					Firmware: &common.Firmware{
 						Installed:  "11300DN0",
 						Available:  "",
@@ -1335,6 +1340,7 @@ var (
 					Model:       "Micron_9300_MTFDHAL3T8TDP",
 					Serial:      "202728F691C6",
 					ProductName: "Micron_9300_MTFDHAL3T8TDP",
+					LogicalName: "/dev/nvme1",
 					Firmware: &common.Firmware{
 						Installed:  "11300DN0",
 						Available:  "",
@@ -1365,6 +1371,7 @@ var (
 					Model:       "MTFDDAV240TDU",
 					Serial:      "203329F89392",
 					ProductName: "MTFDDAV240TDU",
+					LogicalName: "/dev/sda",
 					Firmware: &common.Firmware{
 						Installed:  "D3DJ004",
 						Available:  "",
@@ -1395,6 +1402,7 @@ var (
 					Model:       "MTFDDAV240TDU",
 					Serial:      "203329F89796",
 					ProductName: "MTFDDAV240TDU",
+					LogicalName: "/dev/sdb",
 					Firmware: &common.Firmware{
 						Installed:  "D3DJ004",
 						Available:  "",
