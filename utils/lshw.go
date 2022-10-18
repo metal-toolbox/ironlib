@@ -48,6 +48,7 @@ type LshwNode struct {
 	Vendor        string                `json:"vendor,omitempty"`
 	Physid        string                `json:"physid,omitempty"`
 	Businfo       string                `json:"businfo,omitempty"`
+	LogicalName   interface{}           `json:"logicalname,omitempty"`
 	Dev           string                `json:"dev,omitempty"`
 	Slot          string                `json:"slot,omitempty"`
 	Units         string                `json:"units,omitempty"`
@@ -465,6 +466,13 @@ func (l *Lshw) xDrive(node *LshwNode) *common.Drive {
 
 		BusInfo:       node.Businfo,
 		CapacityBytes: int64(node.Size),
+	}
+
+	// type assert LogicalName since it can also be an array - in which case we
+	// do not care about the data.
+	logicalName, isString := node.LogicalName.(string)
+	if isString {
+		drive.LogicalName = logicalName
 	}
 
 	if drive.Vendor == "" {
