@@ -44,7 +44,7 @@ func (h *Hdparm) ListFeatures(device string) ([]byte, error) {
 }
 
 // nolint:gocyclo // line parsing is cyclomatic
-func (h *Hdparm) parseHdparmFeatures(device string) ([]hdparmDeviceFeatures, error) {
+func (h *Hdparm) ParseHdparmFeatures(device string) ([]hdparmDeviceFeatures, error) {
 	out, err := h.ListFeatures(device)
 	if err != nil {
 		return nil, err

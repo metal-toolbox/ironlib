@@ -33,9 +33,9 @@ func Test_NvmeComponents(t *testing.T) {
 func Test_ParseNvmeFeatures(t *testing.T) {
 	n := newFakeNvme()
 
-	deviceAttributes := &nvmeDeviceAttributes{DevicePath: "/dev/nvme0"}
+	d := &nvmeDeviceAttributes{DevicePath: "/dev/nvme0"}
 
-	features, err := n.parseNvmeFeatures(deviceAttributes)
+	features, err := n.ParseNvmeFeatures(d.DevicePath)
 	if err != nil {
 		t.Fatal(err)
 	}

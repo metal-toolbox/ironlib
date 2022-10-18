@@ -91,7 +91,7 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 		}
 
 		// Collect drive features
-		features, err := n.parseNvmeFeatures(d)
+		features, err := n.ParseNvmeFeatures(d.DevicePath)
 		if err != nil {
 			return nil, err
 		}
@@ -131,8 +131,8 @@ func (n *Nvme) ListFeatures(device string) ([]byte, error) {
 }
 
 // nolint:gocyclo // line parsing is cyclomatic
-func (n *Nvme) parseNvmeFeatures(d *nvmeDeviceAttributes) ([]nvmeDeviceFeatures, error) {
-	out, err := n.ListFeatures(d.DevicePath)
+func (n *Nvme) ParseNvmeFeatures(device string) ([]nvmeDeviceFeatures, error) {
+	out, err := n.ListFeatures(device)
 	if err != nil {
 		return nil, err
 	}
