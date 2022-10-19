@@ -91,7 +91,7 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 		}
 
 		// Collect drive features
-		features, err := n.ParseNvmeFeatures(d.DevicePath)
+		features, err := n.parseNvmeFeatures(d.DevicePath)
 		if err != nil {
 			return nil, err
 		}
@@ -118,9 +118,9 @@ func (n *Nvme) List() ([]byte, error) {
 	return result.Stdout, nil
 }
 
-func (n *Nvme) ListFeatures(device string) ([]byte, error) {
+func (n *Nvme) ListFeatures(devicePath string) ([]byte, error) {
 	// nvme id-ctrl -H devicepath
-	n.Executor.SetArgs([]string{"id-ctrl", "-H", device})
+	n.Executor.SetArgs([]string{"id-ctrl", "-H", devicePath})
 
 	result, err := n.Executor.ExecWithContext(context.Background())
 	if err != nil {
@@ -131,8 +131,8 @@ func (n *Nvme) ListFeatures(device string) ([]byte, error) {
 }
 
 // nolint:gocyclo // line parsing is cyclomatic
-func (n *Nvme) ParseNvmeFeatures(device string) ([]nvmeDeviceFeatures, error) {
-	out, err := n.ListFeatures(device)
+func (n *Nvme) parseNvmeFeatures(devicePath string) ([]nvmeDeviceFeatures, error) {
+	out, err := n.ListFeatures(devicePath)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (n *Nvme) ParseNvmeFeatures(device string) ([]nvmeDeviceFeatures, error) {
 	reSaniEnd := regexp.MustCompile(`(?s)^hmminds\s`)
 	reBlank := regexp.MustCompile(`(?m)^\s*$`)
 
-	fnaBool, saniBool := false, false
+	var fnaBool, saniBool bool
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -187,18 +187,22 @@ func (n *Nvme) ParseNvmeFeatures(device string) ([]nvmeDeviceFeatures, error) {
 		case (fnaStart || saniStart):
 			var feature nvmeDeviceFeatures
 
+			var partsLen = 2
+
 			parts := strings.Split(line, ":")
-			key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
-			feature.Name = key
+			if len(parts) == partsLen {
+				key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+				feature.Name = key
+
+				if value != "0" {
+					feature.Enabled = true
+				}
+			}
 
 			if fnaStart {
 				feature.Description = "Crypto Erase Support"
 			} else {
 				feature.Description = "Sanitize Support"
-			}
-
-			if value != "0" {
-				feature.Enabled = true
 			}
 
 			features = append(features, feature)
@@ -207,40 +211,50 @@ func (n *Nvme) ParseNvmeFeatures(device string) ([]nvmeDeviceFeatures, error) {
 		case (fnaBool && !fnaEnd && !isBlank):
 			var feature nvmeDeviceFeatures
 
+			var partsLen = 3
+
 			parts := strings.Split(line, ":")
-			data := strings.Split(parts[2], "\t")
-			enabled := strings.TrimSpace(data[0])
+			if len(parts) == partsLen {
+				data := strings.Split(parts[2], "\t")
+				enabled := strings.TrimSpace(data[0])
 
-			// Generate short flag identifier
-			for _, word := range strings.Fields(data[1]) {
-				feature.Name += strings.ToLower(word[0:1])
+				if enabled != "0" {
+					feature.Enabled = true
+				}
+
+				// Generate short flag identifier
+				for _, word := range strings.Fields(data[1]) {
+					feature.Name += strings.ToLower(word[0:1])
+				}
+
+				feature.Description = data[1]
 			}
 
-			if enabled != "0" {
-				feature.Enabled = true
-			}
-
-			feature.Description = data[1]
 			features = append(features, feature)
 
 			// sanitize
 		case (saniBool && !saniEnd && !isBlank):
 			var feature nvmeDeviceFeatures
 
+			var partsLen = 3
+
 			parts := strings.Split(line, ":")
-			data := strings.Split(parts[2], "\t")
-			enabled := strings.TrimSpace(data[0])
+			if len(parts) == partsLen {
+				data := strings.Split(parts[2], "\t")
+				enabled := strings.TrimSpace(data[0])
 
-			// Generate short flag identifier
-			for _, word := range strings.Fields(data[1]) {
-				feature.Name += strings.ToLower(word[0:1])
+				if enabled != "0" {
+					feature.Enabled = true
+				}
+
+				// Generate short flag identifier
+				for _, word := range strings.Fields(data[1]) {
+					feature.Name += strings.ToLower(word[0:1])
+				}
+
+				feature.Description = data[1]
 			}
 
-			if enabled != "0" {
-				feature.Enabled = true
-			}
-
-			feature.Description = data[1]
 			features = append(features, feature)
 		}
 	}

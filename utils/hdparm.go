@@ -31,9 +31,9 @@ func NewHdparmCmd(trace bool) *Hdparm {
 	return &Hdparm{Executor: e}
 }
 
-func (h *Hdparm) ListFeatures(device string) ([]byte, error) {
+func (h *Hdparm) ListFeatures(devicePath string) ([]byte, error) {
 	// hdparm -I devicepath
-	h.Executor.SetArgs([]string{"-I", device})
+	h.Executor.SetArgs([]string{"-I", devicePath})
 
 	result, err := h.Executor.ExecWithContext(context.Background())
 	if err != nil {
@@ -44,8 +44,8 @@ func (h *Hdparm) ListFeatures(device string) ([]byte, error) {
 }
 
 // nolint:gocyclo // line parsing is cyclomatic
-func (h *Hdparm) ParseHdparmFeatures(device string) ([]hdparmDeviceFeatures, error) {
-	out, err := h.ListFeatures(device)
+func (h *Hdparm) parseHdparmFeatures(devicePath string) ([]hdparmDeviceFeatures, error) {
+	out, err := h.ListFeatures(devicePath)
 	if err != nil {
 		return nil, err
 	}
@@ -73,9 +73,10 @@ func (h *Hdparm) ParseHdparmFeatures(device string) ([]hdparmDeviceFeatures, err
 
 	supported := regexp.MustCompile(`(?s)^supported$`)
 	seu := strings.NewReplacer("min", "")
-	sfi := strings.NewReplacer("_", " ", "-", " ", "{", "", "}", "", "(", "", ")",
-		"", ",", "", "|", "", "set", "", "command", "")
-	featBool, secBool := false, false
+	sfi := strings.NewReplacer("_", " ", "-", " ", "{", "", "}", "", "(", "", ")", "",
+		",", "", "|", "", "set", "", "command", "")
+
+	var featBool, secBool bool
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -100,7 +101,7 @@ func (h *Hdparm) ParseHdparmFeatures(device string) ([]hdparmDeviceFeatures, err
 				line = strings.TrimSpace(strings.TrimPrefix(line, "*\t"))
 
 				// Generate short flag identifier
-				line = sfi.Replace(line)
+				line = strings.TrimSpace(sfi.Replace(line))
 				for _, word := range strings.Fields(line) {
 					flag += strings.ToLower(word[0:1])
 				}
@@ -130,7 +131,8 @@ func (h *Hdparm) ParseHdparmFeatures(device string) ([]hdparmDeviceFeatures, err
 				var feature hdparmDeviceFeatures
 				switch {
 				case strings.Contains(line, "65534"):
-					feature.Name = "pns"
+					feature.Name, feature.Enabled = "pns", true
+					feature.Enabled = true
 					feature.Description = "password not set"
 				case secSupported:
 					feature.Name = "es"
@@ -138,12 +140,19 @@ func (h *Hdparm) ParseHdparmFeatures(device string) ([]hdparmDeviceFeatures, err
 					feature.Description = "encryption supported"
 				case strings.Contains(line, "not\tenabled"):
 					feature.Name = "ena"
+					feature.Enabled = true
 					feature.Description = "encryption not active"
 				case strings.Contains(line, "not\tlocked"):
 					feature.Name = "dnl"
+					feature.Enabled = true
 					feature.Description = "device is not locked"
+				case strings.Contains(line, "not\tfrozen"):
+					feature.Name = "dnf"
+					feature.Enabled = true
+					feature.Description = "device is not frozen"
 				case strings.Contains(line, "not\texpired"):
 					feature.Name = "ene"
+					feature.Enabled = true
 					feature.Description = "encryption not expired"
 				case strings.Contains(line, "supported: enhanced erase"):
 					feature.Name = "esee"
@@ -151,8 +160,8 @@ func (h *Hdparm) ParseHdparmFeatures(device string) ([]hdparmDeviceFeatures, err
 					feature.Description = "encryption supports enhanced erase"
 				case strings.Contains(line, "SECURITY ERASE UNIT"):
 					seTime, sehTime := seu.Replace(parts[0]), seu.Replace(parts[5])
-					feature.Name = "time" + seTime + "+" + sehTime
-					feature.Description = "erase time: " + seTime + ", " + sehTime + " (enhanced)"
+					feature.Name = "time" + seTime + ":" + sehTime
+					feature.Description = "erase time: " + seTime + "m, " + sehTime + "m (enhanced)"
 				}
 				features = append(features, feature)
 			}
