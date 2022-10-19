@@ -62,16 +62,12 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 		dModel := d.Model
 
 		var vendor string
-		var product []string
 
 		modelTokens := strings.Split(d.Model, " ")
 
 		if len(modelTokens) > 1 {
 			vendor = modelTokens[1]
-			product = append(modelTokens[:1], modelTokens[2:]...)
 		}
-
-		productName := strings.Join(product, " ")
 
 		drive := &common.Drive{
 			Protocol: d.Transport,
@@ -79,7 +75,6 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 				Serial:      d.Serial,
 				Vendor:      vendor,
 				Model:       dModel,
-				ProductName: productName,
 				Description: d.Model,
 				Firmware: &common.Firmware{
 					Installed: d.Firmware,

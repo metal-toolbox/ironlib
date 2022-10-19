@@ -16,8 +16,34 @@ func newFakeNvme() *Nvme {
 
 func Test_NvmeComponents(t *testing.T) {
 	expected := []*common.Drive{
-		{Common: common.Common{Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL"}},
-		{Common: common.Common{Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL"}},
+		{Common: common.Common{Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
+			Metadata: map[string]string{
+				"Additional media modification after sanitize operation completes successfully is not defined": "false",
+				"Block Erase Sanitize Operation Not Supported":                                                 "false",
+				"Crypto Erase Applies to Single Namespace(s)":                                                  "false",
+				"Crypto Erase Sanitize Operation Not Supported":                                                "false",
+				"Crypto Erase Support":                                                                         "true",
+				"Crypto Erase Supported as part of Secure Erase":                                               "true",
+				"Format Applies to Single Namespace(s)":                                                        "false",
+				"No-Deallocate After Sanitize bit in Sanitize command Supported":                               "false",
+				"Overwrite Sanitize Operation Not Supported":                                                   "false",
+				"Sanitize Support": "false",
+			},
+		}},
+		{Common: common.Common{Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
+			Metadata: map[string]string{
+				"Additional media modification after sanitize operation completes successfully is not defined": "false",
+				"Block Erase Sanitize Operation Not Supported":                                                 "false",
+				"Crypto Erase Applies to Single Namespace(s)":                                                  "false",
+				"Crypto Erase Sanitize Operation Not Supported":                                                "false",
+				"Crypto Erase Support":                                                                         "true",
+				"Crypto Erase Supported as part of Secure Erase":                                               "true",
+				"Format Applies to Single Namespace(s)":                                                        "false",
+				"No-Deallocate After Sanitize bit in Sanitize command Supported":                               "false",
+				"Overwrite Sanitize Operation Not Supported":                                                   "false",
+				"Sanitize Support": "false",
+			},
+		}},
 	}
 
 	n := newFakeNvme()
@@ -35,7 +61,7 @@ func Test_ParseNvmeFeatures(t *testing.T) {
 
 	d := &nvmeDeviceAttributes{DevicePath: "/dev/nvme0"}
 
-	features, err := n.ParseNvmeFeatures(d.DevicePath)
+	features, err := n.parseNvmeFeatures(d.DevicePath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,27 +77,27 @@ var (
 			Enabled:     false,
 		},
 		{
-			Name:        "",
+			Name:        "ammasocsind",
 			Description: "Additional media modification after sanitize operation completes successfully is not defined",
 			Enabled:     false,
 		},
 		{
-			Name:        "",
+			Name:        "nasbiscs",
 			Description: "No-Deallocate After Sanitize bit in Sanitize command Supported",
 			Enabled:     false,
 		},
 		{
-			Name:        "",
+			Name:        "osons",
 			Description: "Overwrite Sanitize Operation Not Supported",
 			Enabled:     false,
 		},
 		{
-			Name:        "",
+			Name:        "besons",
 			Description: "Block Erase Sanitize Operation Not Supported",
 			Enabled:     false,
 		},
 		{
-			Name:        "",
+			Name:        "cesons",
 			Description: "Crypto Erase Sanitize Operation Not Supported",
 			Enabled:     false,
 		},
