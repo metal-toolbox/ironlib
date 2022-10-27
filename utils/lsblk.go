@@ -26,10 +26,6 @@ type lsblkDeviceAttributes struct {
 	Transport string `json:"tran"`
 }
 
-type lsblkList struct {
-	Devices []*lsblkDeviceAttributes `json:"Devices"`
-}
-
 // Return a new lsblk executor
 func NewLsblkCmd(trace bool) *Lsblk {
 	e := NewExecutor(lsblk)
@@ -46,19 +42,19 @@ func NewLsblkCmd(trace bool) *Lsblk {
 func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 	drives := make([]*common.Drive, 0)
 
-	out, err := l.List()
+	out, err := l.list(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	list := &lsblkList{Devices: []*lsblkDeviceAttributes{}}
+	items := map[string][]*lsblkDeviceAttributes{}
 
-	err = json.Unmarshal(out, list)
+	err = json.Unmarshal(out, &items)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, d := range list.Devices {
+	for _, d := range items["blockdevices"] {
 		dModel := d.Model
 
 		var vendor string
@@ -89,14 +85,21 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 	return drives, nil
 }
 
-func (l *Lsblk) List() ([]byte, error) {
+func (l *Lsblk) list(ctx context.Context) ([]byte, error) {
 	// lsblk --json --nodeps --output name,model,serial,tran -e1,7,11
 	l.Executor.SetArgs([]string{"--json", "--nodeps", "--output", "name,path,model,serial,rev,tran", "-e1,7,11"})
 
-	result, err := l.Executor.ExecWithContext(context.Background())
+	result, err := l.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return result.Stdout, nil
+}
+
+// NewFakeLsblk returns a mock lsblk collector that returns mock data for use in tests.
+func NewFakeLsblk() *Lsblk {
+	return &Lsblk{
+		Executor: NewFakeExecutor("lsblk"),
+	}
 }
