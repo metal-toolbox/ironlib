@@ -65,6 +65,15 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 
 			e.Stdout = b
 		}
+	case "lsblk":
+		if e.Args[0] == "--json" {
+			b, err := os.ReadFile("../fixtures/utils/lsblk/json")
+			if err != nil {
+				return nil, err
+			}
+
+			e.Stdout = b
+		}
 	case "dsu":
 	case "rpm":
 		if e.Args[1] == "-1" && e.Args[2] == "dell-system-update" {
