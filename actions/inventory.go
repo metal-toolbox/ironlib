@@ -24,6 +24,7 @@ var (
 type Collectors struct {
 	Inventory          InventoryCollector
 	Drives             []DriveCollector
+	DriveCapabilities  []DriveCapabilityCollector
 	NICs               NICCollector
 	BMC                BMCCollector
 	CPLDs              CPLDCollector
@@ -39,7 +40,13 @@ type Collectors struct {
 func InitCollectors(trace bool) *Collectors {
 	return &Collectors{
 		Inventory: utils.NewLshwCmd(trace),
-		Drives:    []DriveCollector{utils.NewSmartctlCmd(trace)},
+		Drives: []DriveCollector{
+			utils.NewSmartctlCmd(trace),
+		},
+		DriveCapabilities: []DriveCapabilityCollector{
+			utils.NewHdparmCmd(trace),
+			utils.NewNvmeCmd(trace),
+		},
 	}
 }
 
@@ -77,6 +84,13 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 			return errors.Wrap(err, "error in dmidecode inventory collector")
 		}
 	}
+
+	// TODO (joel)
+	//
+	// move Drives(), NICs() and other methods under the Collectors struct
+	// so that parameters can be set as fields on the Collectors struct and they don't have to be passed
+	// as function parameters. This will also allow data collection to proceed even if
+	// one drive/nic/storagecontroller/psu component returns an error.
 
 	// Collect initial device inventory
 	err := collectors.Inventory.Collect(ctx, device)
@@ -146,6 +160,11 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 		}
 	}
 
+	err = DriveCapabilities(ctx, device.Drives, collectors.DriveCapabilities)
+	if err != nil && failOnError {
+		return errors.Wrap(err, "error retrieving DriveCapabilities")
+	}
+
 	// default set model numbers to device model
 	if device.BMC != nil && device.BMC.Model == "" {
 		device.BMC.Model = device.Model
@@ -202,6 +221,34 @@ func Drives(ctx context.Context, drives []*common.Drive, collectors []DriveColle
 				}
 			}
 		}
+	}
+
+	return nil
+}
+
+// DriveCapabilities executes drive capability collectors
+//
+// The capability collector is identified based on the drive logical name.
+func DriveCapabilities(ctx context.Context, drives []*common.Drive, collectors []DriveCapabilityCollector) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("recovered from panic in DriveCapabilities(): ", r)
+		}
+	}()
+
+	for _, drive := range drives {
+		if drive.LogicalName == "" {
+			continue
+		}
+
+		collector := driveCapabilityCollectorByLogicalName(drive.LogicalName, false, collectors)
+
+		capabilities, err := collector.DriveCapabilities(ctx, drive.LogicalName)
+		if err != nil {
+			return err
+		}
+
+		drive.Capabilities = capabilities
 	}
 
 	return nil
