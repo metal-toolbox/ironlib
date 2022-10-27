@@ -1,33 +1,29 @@
 package utils
 
 import (
+	"context"
 	"testing"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/stretchr/testify/assert"
 )
 
-func newFakeHdparm() *Hdparm {
-	return &Hdparm{
-		Executor: NewFakeExecutor("hdparm"),
-	}
-}
-
-func Test_ParseHdparmFeatures(t *testing.T) {
-	h := newFakeHdparm()
+func Test_HdparmDriveCapabilities(t *testing.T) {
+	h := NewFakeHdparm()
 
 	device := "/dev/sda"
 
-	features, err := h.parseHdparmFeatures(device)
+	capabilities, err := h.DriveCapabilities(context.TODO(), device)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, fixtureHdparmDevicefeatures, features)
+	assert.Equal(t, fixtureHdparmDeviceCapabilities, capabilities)
 }
 
 var (
-	fixtureHdparmDevicefeatures = []hdparmDeviceFeatures{
+	fixtureHdparmDeviceCapabilities = []*common.Capability{
 		{
 			Name:        "sf",
 			Description: "SMART feature",

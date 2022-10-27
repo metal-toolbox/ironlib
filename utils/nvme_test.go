@@ -8,12 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newFakeNvme() *Nvme {
-	return &Nvme{
-		Executor: NewFakeExecutor("nvme"),
-	}
-}
-
 func Test_NvmeComponents(t *testing.T) {
 	expected := []*common.Drive{
 		{Common: common.Common{Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
@@ -46,7 +40,7 @@ func Test_NvmeComponents(t *testing.T) {
 		}},
 	}
 
-	n := newFakeNvme()
+	n := NewFakeNvme()
 
 	drives, err := n.Drives(context.TODO())
 	if err != nil {
@@ -56,21 +50,21 @@ func Test_NvmeComponents(t *testing.T) {
 	assert.Equal(t, expected, drives)
 }
 
-func Test_ParseNvmeFeatures(t *testing.T) {
-	n := newFakeNvme()
+func Test_NvmeDriveCapabilities(t *testing.T) {
+	n := NewFakeNvme()
 
 	d := &nvmeDeviceAttributes{DevicePath: "/dev/nvme0"}
 
-	features, err := n.parseNvmeFeatures(d.DevicePath)
+	capabilities, err := n.DriveCapabilities(context.TODO(), d.DevicePath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, fixtureNvmeDevicefeatures, features)
+	assert.Equal(t, fixtureNvmeDeviceCapabilities, capabilities)
 }
 
 var (
-	fixtureNvmeDevicefeatures = []nvmeDeviceFeatures{
+	fixtureNvmeDeviceCapabilities = []*common.Capability{
 		{
 			Name:        "sanicap",
 			Description: "Sanitize Support",
