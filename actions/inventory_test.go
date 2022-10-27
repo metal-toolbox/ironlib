@@ -9,6 +9,7 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/bmc-toolbox/common"
+	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	smcFixtures "github.com/metal-toolbox/ironlib/fixtures/supermicro"
 	"github.com/metal-toolbox/ironlib/utils"
 )
@@ -27,6 +28,7 @@ func Test_Inventory_dell(t *testing.T) {
 
 	lshw := utils.NewFakeLshw(bytes.NewReader(lshwb))
 	smartctl := utils.NewFakeSmartctl("../fixtures/dell/r6515/smartctl")
+
 	collectors := &Collectors{
 		Inventory: lshw,
 		Drives:    []DriveCollector{smartctl},
