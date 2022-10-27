@@ -27,12 +27,6 @@ type nvmeDeviceAttributes struct {
 	SerialNumber string `json:"SerialNumber"`
 }
 
-type nvmeDeviceFeatures struct {
-	Name        string `json:"Name"`
-	Description string `json:"Description"`
-	Enabled     bool   `json:"Enabled"`
-}
-
 type nvmeList struct {
 	Devices []*nvmeDeviceAttributes `json:"Devices"`
 }
@@ -53,7 +47,7 @@ func NewNvmeCmd(trace bool) *Nvme {
 func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 	drives := make([]*common.Drive, 0)
 
-	out, err := n.List()
+	out, err := n.list(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -90,13 +84,13 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 			},
 		}
 
-		// Collect drive features
-		features, err := n.parseNvmeFeatures(d.DevicePath)
+		// Collect drive capabilitiesFound
+		capabilitiesFound, err := n.DriveCapabilities(ctx, d.DevicePath)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, f := range features {
+		for _, f := range capabilitiesFound {
 			drive.Common.Metadata[f.Description] = strconv.FormatBool(f.Enabled)
 		}
 
@@ -106,7 +100,7 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 	return drives, nil
 }
 
-func (n *Nvme) List() ([]byte, error) {
+func (n *Nvme) list(ctx context.Context) ([]byte, error) {
 	// nvme list --output-format=json
 	n.Executor.SetArgs([]string{"list", "--output-format=json"})
 
@@ -118,11 +112,11 @@ func (n *Nvme) List() ([]byte, error) {
 	return result.Stdout, nil
 }
 
-func (n *Nvme) ListFeatures(devicePath string) ([]byte, error) {
+func (n *Nvme) cmdListCapabilities(ctx context.Context, logicalPath string) ([]byte, error) {
 	// nvme id-ctrl -H devicepath
-	n.Executor.SetArgs([]string{"id-ctrl", "-H", devicePath})
+	n.Executor.SetArgs([]string{"id-ctrl", "-H", logicalPath})
 
-	result, err := n.Executor.ExecWithContext(context.Background())
+	result, err := n.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -130,14 +124,20 @@ func (n *Nvme) ListFeatures(devicePath string) ([]byte, error) {
 	return result.Stdout, nil
 }
 
+// DriveCapabilities returns the drive capability attributes obtained through hdparm
+//
+// The logicalName is the kernel/OS assigned drive name - /dev/nvmeX
+//
+// This method implements the actions.DriveCapabilityCollector interface.
+//
 // nolint:gocyclo // line parsing is cyclomatic
-func (n *Nvme) parseNvmeFeatures(devicePath string) ([]nvmeDeviceFeatures, error) {
-	out, err := n.ListFeatures(devicePath)
+func (n *Nvme) DriveCapabilities(ctx context.Context, logicalName string) ([]*common.Capability, error) {
+	out, err := n.cmdListCapabilities(ctx, logicalName)
 	if err != nil {
 		return nil, err
 	}
 
-	var features []nvmeDeviceFeatures
+	var capabilitiesFound []*common.Capability
 
 	var lines []string
 
@@ -185,79 +185,105 @@ func (n *Nvme) parseNvmeFeatures(devicePath string) ([]nvmeDeviceFeatures, error
 
 		switch {
 		case (fnaStart || saniStart):
-			var feature nvmeDeviceFeatures
+			capability := new(common.Capability)
 
 			var partsLen = 2
 
 			parts := strings.Split(line, ":")
-			if len(parts) == partsLen {
-				key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
-				feature.Name = key
+			if len(parts) != partsLen {
+				continue
+			}
 
-				if value != "0" {
-					feature.Enabled = true
-				}
+			key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+			capability.Name = key
+
+			if value != "0" {
+				capability.Enabled = true
 			}
 
 			if fnaStart {
-				feature.Description = "Crypto Erase Support"
+				capability.Description = "Crypto Erase Support"
 			} else {
-				feature.Description = "Sanitize Support"
+				capability.Description = "Sanitize Support"
 			}
 
-			features = append(features, feature)
+			if value != "0" {
+				capability.Enabled = true
+			}
+
+			capabilitiesFound = append(capabilitiesFound, capability)
 
 			// crypto erase
 		case (fnaBool && !fnaEnd && !isBlank):
-			var feature nvmeDeviceFeatures
+			capability := new(common.Capability)
 
 			var partsLen = 3
 
 			parts := strings.Split(line, ":")
-			if len(parts) == partsLen {
-				data := strings.Split(parts[2], "\t")
-				enabled := strings.TrimSpace(data[0])
-
-				if enabled != "0" {
-					feature.Enabled = true
-				}
-
-				// Generate short flag identifier
-				for _, word := range strings.Fields(data[1]) {
-					feature.Name += strings.ToLower(word[0:1])
-				}
-
-				feature.Description = data[1]
+			if len(parts) != partsLen {
+				continue
 			}
 
-			features = append(features, feature)
+			data := strings.Split(parts[2], "\t")
+			enabled := strings.TrimSpace(data[0])
 
+			if enabled != "0" {
+				capability.Enabled = true
+			}
+
+			// Generate short flag identifier
+			for _, word := range strings.Fields(data[1]) {
+				capability.Name += strings.ToLower(word[0:1])
+			}
+
+			capability.Description = data[1]
+
+			if enabled != "0" {
+				capability.Enabled = true
+			}
+
+			capability.Description = data[1]
+			capabilitiesFound = append(capabilitiesFound, capability)
 			// sanitize
 		case (saniBool && !saniEnd && !isBlank):
-			var feature nvmeDeviceFeatures
+			capability := new(common.Capability)
 
 			var partsLen = 3
 
 			parts := strings.Split(line, ":")
-			if len(parts) == partsLen {
-				data := strings.Split(parts[2], "\t")
-				enabled := strings.TrimSpace(data[0])
-
-				if enabled != "0" {
-					feature.Enabled = true
-				}
-
-				// Generate short flag identifier
-				for _, word := range strings.Fields(data[1]) {
-					feature.Name += strings.ToLower(word[0:1])
-				}
-
-				feature.Description = data[1]
+			if len(parts) != partsLen {
+				continue
 			}
 
-			features = append(features, feature)
+			data := strings.Split(parts[2], "\t")
+			enabled := strings.TrimSpace(data[0])
+
+			if enabled != "0" {
+				capability.Enabled = true
+			}
+
+			// Generate short flag identifier
+			for _, word := range strings.Fields(data[1]) {
+				capability.Name += strings.ToLower(word[0:1])
+			}
+
+			capability.Description = data[1]
+
+			if enabled != "0" {
+				capability.Enabled = true
+			}
+
+			capability.Description = data[1]
+			capabilitiesFound = append(capabilitiesFound, capability)
 		}
 	}
 
-	return features, err
+	return capabilitiesFound, err
+}
+
+// NewFakeNvme returns a mock nvme collector that returns mock data for use in tests.
+func NewFakeNvme() *Nvme {
+	return &Nvme{
+		Executor: NewFakeExecutor("nvme"),
+	}
 }

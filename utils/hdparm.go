@@ -5,18 +5,14 @@ import (
 	"context"
 	"regexp"
 	"strings"
+
+	"github.com/bmc-toolbox/common"
 )
 
 const hdparm = "/usr/sbin/hdparm"
 
 type Hdparm struct {
 	Executor Executor
-}
-
-type hdparmDeviceFeatures struct {
-	Name        string `json:"Name"`
-	Description string `json:"Description"`
-	Enabled     bool   `json:"Enabled"`
 }
 
 // Return a new hdparm executor
@@ -31,11 +27,11 @@ func NewHdparmCmd(trace bool) *Hdparm {
 	return &Hdparm{Executor: e}
 }
 
-func (h *Hdparm) ListFeatures(devicePath string) ([]byte, error) {
+func (h *Hdparm) cmdListCapabilities(ctx context.Context, logicalName string) ([]byte, error) {
 	// hdparm -I devicepath
-	h.Executor.SetArgs([]string{"-I", devicePath})
+	h.Executor.SetArgs([]string{"-I", logicalName})
 
-	result, err := h.Executor.ExecWithContext(context.Background())
+	result, err := h.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -43,14 +39,20 @@ func (h *Hdparm) ListFeatures(devicePath string) ([]byte, error) {
 	return result.Stdout, nil
 }
 
+// DriveCapabilities returns the capability attributes obtained through hdparm
+//
+// The logicalName is the kernel/OS assigned drive name - /dev/sdX
+//
+// This method implements the actions.DriveCapabilityCollector interface.
+//
 // nolint:gocyclo // line parsing is cyclomatic
-func (h *Hdparm) parseHdparmFeatures(devicePath string) ([]hdparmDeviceFeatures, error) {
-	out, err := h.ListFeatures(devicePath)
+func (h *Hdparm) DriveCapabilities(ctx context.Context, logicalName string) ([]*common.Capability, error) {
+	out, err := h.cmdListCapabilities(ctx, logicalName)
 	if err != nil {
 		return nil, err
 	}
 
-	var features []hdparmDeviceFeatures
+	var capabilities []*common.Capability
 
 	var lines []string
 
@@ -95,7 +97,7 @@ func (h *Hdparm) parseHdparmFeatures(devicePath string) ([]hdparmDeviceFeatures,
 			featBool, secBool = false, false
 		}
 
-		// Parse command features
+		// Parse command capabilities
 		if featBool && !strings.Contains(line, featStart) {
 			if strings.Contains(line, "*") {
 				line = strings.TrimSpace(strings.TrimPrefix(line, "*\t"))
@@ -106,11 +108,11 @@ func (h *Hdparm) parseHdparmFeatures(devicePath string) ([]hdparmDeviceFeatures,
 					flag += strings.ToLower(word[0:1])
 				}
 
-				var feature hdparmDeviceFeatures
-				feature.Name = flag
-				feature.Description = line
-				feature.Enabled = true
-				features = append(features, feature)
+				capability := new(common.Capability)
+				capability.Name = flag
+				capability.Description = line
+				capability.Enabled = true
+				capabilities = append(capabilities, capability)
 			} else if !strings.Contains(line, "*") && !strings.Contains(line, featStart) {
 				// Generate short flag identifier
 				line = strings.TrimSpace(sfi.Replace(line))
@@ -118,55 +120,62 @@ func (h *Hdparm) parseHdparmFeatures(devicePath string) ([]hdparmDeviceFeatures,
 					flag += strings.ToLower(word[0:1])
 				}
 
-				var feature hdparmDeviceFeatures
-				feature.Name = flag
-				feature.Description = line
-				feature.Enabled = false
-				features = append(features, feature)
+				capability := new(common.Capability)
+				capability.Name = flag
+				capability.Description = line
+				capability.Enabled = false
+				capabilities = append(capabilities, capability)
 			}
 		} else if secBool {
-			// Parse security features
+			// Parse security capabilities
 			secSupported := supported.MatchString(line)
 			if !strings.Contains(line, secStart) {
-				var feature hdparmDeviceFeatures
+				capability := new(common.Capability)
 				switch {
 				case strings.Contains(line, "65534"):
-					feature.Name, feature.Enabled = "pns", true
-					feature.Enabled = true
-					feature.Description = "password not set"
+					capability.Name, capability.Enabled = "pns", true
+					capability.Enabled = true
+					capability.Description = "password not set"
 				case secSupported:
-					feature.Name = "es"
-					feature.Enabled = true
-					feature.Description = "encryption supported"
+					capability.Name = "es"
+					capability.Enabled = true
+					capability.Description = "encryption supported"
 				case strings.Contains(line, "not\tenabled"):
-					feature.Name = "ena"
-					feature.Enabled = true
-					feature.Description = "encryption not active"
+					capability.Name = "ena"
+					capability.Enabled = true
+					capability.Description = "encryption not active"
 				case strings.Contains(line, "not\tlocked"):
-					feature.Name = "dnl"
-					feature.Enabled = true
-					feature.Description = "device is not locked"
+					capability.Name = "dnl"
+					capability.Enabled = true
+					capability.Description = "device is not locked"
 				case strings.Contains(line, "not\tfrozen"):
-					feature.Name = "dnf"
-					feature.Enabled = true
-					feature.Description = "device is not frozen"
+					capability.Name = "dnf"
+					capability.Enabled = true
+					capability.Description = "device is not frozen"
 				case strings.Contains(line, "not\texpired"):
-					feature.Name = "ene"
-					feature.Enabled = true
-					feature.Description = "encryption not expired"
+					capability.Name = "ene"
+					capability.Enabled = true
+					capability.Description = "encryption not expired"
 				case strings.Contains(line, "supported: enhanced erase"):
-					feature.Name = "esee"
-					feature.Enabled = true
-					feature.Description = "encryption supports enhanced erase"
+					capability.Name = "esee"
+					capability.Enabled = true
+					capability.Description = "encryption supports enhanced erase"
 				case strings.Contains(line, "SECURITY ERASE UNIT"):
 					seTime, sehTime := seu.Replace(parts[0]), seu.Replace(parts[5])
-					feature.Name = "time" + seTime + ":" + sehTime
-					feature.Description = "erase time: " + seTime + "m, " + sehTime + "m (enhanced)"
+					capability.Name = "time" + seTime + ":" + sehTime
+					capability.Description = "erase time: " + seTime + "m, " + sehTime + "m (enhanced)"
 				}
-				features = append(features, feature)
+				capabilities = append(capabilities, capability)
 			}
 		}
 	}
 
-	return features, err
+	return capabilities, err
+}
+
+// NewFakeHdparm returns a mock hdparm collector that returns mock data for use in tests.
+func NewFakeHdparm() *Hdparm {
+	return &Hdparm{
+		Executor: NewFakeExecutor("hdparm"),
+	}
 }
