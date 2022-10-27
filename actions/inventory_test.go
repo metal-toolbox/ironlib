@@ -9,7 +9,6 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/bmc-toolbox/common"
-	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	smcFixtures "github.com/metal-toolbox/ironlib/fixtures/supermicro"
 	"github.com/metal-toolbox/ironlib/utils"
 )
@@ -99,9 +98,14 @@ func Test_Inventory_smc(t *testing.T) {
 		t.Error(err)
 	}
 
+	// drive capability collectors
+	hdparm := utils.NewFakeHdparm()
+	nvme := utils.NewFakeNvme()
+
 	collectors := &Collectors{
 		Inventory:          lshw,
 		Drives:             []DriveCollector{smartctl},
+		DriveCapabilities:  []DriveCapabilityCollector{hdparm, nvme},
 		NICs:               mlxup,
 		CPLDs:              ipmicfg0,
 		BIOS:               ipmicfg1,
