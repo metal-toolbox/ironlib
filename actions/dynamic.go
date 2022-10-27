@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"strings"
+
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/utils"
 )
@@ -19,4 +21,27 @@ func DriveCollectorByStorageControllerVendor(vendor string, trace bool) DriveCol
 	}
 
 	return nil
+}
+
+func driveCapabilityCollectorByLogicalName(logicalName string, trace bool, collectors []DriveCapabilityCollector) DriveCapabilityCollector {
+	// when collectors are is passed in, return the collector based on the logical name
+	for _, collector := range collectors {
+		nvme, isNvmeCollector := collector.(*utils.Nvme)
+		if isNvmeCollector && strings.Contains(logicalName, "nvme") {
+			return nvme
+		}
+
+		hdparm, isHdparmCollector := collector.(*utils.Hdparm)
+		if isHdparmCollector && !strings.Contains(logicalName, "nvme") {
+			return hdparm
+		}
+	}
+
+	// otherwise return the collector based on the logical name
+	switch {
+	case strings.Contains(logicalName, "nvme"):
+		return utils.NewNvmeCmd(trace)
+	default:
+		return utils.NewHdparmCmd(trace)
+	}
 }
