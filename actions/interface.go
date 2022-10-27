@@ -36,6 +36,13 @@ type DriveCollector interface {
 	Drives(ctx context.Context) ([]*common.Drive, error)
 }
 
+// DriveCapabilityCollector defines an interface to collect disk drive capability attributes
+//
+// The logicalName is the kernel/OS assigned drive name - /dev/sdX or /dev/nvmeX
+type DriveCapabilityCollector interface {
+	DriveCapabilities(ctx context.Context, logicalName string) ([]*common.Capability, error)
+}
+
 // NICCollector defines an interface to returns NIC inventory
 type NICCollector interface {
 	NICs(ctx context.Context) ([]*common.NIC, error)
