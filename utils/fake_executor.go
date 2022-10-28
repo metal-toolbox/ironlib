@@ -49,7 +49,17 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 			e.Stdout = nvmeListDummyJSON
 
 		case "id-ctrl":
-			b, err := os.ReadFile("../fixtures/utils/nvme/nvmecli-id-ctrl")
+			cwd, _ := os.Getwd()
+			f := "../fixtures/utils/nvme/nvmecli-id-ctrl"
+
+			// This is a hack - until the fake executor can
+			// live in its own along with the fixture, so the
+			// fixture data does not have to be reached through a relative path.
+			if strings.Contains(cwd, "providers") {
+				f = "../../fixtures/utils/nvme/nvmecli-id-ctrl"
+			}
+
+			b, err := os.ReadFile(f)
 			if err != nil {
 				return nil, err
 			}
@@ -58,7 +68,18 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 		}
 	case "hdparm":
 		if e.Args[0] == "-I" {
-			b, err := os.ReadFile("../fixtures/utils/hdparm/hdparm-i")
+			cwd, _ := os.Getwd()
+
+			f := "../fixtures/utils/hdparm/hdparm-i"
+
+			// This is a hack - until the fake executor can
+			// live in its own along with the fixture, so the
+			// fixture data does not have to be reached through a relative path.
+			if strings.Contains(cwd, "providers") {
+				f = "../../fixtures/utils/hdparm/hdparm-i"
+			}
+
+			b, err := os.ReadFile(f)
 			if err != nil {
 				return nil, err
 			}
@@ -67,7 +88,17 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 		}
 	case "lsblk":
 		if e.Args[0] == "--json" {
-			b, err := os.ReadFile("../fixtures/utils/lsblk/json")
+			cwd, _ := os.Getwd()
+			f := "../fixtures/utils/lsblk/json"
+
+			// This is a hack - until the lsblk fake executor can
+			// live in its own along with the fixture, so the
+			// fixture data does not have to be reached through a relative path.
+			if strings.Contains(cwd, "providers") {
+				f = "../../fixtures/utils/lsblk/json"
+			}
+
+			b, err := os.ReadFile(f)
 			if err != nil {
 				return nil, err
 			}
