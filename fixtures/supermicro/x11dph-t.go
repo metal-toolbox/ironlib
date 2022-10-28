@@ -354,7 +354,7 @@ var (
 				Status: nil,
 			},
 			ID:  "",
-			NIC: nil,
+			NIC: &common.NIC{},
 		},
 		Mainboard: &common.Mainboard{
 			Common: common.Common{
@@ -740,13 +740,13 @@ var (
 			{
 				Common: common.Common{
 					Oem:         false,
-					Description: "Ethernet interface",
+					Description: "ConnectX-4 Lx EN network interface card; 25GbE dual-port SFP28; PCIe3.0 x8; ROHS R6",
 					Vendor:      "mellanox",
 					Model:       "MCX4121A-ACA_Ax",
 					Serial:      "0c:42:a1:3d:bd:e0",
 					ProductName: "MT27710 Family [ConnectX-4 Lx]",
 					Firmware: &common.Firmware{
-						Installed:  "14.27.1016",
+						Installed:  "14.29.2002",
 						Available:  "14.28.2006",
 						SoftwareID: "",
 						Previous:   nil,
