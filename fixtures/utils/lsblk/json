@@ -3,24 +3,32 @@
         {
             "name": "sda",
             "path": "/dev/sda",
-            "model": "Samsung SSD 850 EVO 2TB",
-            "serial": "S2RLNX0H700433B",
+            "model": "MTFDDAV240TDU",
+            "serial": "203329F89392",
             "rev": "2B6Q",
             "tran": "sata"
         },
         {
             "name": "sdb",
             "path": "/dev/sdb",
-            "model": "Samsung SSD 850 EVO 2TB",
-            "serial": "S2RLNX0H700428V",
+            "model": "MTFDDAV240TDU",
+            "serial": "203329F89796",
             "rev": "2B6Q",
             "tran": "sata"
         },
         {
             "name": "nvme0n1",
             "path": "/dev/nvme0n1",
-            "model": "Samsung SSD 970 PRO 512GB",
-            "serial": "S5JYNC0N102898N",
+            "model": "Micron_9300_MTFDHAL3T8TDP",
+            "serial": "202728F691F5",
+            "rev": null,
+            "tran": "nvme"
+        },
+        {
+            "name": "nvme0n1",
+            "path": "/dev/nvme0n2",
+            "model": "Micron_9300_MTFDHAL3T8TDP",
+            "serial": "202728F691C6",
             "rev": null,
             "tran": "nvme"
         }
