@@ -123,9 +123,6 @@ func (d *dell) GetInventory(ctx context.Context, dynamic bool) (*common.Device, 
 		return nil, err
 	}
 
-	// collect dell component info
-	d.logger.Info("Collecting dell OEM component inventory with DSU")
-
 	return d.hw.Device, nil
 }
 
