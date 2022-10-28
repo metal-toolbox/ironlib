@@ -23,36 +23,29 @@ var (
 	fixtureLsblkDrives = []*common.Drive{
 		{
 			Common: common.Common{
-				Description: "Samsung SSD 850 EVO 2TB",
-				Vendor:      "SSD",
-				Model:       "Samsung SSD 850 EVO 2TB",
-				Serial:      "S2RLNX0H700433B",
-				Metadata:    map[string]string{},
-				Firmware:    &common.Firmware{},
+				Model:  "MTFDDAV240TDU",
+				Serial: "203329F89392",
 			},
 			Protocol: "sata",
 		},
 		{
 			Common: common.Common{
-				Oem:         false,
-				Description: "Samsung SSD 850 EVO 2TB",
-				Vendor:      "SSD",
-				Model:       "Samsung SSD 850 EVO 2TB",
-				Serial:      "S2RLNX0H700428V",
-				Metadata:    map[string]string{},
-				Firmware:    &common.Firmware{},
+				Model:  "MTFDDAV240TDU",
+				Serial: "203329F89796",
 			},
 			Protocol: "sata",
 		},
 		{
 			Common: common.Common{
-				Oem:         false,
-				Description: "Samsung SSD 970 PRO 512GB",
-				Vendor:      "SSD",
-				Model:       "Samsung SSD 970 PRO 512GB",
-				Serial:      "S5JYNC0N102898N",
-				Metadata:    map[string]string{},
-				Firmware:    &common.Firmware{},
+				Model:  "Micron_9300_MTFDHAL3T8TDP",
+				Serial: "202728F691F5",
+			},
+			Protocol: "nvme",
+		},
+		{
+			Common: common.Common{
+				Model:  "Micron_9300_MTFDHAL3T8TDP",
+				Serial: "202728F691C6",
 			},
 			Protocol: "nvme",
 		},

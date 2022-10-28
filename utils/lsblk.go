@@ -68,14 +68,9 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 		drive := &common.Drive{
 			Protocol: d.Transport,
 			Common: common.Common{
-				Serial:      d.Serial,
-				Vendor:      vendor,
-				Model:       dModel,
-				Description: d.Model,
-				Firmware: &common.Firmware{
-					Installed: d.Firmware,
-				},
-				Metadata: map[string]string{},
+				Serial: d.Serial,
+				Vendor: vendor,
+				Model:  dModel,
 			},
 		}
 
