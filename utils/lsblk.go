@@ -66,7 +66,7 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 		}
 
 		drive := &common.Drive{
-			Protocol: d.Transport,
+			Protocol: strings.ToLower(d.Transport),
 			Common: common.Common{
 				Serial: d.Serial,
 				Vendor: vendor,
