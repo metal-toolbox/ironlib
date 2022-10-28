@@ -466,7 +466,10 @@ func StorageController(ctx context.Context, controllers []*common.StorageControl
 				}
 
 				changelog = vetChanges(changelog)
-				diff.Patch(changelog, e)
+
+				if len(changelog) > 0 {
+					diff.Patch(changelog, e)
+				}
 			}
 		}
 	}
@@ -479,44 +482,81 @@ func StorageController(ctx context.Context, controllers []*common.StorageControl
 func vetChanges(changes diff.Changelog) diff.Changelog {
 	accepted := diff.Changelog{}
 
-	for _, c := range changes {
+	for _, change := range changes {
 		// Skip changes that delete items
-		if c.Type == diff.DELETE {
-			continue
+		if acceptChange(&change) {
+			accepted = append(accepted, change)
 		}
-
-		if c.Type == diff.UPDATE {
-			if structFieldNotEmpty(c.From) {
-				// Allow changes in the Vendor, Model fields
-				if !slices.Contains(c.Path, "Vendor") && !slices.Contains(c.Path, "Model") {
-					continue
-				}
-			}
-		}
-
-		accepted = append(accepted, c)
 	}
 
 	return accepted
 }
 
-// returns true with the given field is empty or zero
-func structFieldNotEmpty(field interface{}) bool {
-	switch changeFrom := field.(type) {
+func acceptChange(change *diff.Change) bool {
+	switch change.Type {
+	case diff.DELETE:
+		return false
+	case diff.UPDATE:
+		return vetUpdate(change)
+	case diff.CREATE:
+		return true
+	}
+
+	return false
+}
+
+// vetUpdate looks at a diff.Update change and returns true if the change is to be accepted
+//
+// nolint:gocyclo // validation is cyclomatic, and this logic grokable when kept in one method
+func vetUpdate(change *diff.Change) bool {
+	// allow vendor, model field changes only if the older value was not defined
+	if slices.Contains(change.Path, "Vendor") || slices.Contains(change.Path, "Model") {
+		if strings.TrimSpace(change.To.(string)) != "" && strings.TrimSpace(change.From.(string)) == "" {
+			return true
+		}
+	}
+
+	// accept description if its longer than the older value
+	if slices.Contains(change.Path, "Description") {
+		if len(change.To.(string)) > len(change.From.(string)) {
+			return true
+		}
+	}
+
+	// accept product name change if the older value was empty
+	if slices.Contains(change.Path, "ProductName") {
+		if change.From.(string) != "" {
+			return false
+		}
+	}
+
+	// remaining fields are type asserted,
+	// if the old value is empty, accept the change
+	switch newValue := change.To.(type) {
+	case nil:
+		return false
 	case string:
-		if changeFrom != "" {
+		if strings.TrimSpace(newValue) != "" {
 			return true
 		}
 	case int:
-		if changeFrom != int(0) {
+		if newValue != int(0) {
 			return true
 		}
 	case int64:
-		if changeFrom != int64(0) {
+		if newValue != int64(0) {
 			return true
 		}
 	case int32:
-		if changeFrom != int32(0) {
+		if newValue != int32(0) {
+			return true
+		}
+	case *common.Firmware:
+		if change.From == nil {
+			return true
+		}
+	case map[string]string:
+		if change.From == nil {
 			return true
 		}
 	}
