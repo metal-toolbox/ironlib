@@ -40,9 +40,13 @@ func newFakeDellDevice() (*dell, error) {
 	smartctl := utils.NewFakeSmartctl(r6515fixtures + "/smartctl")
 	lsblk := utils.NewFakeLsblk()
 
+	hdparm := utils.NewFakeHdparm()
+	nvme := utils.NewFakeNvme()
+
 	collectors := &actions.Collectors{
-		Inventory: lshw,
-		Drives:    []actions.DriveCollector{smartctl, lsblk},
+		Inventory:         lshw,
+		Drives:            []actions.DriveCollector{smartctl, lsblk},
+		DriveCapabilities: []actions.DriveCapabilityCollector{hdparm, nvme},
 	}
 
 	hardware := model.NewHardware(&device)
