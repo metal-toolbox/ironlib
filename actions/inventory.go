@@ -42,6 +42,7 @@ func InitCollectors(trace bool) *Collectors {
 		Inventory: utils.NewLshwCmd(trace),
 		Drives: []DriveCollector{
 			utils.NewSmartctlCmd(trace),
+			utils.NewLsblkCmd(trace),
 		},
 		DriveCapabilities: []DriveCapabilityCollector{
 			utils.NewHdparmCmd(trace),

@@ -28,10 +28,11 @@ func Test_Inventory_dell(t *testing.T) {
 
 	lshw := utils.NewFakeLshw(bytes.NewReader(lshwb))
 	smartctl := utils.NewFakeSmartctl("../fixtures/dell/r6515/smartctl")
+	lsblk := utils.NewFakeLsblk()
 
 	collectors := &Collectors{
 		Inventory: lshw,
-		Drives:    []DriveCollector{smartctl},
+		Drives:    []DriveCollector{smartctl, lsblk},
 	}
 
 	err = Collect(context.TODO(), &device, collectors, true, false, false)
