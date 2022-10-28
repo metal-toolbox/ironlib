@@ -30,9 +30,13 @@ func Test_Inventory_dell(t *testing.T) {
 	smartctl := utils.NewFakeSmartctl("../fixtures/dell/r6515/smartctl")
 	lsblk := utils.NewFakeLsblk()
 
+	hdparm := utils.NewFakeHdparm()
+	nvme := utils.NewFakeNvme()
+
 	collectors := &Collectors{
-		Inventory: lshw,
-		Drives:    []DriveCollector{smartctl, lsblk},
+		Inventory:         lshw,
+		Drives:            []DriveCollector{smartctl, lsblk},
+		DriveCapabilities: []DriveCapabilityCollector{hdparm, nvme},
 	}
 
 	err = Collect(context.TODO(), &device, collectors, true, false, false)
@@ -104,10 +108,11 @@ func Test_Inventory_smc(t *testing.T) {
 	// drive capability collectors
 	hdparm := utils.NewFakeHdparm()
 	nvme := utils.NewFakeNvme()
+	lsblk := utils.NewFakeLsblk()
 
 	collectors := &Collectors{
 		Inventory:          lshw,
-		Drives:             []DriveCollector{smartctl},
+		Drives:             []DriveCollector{smartctl, lsblk},
 		DriveCapabilities:  []DriveCapabilityCollector{hdparm, nvme},
 		NICs:               mlxup,
 		CPLDs:              ipmicfg0,

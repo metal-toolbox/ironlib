@@ -161,6 +161,7 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 		}
 	}
 
+	// DriveCapabilities is to be invoked after Drives()
 	err = DriveCapabilities(ctx, device.Drives, collectors.DriveCapabilities)
 	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving DriveCapabilities")
@@ -238,6 +239,15 @@ func DriveCapabilities(ctx context.Context, drives []*common.Drive, collectors [
 	}()
 
 	for _, drive := range drives {
+		// check capabilities on drives that are either SATA or NVME,
+		//
+		// if theres others to be supported, the driveCapabilityCollectorByLogicalName() method
+		// is to be updated to include the required support for SAS/USB/SCSI or other kinds of transports.
+		if !slices.Contains([]string{"sata", "nvme"}, drive.Protocol) {
+			continue
+		}
+
+		// drive logical name is required
 		if drive.LogicalName == "" {
 			continue
 		}
