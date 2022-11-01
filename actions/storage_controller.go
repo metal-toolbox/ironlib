@@ -24,7 +24,7 @@ func CreateVirtualDisk(ctx context.Context, hba *common.StorageController, optio
 	return util.CreateVirtualDisk(ctx, options.RaidMode, options.PhysicalDiskIDs, options.Name, options.BlockSize)
 }
 
-func DestroyVirtualDisk(ctx context.Context, hba *common.Device, options *model.DestroyVirtualDiskOptions) error {
+func DestroyVirtualDisk(ctx context.Context, hba *common.StorageController, options *model.DestroyVirtualDiskOptions) error {
 	util, err := GetControllerUtility(hba.Vendor, hba.Model)
 	if err != nil {
 		return err
