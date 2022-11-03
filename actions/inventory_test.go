@@ -105,15 +105,9 @@ func Test_Inventory_smc(t *testing.T) {
 		t.Error(err)
 	}
 
-	// drive capability collectors
-	hdparm := utils.NewFakeHdparm()
-	nvme := utils.NewFakeNvme()
-	lsblk := utils.NewFakeLsblk()
-
 	collectors := &Collectors{
 		Inventory:          lshw,
-		Drives:             []DriveCollector{smartctl, lsblk},
-		DriveCapabilities:  []DriveCapabilityCollector{hdparm, nvme},
+		Drives:             []DriveCollector{smartctl},
 		NICs:               mlxup,
 		CPLDs:              ipmicfg0,
 		BIOS:               ipmicfg1,
