@@ -28,10 +28,17 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, err
 
 	// register inventory collectors
 	collectors := &actions.Collectors{
-		BMC:                utils.NewIpmicfgCmd(trace),
-		BIOS:               utils.NewIpmicfgCmd(trace),
-		CPLDs:              utils.NewIpmicfgCmd(trace),
-		Drives:             []actions.DriveCollector{utils.NewSmartctlCmd(trace)},
+		BMC:   utils.NewIpmicfgCmd(trace),
+		BIOS:  utils.NewIpmicfgCmd(trace),
+		CPLDs: utils.NewIpmicfgCmd(trace),
+		Drives: []actions.DriveCollector{
+			utils.NewSmartctlCmd(trace),
+			utils.NewLsblkCmd(trace),
+		},
+		DriveCapabilities: []actions.DriveCapabilityCollector{
+			utils.NewHdparmCmd(trace),
+			utils.NewNvmeCmd(trace),
+		},
 		StorageControllers: utils.NewStoreCLICmd(trace),
 		NICs:               utils.NewMlxupCmd(trace),
 	}
