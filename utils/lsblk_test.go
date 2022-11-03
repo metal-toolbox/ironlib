@@ -23,29 +23,33 @@ var (
 	fixtureLsblkDrives = []*common.Drive{
 		{
 			Common: common.Common{
-				Model:  "MTFDDAV240TDU",
-				Serial: "203329F89392",
+				Model:       "MTFDDAV240TDU",
+				Serial:      "203329F89392",
+				LogicalName: "/dev/sda",
 			},
 			Protocol: "sata",
 		},
 		{
 			Common: common.Common{
-				Model:  "MTFDDAV240TDU",
-				Serial: "203329F89796",
+				Model:       "MTFDDAV240TDU",
+				Serial:      "203329F89796",
+				LogicalName: "/dev/sdb",
 			},
 			Protocol: "sata",
 		},
 		{
 			Common: common.Common{
-				Model:  "Micron_9300_MTFDHAL3T8TDP",
-				Serial: "202728F691F5",
+				Model:       "Micron_9300_MTFDHAL3T8TDP",
+				Serial:      "202728F691F5",
+				LogicalName: "/dev/nvme0",
 			},
 			Protocol: "nvme",
 		},
 		{
 			Common: common.Common{
-				Model:  "Micron_9300_MTFDHAL3T8TDP",
-				Serial: "202728F691C6",
+				Model:       "Micron_9300_MTFDHAL3T8TDP",
+				Serial:      "202728F691C6",
+				LogicalName: "/dev/nvme1",
 			},
 			Protocol: "nvme",
 		},
