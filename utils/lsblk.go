@@ -18,7 +18,7 @@ type Lsblk struct {
 }
 
 type lsblkDeviceAttributes struct {
-	Name      string `json:"name"`
+	Name      string `json:"kname"`
 	Device    string `json:"path"`
 	Model     string `json:"model"`
 	Serial    string `json:"serial"`
@@ -68,9 +68,10 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 		drive := &common.Drive{
 			Protocol: strings.ToLower(d.Transport),
 			Common: common.Common{
-				Serial: d.Serial,
-				Vendor: vendor,
-				Model:  dModel,
+				LogicalName: strings.TrimSpace(d.Device),
+				Serial:      strings.TrimSpace(d.Serial),
+				Vendor:      strings.TrimSpace(vendor),
+				Model:       strings.TrimSpace(dModel),
 			},
 		}
 
@@ -81,8 +82,8 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 }
 
 func (l *Lsblk) list(ctx context.Context) ([]byte, error) {
-	// lsblk --json --nodeps --output name,model,serial,tran -e1,7,11
-	l.Executor.SetArgs([]string{"--json", "--nodeps", "--output", "name,path,model,serial,rev,tran", "-e1,7,11"})
+	// lsblk --json --nodeps --output name,path,model,serial,tran -e1,7,11
+	l.Executor.SetArgs([]string{"--json", "--nodeps", "--output", "kname,path,model,serial,rev,tran", "-e1,7,11"})
 
 	result, err := l.Executor.ExecWithContext(ctx)
 	if err != nil {

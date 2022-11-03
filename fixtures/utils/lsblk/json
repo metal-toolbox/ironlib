@@ -11,23 +11,23 @@
         {
             "name": "sdb",
             "path": "/dev/sdb",
-            "model": "MTFDDAV240TDU",
+            "model": "MTFDDAV240TDU     ",
             "serial": "203329F89796",
             "rev": "2B6Q",
             "tran": "sata"
         },
         {
-            "name": "nvme0n1",
-            "path": "/dev/nvme0n1",
-            "model": "Micron_9300_MTFDHAL3T8TDP",
-            "serial": "202728F691F5",
+            "name": "nvme0",
+            "path": "/dev/nvme0",
+            "model": "Micron_9300_MTFDHAL3T8TDP         ",
+            "serial": "202728F691F5         ",
             "rev": null,
             "tran": "nvme"
         },
         {
-            "name": "nvme0n1",
-            "path": "/dev/nvme0n2",
-            "model": "Micron_9300_MTFDHAL3T8TDP",
+            "name": "nvme0",
+            "path": "/dev/nvme1       ",
+            "model": "Micron_9300_MTFDHAL3T8TDP         ",
             "serial": "202728F691C6",
             "rev": null,
             "tran": "nvme"
