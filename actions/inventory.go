@@ -209,19 +209,56 @@ func Drives(ctx context.Context, drives []*common.Drive, collectors []DriveColle
 		}
 
 		// TODO: handle case where the object may not already be present in device.Drives and needs to be added
-		for _, e := range drives {
-			for _, i := range ndrives {
-				// object is matched by serial identifier and patched
-				if strings.EqualFold(e.Serial, i.Serial) {
-					changelog, err := diff.Diff(e, i)
-					if err != nil {
-						return err
-					}
-
-					changelog = vetChanges(changelog)
-					diff.Patch(changelog, e)
+		for _, existing := range drives {
+			// match existing drives by serial, and patch with changes
+			found := findDriveBySerial(existing.Serial, ndrives)
+			if found != nil {
+				// diff existing drive fields with the one found by the collector
+				changelog, err := diff.Diff(existing, found)
+				if err != nil {
+					return err
 				}
+
+				changelog = vetChanges(changelog)
+				diff.Patch(changelog, existing)
+
+				continue
 			}
+
+			// as a fallback for the ndrives data that might not include a serial number,
+			//
+			// match existing drives by logical name and patch with changes
+			found = findDriveByLogicalName(existing.LogicalName, ndrives)
+			if found != nil {
+				// diff existing drive fields with the one found by the collector
+				changelog, err := diff.Diff(existing, found)
+				if err != nil {
+					return err
+				}
+
+				changelog = vetChanges(changelog)
+				diff.Patch(changelog, existing)
+			}
+		}
+	}
+
+	return nil
+}
+
+func findDriveBySerial(serial string, drives []*common.Drive) *common.Drive {
+	for _, drive := range drives {
+		if strings.EqualFold(serial, drive.Serial) {
+			return drive
+		}
+	}
+
+	return nil
+}
+
+func findDriveByLogicalName(logicalName string, drives []*common.Drive) *common.Drive {
+	for _, drive := range drives {
+		if strings.EqualFold(logicalName, drive.LogicalName) {
+			return drive
 		}
 	}
 
