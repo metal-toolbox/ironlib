@@ -1,95 +1,865 @@
 {
-   "id": "",
+   "oem": true,
+   "vendor": "Dell Inc.",
+   "model": "PowerEdge R6515",
+   "serial": "J0S2LM3",
    "bios": {
+     "oem": false,
      "description": "BIOS",
-     "vendor": "American Megatrends Inc.",
+     "vendor": "Dell Inc.",
+     "model": "PowerEdge R6515",
+     "firmware": {
+       "installed": "2.6.6"
+     },
      "size_bytes": 65536,
-     "capacity_bytes": 33554432,
-     "firmware_installed": "L2.07B",
-     "firmware_managed": true
+     "capacity_bytes": 33554432
+   },
+   "bmc": {
+     "oem": false,
+     "model": "PowerEdge R6515",
+     "nic": {
+       "oem": false
+     }
    },
    "mainboard": {
+     "oem": false,
      "description": "Motherboard",
-     "vendor": "ASRockRack",
-     "model": "E3C246D4I-NL",
-     "serial": "196231220000153",
-     "physid": "0",
-     "firmware_managed": true
+     "vendor": "Dell Inc.",
+     "model": "068NXX",
+     "serial": ".J0S2LM3.MXWSJ00214015M.",
+     "product_name": "068NXX",
+     "physid": "0"
    },
-   "cpu": [
+   "cplds": [],
+   "cpus": [
      {
-       "description": "Intel(R) Xeon(R) E-2278G CPU @ 3.40GHz",
-       "vendor": "Intel Corp.",
-       "model": "Intel(R) Xeon(R) E-2278G CPU @ 3.40GHz",
+       "oem": false,
+       "description": "CPU",
+       "vendor": "Advanced Micro Devices [AMD]",
+       "model": "AMD EPYC 7513 32-Core Processor",
+       "product_name": "AMD EPYC 7513 32-Core Processor",
        "slot": "CPU1",
-       "clock_speeed_hz": 100000000,
-       "cores": 8,
-       "threads": 16
+       "clock_speeed_hz": 2000000000,
+       "cores": 32,
+       "threads": 64
      }
    ],
    "memory": [
      {
-       "description": "SODIMM DDR4 Synchronous 2666 MHz (0.4 ns)",
-       "slot": "ChannelA-DIMM0",
-       "vendor": "Micron",
-       "model": "18ASF2G72HZ-2G6E1",
-       "serial": "F0F9053F",
-       "size_bytes": 17179869184,
-       "clock_speed_hz": 2666000000
+       "oem": false,
+       "description": "DIMM DDR4 Synchronous Registered (Buffered) 3200 MHz (0.3 ns)",
+       "vendor": "Hynix Semiconductor (Hyundai Electronics)",
+       "model": "HMA84GR7DJR4N-XN",
+       "serial": "139A865A",
+       "product_name": "HMA84GR7DJR4N-XN",
+       "slot": "A1",
+       "size_bytes": 34359738368,
+       "clock_speed_hz": 3200000000
      },
      {
-       "description": "SODIMM DDR4 Synchronous 2666 MHz (0.4 ns)",
-       "slot": "ChannelB-DIMM0",
-       "vendor": "Micron",
-       "model": "18ASF2G72HZ-2G6E1",
-       "serial": "F0F90894",
-       "size_bytes": 17179869184,
-       "clock_speed_hz": 2666000000
+       "oem": false,
+       "description": "DIMM DDR4 Synchronous Registered (Buffered) 3200 MHz (0.3 ns)",
+       "vendor": "Hynix Semiconductor (Hyundai Electronics)",
+       "model": "HMA84GR7DJR4N-XN",
+       "serial": "139A8777",
+       "product_name": "HMA84GR7DJR4N-XN",
+       "slot": "A2",
+       "size_bytes": 34359738368,
+       "clock_speed_hz": 3200000000
+     },
+     {
+       "oem": false,
+       "description": "DIMM DDR4 Synchronous Registered (Buffered) 3200 MHz (0.3 ns)",
+       "vendor": "Hynix Semiconductor (Hyundai Electronics)",
+       "model": "HMA84GR7DJR4N-XN",
+       "serial": "139A866C",
+       "product_name": "HMA84GR7DJR4N-XN",
+       "slot": "A3",
+       "size_bytes": 34359738368,
+       "clock_speed_hz": 3200000000
+     },
+     {
+       "oem": false,
+       "description": "DIMM DDR4 Synchronous Registered (Buffered) 3200 MHz (0.3 ns)",
+       "vendor": "Hynix Semiconductor (Hyundai Electronics)",
+       "model": "HMA84GR7DJR4N-XN",
+       "serial": "139A8666",
+       "product_name": "HMA84GR7DJR4N-XN",
+       "slot": "A4",
+       "size_bytes": 34359738368,
+       "clock_speed_hz": 3200000000
+     },
+     {
+       "oem": false,
+       "description": "DIMM DDR4 Synchronous Registered (Buffered) 3200 MHz (0.3 ns)",
+       "vendor": "Hynix Semiconductor (Hyundai Electronics)",
+       "model": "HMA84GR7DJR4N-XN",
+       "serial": "139A86E7",
+       "product_name": "HMA84GR7DJR4N-XN",
+       "slot": "A5",
+       "size_bytes": 34359738368,
+       "clock_speed_hz": 3200000000
+     },
+     {
+       "oem": false,
+       "description": "DIMM DDR4 Synchronous Registered (Buffered) 3200 MHz (0.3 ns)",
+       "vendor": "Hynix Semiconductor (Hyundai Electronics)",
+       "model": "HMA84GR7DJR4N-XN",
+       "serial": "139A8775",
+       "product_name": "HMA84GR7DJR4N-XN",
+       "slot": "A6",
+       "size_bytes": 34359738368,
+       "clock_speed_hz": 3200000000
+     },
+     {
+       "oem": false,
+       "description": "DIMM DDR4 Synchronous Registered (Buffered) 3200 MHz (0.3 ns)",
+       "vendor": "Hynix Semiconductor (Hyundai Electronics)",
+       "model": "HMA84GR7DJR4N-XN",
+       "serial": "139A8665",
+       "product_name": "HMA84GR7DJR4N-XN",
+       "slot": "A7",
+       "size_bytes": 34359738368,
+       "clock_speed_hz": 3200000000
+     },
+     {
+       "oem": false,
+       "description": "DIMM DDR4 Synchronous Registered (Buffered) 3200 MHz (0.3 ns)",
+       "vendor": "Hynix Semiconductor (Hyundai Electronics)",
+       "model": "HMA84GR7DJR4N-XN",
+       "serial": "139A86E3",
+       "product_name": "HMA84GR7DJR4N-XN",
+       "slot": "A8",
+       "size_bytes": 34359738368,
+       "clock_speed_hz": 3200000000
+     },
+     {
+       "oem": false,
+       "description": "[empty]",
+       "slot": "A9"
+     },
+     {
+       "oem": false,
+       "description": "[empty]",
+       "slot": "A10"
+     },
+     {
+       "oem": false,
+       "description": "[empty]",
+       "slot": "A11"
+     },
+     {
+       "oem": false,
+       "description": "[empty]",
+       "slot": "A12"
+     },
+     {
+       "oem": false,
+       "description": "[empty]",
+       "slot": "A13"
+     },
+     {
+       "oem": false,
+       "description": "[empty]",
+       "slot": "A14"
+     },
+     {
+       "oem": false,
+       "description": "[empty]",
+       "slot": "A15"
+     },
+     {
+       "oem": false,
+       "description": "[empty]",
+       "slot": "A16"
      }
    ],
    "nics": [
      {
+       "oem": false,
+       "vendor": "Intel Corporation [8086]",
+       "model": "Ethernet Controller E810-XXV for SFP",
+       "serial": "b4:96:91:d1:f4:e6",
+       "product_name": "Ethernet Controller E810-XXV for SFP",
+       "pci_vendor_id": "8086",
+       "pci_product_id": "159B",
+       "metadata": {
+         "driver": "ice",
+         "duplex": "full",
+         "firmware": "3.00 0x80008944 20.5.13",
+         "link": "yes",
+         "speed": "25Gbit/s"
+       },
+       "firmware": {
+         "installed": "20.5.13"
+       },
        "description": "Ethernet interface",
-       "vendor": "Intel Corporation",
-       "model": "Ethernet Controller X710 for 10GbE SFP+",
-       "serial": "b4:96:91:70:26:c8",
-       "speed_bits": 10000000000,
-       "physid": "0"
-     },
-     {
-       "description": "Ethernet interface",
-       "vendor": "Intel Corporation",
-       "model": "Ethernet Controller X710 for 10GbE SFP+",
-       "serial": "b4:96:91:70:26:c8",
-       "speed_bits": 10000000000,
-       "physid": "0.1"
+       "speed_bits": 25000000000,
+       "physid": "0",
+       "bus_info": "pci@0000:41:00.0"
      }
    ],
    "drives": [
      {
-       "description": "ATA Disk",
-       "serial": "PHYF001300HB480BGN",
-       "model": "INTEL SSDSC2KB48",
-       "firmware_installed": "XCV10110",
-       "size_bytes": 480103981056
+       "oem": false,
+       "description": "NVMe device",
+       "vendor": "micron",
+       "model": "Micron_9300_MTFDHAL3T8TDP",
+       "serial": "2144328B02CD",
+       "product_name": "Micron_9300_MTFDHAL3T8TDP",
+       "logical_name": "/dev/nvme0n1",
+       "capabilities": [
+         {
+           "Name": "sanicap",
+           "Description": "Sanitize Support",
+           "Enabled": false
+         },
+         {
+           "Name": "ammasocsind",
+           "Description": "Additional media modification after sanitize operation completes successfully is not defined",
+           "Enabled": false
+         },
+         {
+           "Name": "nasbiscs",
+           "Description": "No-Deallocate After Sanitize bit in Sanitize command Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "osons",
+           "Description": "Overwrite Sanitize Operation Not Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "besons",
+           "Description": "Block Erase Sanitize Operation Not Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "cesons",
+           "Description": "Crypto Erase Sanitize Operation Not Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "fna",
+           "Description": "Crypto Erase Support",
+           "Enabled": true
+         },
+         {
+           "Name": "fbn(s",
+           "Description": "FormatNVM Broadcast NSID (FFFFFFFFh) Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "cesapose",
+           "Description": "Crypto Erase Supported as part of Secure Erase",
+           "Enabled": true
+         },
+         {
+           "Name": "ceatsn",
+           "Description": "Crypto Erase Applies to Single Namespace(s)",
+           "Enabled": false
+         },
+         {
+           "Name": "fatsn",
+           "Description": "Format Applies to Single Namespace(s)",
+           "Enabled": false
+         }
+       ],
+       "firmware": {
+         "installed": "11300DU0"
+       },
+       "drive_type": "NVMe-PCIe-SSD",
+       "bus_info": "pci@0000:44:00.0",
+       "protocol": "nvme",
+       "smart_status": "ok"
      },
      {
+       "oem": false,
+       "description": "NVMe device",
+       "vendor": "micron",
+       "model": "Micron_9300_MTFDHAL3T8TDP",
+       "serial": "2144328AF4E9",
+       "product_name": "Micron_9300_MTFDHAL3T8TDP",
+       "logical_name": "/dev/nvme1n1",
+       "capabilities": [
+         {
+           "Name": "sanicap",
+           "Description": "Sanitize Support",
+           "Enabled": false
+         },
+         {
+           "Name": "ammasocsind",
+           "Description": "Additional media modification after sanitize operation completes successfully is not defined",
+           "Enabled": false
+         },
+         {
+           "Name": "nasbiscs",
+           "Description": "No-Deallocate After Sanitize bit in Sanitize command Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "osons",
+           "Description": "Overwrite Sanitize Operation Not Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "besons",
+           "Description": "Block Erase Sanitize Operation Not Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "cesons",
+           "Description": "Crypto Erase Sanitize Operation Not Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "fna",
+           "Description": "Crypto Erase Support",
+           "Enabled": true
+         },
+         {
+           "Name": "fbn(s",
+           "Description": "FormatNVM Broadcast NSID (FFFFFFFFh) Supported",
+           "Enabled": false
+         },
+         {
+           "Name": "cesapose",
+           "Description": "Crypto Erase Supported as part of Secure Erase",
+           "Enabled": true
+         },
+         {
+           "Name": "ceatsn",
+           "Description": "Crypto Erase Applies to Single Namespace(s)",
+           "Enabled": false
+         },
+         {
+           "Name": "fatsn",
+           "Description": "Format Applies to Single Namespace(s)",
+           "Enabled": false
+         }
+       ],
+       "firmware": {
+         "installed": "11300DU0"
+       },
+       "drive_type": "NVMe-PCIe-SSD",
+       "bus_info": "pci@0000:45:00.0",
+       "protocol": "nvme",
+       "smart_status": "ok"
+     },
+     {
+       "oem": false,
        "description": "ATA Disk",
-       "serial": "PHYF001209KL480BGN",
-       "model": "INTEL SSDSC2KB48",
-       "firmware_installed": "XCV10110",
-       "size_bytes": 480103981056
+       "vendor": "micron",
+       "model": "MTFDDAV240TDU",
+       "serial": "21433250F5BA",
+       "product_name": "MTFDDAV240TDU",
+       "logical_name": "/dev/sda",
+       "capabilities": [
+         {
+           "Name": "sf",
+           "Description": "SMART feature",
+           "Enabled": true
+         },
+         {
+           "Name": "pmf",
+           "Description": "Power Management feature",
+           "Enabled": true
+         },
+         {
+           "Name": "wc",
+           "Description": "Write cache",
+           "Enabled": true
+         },
+         {
+           "Name": "la",
+           "Description": "Look ahead",
+           "Enabled": true
+         },
+         {
+           "Name": "wb",
+           "Description": "WRITE BUFFER",
+           "Enabled": true
+         },
+         {
+           "Name": "rb",
+           "Description": "READ BUFFER",
+           "Enabled": true
+         },
+         {
+           "Name": "nc",
+           "Description": "NOP cmd",
+           "Enabled": true
+         },
+         {
+           "Name": "dm",
+           "Description": "DOWNLOAD MICROCODE",
+           "Enabled": true
+         },
+         {
+           "Name": "apmf",
+           "Description": "Advanced Power Management feature",
+           "Enabled": true
+         },
+         {
+           "Name": "4baf",
+           "Description": "48 bit Address feature",
+           "Enabled": true
+         },
+         {
+           "Name": "mfc",
+           "Description": "Mandatory FLUSH CACHE",
+           "Enabled": true
+         },
+         {
+           "Name": "fce",
+           "Description": "FLUSH CACHE EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "sel",
+           "Description": "SMART error logging",
+           "Enabled": true
+         },
+         {
+           "Name": "sst",
+           "Description": "SMART self test",
+           "Enabled": true
+         },
+         {
+           "Name": "gplf",
+           "Description": "General Purpose Logging feature",
+           "Enabled": true
+         },
+         {
+           "Name": "6bwwn",
+           "Description": "64 bit World wide name",
+           "Enabled": true
+         },
+         {
+           "Name": "iiwu",
+           "Description": "IDLE IMMEDIATE with UNLOAD",
+           "Enabled": true
+         },
+         {
+           "Name": "wrvf",
+           "Description": "Write Read Verify feature",
+           "Enabled": false
+         },
+         {
+           "Name": "wue",
+           "Description": "WRITE UNCORRECTABLE EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "rdegs",
+           "Description": "READWRITE DMA EXT GPL s",
+           "Enabled": true
+         },
+         {
+           "Name": "sdm",
+           "Description": "Segmented DOWNLOAD MICROCODE",
+           "Enabled": true
+         },
+         {
+           "Name": "u1",
+           "Description": "unknown 119[6]",
+           "Enabled": true
+         },
+         {
+           "Name": "u1",
+           "Description": "unknown 119[8]",
+           "Enabled": false
+         },
+         {
+           "Name": "gss1",
+           "Description": "Gen1 signaling speed 1.5Gb/s",
+           "Enabled": true
+         },
+         {
+           "Name": "gss3",
+           "Description": "Gen2 signaling speed 3.0Gb/s",
+           "Enabled": true
+         },
+         {
+           "Name": "gss6",
+           "Description": "Gen3 signaling speed 6.0Gb/s",
+           "Enabled": true
+         },
+         {
+           "Name": "ncqn",
+           "Description": "Native Command Queueing NCQ",
+           "Enabled": true
+         },
+         {
+           "Name": "pec",
+           "Description": "Phy event counters",
+           "Enabled": true
+         },
+         {
+           "Name": "npi",
+           "Description": "NCQ priority information",
+           "Enabled": true
+         },
+         {
+           "Name": "rldeetrle",
+           "Description": "READ LOG DMA EXT equivalent to READ LOG EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "dsaao",
+           "Description": "DMA Setup Auto Activate optimization",
+           "Enabled": true
+         },
+         {
+           "Name": "stp",
+           "Description": "Software tings preservation",
+           "Enabled": true
+         },
+         {
+           "Name": "sctsf",
+           "Description": "SMART Command Transport SCT feature",
+           "Enabled": true
+         },
+         {
+           "Name": "swsa",
+           "Description": "SCT Write Same AC2",
+           "Enabled": true
+         },
+         {
+           "Name": "serca",
+           "Description": "SCT Error Recovery Control AC3",
+           "Enabled": true
+         },
+         {
+           "Name": "sfca",
+           "Description": "SCT Features Control AC4",
+           "Enabled": true
+         },
+         {
+           "Name": "sdta",
+           "Description": "SCT Data Tables AC5",
+           "Enabled": true
+         },
+         {
+           "Name": "sale",
+           "Description": "SANITIZE ANTIFREEZE LOCK EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "sf",
+           "Description": "SANITIZE feature",
+           "Enabled": true
+         },
+         {
+           "Name": "cse",
+           "Description": "CRYPTO SCRAMBLE EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "bee",
+           "Description": "BLOCK ERASE EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "dmd",
+           "Description": "DOWNLOAD MICROCODE DMA",
+           "Enabled": true
+         },
+         {
+           "Name": "wbd",
+           "Description": "WRITE BUFFER DMA",
+           "Enabled": true
+         },
+         {
+           "Name": "rbd",
+           "Description": "READ BUFFER DMA",
+           "Enabled": true
+         },
+         {
+           "Name": "dsmtsl8b",
+           "Description": "Data Set Management TRIM supported limit 8 blocks",
+           "Enabled": true
+         },
+         {
+           "Name": "drzat",
+           "Description": "Deterministic read ZEROs after TRIM",
+           "Enabled": true
+         }
+       ],
+       "firmware": {
+         "installed": "D3DJ004"
+       },
+       "oem_id": "DELL(tm)",
+       "drive_type": "Sata-SSD",
+       "bus_info": "scsi@0:0.0.0",
+       "protocol": "sata",
+       "smart_status": "ok",
+       "capacity_bytes": 240057409536
+     },
+     {
+       "oem": false,
+       "description": "ATA Disk",
+       "vendor": "micron",
+       "model": "MTFDDAV240TDU",
+       "serial": "21433250F717",
+       "product_name": "MTFDDAV240TDU",
+       "logical_name": "/dev/sdb",
+       "capabilities": [
+         {
+           "Name": "sf",
+           "Description": "SMART feature",
+           "Enabled": true
+         },
+         {
+           "Name": "pmf",
+           "Description": "Power Management feature",
+           "Enabled": true
+         },
+         {
+           "Name": "wc",
+           "Description": "Write cache",
+           "Enabled": true
+         },
+         {
+           "Name": "la",
+           "Description": "Look ahead",
+           "Enabled": true
+         },
+         {
+           "Name": "wb",
+           "Description": "WRITE BUFFER",
+           "Enabled": true
+         },
+         {
+           "Name": "rb",
+           "Description": "READ BUFFER",
+           "Enabled": true
+         },
+         {
+           "Name": "nc",
+           "Description": "NOP cmd",
+           "Enabled": true
+         },
+         {
+           "Name": "dm",
+           "Description": "DOWNLOAD MICROCODE",
+           "Enabled": true
+         },
+         {
+           "Name": "apmf",
+           "Description": "Advanced Power Management feature",
+           "Enabled": true
+         },
+         {
+           "Name": "4baf",
+           "Description": "48 bit Address feature",
+           "Enabled": true
+         },
+         {
+           "Name": "mfc",
+           "Description": "Mandatory FLUSH CACHE",
+           "Enabled": true
+         },
+         {
+           "Name": "fce",
+           "Description": "FLUSH CACHE EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "sel",
+           "Description": "SMART error logging",
+           "Enabled": true
+         },
+         {
+           "Name": "sst",
+           "Description": "SMART self test",
+           "Enabled": true
+         },
+         {
+           "Name": "gplf",
+           "Description": "General Purpose Logging feature",
+           "Enabled": true
+         },
+         {
+           "Name": "6bwwn",
+           "Description": "64 bit World wide name",
+           "Enabled": true
+         },
+         {
+           "Name": "iiwu",
+           "Description": "IDLE IMMEDIATE with UNLOAD",
+           "Enabled": true
+         },
+         {
+           "Name": "wrvf",
+           "Description": "Write Read Verify feature",
+           "Enabled": false
+         },
+         {
+           "Name": "wue",
+           "Description": "WRITE UNCORRECTABLE EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "rdegs",
+           "Description": "READWRITE DMA EXT GPL s",
+           "Enabled": true
+         },
+         {
+           "Name": "sdm",
+           "Description": "Segmented DOWNLOAD MICROCODE",
+           "Enabled": true
+         },
+         {
+           "Name": "u1",
+           "Description": "unknown 119[6]",
+           "Enabled": true
+         },
+         {
+           "Name": "u1",
+           "Description": "unknown 119[8]",
+           "Enabled": false
+         },
+         {
+           "Name": "gss1",
+           "Description": "Gen1 signaling speed 1.5Gb/s",
+           "Enabled": true
+         },
+         {
+           "Name": "gss3",
+           "Description": "Gen2 signaling speed 3.0Gb/s",
+           "Enabled": true
+         },
+         {
+           "Name": "gss6",
+           "Description": "Gen3 signaling speed 6.0Gb/s",
+           "Enabled": true
+         },
+         {
+           "Name": "ncqn",
+           "Description": "Native Command Queueing NCQ",
+           "Enabled": true
+         },
+         {
+           "Name": "pec",
+           "Description": "Phy event counters",
+           "Enabled": true
+         },
+         {
+           "Name": "npi",
+           "Description": "NCQ priority information",
+           "Enabled": true
+         },
+         {
+           "Name": "rldeetrle",
+           "Description": "READ LOG DMA EXT equivalent to READ LOG EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "dsaao",
+           "Description": "DMA Setup Auto Activate optimization",
+           "Enabled": true
+         },
+         {
+           "Name": "stp",
+           "Description": "Software tings preservation",
+           "Enabled": true
+         },
+         {
+           "Name": "sctsf",
+           "Description": "SMART Command Transport SCT feature",
+           "Enabled": true
+         },
+         {
+           "Name": "swsa",
+           "Description": "SCT Write Same AC2",
+           "Enabled": true
+         },
+         {
+           "Name": "serca",
+           "Description": "SCT Error Recovery Control AC3",
+           "Enabled": true
+         },
+         {
+           "Name": "sfca",
+           "Description": "SCT Features Control AC4",
+           "Enabled": true
+         },
+         {
+           "Name": "sdta",
+           "Description": "SCT Data Tables AC5",
+           "Enabled": true
+         },
+         {
+           "Name": "sale",
+           "Description": "SANITIZE ANTIFREEZE LOCK EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "sf",
+           "Description": "SANITIZE feature",
+           "Enabled": true
+         },
+         {
+           "Name": "cse",
+           "Description": "CRYPTO SCRAMBLE EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "bee",
+           "Description": "BLOCK ERASE EXT",
+           "Enabled": true
+         },
+         {
+           "Name": "dmd",
+           "Description": "DOWNLOAD MICROCODE DMA",
+           "Enabled": true
+         },
+         {
+           "Name": "wbd",
+           "Description": "WRITE BUFFER DMA",
+           "Enabled": true
+         },
+         {
+           "Name": "rbd",
+           "Description": "READ BUFFER DMA",
+           "Enabled": true
+         },
+         {
+           "Name": "dsmtsl8b",
+           "Description": "Data Set Management TRIM supported limit 8 blocks",
+           "Enabled": true
+         },
+         {
+           "Name": "drzat",
+           "Description": "Deterministic read ZEROs after TRIM",
+           "Enabled": true
+         }
+       ],
+       "firmware": {
+         "installed": "D3DJ004"
+       },
+       "oem_id": "DELL(tm)",
+       "drive_type": "Sata-SSD",
+       "bus_info": "scsi@1:0.0.0",
+       "protocol": "sata",
+       "smart_status": "ok",
+       "capacity_bytes": 240057409536
      }
    ],
    "storage_controller": [
      {
+       "oem": false,
        "description": "SATA controller",
-       "vendor": "Intel Corporation",
-       "model": "Cannon Lake PCH SATA AHCI Controller",
-       "physid": "17"
+       "vendor": "Marvell Technology Group Ltd.",
+       "model": "88SE9230 PCIe 2.0 x2 4-port SATA 6 Gb/s RAID Controller",
+       "serial": "1B4B:9230",
+       "product_name": "88SE9230 PCIe 2.0 x2 4-port SATA 6 Gb/s RAID Controller",
+       "pci_vendor_id": "1B4B",
+       "pci_product_id": "9230",
+       "supported_device_protocol": "SATA",
+       "physid": "0",
+       "bus_info": "pci@0000:c3:00.0"
      }
-   ],
-   "components": null,
-   "component_updates": null,
-   "oem": false
+   ]
  }
