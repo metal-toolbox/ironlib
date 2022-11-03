@@ -566,14 +566,21 @@ func vetUpdate(change *diff.Change) bool {
 
 	// accept description if its longer than the older value
 	if slices.Contains(change.Path, "Description") {
-		if len(change.To.(string)) > len(change.From.(string)) {
+		if len(strings.TrimSpace(change.To.(string))) > len(strings.TrimSpace(change.From.(string))) {
 			return true
 		}
 	}
 
-	// accept product name change if the older value was empty
+	// keep product name if not empty
 	if slices.Contains(change.Path, "ProductName") {
-		if change.From.(string) != "" {
+		if strings.TrimSpace(change.From.(string)) != "" {
+			return false
+		}
+	}
+
+	// keep existing serial value if not empty
+	if slices.Contains(change.Path, "Serial") {
+		if strings.TrimSpace(change.From.(string)) != "" {
 			return false
 		}
 	}
