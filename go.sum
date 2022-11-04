@@ -1,7 +1,7 @@
 github.com/beevik/etree v1.1.0 h1:T0xke/WvNtMoCqgzPhkX2r4rjY3GDZFi+FjpRZY2Jbs=
 github.com/beevik/etree v1.1.0/go.mod h1:r8Aw8JqVegEf0w2fDnATrX9VpkMcyFeM0FhwO62wh+A=
-github.com/bmc-toolbox/common v0.0.0-20221027142600-dd231ee11e95 h1:ZKq2USYtq9S0uujNIsJzkufk4C/n4vPhKzH2nO02hwE=
-github.com/bmc-toolbox/common v0.0.0-20221027142600-dd231ee11e95/go.mod h1:SY//n1PJjZfbFbmAsB6GvEKbc7UXz3d30s3kWxfJQ/c=
+github.com/bmc-toolbox/common v0.0.0-20221104171658-00f3ff9e9233 h1:kGmMpnHvp3KebZbEMHZHR4pVMqk/otXzvwcFhMg++7M=
+github.com/bmc-toolbox/common v0.0.0-20221104171658-00f3ff9e9233/go.mod h1:SY//n1PJjZfbFbmAsB6GvEKbc7UXz3d30s3kWxfJQ/c=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
