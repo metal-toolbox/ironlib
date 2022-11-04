@@ -189,10 +189,11 @@ func (m *Mvcli) Drives(ctx context.Context) ([]*common.Drive, error) {
 				Metadata:    make(map[string]string),
 			},
 
-			BlockSizeBytes:      d.Size,
-			CapacityBytes:       d.PDSize,
-			Type:                m.processDriveType(d.Type, d.SSDType),
-			NegotiatedSpeedGbps: d.CurrentSpeed,
+			BlockSizeBytes:           d.Size,
+			CapacityBytes:            d.PDSize,
+			Type:                     m.processDriveType(d.Type, d.SSDType),
+			NegotiatedSpeedGbps:      d.CurrentSpeed,
+			StorageControllerDriveID: d.ID,
 		}
 
 		drives = append(drives, drive)
