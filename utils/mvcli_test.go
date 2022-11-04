@@ -75,10 +75,11 @@ func Test_MvcliDrives(t *testing.T) {
 					Metadata:  nil,
 				},
 			},
-			CapacityBytes:       234365528 * 1000,
-			BlockSizeBytes:      234431064 * 1000,
-			Type:                common.SlugDriveTypeSATASSD,
-			NegotiatedSpeedGbps: 6,
+			CapacityBytes:            234365528 * 1000,
+			BlockSizeBytes:           234431064 * 1000,
+			Type:                     common.SlugDriveTypeSATASSD,
+			NegotiatedSpeedGbps:      6,
+			StorageControllerDriveID: 0,
 		},
 		{
 			Common: common.Common{
@@ -93,10 +94,11 @@ func Test_MvcliDrives(t *testing.T) {
 					Metadata:  nil,
 				},
 			},
-			CapacityBytes:       234365528 * 1000,
-			BlockSizeBytes:      234431064 * 1000,
-			Type:                common.SlugDriveTypeSATASSD,
-			NegotiatedSpeedGbps: 6,
+			CapacityBytes:            234365528 * 1000,
+			BlockSizeBytes:           234431064 * 1000,
+			Type:                     common.SlugDriveTypeSATASSD,
+			NegotiatedSpeedGbps:      6,
+			StorageControllerDriveID: 1,
 		},
 	}
 
