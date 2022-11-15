@@ -2102,6 +2102,73 @@ var (
 						"firmware": "3.31 0x80000c92 1.1747.0",
 						"link":     "no",
 					},
+					Capabilities: []*common.Capability{
+						&common.Capability{
+							Name:        "10000bt-fd",
+							Description: "10Gbit/s (full duplex)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "1000bt-fd",
+							Description: "1Gbit/s (full duplex)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "autonegotiation",
+							Description: "Auto-negotiation",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bus_master",
+							Description: "bus mastering",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cap_list",
+							Description: "PCI capabilities listing",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ethernet",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "msi",
+							Description: "Message Signalled Interrupts",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "msix",
+							Description: "MSI-X",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pciexpress",
+							Description: "PCI Express",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "physical",
+							Description: "Physical interface",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pm",
+							Description: "Power Management",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rom",
+							Description: "extension ROM",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vpd",
+							Description: "Vital Product Data",
+							Enabled:     true,
+						},
+					},
 				},
 				ID:          "",
 				Description: "Ethernet interface",
@@ -2129,6 +2196,73 @@ var (
 						"driver":   "i40e",
 						"firmware": "3.31 0x80000c92 1.1747.0",
 						"link":     "no",
+					},
+					Capabilities: []*common.Capability{
+						&common.Capability{
+							Name:        "10000bt-fd",
+							Description: "10Gbit/s (full duplex)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "1000bt-fd",
+							Description: "1Gbit/s (full duplex)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "autonegotiation",
+							Description: "Auto-negotiation",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bus_master",
+							Description: "bus mastering",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cap_list",
+							Description: "PCI capabilities listing",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ethernet",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "msi",
+							Description: "Message Signalled Interrupts",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "msix",
+							Description: "MSI-X",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pciexpress",
+							Description: "PCI Express",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "physical",
+							Description: "Physical interface",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pm",
+							Description: "Power Management",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rom",
+							Description: "extension ROM",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vpd",
+							Description: "Vital Product Data",
+							Enabled:     true,
+						},
 					},
 				},
 				ID:          "",
@@ -2165,6 +2299,58 @@ var (
 						"firmware": "14.27.1016 (MT_2420110034)",
 						"link":     "yes",
 						"speed":    "10Gbit/s",
+					},
+					Capabilities: []*common.Capability{
+						&common.Capability{
+							Name:        "autonegotiation",
+							Description: "Auto-negotiation",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bus_master",
+							Description: "bus mastering",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cap_list",
+							Description: "PCI capabilities listing",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ethernet",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "msix",
+							Description: "MSI-X",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pciexpress",
+							Description: "PCI Express",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "physical",
+							Description: "Physical interface",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pm",
+							Description: "Power Management",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rom",
+							Description: "extension ROM",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vpd",
+							Description: "Vital Product Data",
+							Enabled:     true,
+						},
 					},
 				},
 				ID:          "",
