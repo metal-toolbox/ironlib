@@ -8,7 +8,7 @@ lint:
 		|| echo "expected linter version: ${LINTER_EXPECTED_VERSION}"
 
 ## Go test
-test:
+test: lint
 	CGO_ENABLED=0 go test -v -covermode=atomic ./...
 
 # https://gist.github.com/prwhite/8168133
