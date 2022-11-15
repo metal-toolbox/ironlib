@@ -328,6 +328,668 @@ var (
 					ProductName: "AMD EPYC 7502P 32-Core Processor",
 					Firmware:    &common.Firmware{Installed: "137367629", Metadata: map[string]string{}},
 					Status:      nil,
+					Capabilities: []*common.Capability{
+						&common.Capability{
+							Name:        "3dnowprefetch",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "abm",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "adx",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "aes",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "aperfmperf",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "apic",
+							Description: "on-chip advanced programmable interrupt controller (APIC)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "arat",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "avic",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "avx",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "avx2",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bmi1",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bmi2",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bpext",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cat_l3",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cdp_l3",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "clflush",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "clflushopt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "clwb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "clzero",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cmov",
+							Description: "conditional move instruction",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cmp_legacy",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "constant_tsc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cpb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cpuid",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm_llc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm_mbm_local",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm_mbm_total",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm_occup_llc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cr8_legacy",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cx16",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cx8",
+							Description: "compare and exchange 8-byte",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "de",
+							Description: "debugging extensions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "decodeassists",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "extapic",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "extd_apicid",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "f16c",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "flushbyasid",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fma",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fpu",
+							Description: "mathematical co-processor",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fpu_exception",
+							Description: "FPU exceptions reporting",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fsgsbase",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fxsr",
+							Description: "fast floating point save/restore",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fxsr_opt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ht",
+							Description: "HyperThreading",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "hw_pstate",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ibpb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ibrs",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ibs",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "irperf",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "lahf_lm",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "lbrv",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "lm",
+							Description: "64bits extensions (x86-64)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mba",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mca",
+							Description: "machine check architecture",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mce",
+							Description: "machine check exceptions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "misalignsse",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mmx",
+							Description: "multimedia extensions (MMX)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mmxext",
+							Description: "multimedia extensions (MMXExt)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "monitor",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "movbe",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "msr",
+							Description: "model-specific registers",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mtrr",
+							Description: "memory type range registers",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mwaitx",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "nonstop_tsc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "nopl",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "npt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "nrip_save",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "nx",
+							Description: "no-execute bit (NX)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "osvw",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "overflow_recov",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pae",
+							Description: "4GB+ memory addressing (Physical Address Extension)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pat",
+							Description: "page attribute table",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pausefilter",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pclmulqdq",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pdpe1gb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "perfctr_core",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "perfctr_llc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "perfctr_nb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pfthreshold",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pge",
+							Description: "page global enable",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pni",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "popcnt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pse",
+							Description: "page size extensions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pse36",
+							Description: "36-bit page size extensions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdpid",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdrand",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdseed",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdt_a",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdtscp",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rep_good",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sep",
+							Description: "fast system calls",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sev",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sha_ni",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "skinit",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "smap",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "smca",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sme",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "smep",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ssbd",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse",
+							Description: "streaming SIMD extensions (SSE)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse2",
+							Description: "streaming SIMD extensions (SSE2)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse4_1",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse4_2",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse4a",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ssse3",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "stibp",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "succor",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "svm",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "svm_lock",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "syscall",
+							Description: "fast system calls",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "tce",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "topoext",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "tsc",
+							Description: "time stamp counter",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "tsc_scale",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "umip",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "v_vmsave_vmload",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vgif",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vmcb_clean",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vme",
+							Description: "virtual mode extensions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vmmcall",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "wbnoinvd",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "wdt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "wp",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "x2apic",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "x86-64",
+							Description: "64bits extensions (x86-64)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xgetbv1",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsave",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsavec",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsaveerptr",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsaveopt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsaves",
+							Description: "",
+							Enabled:     true,
+						},
+					},
 				},
 				ID:           "",
 				Slot:         "CPU1",
@@ -1058,6 +1720,668 @@ var (
 					ProductName: "AMD EPYC 7502P 32-Core Processor",
 					Firmware:    &common.Firmware{Installed: "137367629", Metadata: map[string]string{}},
 					Status:      nil,
+					Capabilities: []*common.Capability{
+						&common.Capability{
+							Name:        "3dnowprefetch",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "abm",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "adx",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "aes",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "aperfmperf",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "apic",
+							Description: "on-chip advanced programmable interrupt controller (APIC)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "arat",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "avic",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "avx",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "avx2",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bmi1",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bmi2",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "bpext",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cat_l3",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cdp_l3",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "clflush",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "clflushopt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "clwb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "clzero",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cmov",
+							Description: "conditional move instruction",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cmp_legacy",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "constant_tsc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cpb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cpuid",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm_llc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm_mbm_local",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm_mbm_total",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cqm_occup_llc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cr8_legacy",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cx16",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "cx8",
+							Description: "compare and exchange 8-byte",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "de",
+							Description: "debugging extensions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "decodeassists",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "extapic",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "extd_apicid",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "f16c",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "flushbyasid",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fma",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fpu",
+							Description: "mathematical co-processor",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fpu_exception",
+							Description: "FPU exceptions reporting",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fsgsbase",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fxsr",
+							Description: "fast floating point save/restore",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "fxsr_opt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ht",
+							Description: "HyperThreading",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "hw_pstate",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ibpb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ibrs",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ibs",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "irperf",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "lahf_lm",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "lbrv",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "lm",
+							Description: "64bits extensions (x86-64)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mba",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mca",
+							Description: "machine check architecture",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mce",
+							Description: "machine check exceptions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "misalignsse",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mmx",
+							Description: "multimedia extensions (MMX)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mmxext",
+							Description: "multimedia extensions (MMXExt)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "monitor",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "movbe",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "msr",
+							Description: "model-specific registers",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mtrr",
+							Description: "memory type range registers",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "mwaitx",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "nonstop_tsc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "nopl",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "npt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "nrip_save",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "nx",
+							Description: "no-execute bit (NX)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "osvw",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "overflow_recov",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pae",
+							Description: "4GB+ memory addressing (Physical Address Extension)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pat",
+							Description: "page attribute table",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pausefilter",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pclmulqdq",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pdpe1gb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "perfctr_core",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "perfctr_llc",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "perfctr_nb",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pfthreshold",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pge",
+							Description: "page global enable",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pni",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "popcnt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pse",
+							Description: "page size extensions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "pse36",
+							Description: "36-bit page size extensions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdpid",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdrand",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdseed",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdt_a",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rdtscp",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "rep_good",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sep",
+							Description: "fast system calls",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sev",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sha_ni",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "skinit",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "smap",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "smca",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sme",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "smep",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ssbd",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse",
+							Description: "streaming SIMD extensions (SSE)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse2",
+							Description: "streaming SIMD extensions (SSE2)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse4_1",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse4_2",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "sse4a",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "ssse3",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "stibp",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "succor",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "svm",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "svm_lock",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "syscall",
+							Description: "fast system calls",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "tce",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "topoext",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "tsc",
+							Description: "time stamp counter",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "tsc_scale",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "umip",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "v_vmsave_vmload",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vgif",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vmcb_clean",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vme",
+							Description: "virtual mode extensions",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "vmmcall",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "wbnoinvd",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "wdt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "wp",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "x2apic",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "x86-64",
+							Description: "64bits extensions (x86-64)",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xgetbv1",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsave",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsavec",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsaveerptr",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsaveopt",
+							Description: "",
+							Enabled:     true,
+						},
+						&common.Capability{
+							Name:        "xsaves",
+							Description: "",
+							Enabled:     true,
+						},
+					},
 				},
 				ID:           "",
 				Slot:         "CPU1",
