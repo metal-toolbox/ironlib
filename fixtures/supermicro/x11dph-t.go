@@ -260,6 +260,93 @@ var (
 					},
 				},
 				Status: nil,
+				Capabilities: []*common.Capability{
+					&common.Capability{
+						Name:        "acpi",
+						Description: "ACPI",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "biosbootspecification",
+						Description: "BIOS boot specification",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "bootselect",
+						Description: "Selectable boot path",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "cdboot",
+						Description: "Booting from CD-ROM/DVD",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "edd",
+						Description: "Enhanced Disk Drive extensions",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "int13floppy1200",
+						Description: "5.25\" 1.2MB floppy",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "int13floppy2880",
+						Description: "3.5\" 2.88MB floppy",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "int13floppy720",
+						Description: "3.5\" 720KB floppy",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "int14serial",
+						Description: "INT14 serial line control",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "int17printer",
+						Description: "INT17 printer control",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "int5printscreen",
+						Description: "Print Screen key",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "pci",
+						Description: "PCI bus",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "shadowing",
+						Description: "BIOS shadowing",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "socketedrom",
+						Description: "BIOS ROM is socketed",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "uefi",
+						Description: "UEFI specification is supported",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "upgrade",
+						Description: "BIOS EEPROM can be upgraded",
+						Enabled:     true,
+					},
+					&common.Capability{
+						Name:        "usb",
+						Description: "USB legacy emulation",
+						Enabled:     true,
+					},
+				},
 			},
 			SizeBytes:     65536,
 			CapacityBytes: 67108864,
