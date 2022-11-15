@@ -210,6 +210,12 @@ func (l *Lshw) parseNode(node *LshwNode) {
 		if drive != nil {
 			l.Device.Drives = append(l.Device.Drives, drive)
 		}
+	case "power":
+		powerSupply := l.xPSU(node)
+		if powerSupply != nil {
+			l.Device.PSUs = append(l.Device.PSUs, powerSupply)
+			return
+		}
 	}
 }
 
@@ -542,6 +548,26 @@ func (l *Lshw) xStorageController(node *LshwNode) *common.StorageController {
 	}
 
 	return sc
+}
+
+// Returns PSU information struct populated with the attributes identified by lshw
+func (l *Lshw) xPSU(node *LshwNode) *common.PSU {
+	if node.Class != "power" {
+		return nil
+	}
+
+	return &common.PSU{
+		Common: common.Common{
+			Description: node.Description,
+			Vendor:      node.Vendor,
+			Model:       node.Product,
+			Serial:      node.Serial,
+			ProductName: node.Product,
+		},
+
+		ID:                 node.Physid,
+		PowerCapacityWatts: node.Capacity,
+	}
 }
 
 // FakeLshwExecute implements the utils.Executor interface for testing

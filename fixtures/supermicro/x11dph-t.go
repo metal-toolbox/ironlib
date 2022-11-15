@@ -1225,7 +1225,30 @@ var (
 				SpeedGbps:                    0,
 			},
 		},
-		PSUs:       []*common.PSU{},
+		PSUs: []*common.PSU{
+			{
+				Common: common.Common{
+					Description: "PWS-1K23A-1R",
+					Vendor:      "SUPERMICRO",
+					Model:       "PWS-1K23A-1R",
+					Serial:      "P1K2ACK07HB0670",
+					ProductName: "PWS-1K23A-1R",
+				},
+				ID:                 "1",
+				PowerCapacityWatts: 1200,
+			},
+			{
+				Common: common.Common{
+					Description: "PWS-1K23A-1R",
+					Vendor:      "SUPERMICRO",
+					Model:       "PWS-1K23A-1R",
+					Serial:      "P1K2ACK07HB0669",
+					ProductName: "PWS-1K23A-1R",
+				},
+				ID:                 "2",
+				PowerCapacityWatts: 1200,
+			},
+		},
 		Enclosures: []*common.Enclosure{},
 	}
 )
