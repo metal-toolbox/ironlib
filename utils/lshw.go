@@ -356,11 +356,12 @@ func (l *Lshw) xNIC(node *LshwNode) *common.NIC {
 
 	nic := &common.NIC{
 		Common: common.Common{
-			Description: node.Description,
-			Vendor:      node.Vendor,
-			Model:       node.Product,
-			Serial:      node.Serial,
-			ProductName: node.Product,
+			Description:  node.Description,
+			Vendor:       node.Vendor,
+			Model:        node.Product,
+			Serial:       node.Serial,
+			ProductName:  node.Product,
+			Capabilities: l.xParseCapabilities(node.Capabilities),
 		},
 
 		Description: node.Description,
