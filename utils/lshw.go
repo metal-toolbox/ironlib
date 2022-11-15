@@ -246,6 +246,7 @@ func (l *Lshw) xBIOS(node *LshwNode) *common.BIOS {
 			Firmware: &common.Firmware{
 				Installed: node.Version,
 			},
+			Capabilities: l.xParseCapabilities(node.Capabilities),
 		},
 
 		SizeBytes:     int64(node.Size),
@@ -612,9 +613,11 @@ func (l *Lshw) xParseCapabilities(capabilities LshwNodeCapabilities) []*common.C
 		sort.SliceStable(caps, func(i, j int) bool {
 			return caps[i].Name < caps[j].Name
 		})
+
+		return caps
 	}
 
-	return caps
+	return nil
 }
 
 // FakeLshwExecute implements the utils.Executor interface for testing
