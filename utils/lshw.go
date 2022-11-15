@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -313,12 +314,13 @@ func (l *Lshw) xCPU(node *LshwNode) *common.CPU {
 
 	return &common.CPU{
 		Common: common.Common{
-			Description: node.Description,
-			Vendor:      node.Vendor,
-			Model:       node.Product,
-			Serial:      node.Serial,
-			ProductName: node.Product,
-			Firmware:    firmware,
+			Description:  node.Description,
+			Vendor:       node.Vendor,
+			Model:        node.Product,
+			Serial:       node.Serial,
+			ProductName:  node.Product,
+			Firmware:     firmware,
+			Capabilities: l.xParseCapabilities(node.Capabilities),
 		},
 
 		ClockSpeedHz: node.Clock,
@@ -577,6 +579,42 @@ func (l *Lshw) xPSU(node *LshwNode) *common.PSU {
 		ID:                 node.Physid,
 		PowerCapacityWatts: node.Capacity,
 	}
+}
+
+func (l *Lshw) xParseCapabilities(capabilities LshwNodeCapabilities) []*common.Capability {
+	caps := make([]*common.Capability, 0)
+
+	for key, v := range capabilities {
+		switch value := v.(type) {
+		default:
+			continue
+		case string:
+			caps = append(caps, &common.Capability{
+				Name:        key,
+				Description: value,
+				Enabled:     true,
+			})
+
+			continue
+
+		case bool:
+			caps = append(caps, &common.Capability{
+				Name:    key,
+				Enabled: value,
+			})
+
+			continue
+		}
+	}
+
+	// sort capabilities by name - this helps in tests to have data that is consistent.
+	if len(caps) > 0 {
+		sort.SliceStable(caps, func(i, j int) bool {
+			return caps[i].Name < caps[j].Name
+		})
+	}
+
+	return caps
 }
 
 // FakeLshwExecute implements the utils.Executor interface for testing
