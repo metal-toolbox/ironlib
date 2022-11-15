@@ -285,6 +285,8 @@ func (l *Lshw) xCPU(node *LshwNode) *common.CPU {
 	// parse out cores and thread count
 	var cores, threads int
 
+	var firmware *common.Firmware
+
 	if node.Configuration != nil {
 		c, defined := node.Configuration["cores"]
 		if defined {
@@ -301,6 +303,12 @@ func (l *Lshw) xCPU(node *LshwNode) *common.CPU {
 				threads = t
 			}
 		}
+
+		microcode, defined := node.Configuration["microcode"]
+		if defined {
+			firmware = common.NewFirmwareObj()
+			firmware.Installed = microcode
+		}
 	}
 
 	return &common.CPU{
@@ -310,6 +318,7 @@ func (l *Lshw) xCPU(node *LshwNode) *common.CPU {
 			Model:       node.Product,
 			Serial:      node.Serial,
 			ProductName: node.Product,
+			Firmware:    firmware,
 		},
 
 		ClockSpeedHz: node.Clock,
