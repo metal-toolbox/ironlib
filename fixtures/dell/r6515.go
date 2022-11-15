@@ -868,7 +868,30 @@ var (
 				SpeedGbps:                    0,
 			},
 		},
-		PSUs:       []*common.PSU{},
+		PSUs: []*common.PSU{
+			{
+				Common: common.Common{
+					Description: "PWR SPLY,550W,RDNT,LTON",
+					Vendor:      "DELL",
+					Model:       "0NCNFFA02",
+					Serial:      "CNLOD000B229D6",
+					ProductName: "0NCNFFA02",
+				},
+				ID:                 "1",
+				PowerCapacityWatts: 550,
+			},
+			{
+				Common: common.Common{
+					Description: "PWR SPLY,550W,RDNT,LTON",
+					Vendor:      "DELL",
+					Model:       "0NCNFFA02",
+					Serial:      "CNLOD000B232CD",
+					ProductName: "0NCNFFA02",
+				},
+				ID:                 "2",
+				PowerCapacityWatts: 550,
+			},
+		},
 		Enclosures: []*common.Enclosure{},
 	}
 
@@ -1599,7 +1622,30 @@ var (
 				SpeedGbps:                    0,
 			},
 		},
-		PSUs:       []*common.PSU{},
+		PSUs: []*common.PSU{
+			{
+				Common: common.Common{
+					Description: "PWR SPLY,550W,RDNT,LTON",
+					Vendor:      "DELL",
+					Model:       "0NCNFFA02",
+					Serial:      "CNLOD000B229D6",
+					ProductName: "0NCNFFA02",
+				},
+				ID:                 "1",
+				PowerCapacityWatts: 550,
+			},
+			{
+				Common: common.Common{
+					Description: "PWR SPLY,550W,RDNT,LTON",
+					Vendor:      "DELL",
+					Model:       "0NCNFFA02",
+					Serial:      "CNLOD000B232CD",
+					ProductName: "0NCNFFA02",
+				},
+				ID:                 "2",
+				PowerCapacityWatts: 550,
+			},
+		},
 		Enclosures: []*common.Enclosure{},
 	}
 
