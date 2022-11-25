@@ -99,3 +99,5 @@ UTIL_SMC_IPMICFG
 UTIL_SUM
 UTIL_STORECLI
 ```
+
+Check out this [snippet](examples/dependencies/main.go) to determine if all required dependencies are available to ironlib.
