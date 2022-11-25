@@ -14,7 +14,6 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-const smcSumPath = "/usr/sbin/sum"
 const EnvVarSumPath = "UTIL_SUM"
 
 type SupermicroSUM struct {
@@ -23,13 +22,15 @@ type SupermicroSUM struct {
 
 // Return a new Supermicro sum command executor
 func NewSupermicroSUM(trace bool) *SupermicroSUM {
-	var e Executor
-	if envSum := os.Getenv(EnvVarSumPath); envSum != "" {
-		e = NewExecutor(envSum)
-	} else {
-		e = NewExecutor(smcSumPath)
+	// TODO: rename this to smc-sum
+	utility := "sum"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvVarSumPath); eVar != "" {
+		utility = eVar
 	}
 
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

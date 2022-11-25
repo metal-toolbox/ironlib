@@ -5,13 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
 )
 
-const storecli = "/opt/MegaRAID/storcli/storcli64"
+const EnvStorecliUtility = "UTIL_STORECLI"
 
 type StoreCLI struct {
 	Executor Executor
@@ -41,7 +42,14 @@ type ResponseData struct {
 
 // Return a new storecli executor
 func NewStoreCLICmd(trace bool) *StoreCLI {
-	e := NewExecutor(storecli)
+	utility := "/opt/MegaRAID/storcli/storcli64"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvStorecliUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

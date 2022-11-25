@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -11,7 +12,7 @@ import (
 	"github.com/bmc-toolbox/common"
 )
 
-const nvmecli = "/usr/sbin/nvme"
+const EnvNvmeUtility = "UTIL_NVME"
 
 type Nvme struct {
 	Executor Executor
@@ -33,7 +34,14 @@ type nvmeList struct {
 
 // Return a new nvme executor
 func NewNvmeCmd(trace bool) *Nvme {
-	e := NewExecutor(nvmecli)
+	utility := "nvme"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvNvmeUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

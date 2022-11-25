@@ -3,13 +3,16 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/pkg/errors"
 )
 
-const lsblk = "/usr/bin/lsblk"
+const (
+	EnvLsblkUtility = "UTIL_LSBLK"
+)
 
 var ErrLsblkTransportUnsupported = errors.New("Unsupported transport type")
 
@@ -28,7 +31,14 @@ type lsblkDeviceAttributes struct {
 
 // Return a new lsblk executor
 func NewLsblkCmd(trace bool) *Lsblk {
-	e := NewExecutor(lsblk)
+	utility := "lsblk"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvLsblkUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

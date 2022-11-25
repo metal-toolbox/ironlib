@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,9 +16,9 @@ import (
 )
 
 const (
-	mvcliBin  = "/usr/bin/mvcli"
-	BitsUint8 = 8
-	BitsInt64 = 64
+	EnvMvcliUtility = "UTIL_MVCLI"
+	BitsUint8       = 8
+	BitsInt64       = 64
 )
 
 // RAID Modes:
@@ -108,7 +109,14 @@ func wrapError(err error, k string, v interface{}) error {
 
 // Return a new mvcli executor
 func NewMvcliCmd(trace bool) *Mvcli {
-	e := NewExecutor(mvcliBin)
+	utility := "mvcli"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvMvcliUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

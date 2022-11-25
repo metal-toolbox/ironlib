@@ -49,9 +49,10 @@ type AsrrBioscontrol struct {
 
 // NewAsrrBioscontrol returns a new Asrr bios control utility executor
 func NewAsrrBioscontrol(trace bool) *AsrrBioscontrol {
-	utility := os.Getenv(EnvAsrrBiosUtility)
-	if utility == "" {
-		utility = asrrBiosUtility
+	utility := asrrBiosUtility
+
+	if eVar := os.Getenv(EnvAsrrBiosUtility); eVar != "" {
+		utility = eVar
 	}
 
 	e := NewExecutor(utility)

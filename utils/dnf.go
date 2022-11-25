@@ -40,6 +40,11 @@ gpgkey=file:///usr/libexec/dell_dup/0x756ba70b1019ced6.asc
 enabled=1`
 )
 
+const (
+	// EnvDnfUtility - to override the utility path
+	EnvDnfUtility = "UTIL_DNF"
+)
+
 type Dnf struct {
 	Executor Executor
 }
@@ -53,7 +58,14 @@ type DnfRepoParams struct {
 
 // Return a new dnf executor
 func NewDnf(trace bool) *Dnf {
-	e := NewExecutor("microdnf")
+	utility := "microdnf"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvDnfUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

@@ -26,6 +26,8 @@ const (
 	DSUExitCodeNoUpdatesAvailable = 34
 
 	LocalUpdatesDirectory = "/root/dsu"
+
+	EnvDsuUtility = "UTIL_DSU"
 )
 
 var (
@@ -38,7 +40,14 @@ var (
 // NewDsu returns a executor to run dsu commands
 // if trace is enabled, stdout is printed to the terminal
 func NewDsu(trace bool) *Dsu {
-	e := NewExecutor("dsu")
+	utility := "dsu"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvDsuUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	if !trace {
 		e.SetQuiet()
 	}

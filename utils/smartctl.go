@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const smartctlBin = "/usr/sbin/smartctl"
+const EnvSmartctlUtility = "UTIL_SMARTCTL"
 
 var (
 	// map of smartctl error bits to explanation - man 8 smartctl
@@ -60,7 +60,14 @@ type SmartctlStatus struct {
 
 // Return a new smartctl executor
 func NewSmartctlCmd(trace bool) *Smartctl {
-	e := NewExecutor(smartctlBin)
+	utility := "smartctl"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvSmartctlUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {
