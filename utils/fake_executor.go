@@ -129,6 +129,16 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: 0}, nil
 }
 
+func (e *FakeExecute) CheckExecutable() error {
+	return nil
+}
+
+// CmdPath returns the absolute path to the executable
+// this means the caller should not have disabled CheckBin.
+func (e *FakeExecute) CmdPath() string {
+	return e.Cmd
+}
+
 func (e *FakeExecute) SetArgs(a []string) {
 	e.Args = a
 }

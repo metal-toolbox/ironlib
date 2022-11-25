@@ -22,6 +22,8 @@ type Executor interface {
 	GetCmd() string
 	DisableBinCheck()
 	SetStdin(io.Reader)
+	CmdPath() string
+	CheckExecutable() error
 	// for tests
 	SetStdout([]byte)
 	SetStderr([]byte)
@@ -55,6 +57,12 @@ func (e *Execute) GetCmd() string {
 	cmd = append(cmd, e.Args...)
 
 	return strings.Join(cmd, " ")
+}
+
+// CmdPath returns the absolute path to the executable
+// this means the caller should not have disabled CheckBin.
+func (e *Execute) CmdPath() string {
+	return e.Cmd
 }
 
 // SetArgs sets the command args
@@ -102,7 +110,7 @@ func (e *Execute) SetExitCode(i int) {
 // ExecWithContext executes the command and returns the Result object
 func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err error) {
 	if e.CheckBin {
-		err = checkBinDep(e.Cmd)
+		err = e.CheckExecutable()
 		if err != nil {
 			return nil, err
 		}
@@ -131,18 +139,20 @@ func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err erro
 	return result, nil
 }
 
-// checkBinDep determines if the given bin exists and is an executable
-func checkBinDep(bin string) error {
+// CheckExecutable determines if the set Cmd value exists as a file and is an executable.
+func (e *Execute) CheckExecutable() error {
 	var path string
 
-	if strings.Contains(bin, "/") {
-		path = bin
+	if strings.Contains(e.Cmd, "/") {
+		path = e.Cmd
 	} else {
 		var err error
-		path, err = exec.LookPath(bin)
+		path, err = exec.LookPath(e.Cmd)
 		if err != nil {
 			return errors.Wrap(errs.ErrBinLookupPath, err.Error())
 		}
+
+		e.Cmd = path
 	}
 
 	fileInfo, err := os.Lstat(path)
