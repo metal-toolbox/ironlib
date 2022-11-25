@@ -1,7 +1,10 @@
 package ironlib
 
 import (
+	"fmt"
+
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/providers/asrockrack"
@@ -44,6 +47,50 @@ func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
 		return asrockrack.New(dmidecode, logger)
 	default:
 		return generic.New(dmidecode, logger)
+	}
+}
+
+// CheckDependencies checks and lists available utilities.
+func CheckDependencies() {
+	utilities := []actions.UtilAttributeGetter{
+		utils.NewAsrrBioscontrol(false),
+		utils.NewDellRacadm(false),
+		utils.NewDnf(false),
+		utils.NewDsu(false),
+		utils.NewHdparmCmd(false),
+		utils.NewLshwCmd(false),
+		utils.NewLsblkCmd(false),
+		utils.NewMlxupCmd(false),
+		utils.NewMsecli(false),
+		utils.NewMvcliCmd(false),
+		utils.NewNvmeCmd(false),
+		utils.NewSmartctlCmd(false),
+		utils.NewIpmicfgCmd(false),
+		utils.NewSupermicroSUM(false),
+		utils.NewStoreCLICmd(false),
+	}
+
+	red := "\033[31m"
+	green := "\033[32m"
+	reset := "\033[0m"
+
+	dmi, err := utils.NewDmidecode()
+
+	dmiName, dmiPath, dmiErr := dmi.Attributes()
+	if err != nil || dmiErr != nil {
+		fmt.Printf("util: %s, path: %s %s[err]%s - %s\n", dmiName, dmiPath, red, reset, dmiErr.Error())
+	} else {
+		fmt.Printf("util: %s, path: %s %s[ok]%s\n", dmiName, dmiPath, green, reset)
+	}
+
+	for _, utility := range utilities {
+		name, uPath, err := utility.Attributes()
+		if err != nil {
+			fmt.Printf("util: %s, path: %s %s[err]%s - %s\n", name, uPath, red, reset, err.Error())
+			continue
+		}
+
+		fmt.Printf("util: %s, path: %s %s[ok]%s\n", name, uPath, green, reset)
 	}
 }
 
