@@ -51,6 +51,14 @@ func NewNvmeCmd(trace bool) *Nvme {
 	return &Nvme{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (n *Nvme) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := n.Executor.CheckExecutable()
+
+	return "nvme", n.Executor.CmdPath(), er
+}
+
 // Executes nvme list, parses the output and returns a slice of *common.Drive
 func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 	drives := make([]*common.Drive, 0)

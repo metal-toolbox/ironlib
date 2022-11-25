@@ -26,6 +26,13 @@ func NewDmidecode() (d *Dmidecode, err error) {
 	return &Dmidecode{dmi: dmi}, err
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (d *Dmidecode) Attributes() (utilName, absolutePath string, err error) {
+	path, err := d.dmi.FindBin("dmidecode")
+
+	return "dmidecode", path, err
+}
+
 // InitFakeDmidecode returns a fake dmidecode instance loaded with the dmidecode output from testFile
 func InitFakeDmidecode(testFile string) (*Dmidecode, error) {
 	b, err := os.ReadFile(testFile)

@@ -37,6 +37,14 @@ func NewHdparmCmd(trace bool) *Hdparm {
 	return &Hdparm{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (h *Hdparm) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := h.Executor.CheckExecutable()
+
+	return "hdparm", h.Executor.CmdPath(), er
+}
+
 func (h *Hdparm) cmdListCapabilities(ctx context.Context, logicalName string) ([]byte, error) {
 	// hdparm -I devicepath
 	h.Executor.SetArgs([]string{"-I", logicalName})

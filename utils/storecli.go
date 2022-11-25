@@ -59,6 +59,14 @@ func NewStoreCLICmd(trace bool) *StoreCLI {
 	return &StoreCLI{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (s *StoreCLI) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := s.Executor.CheckExecutable()
+
+	return "storecli", s.Executor.CmdPath(), er
+}
+
 // Return a Fake storecli executor for tests
 func NewFakeStoreCLI(r io.Reader) (*StoreCLI, error) {
 	e := NewFakeExecutor("storecli")

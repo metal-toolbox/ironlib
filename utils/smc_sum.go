@@ -40,6 +40,14 @@ func NewSupermicroSUM(trace bool) *SupermicroSUM {
 	return &SupermicroSUM{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (s *SupermicroSUM) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := s.Executor.CheckExecutable()
+
+	return "smc-sum", s.Executor.CmdPath(), er
+}
+
 // Components implements the Utility interface
 func (s *SupermicroSUM) Components() ([]*model.Component, error) {
 	return nil, nil

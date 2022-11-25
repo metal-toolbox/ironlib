@@ -77,6 +77,14 @@ func NewDnf(trace bool) *Dnf {
 	}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (d *Dnf) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := d.Executor.CheckExecutable()
+
+	return "dnf", d.Executor.CmdPath(), er
+}
+
 // Returns a fake dnf instance for tests
 func NewFakeDnf() *Dnf {
 	return &Dnf{

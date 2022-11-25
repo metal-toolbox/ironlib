@@ -51,6 +51,14 @@ func NewMsecli(trace bool) *Msecli {
 	return &Msecli{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (m *Msecli) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := m.Executor.CheckExecutable()
+
+	return "msecli", m.Executor.CmdPath(), er
+}
+
 // Drives returns a slice of drive components identified
 func (m *Msecli) Drives(ctx context.Context) ([]*common.Drive, error) {
 	devices, err := m.Query()
