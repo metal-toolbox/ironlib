@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -84,6 +85,14 @@ func NewLshwCmd(trace bool) *Lshw {
 	}
 
 	return &Lshw{Executor: e, nicSerials: make(map[string]bool)}
+}
+
+// Attributes implements the actions.UtilAttributeGetter interface
+func (l *Lshw) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := l.Executor.CheckExecutable()
+
+	return "lshw", l.Executor.CmdPath(), er
 }
 
 // Inventory collects and returns device hardware inventory

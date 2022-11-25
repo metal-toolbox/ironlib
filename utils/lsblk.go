@@ -48,6 +48,14 @@ func NewLsblkCmd(trace bool) *Lsblk {
 	return &Lsblk{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (l *Lsblk) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := l.Executor.CheckExecutable()
+
+	return "lsblk", l.Executor.CmdPath(), er
+}
+
 // Executes lsblk list, parses the output and returns a slice of *common.Drive
 func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 	drives := make([]*common.Drive, 0)

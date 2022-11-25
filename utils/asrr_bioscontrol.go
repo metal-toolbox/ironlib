@@ -65,6 +65,14 @@ func NewAsrrBioscontrol(trace bool) *AsrrBioscontrol {
 	return &AsrrBioscontrol{Executor: e, tmpJSONFile: asrTmpBIOSConfigJSON}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (a *AsrrBioscontrol) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := a.Executor.CheckExecutable()
+
+	return "asrr-bioscontrol", a.Executor.CmdPath(), er
+}
+
 // kernelVersion returns the host kernel version
 func kernelVersion() (string, error) {
 	unameExec := NewExecutor("uname")

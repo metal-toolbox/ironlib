@@ -77,6 +77,14 @@ func NewSmartctlCmd(trace bool) *Smartctl {
 	return &Smartctl{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (s *Smartctl) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := s.Executor.CheckExecutable()
+
+	return "smartctl", s.Executor.CmdPath(), er
+}
+
 // Drives returns drives identified by smartctl
 func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 	drives := make([]*common.Drive, 0)

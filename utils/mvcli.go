@@ -126,6 +126,14 @@ func NewMvcliCmd(trace bool) *Mvcli {
 	return &Mvcli{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (m *Mvcli) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := m.Executor.CheckExecutable()
+
+	return "mvcli", m.Executor.CmdPath(), er
+}
+
 // Return a Fake mvcli executor for tests
 func NewFakeMvcli(r io.Reader) (*Mvcli, error) {
 	e := NewFakeExecutor("mvcli")

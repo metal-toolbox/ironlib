@@ -43,6 +43,14 @@ func NewDellRacadm(trace bool) *DellRacadm {
 	return &DellRacadm{Executor: e, BIOSCfgTmpFile: "/tmp/bioscfg"}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (s *DellRacadm) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := s.Executor.CheckExecutable()
+
+	return "dell-racadm", s.Executor.CmdPath(), er
+}
+
 // GetBIOSConfiguration returns a BIOS configuration object
 func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel string) (map[string]string, error) {
 	var cfg map[string]string

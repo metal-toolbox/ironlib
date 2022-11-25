@@ -44,6 +44,14 @@ func NewIpmicfgCmd(trace bool) *Ipmicfg {
 	return &Ipmicfg{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (i *Ipmicfg) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := i.Executor.CheckExecutable()
+
+	return "smc-ipmicfg", i.Executor.CmdPath(), er
+}
+
 // Fake IPMI executor for tests
 func NewFakeIpmicfg(r io.Reader) *Ipmicfg {
 	e := NewFakeExecutor("ipmicfg")

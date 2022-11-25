@@ -57,6 +57,14 @@ func NewDsu(trace bool) *Dsu {
 	}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (d *Dsu) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := d.Executor.CheckExecutable()
+
+	return "dsu", d.Executor.CmdPath(), er
+}
+
 // Returns a dsu instance with a fake executor for tests
 func NewFakeDsu(r io.Reader) (*Dsu, error) {
 	dsu := &Dsu{

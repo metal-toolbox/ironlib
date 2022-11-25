@@ -54,6 +54,14 @@ func NewMlxupCmd(trace bool) *Mlxup {
 	return &Mlxup{Executor: e}
 }
 
+// Attributes implements the actions.UtilAttributeGetter interface
+func (m *Mlxup) Attributes() (utilName, absolutePath string, err error) {
+	// Call CheckExecutable first so that the Executable CmdPath is resolved.
+	er := m.Executor.CheckExecutable()
+
+	return "mlxup", m.Executor.CmdPath(), er
+}
+
 // NICs returns a slice of mellanox components as *common.NIC's
 func (m *Mlxup) NICs(ctx context.Context) ([]*common.NIC, error) {
 	devices, err := m.Query()
