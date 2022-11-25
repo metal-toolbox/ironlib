@@ -90,7 +90,7 @@ func initCheckBinTests() []checkBinTester {
 	}
 }
 
-func Test_checkBinDep(t *testing.T) {
+func Test_CheckExecutable(t *testing.T) {
 	tests := initCheckBinTests()
 	for _, c := range tests {
 		if c.createFile {
@@ -110,7 +110,9 @@ func Test_checkBinDep(t *testing.T) {
 			}
 		}
 
-		err := checkBinDep(c.filePath)
+		e := new(Execute)
+		e.Cmd = c.filePath
+		err := e.CheckExecutable()
 		assert.Equal(t, c.expectedErr, errors.Cause(err), c.testName)
 	}
 }
