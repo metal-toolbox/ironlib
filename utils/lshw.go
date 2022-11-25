@@ -15,8 +15,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const lshwBin = "/usr/sbin/lshw"
-
 var (
 	ErrParseLshwOutput         = errors.New("lshw output parse error")
 	storageControllerInterface = map[string]string{"sas": "SAS", "sata": "SATA"}
@@ -65,9 +63,20 @@ type LshwNode struct {
 	Capabilities  LshwNodeCapabilities  `json:"capabilities,omitempty"`
 }
 
+const (
+	EnvLshwUtility = "UTIL_LSHW"
+)
+
 // Return a new lshw executor
 func NewLshwCmd(trace bool) *Lshw {
-	e := NewExecutor(lshwBin)
+	utility := "lshw"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvLshwUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

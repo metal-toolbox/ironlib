@@ -3,13 +3,16 @@ package utils
 import (
 	"bufio"
 	"context"
+	"os"
 	"regexp"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
 )
 
-const hdparm = "/usr/sbin/hdparm"
+const (
+	EnvHdparmUtility = "UTIL_HDPARM"
+)
 
 type Hdparm struct {
 	Executor Executor
@@ -17,7 +20,14 @@ type Hdparm struct {
 
 // Return a new hdparm executor
 func NewHdparmCmd(trace bool) *Hdparm {
-	e := NewExecutor(hdparm)
+	utility := "hdparm"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvHdparmUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

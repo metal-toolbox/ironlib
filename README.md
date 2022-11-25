@@ -76,3 +76,26 @@ func main() {
 }
 
 ```
+
+#### Executable path environment variables.
+
+By default ironlib will lookup the executable path, if required the path can be overriden by
+exporting one or more of these environment variables
+
+```
+UTIL_ASRR_BIOSCONTROL
+UTIL_RACADM7
+UTIL_DNF
+UTIL_DSU
+UTIL_HDPARM
+UTIL_LSBLK
+UTIL_LSHW
+UTIL_MLXUP
+UTIL_MSECLI
+UTIL_MVCLI
+UTIL_NVME
+UTIL_SMARTCTL
+UTIL_SMC_IPMICFG
+UTIL_SUM
+UTIL_STORECLI
+```

@@ -5,13 +5,16 @@ import (
 	"context"
 	"io"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/pkg/errors"
 )
 
-const mlxupBin = "/usr/sbin/mlxup"
+const (
+	EnvMlxupUtility = "UTIL_MLXUP"
+)
 
 // Mlxup is a mlxup command executor object
 type Mlxup struct {
@@ -34,8 +37,14 @@ type MlxupDevice struct {
 
 // Return a new mellanox mlxup command executor
 func NewMlxupCmd(trace bool) *Mlxup {
-	e := NewExecutor(mlxupBin)
+	utility := "mlxup"
 
+	// lookup env var for util
+	if eVar := os.Getenv(EnvMlxupUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

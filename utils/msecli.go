@@ -16,8 +16,9 @@ var (
 	ErrMseCliDriveNotIdentified = errors.New("failed to identify drive for update")
 )
 
-// msecli git executable
-const msecliBin = "/usr/bin/msecli"
+const (
+	EnvMsecliUtility = "UTIL_MSECLI"
+)
 
 // Msecli is an msecli executor
 type Msecli struct {
@@ -33,7 +34,14 @@ type MsecliDevice struct {
 
 // NewMsecli returns a Msecli object to run msecli commands
 func NewMsecli(trace bool) *Msecli {
-	e := NewExecutor(msecliBin)
+	utility := "msecli"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvMsecliUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {

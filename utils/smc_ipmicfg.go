@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/pkg/errors"
 )
 
-const ipmicfg = "/usr/sbin/smc-ipmicfg"
+const EnvSmcIpmicfgUtility = "UTIL_SMC_IPMICFG"
 
 type Ipmicfg struct {
 	Executor Executor
@@ -25,9 +26,15 @@ type IpmicfgSummary struct {
 }
 
 // Return a new Supermicro IPMICFG executor
-// note: the binary is expected to be available as smc-ipmicfg as setup in the fup firmware-update image
 func NewIpmicfgCmd(trace bool) *Ipmicfg {
-	e := NewExecutor(ipmicfg)
+	utility := "smc-ipmicfg"
+
+	// lookup env var for util
+	if eVar := os.Getenv(EnvSmcIpmicfgUtility); eVar != "" {
+		utility = eVar
+	}
+
+	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
 	if !trace {
