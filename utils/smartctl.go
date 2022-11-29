@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const EnvSmartctlUtility = "UTIL_SMARTCTL"
+const EnvSmartctlUtility = "IRONLIB_UTIL_SMARTCTL"
 
 var (
 	// map of smartctl error bits to explanation - man 8 smartctl

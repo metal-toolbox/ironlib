@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	EnvHdparmUtility = "UTIL_HDPARM"
+	EnvHdparmUtility = "IRONLIB_UTIL_HDPARM"
 )
 
 type Hdparm struct {

@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	EnvLsblkUtility = "UTIL_LSBLK"
+	EnvLsblkUtility = "IRONLIB_UTIL_LSBLK"
 )
 
 var ErrLsblkTransportUnsupported = errors.New("Unsupported transport type")

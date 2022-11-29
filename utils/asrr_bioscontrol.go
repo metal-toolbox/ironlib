@@ -25,7 +25,7 @@ import (
 
 const (
 	// EnvAsrrBiosUtility - to override the utility path
-	EnvAsrrBiosUtility = "UTIL_ASRR_BIOSCONTROL"
+	EnvAsrrBiosUtility = "IRONLIB_UTIL_ASRR_BIOSCONTROL"
 
 	// see the Dockerfile for how this bin ends up here
 	asrrBiosUtility = "/usr/sbin/asrr-bioscontrol"

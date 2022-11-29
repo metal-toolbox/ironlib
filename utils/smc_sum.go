@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-const EnvVarSumPath = "UTIL_SUM"
+const EnvVarSumPath = "IRONLIB_UTIL_SUM"
 
 type SupermicroSUM struct {
 	Executor Executor

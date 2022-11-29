@@ -12,7 +12,7 @@ import (
 	"github.com/bmc-toolbox/common"
 )
 
-const EnvNvmeUtility = "UTIL_NVME"
+const EnvNvmeUtility = "IRONLIB_UTIL_NVME"
 
 type Nvme struct {
 	Executor Executor

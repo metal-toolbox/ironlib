@@ -12,7 +12,7 @@ import (
 	"github.com/bmc-toolbox/common"
 )
 
-const EnvStorecliUtility = "UTIL_STORECLI"
+const EnvStorecliUtility = "IRONLIB_UTIL_STORECLI"
 
 type StoreCLI struct {
 	Executor Executor
