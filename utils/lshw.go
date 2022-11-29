@@ -65,7 +65,7 @@ type LshwNode struct {
 }
 
 const (
-	EnvLshwUtility = "UTIL_LSHW"
+	EnvLshwUtility = "IRONLIB_UTIL_LSHW"
 )
 
 // Return a new lshw executor

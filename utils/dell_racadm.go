@@ -12,7 +12,7 @@ import (
 )
 
 const DellRacadmPath = "/opt/dell/srvadmin/bin/idracadm7"
-const EnvVarRacadm7 = "UTIL_RACADM7"
+const EnvVarRacadm7 = "IRONLIB_UTIL_RACADM7"
 
 var ErrDellBiosCfgNil = errors.New("expected valid bios config object, got nil")
 var ErrDellBiosCfgFileUndefined = errors.New("no BIOS config file defined")

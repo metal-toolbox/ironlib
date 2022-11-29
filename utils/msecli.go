@@ -17,7 +17,7 @@ var (
 )
 
 const (
-	EnvMsecliUtility = "UTIL_MSECLI"
+	EnvMsecliUtility = "IRONLIB_UTIL_MSECLI"
 )
 
 // Msecli is an msecli executor

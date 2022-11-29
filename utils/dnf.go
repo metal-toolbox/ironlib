@@ -42,7 +42,7 @@ enabled=1`
 
 const (
 	// EnvDnfUtility - to override the utility path
-	EnvDnfUtility = "UTIL_DNF"
+	EnvDnfUtility = "IRONLIB_UTIL_DNF"
 )
 
 type Dnf struct {

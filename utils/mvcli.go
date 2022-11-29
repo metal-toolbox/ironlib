@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	EnvMvcliUtility = "UTIL_MVCLI"
+	EnvMvcliUtility = "IRONLIB_UTIL_MVCLI"
 	BitsUint8       = 8
 	BitsInt64       = 64
 )

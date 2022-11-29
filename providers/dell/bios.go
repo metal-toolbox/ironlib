@@ -13,7 +13,7 @@ func (d *dell) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) 
 }
 
 func (d *dell) GetBIOSConfiguration(ctx context.Context) (map[string]string, error) {
-	if envRacadmUtil := os.Getenv("UTIL_RACADM7"); envRacadmUtil == "" {
+	if envRacadmUtil := os.Getenv("IRONLIB_UTIL_RACADM7"); envRacadmUtil == "" {
 		err := d.pre() // ensure runtime pre-requisites are installed
 		if err != nil {
 			return nil, err

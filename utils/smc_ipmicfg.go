@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const EnvSmcIpmicfgUtility = "UTIL_SMC_IPMICFG"
+const EnvSmcIpmicfgUtility = "IRONLIB_UTIL_SMC_IPMICFG"
 
 type Ipmicfg struct {
 	Executor Executor

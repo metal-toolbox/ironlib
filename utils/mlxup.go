@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	EnvMlxupUtility = "UTIL_MLXUP"
+	EnvMlxupUtility = "IRONLIB_UTIL_MLXUP"
 )
 
 // Mlxup is a mlxup command executor object

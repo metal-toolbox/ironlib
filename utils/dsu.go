@@ -27,7 +27,7 @@ const (
 
 	LocalUpdatesDirectory = "/root/dsu"
 
-	EnvDsuUtility = "UTIL_DSU"
+	EnvDsuUtility = "IRONLIB_UTIL_DSU"
 )
 
 var (
