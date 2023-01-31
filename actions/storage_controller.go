@@ -9,14 +9,19 @@ import (
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 var (
 	ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
 )
 
-func CreateVirtualDisk(ctx context.Context, hba *common.StorageController, options *model.CreateVirtualDiskOptions) error {
-	util, err := GetControllerUtility(hba.Vendor, hba.Model)
+type StorageControllerAction struct {
+	Logger logrus.Logger
+}
+
+func (s *StorageControllerAction) CreateVirtualDisk(ctx context.Context, hba *common.StorageController, options *model.CreateVirtualDiskOptions) error {
+	util, err := s.GetControllerUtility(hba.Vendor, hba.Model)
 	if err != nil {
 		return err
 	}
@@ -24,8 +29,8 @@ func CreateVirtualDisk(ctx context.Context, hba *common.StorageController, optio
 	return util.CreateVirtualDisk(ctx, options.RaidMode, options.PhysicalDiskIDs, options.Name, options.BlockSize)
 }
 
-func DestroyVirtualDisk(ctx context.Context, hba *common.StorageController, options *model.DestroyVirtualDiskOptions) error {
-	util, err := GetControllerUtility(hba.Vendor, hba.Model)
+func (s *StorageControllerAction) DestroyVirtualDisk(ctx context.Context, hba *common.StorageController, options *model.DestroyVirtualDiskOptions) error {
+	util, err := s.GetControllerUtility(hba.Vendor, hba.Model)
 	if err != nil {
 		return err
 	}
@@ -33,8 +38,8 @@ func DestroyVirtualDisk(ctx context.Context, hba *common.StorageController, opti
 	return util.DestroyVirtualDisk(ctx, options.VirtualDiskID)
 }
 
-func ListVirtualDisks(ctx context.Context, hba *common.StorageController) ([]*common.VirtualDisk, error) {
-	util, err := GetControllerUtility(hba.Vendor, hba.Model)
+func (s *StorageControllerAction) ListVirtualDisks(ctx context.Context, hba *common.StorageController) ([]*common.VirtualDisk, error) {
+	util, err := s.GetControllerUtility(hba.Vendor, hba.Model)
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +63,15 @@ func ListVirtualDisks(ctx context.Context, hba *common.StorageController) ([]*co
 }
 
 // GetControllerUtility returns the utility command for the given vendor
-func GetControllerUtility(vendorName, modelName string) (VirtualDiskManager, error) {
+func (s *StorageControllerAction) GetControllerUtility(vendorName, modelName string) (VirtualDiskManager, error) {
+	var trace bool
+
+	if s.Logger.GetLevel().String() == "trace" {
+		trace = true
+	}
+
 	if strings.EqualFold(vendorName, common.VendorMarvell) {
-		return utils.NewMvcliCmd(true), nil
+		return utils.NewMvcliCmd(trace), nil
 	}
 
 	return nil, errors.Wrap(ErrVirtualDiskManagerUtilNotIdentified, "vendor: "+vendorName+" model: "+modelName)
