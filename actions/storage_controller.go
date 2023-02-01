@@ -17,7 +17,7 @@ var (
 )
 
 type StorageControllerAction struct {
-	Logger logrus.Logger
+	Logger *logrus.Logger
 }
 
 func (s *StorageControllerAction) CreateVirtualDisk(ctx context.Context, hba *common.StorageController, options *model.CreateVirtualDiskOptions) error {
