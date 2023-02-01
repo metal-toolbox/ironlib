@@ -20,6 +20,10 @@ type StorageControllerAction struct {
 	Logger *logrus.Logger
 }
 
+func NewStorageControllerAction(logger *logrus.Logger) *StorageControllerAction {
+	return &StorageControllerAction{logger}
+}
+
 func (s *StorageControllerAction) CreateVirtualDisk(ctx context.Context, hba *common.StorageController, options *model.CreateVirtualDiskOptions) error {
 	util, err := s.GetControllerUtility(hba.Vendor, hba.Model)
 	if err != nil {
