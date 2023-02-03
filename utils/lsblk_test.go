@@ -27,7 +27,8 @@ var (
 				Serial:      "203329F89392",
 				LogicalName: "/dev/sda",
 			},
-			Protocol: "sata",
+			Protocol:                 "sata",
+			StorageControllerDriveID: -1,
 		},
 		{
 			Common: common.Common{
@@ -35,7 +36,8 @@ var (
 				Serial:      "203329F89796",
 				LogicalName: "/dev/sdb",
 			},
-			Protocol: "sata",
+			Protocol:                 "sata",
+			StorageControllerDriveID: -1,
 		},
 		{
 			Common: common.Common{
@@ -43,7 +45,8 @@ var (
 				Serial:      "202728F691F5",
 				LogicalName: "/dev/nvme0",
 			},
-			Protocol: "nvme",
+			Protocol:                 "nvme",
+			StorageControllerDriveID: -1,
 		},
 		{
 			Common: common.Common{
@@ -51,7 +54,8 @@ var (
 				Serial:      "202728F691C6",
 				LogicalName: "/dev/nvme1",
 			},
-			Protocol: "nvme",
+			Protocol:                 "nvme",
+			StorageControllerDriveID: -1,
 		},
 	}
 )

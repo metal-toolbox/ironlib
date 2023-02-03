@@ -525,8 +525,9 @@ func (l *Lshw) xDrive(node *LshwNode) *common.Drive {
 			ProductName: node.Product,
 		},
 
-		BusInfo:       node.Businfo,
-		CapacityBytes: int64(node.Size),
+		BusInfo:                  node.Businfo,
+		CapacityBytes:            int64(node.Size),
+		StorageControllerDriveID: -1,
 	}
 
 	// type assert LogicalName since it can also be an array - in which case we

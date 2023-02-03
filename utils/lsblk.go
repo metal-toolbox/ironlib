@@ -91,6 +91,7 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 				Vendor:      strings.TrimSpace(vendor),
 				Model:       strings.TrimSpace(dModel),
 			},
+			StorageControllerDriveID: -1,
 		}
 
 		drives = append(drives, drive)
