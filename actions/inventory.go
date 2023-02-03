@@ -100,7 +100,7 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 	}
 
 	// Collect drive smart data
-	err = Drives(ctx, device.Drives, collectors.Drives)
+	err = Drives(ctx, device, collectors.Drives)
 	if err != nil && failOnError {
 		return errors.Wrap(err, "error retrieving drive inventory")
 	}
@@ -150,13 +150,16 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 
 	if dynamic {
 		for _, sc := range device.StorageControllers {
-			if sc.SupportedRAIDTypes != "" {
-				collectors.Drives = append(collectors.Drives, DriveCollectorByStorageControllerVendor(sc.Vendor, trace))
+			if sc.SupportedRAIDTypes == "" {
+				continue
+			}
 
-				err = Drives(ctx, device.Drives, collectors.Drives)
-				if err != nil && failOnError {
-					return errors.Wrap(err, "error retrieving drive inventory")
-				}
+			collectors.Drives = append(collectors.Drives, DriveCollectorByStorageControllerVendor(sc.Vendor, trace))
+
+			err = Drives(ctx, device, collectors.Drives)
+
+			if err != nil && failOnError {
+				return errors.Wrap(err, "error retrieving drive inventory")
 			}
 		}
 	}
@@ -187,7 +190,7 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 
 // Drives executes drive collectors and merges the data into device.[]*Drive
 // nolint:gocyclo // TODO(joel) if theres more conditionals to be added in here, the method is to be split up.
-func Drives(ctx context.Context, drives []*common.Drive, collectors []DriveCollector) error {
+func Drives(ctx context.Context, device *common.Device, collectors []DriveCollector) error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from panic in Drives(): ", r)
@@ -208,8 +211,7 @@ func Drives(ctx context.Context, drives []*common.Drive, collectors []DriveColle
 			return nil
 		}
 
-		// TODO: handle case where the object may not already be present in device.Drives and needs to be added
-		for _, existing := range drives {
+		for _, existing := range device.Drives {
 			// match existing drives by serial, and patch with changes
 			found := findDriveBySerial(existing.Serial, ndrives)
 			if found != nil {
@@ -226,7 +228,6 @@ func Drives(ctx context.Context, drives []*common.Drive, collectors []DriveColle
 			}
 
 			// as a fallback for the ndrives data that might not include a serial number,
-			//
 			// match existing drives by logical name and patch with changes
 			found = findDriveByLogicalName(existing.LogicalName, ndrives)
 			if found != nil {
@@ -239,6 +240,16 @@ func Drives(ctx context.Context, drives []*common.Drive, collectors []DriveColle
 				changelog = vetChanges(changelog)
 				diff.Patch(changelog, existing)
 			}
+		}
+
+		// add drive if it isn't part of the drives slice based on its serial
+		for _, new := range ndrives {
+			found := findDriveBySerial(new.Serial, device.Drives)
+			if found != nil && found.Serial != "" {
+				continue
+			}
+
+			device.Drives = append(device.Drives, new)
 		}
 	}
 
