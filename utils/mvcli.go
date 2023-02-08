@@ -338,8 +338,6 @@ func (m *Mvcli) processDriveType(pdType, ssdType string) string {
 		return common.SlugDriveTypeSATASSD
 	}
 
-	fmt.Println("Got to UNKNOWN")
-
 	return "Unknown"
 }
 
