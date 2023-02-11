@@ -8,12 +8,11 @@ require (
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
 	github.com/pkg/errors v0.9.1
 	github.com/r3labs/diff/v2 v2.15.1
-	github.com/r3labs/diff/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/gjson v1.14.4
 	golang.org/x/exp v0.0.0-20221114191408-850992195362
-	golang.org/x/net v0.2.0
+	golang.org/x/net v0.6.0
 	gotest.tools v2.2.0+incompatible
 )
 
@@ -26,8 +25,8 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
-	golang.org/x/sys v0.2.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
