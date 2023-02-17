@@ -3,6 +3,8 @@ package actions
 import (
 	"context"
 	"log"
+	"os"
+	"runtime"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
@@ -15,6 +17,11 @@ import (
 
 // The inventory package ties together the various collectors under utils
 // using the interfaces defined utils.interface.
+
+const (
+	// EnvDnfUtility - to override the utility path
+	EnvDisabledCollectors = "IRONLIB_DISABLED_COLLECTORS"
+)
 
 var (
 	ErrInventoryDeviceObjNil = errors.New("method Inventory() expects a valid device object, got nil")
@@ -201,6 +208,10 @@ func Drives(ctx context.Context, device *common.Device, collectors []DriveCollec
 		return nil
 	}
 
+	if isThisCollectorDisabled() {
+		return nil
+	}
+
 	for _, collector := range collectors {
 		ndrives, err := collector.Drives(ctx)
 		if err != nil {
@@ -286,6 +297,10 @@ func DriveCapabilities(ctx context.Context, drives []*common.Drive, collectors [
 		}
 	}()
 
+	if isThisCollectorDisabled() {
+		return nil
+	}
+
 	for _, drive := range drives {
 		// check capabilities on drives that are either SATA or NVME,
 		//
@@ -322,6 +337,10 @@ func NICs(ctx context.Context, nics []*common.NIC, c NICCollector) error {
 	}()
 
 	if c == nil {
+		return nil
+	}
+
+	if isThisCollectorDisabled() {
 		return nil
 	}
 
@@ -365,6 +384,10 @@ func BMC(ctx context.Context, bmc *common.BMC, c BMCCollector) error {
 		return nil
 	}
 
+	if isThisCollectorDisabled() {
+		return nil
+	}
+
 	nbmc, err := c.BMC(ctx)
 	if err != nil {
 		return err
@@ -390,6 +413,10 @@ func CPLDs(ctx context.Context, cplds *[]*common.CPLD, c CPLDCollector) error {
 	}()
 
 	if c == nil {
+		return nil
+	}
+
+	if isThisCollectorDisabled() {
 		return nil
 	}
 
@@ -431,6 +458,10 @@ func BIOS(ctx context.Context, bios *common.BIOS, c BIOSCollector) error {
 		return nil
 	}
 
+	if isThisCollectorDisabled() {
+		return nil
+	}
+
 	nbios, err := c.BIOS(ctx)
 	if err != nil {
 		return err
@@ -460,6 +491,10 @@ func TPMs(ctx context.Context, tpms *[]*common.TPM, c TPMCollector) error {
 	}()
 
 	if c == nil {
+		return nil
+	}
+
+	if isThisCollectorDisabled() {
 		return nil
 	}
 
@@ -502,6 +537,10 @@ func StorageController(ctx context.Context, controllers []*common.StorageControl
 	}()
 
 	if c == nil {
+		return nil
+	}
+
+	if isThisCollectorDisabled() {
 		return nil
 	}
 
@@ -628,4 +667,30 @@ func vetUpdate(change *diff.Change) bool {
 	}
 
 	return false
+}
+
+func isCollectorDisabled(collector string) bool {
+	disabledCollectors := strings.Split(os.Getenv(EnvDisabledCollectors), ",")
+
+	for _, disabledCollector := range disabledCollectors {
+		if disabledCollector == collector {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isThisCollectorDisabled() bool {
+	pc, _, _, ok := runtime.Caller(1)
+	if !ok {
+		return false
+	}
+
+	fn := runtime.FuncForPC(pc)
+	if fn == nil {
+		return false
+	}
+
+	return isCollectorDisabled(fn.Name())
 }
