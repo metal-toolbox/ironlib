@@ -129,6 +129,7 @@ func (e *FakeExecute) ExecWithContext(ctx context.Context) (*Result, error) {
 	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: 0}, nil
 }
 
+// CheckExecutable implements the Executor interface
 func (e *FakeExecute) CheckExecutable() error {
 	return nil
 }

@@ -116,12 +116,7 @@ func (d *Dnf) AddRepo(path string, params *DnfRepoParams, tmpl []byte) (err erro
 		return err
 	}
 
-	err = t.Execute(f, params)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return t.Execute(f, params)
 }
 
 // Install given packages
@@ -132,9 +127,6 @@ func (d *Dnf) Install(pkgNames []string) (err error) {
 	d.Executor.SetArgs(args)
 
 	_, err = d.Executor.ExecWithContext(context.Background())
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
