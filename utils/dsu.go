@@ -98,11 +98,8 @@ func (d *Dsu) FetchUpdateFiles(dstDir string) (int, error) {
 	d.Executor.SetStdin(bytes.NewReader([]byte("a\nc\n")))
 
 	result, err := d.Executor.ExecWithContext(context.Background())
-	if err != nil {
-		return result.ExitCode, err
-	}
 
-	return result.ExitCode, nil
+	return result.ExitCode, err
 }
 
 // ApplyLocalUpdates installs update files fetched by FetchUpdateFiles()
@@ -144,11 +141,8 @@ func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
 	)
 
 	result, err := d.Executor.ExecWithContext(context.Background())
-	if err != nil {
-		return result.ExitCode, err
-	}
 
-	return result.ExitCode, nil
+	return result.ExitCode, err
 }
 
 // Inventory collects inventory with the dell-system-update utility and
@@ -187,13 +181,9 @@ func (d *Dsu) ApplyUpdates() (int, error) {
 	d.Executor.SetArgs(args)
 
 	result, err := d.Executor.ExecWithContext(context.Background())
-	if err != nil {
-		// our executor returns err if exitcode is not zero
-		// 34 - no updates applicable
-		return result.ExitCode, err
-	}
-
-	return result.ExitCode, nil
+	// our executor returns err if exitcode is not zero
+	// 34 - no updates applicable
+	return result.ExitCode, err
 }
 
 // Version returns the dsu currently installed

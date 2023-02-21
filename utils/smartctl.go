@@ -313,6 +313,11 @@ func (e *FakeSmartctlExecute) ExecWithContext(ctx context.Context) (*Result, err
 	return &Result{Stdout: e.Stdout, Stderr: e.Stderr, ExitCode: e.ExitCode}, nil
 }
 
+// CheckExecutable implements the Executor interface
+func (e *FakeSmartctlExecute) CheckExecutable() error {
+	return nil
+}
+
 // SetStdin is to set input to the fake execute method
 func (e *FakeSmartctlExecute) SetStdin(r io.Reader) {
 	e.Stdin = r
@@ -325,4 +330,8 @@ func (e *FakeSmartctlExecute) SetArgs(a []string) {
 
 func (e *FakeSmartctlExecute) SetExitCode(i int) {
 	e.ExitCode = i
+}
+
+func (e *FakeSmartctlExecute) CmdPath() string {
+	return e.Cmd
 }
