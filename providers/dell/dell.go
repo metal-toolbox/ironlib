@@ -15,7 +15,6 @@ import (
 
 // The dell device provider struct
 type dell struct {
-	trace                   bool
 	DsuPrequisitesInstalled bool
 	hw                      *model.Hardware
 	dnf                     *utils.Dnf
@@ -30,7 +29,6 @@ type dell struct {
 	dsuReleaseVersion string
 
 	updateBaseURL string
-	collectors    *actions.Collectors
 }
 
 // New returns a new Dell device manager
@@ -114,12 +112,12 @@ func (d *dell) UpdatesApplied() bool {
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (d *dell) GetInventory(ctx context.Context, dynamic bool) (*common.Device, error) {
-	// Collect device inventory from lshw
+func (d *dell) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
+	// Collect device inventory
 	d.logger.Info("Collecting hardware inventory")
 
-	err := actions.Collect(ctx, d.hw.Device, d.collectors, d.trace, false, dynamic)
-	if err != nil {
+	collector := actions.NewInventoryCollectorAction(options...)
+	if err := collector.Collect(ctx, d.hw.Device); err != nil {
 		return nil, err
 	}
 

@@ -14,10 +14,9 @@ import (
 
 // A Generic device has methods to collect hardware inventory, regardless of the vendor
 type Generic struct {
-	trace      bool
-	hw         *model.Hardware
-	logger     *logrus.Logger
-	collectors *actions.Collectors
+	trace  bool
+	hw     *model.Hardware
+	logger *logrus.Logger
 }
 
 // New returns a generic device manager
@@ -50,22 +49,20 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 	device.Serial = serial
 
 	// set device manager
-	dm := &Generic{
+	return &Generic{
 		hw:     model.NewHardware(&device),
 		logger: l,
 		trace:  trace,
-	}
-
-	return dm, nil
+	}, nil
 }
 
 // Returns hardware inventory for the device
-func (a *Generic) GetInventory(ctx context.Context, dynamic bool) (*common.Device, error) {
-	// Collect device inventory from lshw
+func (a *Generic) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
+	// Collect device inventory
 	a.logger.Info("Collecting inventory")
 
-	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace, false, dynamic)
-	if err != nil {
+	collector := actions.NewInventoryCollectorAction(options...)
+	if err := collector.Collect(ctx, a.hw.Device); err != nil {
 		return nil, err
 	}
 

@@ -28,35 +28,13 @@ func newFakeDellDevice() (*dell, error) {
 	device.Model = "r6515"
 	device.Vendor = "dell"
 
-	// lshw
-	lshwb, err := os.ReadFile(r6515fixtures + "/lshw.json")
-	if err != nil {
-		return nil, err
-	}
-
-	lshw := utils.NewFakeLshw(bytes.NewReader(lshwb))
-
-	// smartctl
-	smartctl := utils.NewFakeSmartctl(r6515fixtures + "/smartctl")
-	lsblk := utils.NewFakeLsblk()
-
-	hdparm := utils.NewFakeHdparm()
-	nvme := utils.NewFakeNvme()
-
-	collectors := &actions.Collectors{
-		Inventory:         lshw,
-		Drives:            []actions.DriveCollector{smartctl, lsblk},
-		DriveCapabilities: []actions.DriveCapabilityCollector{hdparm, nvme},
-	}
-
 	hardware := model.NewHardware(&device)
 	hardware.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
 
 	return &dell{
-		hw:         hardware,
-		dnf:        utils.NewFakeDnf(),
-		logger:     logrus.New(),
-		collectors: collectors,
+		hw:     hardware,
+		dnf:    utils.NewFakeDnf(),
+		logger: logrus.New(),
 	}, nil
 }
 
@@ -88,7 +66,29 @@ func TestGetInventory(t *testing.T) {
 	// skip "/usr/libexec/instsvcdrv-helper start" from being executed
 	os.Setenv("IRONLIB_TEST", "1")
 
-	device, err := dell.GetInventory(context.TODO(), false)
+	// setup fake collectors
+	// lshw
+	lshwb, err := os.ReadFile(r6515fixtures + "/lshw.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	lshw := utils.NewFakeLshw(bytes.NewReader(lshwb))
+
+	// smartctl
+	smartctl := utils.NewFakeSmartctl(r6515fixtures + "/smartctl")
+	lsblk := utils.NewFakeLsblk()
+
+	hdparm := utils.NewFakeHdparm()
+	nvme := utils.NewFakeNvme()
+
+	collectors := &actions.Collectors{
+		InventoryCollector:          lshw,
+		DriveCollectors:             []actions.DriveCollector{smartctl, lsblk},
+		DriveCapabilitiesCollectors: []actions.DriveCapabilityCollector{hdparm, nvme},
+	}
+
+	device, err := dell.GetInventory(context.TODO(), actions.WithCollectors(collectors))
 	if err != nil {
 		t.Error(err)
 	}

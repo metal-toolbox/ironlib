@@ -39,12 +39,7 @@ func (d *dell) dsuInstallUpdates(downloadOnly bool) (int, error) {
 	}
 
 	// Install DSU fetched local update files
-	exitCode, err = d.dsu.ApplyLocalUpdates(utils.LocalUpdatesDirectory)
-	if err != nil {
-		return exitCode, err
-	}
-
-	return exitCode, nil
+	return d.dsu.ApplyLocalUpdates(utils.LocalUpdatesDirectory)
 }
 
 // installUpdate installs a given dell update file (DUP)

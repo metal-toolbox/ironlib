@@ -13,11 +13,10 @@ import (
 )
 
 type supermicro struct {
-	trace      bool
-	hw         *model.Hardware
-	logger     *logrus.Logger
-	dmidecode  *utils.Dmidecode
-	collectors *actions.Collectors
+	trace     bool
+	hw        *model.Hardware
+	logger    *logrus.Logger
+	dmidecode *utils.Dmidecode
 }
 
 func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
@@ -44,11 +43,10 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 	device.Serial = serial
 
 	return &supermicro{
-		hw:         model.NewHardware(&device),
-		collectors: collectors,
-		logger:     l,
-		dmidecode:  dmidecode,
-		trace:      trace,
+		hw:        model.NewHardware(&device),
+		logger:    l,
+		dmidecode: dmidecode,
+		trace:     l.GetLevel().String() == "trace",
 	}, nil
 }
 
@@ -69,12 +67,36 @@ func (s *supermicro) UpdatesApplied() bool {
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (s *supermicro) GetInventory(ctx context.Context, dynamic bool) (*common.Device, error) {
-	// Collect device inventory from lshw
+func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
+	// Collect device inventory
 	s.logger.Info("Collecting hardware inventory")
 
-	err := actions.Collect(ctx, s.hw.Device, s.collectors, s.trace, false, dynamic)
-	if err != nil {
+	var trace bool
+	if s.logger.GetLevel().String() == "trace" {
+		trace = true
+	}
+
+	// define collectors for supermicro hardware
+	collectors := &actions.Collectors{
+		BMCCollector:  utils.NewIpmicfgCmd(trace),
+		BIOSCollector: utils.NewIpmicfgCmd(trace),
+		CPLDCollector: utils.NewIpmicfgCmd(trace),
+		DriveCollectors: []actions.DriveCollector{
+			utils.NewSmartctlCmd(trace),
+			utils.NewLsblkCmd(trace),
+		},
+		DriveCapabilitiesCollectors: []actions.DriveCapabilityCollector{
+			utils.NewHdparmCmd(trace),
+			utils.NewNvmeCmd(trace),
+		},
+		StorageControllerCollector: utils.NewStoreCLICmd(trace),
+		NICCollector:               utils.NewMlxupCmd(trace),
+	}
+
+	options = append(options, actions.WithCollectors(collectors))
+
+	collector := actions.NewInventoryCollectorAction(options...)
+	if err := collector.Collect(ctx, s.hw.Device); err != nil {
 		return nil, err
 	}
 
@@ -92,7 +114,7 @@ func (s *supermicro) ListAvailableUpdates(ctx context.Context, options *model.Up
 func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOptions) (err error) {
 	// collect device inventory if it isn't added already
 	if s.hw.Device == nil || s.hw.Device.BIOS == nil {
-		s.hw.Device, err = s.GetInventory(ctx, false)
+		s.hw.Device, err = s.GetInventory(ctx)
 		if err != nil {
 			return err
 		}
