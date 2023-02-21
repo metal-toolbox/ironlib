@@ -2,15 +2,16 @@ package actions
 
 import (
 	"context"
-	"log"
+	"runtime/debug"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/pkg/errors"
 	"github.com/r3labs/diff/v2"
 	"golang.org/x/exp/slices"
 
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/pkg/errors"
 )
 
 // The inventory package ties together the various collectors under utils
@@ -18,37 +19,120 @@ import (
 
 var (
 	ErrInventoryDeviceObjNil = errors.New("method Inventory() expects a valid device object, got nil")
+	ErrPanic                 = errors.New("recovered from panic")
 )
+
+// InventoryCollectorAction provides methods to collect hardware, firmware inventory.
+type InventoryCollectorAction struct {
+	// collectors registered for inventory collection.
+	collectors Collectors
+
+	// device is the model in which the collected inventory is recorded.
+	device *common.Device
+
+	// Enable trace logging on the collectors.
+	trace bool
+
+	// a.failOnError when enabled causes ironlib to return an error
+	// if a collector returns an error
+	failOnError bool
+
+	// dynamicCollection when enabled will cause ironlib to
+	// enable collectors based on the detected component vendor.
+	dynamicCollection bool
+
+	// disableCollectorUtilities is the list of collector utilities
+	// to be disabled, this is the name of collector utility
+	// which is returned by its Attributes() method.
+	disableCollectorUtilities []model.CollectorUtility
+}
 
 // Collectors is a struct acting as a registry of various inventory collectors
 type Collectors struct {
-	Inventory          InventoryCollector
-	Drives             []DriveCollector
-	DriveCapabilities  []DriveCapabilityCollector
-	NICs               NICCollector
-	BMC                BMCCollector
-	CPLDs              CPLDCollector
-	BIOS               BIOSCollector
-	TPMs               TPMCollector
-	StorageControllers StorageControllerCollector
+	InventoryCollector
+	NICCollector
+	BMCCollector
+	CPLDCollector
+	BIOSCollector
+	TPMCollector
+	StorageControllerCollector
+	DriveCollectors             []DriveCollector
+	DriveCapabilitiesCollectors []DriveCapabilityCollector
 }
 
-// InitCollectors constructs the Collectors object
-// with lshw and smartctl collectors by default
+// Option returns a function that sets a InventoryCollectorAction parameter
+type Option func(*InventoryCollectorAction)
+
+// WithTraceLevel sets trace level logging on the action runner.
+func WithTraceLevel() Option {
+	return func(a *InventoryCollectorAction) {
+		a.trace = true
+	}
+}
+
+// WithFailOnError sets the InventoryCollectorAction to return on any error
+// that may occur when collecting inventory.
 //
-// param trace causes the collectors to log command outputs
-func InitCollectors(trace bool) *Collectors {
-	return &Collectors{
-		Inventory: utils.NewLshwCmd(trace),
-		Drives: []DriveCollector{
-			utils.NewSmartctlCmd(trace),
-			utils.NewLsblkCmd(trace),
-		},
-		DriveCapabilities: []DriveCapabilityCollector{
-			utils.NewHdparmCmd(trace),
-			utils.NewNvmeCmd(trace),
+// By default the InventoryCollectorAction continues to collect inventory
+// even if one or more collectors fail.
+func WithFailOnError() Option {
+	return func(a *InventoryCollectorAction) {
+		a.failOnError = true
+	}
+}
+
+// DynamicCollection when enabled will cause ironlib to
+// identify collectors based on the detected component vendor.
+func WithDynamicCollection() Option {
+	return func(a *InventoryCollectorAction) {
+		a.dynamicCollection = true
+	}
+}
+
+// WithCollectors sets collectors to the ones passed in as a parameter.
+func WithCollectors(collectors *Collectors) Option {
+	return func(a *InventoryCollectorAction) {
+		a.collectors = *collectors
+	}
+}
+
+// WithDisableCollectorUtilities disables the given collector utilities.
+func WithDisableCollectorUtilities(utilityNames []model.CollectorUtility) Option {
+	return func(a *InventoryCollectorAction) {
+		a.disableCollectorUtilities = utilityNames
+	}
+}
+
+// NewActionrunner returns an Actions runner that is capable of collecting inventory.
+func NewInventoryCollectorAction(options ...Option) *InventoryCollectorAction {
+	var trace bool
+
+	// set default collectors
+	a := &InventoryCollectorAction{
+		collectors: Collectors{
+			InventoryCollector: utils.NewLshwCmd(trace),
+			DriveCollectors: []DriveCollector{
+				utils.NewSmartctlCmd(trace),
+				utils.NewLsblkCmd(trace),
+			},
+			DriveCapabilitiesCollectors: []DriveCapabilityCollector{
+				utils.NewHdparmCmd(trace),
+				utils.NewNvmeCmd(trace),
+			},
 		},
 	}
+
+	// set options to override
+	for _, opt := range options {
+		opt(a)
+	}
+
+	// the lshw collector cannot be disabled, since its the primary inventory collector.
+	if a.collectors.InventoryCollector == nil {
+		a.collectors.InventoryCollector = utils.NewLshwCmd(trace)
+	}
+
+	return a
 }
 
 // Collect collects device inventory data based on the given collectors,
