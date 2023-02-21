@@ -6,7 +6,6 @@ import (
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
-	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/providers/asrockrack"
 	"github.com/metal-toolbox/ironlib/providers/dell"
 	"github.com/metal-toolbox/ironlib/providers/generic"
@@ -18,7 +17,7 @@ import (
 
 // New returns a device Manager interface based on the hardware deviceVendor, model attributes
 // by default returns a Generic device instance that only returns the device inventory
-func New(logger *logrus.Logger) (m model.DeviceManager, err error) {
+func New(logger *logrus.Logger) (m actions.DeviceManager, err error) {
 	dmidecode, err := utils.NewDmidecode()
 	if err != nil {
 		return nil, errors.Wrap(errs.ErrDmiDecodeRun, err.Error())

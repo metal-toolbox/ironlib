@@ -19,7 +19,7 @@ type asrockrack struct {
 }
 
 // New returns a ASRockRack device manager
-func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
 	var trace bool
 
 	if l.Level == logrus.TraceLevel {
@@ -95,5 +95,11 @@ func (a *asrockrack) InstallUpdates(ctx context.Context, options *model.UpdateOp
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
 func (a *asrockrack) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
+	return nil
+}
+
+// ApplyUpdate is here to satisfy the actions.Updater interface
+// it is to be deprecated in favor of InstallUpdates.
+func (a *asrockrack) ApplyUpdate(ctx context.Context, updateFile, component string) error {
 	return nil
 }
