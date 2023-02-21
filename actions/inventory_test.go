@@ -9,6 +9,7 @@ import (
 	"github.com/bmc-toolbox/common"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	smcFixtures "github.com/metal-toolbox/ironlib/fixtures/supermicro"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,13 +34,20 @@ func Test_Inventory_dell(t *testing.T) {
 	nvme := utils.NewFakeNvme()
 
 	collectors := &Collectors{
-		Inventory:         lshw,
-		Drives:            []DriveCollector{smartctl, lsblk},
-		DriveCapabilities: []DriveCapabilityCollector{hdparm, nvme},
+		InventoryCollector:          lshw,
+		DriveCollectors:             []DriveCollector{smartctl, lsblk},
+		DriveCapabilitiesCollectors: []DriveCapabilityCollector{hdparm, nvme},
 	}
 
-	err = Collect(context.TODO(), &device, collectors, true, false, false)
-	if err != nil {
+	options := []Option{
+		WithCollectors(collectors),
+		WithTraceLevel(),
+		WithFailOnError(),
+		WithDisableCollectorUtilities([]model.CollectorUtility{"dmidecode"}),
+	}
+
+	collector := NewInventoryCollectorAction(options...)
+	if err := collector.Collect(context.TODO(), &device); err != nil {
 		t.Error(err)
 	}
 
@@ -105,18 +113,18 @@ func Test_Inventory_smc(t *testing.T) {
 	}
 
 	collectors := &Collectors{
-		Inventory:          lshw,
-		Drives:             []DriveCollector{smartctl},
-		NICs:               mlxup,
-		CPLDs:              ipmicfg0,
-		BIOS:               ipmicfg1,
-		BMC:                ipmicfg2,
-		TPMs:               dmi,
-		StorageControllers: storecli,
+		InventoryCollector:         lshw,
+		DriveCollectors:            []DriveCollector{smartctl},
+		NICCollector:               mlxup,
+		CPLDCollector:              ipmicfg0,
+		BIOSCollector:              ipmicfg1,
+		BMCCollector:               ipmicfg2,
+		TPMCollector:               dmi,
+		StorageControllerCollector: storecli,
 	}
 
-	err = Collect(context.TODO(), &device, collectors, true, false, false)
-	if err != nil {
+	collector := NewInventoryCollectorAction(WithCollectors(collectors), WithTraceLevel())
+	if err := collector.Collect(context.TODO(), &device); err != nil {
 		t.Error(err)
 	}
 
