@@ -1,11 +1,18 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/metal-toolbox/ironlib.svg)](https://pkg.go.dev/github.com/metal-toolbox/ironlib)
 ![](https://img.shields.io/badge/Stability-Maintained-green.svg)
 
-Ironlib wraps various opensource and various vendor utilities to expose a consistent set of [interface methods](https://github.com/metal-toolbox/ironlib/blob/main/model/interface.go) to,
+Ironlib wraps various opensource and various vendor utilities to expose a consistent set of [interface methods](https://github.com/metal-toolbox/ironlib/blob/main/actions/interface.go) to,
 
  - Collect inventory
  - Update firmware
  - Set/Get BIOS configuration
  - Set/Get BMC configuration
+
+For the available methods,
+
+- The supported actions interface and method docs can be found [here](https://pkg.go.dev/github.com/metal-toolbox/ironlib/actions)
+- The supported utilities and its methods can be found [here](https://pkg.go.dev/github.com/metal-toolbox/ironlib/utils)
+
 
 ## Currently supported hardware
 
