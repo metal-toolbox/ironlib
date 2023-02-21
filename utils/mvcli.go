@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
 )
@@ -127,7 +128,7 @@ func NewMvcliCmd(trace bool) *Mvcli {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (m *Mvcli) Attributes() (utilName, absolutePath string, err error) {
+func (m *Mvcli) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := m.Executor.CheckExecutable()
 

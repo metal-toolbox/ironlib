@@ -52,7 +52,7 @@ func NewMsecli(trace bool) *Msecli {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (m *Msecli) Attributes() (utilName, absolutePath string, err error) {
+func (m *Msecli) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := m.Executor.CheckExecutable()
 

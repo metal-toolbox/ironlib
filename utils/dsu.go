@@ -58,7 +58,7 @@ func NewDsu(trace bool) *Dsu {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (d *Dsu) Attributes() (utilName, absolutePath string, err error) {
+func (d *Dsu) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := d.Executor.CheckExecutable()
 

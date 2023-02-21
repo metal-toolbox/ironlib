@@ -5,6 +5,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+// CollectorUtility is the name of a utility defined in utils/
+type CollectorUtility string
+
 const (
 	// Dell specific component slugs
 	SlugDellSystemCPLD                  = "Dell System CPLD"

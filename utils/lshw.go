@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -88,7 +89,7 @@ func NewLshwCmd(trace bool) *Lshw {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (l *Lshw) Attributes() (utilName, absolutePath string, err error) {
+func (l *Lshw) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := l.Executor.CheckExecutable()
 
