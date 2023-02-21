@@ -34,7 +34,7 @@ type dell struct {
 }
 
 // New returns a new Dell device manager
-func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
 	var trace bool
 
 	if l.GetLevel().String() == "trace" {
@@ -228,4 +228,10 @@ func (d *dell) setUpdateOptions(options *model.UpdateOptions) {
 			"base url":    d.updateBaseURL,
 		},
 	).Info("update parameters")
+}
+
+// ApplyUpdate is here to satisfy the actions.Updater interface
+// it is to be deprecated in favor of InstallUpdates.
+func (d *dell) ApplyUpdate(ctx context.Context, updateFile, component string) error {
+	return nil
 }

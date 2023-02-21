@@ -20,29 +20,7 @@ type supermicro struct {
 	collectors *actions.Collectors
 }
 
-func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, error) {
-	var trace bool
-	if l.GetLevel().String() == "trace" {
-		trace = true
-	}
-
-	// register inventory collectors
-	collectors := &actions.Collectors{
-		BMC:   utils.NewIpmicfgCmd(trace),
-		BIOS:  utils.NewIpmicfgCmd(trace),
-		CPLDs: utils.NewIpmicfgCmd(trace),
-		Drives: []actions.DriveCollector{
-			utils.NewSmartctlCmd(trace),
-			utils.NewLsblkCmd(trace),
-		},
-		DriveCapabilities: []actions.DriveCapabilityCollector{
-			utils.NewHdparmCmd(trace),
-			utils.NewNvmeCmd(trace),
-		},
-		StorageControllers: utils.NewStoreCLICmd(trace),
-		NICs:               utils.NewMlxupCmd(trace),
-	}
-
+func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", "", 0), err.Error())
@@ -140,5 +118,11 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
 func (s *supermicro) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
+	return nil
+}
+
+// ApplyUpdate is here to satisfy the actions.Updater interface
+// it is to be deprecated in favor of InstallUpdates.
+func (s *supermicro) ApplyUpdate(ctx context.Context, updateFile, component string) error {
 	return nil
 }

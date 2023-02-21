@@ -21,7 +21,7 @@ type Generic struct {
 }
 
 // New returns a generic device manager
-func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (model.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
 	var trace bool
 
 	if l.GetLevel().String() == "trace" {
@@ -95,6 +95,12 @@ func (a *Generic) ListAvailableUpdates(ctx context.Context, options *model.Updat
 
 // InstallUpdates installs updates based on updateOptions
 func (a *Generic) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
+	return nil
+}
+
+// ApplyUpdate is here to satisfy the actions.Updater interface
+// it is to be deprecated in favor of InstallUpdates.
+func (a *Generic) ApplyUpdate(ctx context.Context, updateFile, component string) error {
 	return nil
 }
 
