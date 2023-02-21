@@ -143,29 +143,21 @@ func NewInventoryCollectorAction(options ...Option) *InventoryCollectorAction {
 //
 // The lshw collector always executes first and is included by default.
 // nolint:gocyclo //since we're collecting inventory for each type, this is cyclomatic
-func Collect(ctx context.Context, device *common.Device, collectors *Collectors, trace, failOnError, dynamic bool) error {
-	// register default collectors
-	if collectors == nil {
-		collectors = InitCollectors(trace)
-	}
-
+func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.Device) error {
 	// initialize a new device object - when a device isn't already provided
 	if device == nil {
 		deviceObj := common.NewDevice()
 		device = &deviceObj
 	}
 
-	// register inventory collector
-	if collectors.Inventory == nil {
-		collectors.Inventory = utils.NewLshwCmd(trace)
-	}
+	a.device = device
 
 	// register a TPM inventory collector
-	if collectors.TPMs == nil {
+	if a.collectors.TPMCollector == nil && !slices.Contains(a.disableCollectorUtilities, model.CollectorUtility("dmidecode")) {
 		var err error
 
-		collectors.TPMs, err = utils.NewDmidecode()
-		if err != nil && failOnError {
+		a.collectors.TPMCollector, err = utils.NewDmidecode()
+		if err != nil && a.failOnError {
 			return errors.Wrap(err, "error in dmidecode inventory collector")
 		}
 	}
@@ -178,114 +170,132 @@ func Collect(ctx context.Context, device *common.Device, collectors *Collectors,
 	// one drive/nic/storagecontroller/psu component returns an error.
 
 	// Collect initial device inventory
-	err := collectors.Inventory.Collect(ctx, device)
-	if err != nil && failOnError {
+	err := a.collectors.InventoryCollector.Collect(ctx, a.device)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving device inventory")
 	}
 
 	// Collect drive smart data
-	err = Drives(ctx, device, collectors.Drives)
-	if err != nil && failOnError {
+	err = a.CollectDrives(ctx)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving drive inventory")
 	}
 
 	// Collect NIC info
-	err = NICs(ctx, device.NICs, collectors.NICs)
-	if err != nil && failOnError {
+	err = a.CollectNICs(ctx)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving NIC inventory")
 	}
 
 	// Collect BIOS info
-	err = BIOS(ctx, device.BIOS, collectors.BIOS)
-	if err != nil && failOnError {
+	err = a.CollectBIOS(ctx)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving BIOS inventory")
 	}
 
 	// Collect CPLD info
-	err = CPLDs(ctx, &device.CPLDs, collectors.CPLDs)
-	if err != nil && failOnError {
+	err = a.CollectCPLDs(ctx)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving CPLD inventory")
 	}
 
 	// Collect BMC info
-	err = BMC(ctx, device.BMC, collectors.BMC)
-	if err != nil && failOnError {
+	err = a.CollectBMC(ctx)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving BMC inventory")
 	}
 
 	// Collect TPM info
-	err = TPMs(ctx, &device.TPMs, collectors.TPMs)
-	if err != nil && failOnError {
+	err = a.CollectTPMs(ctx)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving TPM inventory")
 	}
 
-	if dynamic {
-		// Update StorageControllerCollectors
-		for _, sc := range device.StorageControllers {
-			collectors.StorageControllers = StorageControllerCollectorByVendor(sc.Vendor, trace)
+	// Update StorageControllerCollectors based on controller vendor attributes
+	if a.dynamicCollection {
+		for _, sc := range a.device.StorageControllers {
+			a.collectors.StorageControllerCollector = StorageControllerCollectorByVendor(sc.Vendor, a.trace)
 		}
 	}
 
 	// Collect StorageController info
-	err = StorageController(ctx, device.StorageControllers, collectors.StorageControllers)
-	if err != nil && failOnError {
+	err = a.CollectStorageControllers(ctx)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving StorageController inventory")
 	}
 
-	if dynamic {
-		for _, sc := range device.StorageControllers {
+	// Update DriveCollectors based on drive vendor attributes
+	if a.dynamicCollection {
+		for _, sc := range a.device.StorageControllers {
 			if sc.SupportedRAIDTypes == "" {
 				continue
 			}
 
-			collectors.Drives = append(collectors.Drives, DriveCollectorByStorageControllerVendor(sc.Vendor, trace))
+			a.collectors.DriveCollectors = append(
+				a.collectors.DriveCollectors,
+				DriveCollectorByStorageControllerVendor(sc.Vendor, a.trace),
+			)
 
-			err = Drives(ctx, device, collectors.Drives)
+			err = a.CollectDrives(ctx)
 
-			if err != nil && failOnError {
+			if err != nil && a.failOnError {
 				return errors.Wrap(err, "error retrieving drive inventory")
 			}
 		}
 	}
 
-	// DriveCapabilities is to be invoked after Drives()
-	err = DriveCapabilities(ctx, device.Drives, collectors.DriveCapabilities)
-	if err != nil && failOnError {
+	// CollectDriveCapabilities is to be invoked after Drives()
+	err = a.CollectDriveCapabilities(ctx)
+	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving DriveCapabilities")
 	}
 
-	// default set model numbers to device model
-	if device.BMC != nil && device.BMC.Model == "" {
-		device.BMC.Model = device.Model
-	}
-
-	if device.BIOS != nil && device.BIOS.Model == "" {
-		device.BIOS.Model = device.Model
-	}
-
-	for _, cpld := range device.CPLDs {
-		if cpld != nil {
-			cpld.Model = device.Model
-		}
-	}
+	a.setDefaultAttributes()
 
 	return nil
 }
 
-// Drives executes drive collectors and merges the data into device.[]*Drive
-// nolint:gocyclo // TODO(joel) if theres more conditionals to be added in here, the method is to be split up.
-func Drives(ctx context.Context, device *common.Device, collectors []DriveCollector) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("recovered from panic in Drives(): ", r)
+// setDefaultAttributes sets device default attributes
+func (a *InventoryCollectorAction) setDefaultAttributes() {
+	// default set model numbers to device model
+	if a.device.BMC != nil && a.device.BMC.Model == "" {
+		a.device.BMC.Model = a.device.Model
+	}
+
+	if a.device.BIOS != nil && a.device.BIOS.Model == "" {
+		a.device.BIOS.Model = a.device.Model
+	}
+
+	for _, cpld := range a.device.CPLDs {
+		if cpld != nil {
+			cpld.Model = a.device.Model
 		}
+	}
+}
+
+// CollectDrives executes drive collectors and merges the data into device.[]*Drive
+// nolint:gocyclo // TODO(joel) if theres more conditionals to be added in here, the method is to be split up.
+func (a *InventoryCollectorAction) CollectDrives(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
+		}
+
+		return nil
 	}()
 
-	if collectors == nil {
+	if a.collectors.DriveCollectors == nil {
 		return nil
 	}
 
-	for _, collector := range collectors {
+	for _, collector := range a.collectors.DriveCollectors {
+		// skip collector if its been disabled
+		collectorKind, _, _ := collector.Attributes()
+		if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+			continue
+		}
+
 		ndrives, err := collector.Drives(ctx)
 		if err != nil {
 			return err
@@ -295,9 +305,9 @@ func Drives(ctx context.Context, device *common.Device, collectors []DriveCollec
 			return nil
 		}
 
-		for _, existing := range device.Drives {
+		for _, existing := range a.device.Drives {
 			// match existing drives by serial, and patch with changes
-			found := findDriveBySerial(existing.Serial, ndrives)
+			found := a.findDriveBySerial(existing.Serial, ndrives)
 			if found != nil {
 				// diff existing drive fields with the one found by the collector
 				changelog, err := diff.Diff(existing, found)
@@ -305,7 +315,7 @@ func Drives(ctx context.Context, device *common.Device, collectors []DriveCollec
 					return err
 				}
 
-				changelog = vetChanges(changelog)
+				changelog = a.vetChanges(changelog)
 				diff.Patch(changelog, existing)
 
 				continue
@@ -313,7 +323,7 @@ func Drives(ctx context.Context, device *common.Device, collectors []DriveCollec
 
 			// as a fallback for the ndrives data that might not include a serial number,
 			// match existing drives by logical name and patch with changes
-			found = findDriveByLogicalName(existing.LogicalName, ndrives)
+			found = a.findDriveByLogicalName(existing.LogicalName, ndrives)
 			if found != nil {
 				// diff existing drive fields with the one found by the collector
 				changelog, err := diff.Diff(existing, found)
@@ -321,26 +331,25 @@ func Drives(ctx context.Context, device *common.Device, collectors []DriveCollec
 					return err
 				}
 
-				changelog = vetChanges(changelog)
+				changelog = a.vetChanges(changelog)
 				diff.Patch(changelog, existing)
 			}
 		}
 
 		// add drive if it isn't part of the drives slice based on its serial
 		for _, new := range ndrives {
-			found := findDriveBySerial(new.Serial, device.Drives)
+			found := a.findDriveBySerial(new.Serial, a.device.Drives)
 			if found != nil && found.Serial != "" {
 				continue
 			}
 
-			device.Drives = append(device.Drives, new)
+			a.device.Drives = append(a.device.Drives, new)
 		}
 	}
 
 	return nil
 }
-
-func findDriveBySerial(serial string, drives []*common.Drive) *common.Drive {
+func (a *InventoryCollectorAction) findDriveBySerial(serial string, drives []*common.Drive) *common.Drive {
 	for _, drive := range drives {
 		if strings.EqualFold(serial, drive.Serial) {
 			return drive
@@ -350,7 +359,7 @@ func findDriveBySerial(serial string, drives []*common.Drive) *common.Drive {
 	return nil
 }
 
-func findDriveByLogicalName(logicalName string, drives []*common.Drive) *common.Drive {
+func (a *InventoryCollectorAction) findDriveByLogicalName(logicalName string, drives []*common.Drive) *common.Drive {
 	for _, drive := range drives {
 		if strings.EqualFold(logicalName, drive.LogicalName) {
 			return drive
@@ -360,17 +369,20 @@ func findDriveByLogicalName(logicalName string, drives []*common.Drive) *common.
 	return nil
 }
 
-// DriveCapabilities executes drive capability collectors
+// CollectDriveCapabilities executes drive capability collectors
 //
 // The capability collector is identified based on the drive logical name.
-func DriveCapabilities(ctx context.Context, drives []*common.Drive, collectors []DriveCapabilityCollector) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("recovered from panic in DriveCapabilities(): ", r)
+func (a *InventoryCollectorAction) CollectDriveCapabilities(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
+
+		return nil
 	}()
 
-	for _, drive := range drives {
+	for _, drive := range a.device.Drives {
 		// check capabilities on drives that are either SATA or NVME,
 		//
 		// if theres others to be supported, the driveCapabilityCollectorByLogicalName() method
@@ -384,7 +396,13 @@ func DriveCapabilities(ctx context.Context, drives []*common.Drive, collectors [
 			continue
 		}
 
-		collector := driveCapabilityCollectorByLogicalName(drive.LogicalName, false, collectors)
+		collector := driveCapabilityCollectorByLogicalName(drive.LogicalName, false, a.collectors.DriveCapabilitiesCollectors)
+
+		// skip collector if its been disabled
+		collectorKind, _, _ := collector.Attributes()
+		if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+			continue
+		}
 
 		capabilities, err := collector.DriveCapabilities(ctx, drive.LogicalName)
 		if err != nil {
@@ -397,38 +415,49 @@ func DriveCapabilities(ctx context.Context, drives []*common.Drive, collectors [
 	return nil
 }
 
-// NICs executes nic collectors and merges the nic data into device.[]*NIC
-func NICs(ctx context.Context, nics []*common.NIC, c NICCollector) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("recovered from panic in NICs(): ", r)
+// CollectNICs executes nic collectors and merges the nic data into device.[]*NIC
+//
+// nolint:gocyclo // this is fine for now.
+func (a *InventoryCollectorAction) CollectNICs(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
+
+		return nil
 	}()
 
-	if c == nil {
+	if a.collectors.NICCollector == nil {
 		return nil
 	}
 
-	nnics, err := c.NICs(ctx)
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.NICCollector.Attributes()
+	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	found, err := a.collectors.NICs(ctx)
 	if err != nil {
 		return err
 	}
 
-	if len(nnics) == 0 {
+	if len(found) == 0 {
 		return nil
 	}
 
 	// TODO: handle case where the object may not already be present in device.NICs and needs to be added
-	for _, e := range nics {
-		for _, i := range nnics {
+	for _, e := range a.device.NICs {
+		for _, n := range found {
 			// object is matched by serial identifier and patched
-			if strings.EqualFold(e.Serial, i.Serial) {
-				changelog, err := diff.Diff(e, i)
+			if strings.EqualFold(e.Serial, n.Serial) {
+				changelog, err := diff.Diff(e, n)
 				if err != nil {
 					return err
 				}
 
-				changelog = vetChanges(changelog)
+				changelog = a.vetChanges(changelog)
 				diff.Patch(changelog, e)
 			}
 		}
@@ -437,178 +466,218 @@ func NICs(ctx context.Context, nics []*common.NIC, c NICCollector) error {
 	return nil
 }
 
-// BMC executes the bmc collector and updates device bmc information
-func BMC(ctx context.Context, bmc *common.BMC, c BMCCollector) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("recovered from panic in BMC(): ", r)
+// CollectBMC executes the bmc collector and updates device bmc information
+func (a *InventoryCollectorAction) CollectBMC(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
+
+		return nil
 	}()
 
-	if c == nil {
+	if a.collectors.BMCCollector == nil {
 		return nil
 	}
 
-	nbmc, err := c.BMC(ctx)
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.BMCCollector.Attributes()
+	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	found, err := a.collectors.BMC(ctx)
 	if err != nil {
 		return err
 	}
 
-	changelog, err := diff.Diff(bmc, nbmc)
+	changelog, err := diff.Diff(a.device.BMC, found)
 	if err != nil {
 		return err
 	}
 
-	changelog = vetChanges(changelog)
-	diff.Patch(changelog, bmc)
+	changelog = a.vetChanges(changelog)
+	diff.Patch(changelog, a.device.BMC)
 
 	return nil
 }
 
-// CPLDs executes the bmc collector and updates device cpld information
-func CPLDs(ctx context.Context, cplds *[]*common.CPLD, c CPLDCollector) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("recovered from panic in CPLDs(): ", r)
+// CollectCPLDs executes the bmc collector and updates device cpld information
+func (a *InventoryCollectorAction) CollectCPLDs(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
+
+		return nil
 	}()
 
-	if c == nil {
+	if a.collectors.CPLDCollector == nil {
 		return nil
 	}
 
-	ncplds, err := c.CPLDs(ctx)
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.CPLDCollector.Attributes()
+	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	found, err := a.collectors.CPLDs(ctx)
 	if err != nil {
 		return err
 	}
 
 	// no new cplds identified
-	if len(ncplds) == 0 {
+	if len(found) == 0 {
 		return nil
 	}
 
-	// no existing cplds were passed in
-	if len(*cplds) > 0 {
-		changelog, err := diff.Diff(cplds, ncplds)
+	if len(a.device.CPLDs) > 0 {
+		changelog, err := diff.Diff(a.device.CPLDs, found)
 		if err != nil {
 			return err
 		}
 
-		changelog = vetChanges(changelog)
-		diff.Patch(changelog, cplds)
+		changelog = a.vetChanges(changelog)
+		diff.Patch(changelog, a.device.CPLDs)
 	} else {
-		*cplds = append(*cplds, ncplds...)
+		a.device.CPLDs = append(a.device.CPLDs, found...)
 	}
 
 	return nil
 }
 
-// BIOS executes the bios collector and updates device bios information
-func BIOS(ctx context.Context, bios *common.BIOS, c BIOSCollector) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("recovered from panic in BIOS(): ", r)
+// CollectBIOS executes the bios collector and updates device bios information
+func (a *InventoryCollectorAction) CollectBIOS(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
+
+		return nil
 	}()
 
-	if c == nil {
+	if a.collectors.BIOSCollector == nil {
 		return nil
 	}
 
-	nbios, err := c.BIOS(ctx)
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.BIOSCollector.Attributes()
+	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	found, err := a.collectors.BIOS(ctx)
 	if err != nil {
 		return err
 	}
 
-	if nbios == nil {
+	if found == nil {
 		return nil
 	}
 
-	changelog, err := diff.Diff(bios, nbios)
+	changelog, err := diff.Diff(a.device.BIOS, found)
 	if err != nil {
 		return err
 	}
 
-	changelog = vetChanges(changelog)
-	diff.Patch(changelog, bios)
+	changelog = a.vetChanges(changelog)
+	diff.Patch(changelog, a.device.BIOS)
 
 	return nil
 }
 
-// TPMs executes the TPM collector and updates device TPM information
-func TPMs(ctx context.Context, tpms *[]*common.TPM, c TPMCollector) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("recovered from panic in TPM(): ", r)
+// CollectTPMs executes the TPM collector and updates device TPM information
+func (a *InventoryCollectorAction) CollectTPMs(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
+
+		return nil
 	}()
 
-	if c == nil {
+	if a.collectors.TPMCollector == nil {
 		return nil
 	}
 
-	ntpms, err := c.TPMs(ctx)
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.TPMCollector.Attributes()
+	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	found, err := a.collectors.TPMs(ctx)
 	if err != nil {
 		return err
 	}
 
-	if ntpms == nil {
+	if found == nil {
 		return nil
 	}
 
-	// no tpms identified
-	if len(ntpms) == 0 {
-		return nil
-	}
-
-	// no existing tpms were passed in
-	if len(*tpms) > 0 {
-		changelog, err := diff.Diff(tpms, ntpms)
+	if len(a.device.TPMs) > 0 {
+		changelog, err := diff.Diff(a.device.TPMs, found)
 		if err != nil {
 			return err
 		}
 
-		changelog = vetChanges(changelog)
-		diff.Patch(changelog, tpms)
+		changelog = a.vetChanges(changelog)
+		diff.Patch(changelog, a.device.TPMs)
 	} else {
-		*tpms = append(*tpms, ntpms...)
+		a.device.TPMs = append(a.device.TPMs, found...)
 	}
 
 	return nil
 }
 
-// StorageControllers executes the StorageControllers collector and updates device storage controller data
-func StorageController(ctx context.Context, controllers []*common.StorageController, c StorageControllerCollector) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("recovered from panic in StorageController(): ", r)
+// CollectStorageControllers executes the StorageControllers collectors and updates device storage controller data
+//
+// nolint:gocyclo // this is fine for now
+func (a *InventoryCollectorAction) CollectStorageControllers(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
+
+		return nil
 	}()
 
-	if c == nil {
+	if a.collectors.StorageControllerCollector == nil {
 		return nil
 	}
 
-	ncontrollers, err := c.StorageControllers(ctx)
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.StorageControllerCollector.Attributes()
+	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	found, err := a.collectors.StorageControllers(ctx)
 	if err != nil {
 		return err
 	}
 
-	if len(ncontrollers) == 0 {
+	if len(found) == 0 {
 		return nil
 	}
 
 	// TODO: handle case where the object may not already be present in device.Controllers and needs to be added
-	for _, e := range controllers {
-		for _, i := range ncontrollers {
+	for _, e := range a.device.StorageControllers {
+		for _, n := range found {
 			// object is matched by serial identifier and patched
-			if strings.EqualFold(e.Serial, i.Serial) {
-				changelog, err := diff.Diff(e, i)
+			if strings.EqualFold(e.Serial, n.Serial) {
+				changelog, err := diff.Diff(e, n)
 				if err != nil {
 					return err
 				}
 
-				changelog = vetChanges(changelog)
+				changelog = a.vetChanges(changelog)
 
 				if len(changelog) > 0 {
 					diff.Patch(changelog, e)
@@ -622,12 +691,12 @@ func StorageController(ctx context.Context, controllers []*common.StorageControl
 
 // vetChanges looks at the diff changelog and returns an updated Changelog
 // with deletions and changes that zero or unset string, int values are excluded.
-func vetChanges(changes diff.Changelog) diff.Changelog {
+func (a *InventoryCollectorAction) vetChanges(changes diff.Changelog) diff.Changelog {
 	accepted := diff.Changelog{}
 
 	for _, change := range changes {
 		// Skip changes that delete items
-		if acceptChange(&change) {
+		if a.acceptChange(&change) {
 			accepted = append(accepted, change)
 		}
 	}
@@ -635,12 +704,12 @@ func vetChanges(changes diff.Changelog) diff.Changelog {
 	return accepted
 }
 
-func acceptChange(change *diff.Change) bool {
+func (a *InventoryCollectorAction) acceptChange(change *diff.Change) bool {
 	switch change.Type {
 	case diff.DELETE:
 		return false
 	case diff.UPDATE:
-		return vetUpdate(change)
+		return a.vetUpdate(change)
 	case diff.CREATE:
 		return true
 	}
@@ -651,7 +720,7 @@ func acceptChange(change *diff.Change) bool {
 // vetUpdate looks at a diff.Update change and returns true if the change is to be accepted
 //
 // nolint:gocyclo // validation is cyclomatic, and this logic grokable when kept in one method
-func vetUpdate(change *diff.Change) bool {
+func (a *InventoryCollectorAction) vetUpdate(change *diff.Change) bool {
 	// allow vendor, model field changes only if the older value was not defined
 	if slices.Contains(change.Path, "Vendor") || slices.Contains(change.Path, "Model") {
 		if strings.TrimSpace(change.To.(string)) != "" && strings.TrimSpace(change.From.(string)) == "" {
