@@ -4,8 +4,47 @@ import (
 	"context"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 )
+
+// DeviceManager interface is returned to the caller when calling ironlib.New()
+type DeviceManager interface {
+	Setter
+	Getter
+	Updater
+}
+
+// RaidController interface declares methods to manage virtual disks.
+type RaidController interface {
+	VirtualDiskCreator
+	VirtualDiskDestroyer
+}
+
+// Setter interface declares methods to set attributes on a system.
+type Setter interface {
+	SetBIOSConfiguration(ctx context.Context, config map[string]string) error
+}
+
+// Getter interface declares methods implemented by providers to return various attributes.
+type Getter interface {
+	// Get device model
+	GetModel() string
+	// Get device vendor
+	GetVendor() string
+	// Check the device reboot required flag
+	RebootRequired() bool
+	// Check if any updates were applied
+	UpdatesApplied() bool
+	// Retrieve inventory for the device
+	GetInventory(ctx context.Context, options ...Option) (*common.Device, error)
+	// Retrieve inventory using the OEM tooling for the device,
+	GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error
+	// List updates identifed by the vendor tooling (DSU for dells)
+	ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error)
+	// Retrieve BIOS configuration for device
+	GetBIOSConfiguration(ctx context.Context) (map[string]string, error)
+}
 
 // Utility interface couples the configuration, collection and update interfaces
 type Utility interface {
@@ -23,13 +62,17 @@ type BIOSConfiguror interface {
 
 // UtilAttributeGetter defines methods to retrieve utility attributes.
 type UtilAttributeGetter interface {
-	Attributes() (utilName string, absolutePath string, err error)
+	Attributes() (utilName model.CollectorUtility, absolutePath string, err error)
 }
 
 // Updater defines an interface to install an update file
 type Updater interface {
-	UtilAttributeGetter
+	// ApplyUpdate is to be deprecated in favor of InstallUpdates, its implementations are to be moved
+	// to use InstallUpdates.
 	ApplyUpdate(ctx context.Context, updateFile, component string) error
+
+	// InstallUpdates installs updates based on the update options
+	InstallUpdates(ctx context.Context, options *model.UpdateOptions) error
 }
 
 // InventoryCollector defines an interface to collect all device inventory
