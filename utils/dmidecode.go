@@ -8,6 +8,7 @@ import (
 	"github.com/bmc-toolbox/common"
 	"github.com/dselans/dmidecode"
 	"github.com/metal-toolbox/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -27,7 +28,7 @@ func NewDmidecode() (d *Dmidecode, err error) {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (d *Dmidecode) Attributes() (utilName, absolutePath string, err error) {
+func (d *Dmidecode) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	path, err := d.dmi.FindBin("dmidecode")
 
 	return "dmidecode", path, err

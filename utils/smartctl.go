@@ -78,7 +78,7 @@ func NewSmartctlCmd(trace bool) *Smartctl {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (s *Smartctl) Attributes() (utilName, absolutePath string, err error) {
+func (s *Smartctl) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := s.Executor.CheckExecutable()
 

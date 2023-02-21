@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 )
 
 const EnvNvmeUtility = "IRONLIB_UTIL_NVME"
@@ -52,7 +53,7 @@ func NewNvmeCmd(trace bool) *Nvme {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (n *Nvme) Attributes() (utilName, absolutePath string, err error) {
+func (n *Nvme) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := n.Executor.CheckExecutable()
 

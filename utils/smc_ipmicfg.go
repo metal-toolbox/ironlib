@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -45,7 +46,7 @@ func NewIpmicfgCmd(trace bool) *Ipmicfg {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (i *Ipmicfg) Attributes() (utilName, absolutePath string, err error) {
+func (i *Ipmicfg) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := i.Executor.CheckExecutable()
 

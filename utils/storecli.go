@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 )
 
 const EnvStorecliUtility = "IRONLIB_UTIL_STORECLI"
@@ -60,7 +61,7 @@ func NewStoreCLICmd(trace bool) *StoreCLI {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (s *StoreCLI) Attributes() (utilName, absolutePath string, err error) {
+func (s *StoreCLI) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := s.Executor.CheckExecutable()
 

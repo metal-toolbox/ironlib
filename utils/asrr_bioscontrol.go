@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -66,7 +67,7 @@ func NewAsrrBioscontrol(trace bool) *AsrrBioscontrol {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (a *AsrrBioscontrol) Attributes() (utilName, absolutePath string, err error) {
+func (a *AsrrBioscontrol) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := a.Executor.CheckExecutable()
 

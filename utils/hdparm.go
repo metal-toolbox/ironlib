@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 )
 
 const (
@@ -38,7 +39,7 @@ func NewHdparmCmd(trace bool) *Hdparm {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (h *Hdparm) Attributes() (utilName, absolutePath string, err error) {
+func (h *Hdparm) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := h.Executor.CheckExecutable()
 

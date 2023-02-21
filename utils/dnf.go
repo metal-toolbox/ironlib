@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"text/template"
+
+	"github.com/metal-toolbox/ironlib/model"
 )
 
 var (
@@ -78,7 +80,7 @@ func NewDnf(trace bool) *Dnf {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (d *Dnf) Attributes() (utilName, absolutePath string, err error) {
+func (d *Dnf) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := d.Executor.CheckExecutable()
 

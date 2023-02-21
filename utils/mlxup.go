@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 )
 
@@ -55,7 +56,7 @@ func NewMlxupCmd(trace bool) *Mlxup {
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
-func (m *Mlxup) Attributes() (utilName, absolutePath string, err error) {
+func (m *Mlxup) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := m.Executor.CheckExecutable()
 
