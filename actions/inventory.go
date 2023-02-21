@@ -1,3 +1,4 @@
+// The inventory package ties together the various collectors under utils through its InventoryCollectorAction type.
 package actions
 
 import (
@@ -13,9 +14,6 @@ import (
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 )
-
-// The inventory package ties together the various collectors under utils
-// using the interfaces defined utils.interface.
 
 var (
 	ErrInventoryDeviceObjNil = errors.New("method Inventory() expects a valid device object, got nil")
