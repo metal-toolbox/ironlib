@@ -39,10 +39,10 @@ type InventoryCollectorAction struct {
 	// enable collectors based on the detected component vendor.
 	dynamicCollection bool
 
-	// disableCollectorUtilities is the list of collector utilities
+	// disabledCollectorUtilities is the list of collector utilities
 	// to be disabled, this is the name of collector utility
 	// which is returned by its Attributes() method.
-	disableCollectorUtilities []model.CollectorUtility
+	disabledCollectorUtilities []model.CollectorUtility
 }
 
 // Collectors is a struct acting as a registry of various inventory collectors
@@ -94,10 +94,10 @@ func WithCollectors(collectors *Collectors) Option {
 	}
 }
 
-// WithDisableCollectorUtilities disables the given collector utilities.
-func WithDisableCollectorUtilities(utilityNames []model.CollectorUtility) Option {
+// WithDisabledCollectorUtilities disables the given collector utilities.
+func WithDisabledCollectorUtilities(utilityNames []model.CollectorUtility) Option {
 	return func(a *InventoryCollectorAction) {
-		a.disableCollectorUtilities = utilityNames
+		a.disabledCollectorUtilities = utilityNames
 	}
 }
 
@@ -151,7 +151,7 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	a.device = device
 
 	// register a TPM inventory collector
-	if a.collectors.TPMCollector == nil && !slices.Contains(a.disableCollectorUtilities, model.CollectorUtility("dmidecode")) {
+	if a.collectors.TPMCollector == nil && !slices.Contains(a.disabledCollectorUtilities, model.CollectorUtility("dmidecode")) {
 		var err error
 
 		a.collectors.TPMCollector, err = utils.NewDmidecode()
@@ -290,7 +290,7 @@ func (a *InventoryCollectorAction) CollectDrives(ctx context.Context) error {
 	for _, collector := range a.collectors.DriveCollectors {
 		// skip collector if its been disabled
 		collectorKind, _, _ := collector.Attributes()
-		if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+		if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
 			continue
 		}
 
@@ -398,7 +398,7 @@ func (a *InventoryCollectorAction) CollectDriveCapabilities(ctx context.Context)
 
 		// skip collector if its been disabled
 		collectorKind, _, _ := collector.Attributes()
-		if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+		if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
 			continue
 		}
 
@@ -432,7 +432,7 @@ func (a *InventoryCollectorAction) CollectNICs(ctx context.Context) error {
 
 	// skip collector if its been disabled
 	collectorKind, _, _ := a.collectors.NICCollector.Attributes()
-	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
 		return nil
 	}
 
@@ -481,7 +481,7 @@ func (a *InventoryCollectorAction) CollectBMC(ctx context.Context) error {
 
 	// skip collector if its been disabled
 	collectorKind, _, _ := a.collectors.BMCCollector.Attributes()
-	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
 		return nil
 	}
 
@@ -518,7 +518,7 @@ func (a *InventoryCollectorAction) CollectCPLDs(ctx context.Context) error {
 
 	// skip collector if its been disabled
 	collectorKind, _, _ := a.collectors.CPLDCollector.Attributes()
-	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
 		return nil
 	}
 
@@ -564,7 +564,7 @@ func (a *InventoryCollectorAction) CollectBIOS(ctx context.Context) error {
 
 	// skip collector if its been disabled
 	collectorKind, _, _ := a.collectors.BIOSCollector.Attributes()
-	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
 		return nil
 	}
 
@@ -605,7 +605,7 @@ func (a *InventoryCollectorAction) CollectTPMs(ctx context.Context) error {
 
 	// skip collector if its been disabled
 	collectorKind, _, _ := a.collectors.TPMCollector.Attributes()
-	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
 		return nil
 	}
 
@@ -652,7 +652,7 @@ func (a *InventoryCollectorAction) CollectStorageControllers(ctx context.Context
 
 	// skip collector if its been disabled
 	collectorKind, _, _ := a.collectors.StorageControllerCollector.Attributes()
-	if slices.Contains(a.disableCollectorUtilities, collectorKind) {
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
 		return nil
 	}
 

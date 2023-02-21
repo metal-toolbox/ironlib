@@ -43,7 +43,7 @@ func Test_Inventory_dell(t *testing.T) {
 		WithCollectors(collectors),
 		WithTraceLevel(),
 		WithFailOnError(),
-		WithDisableCollectorUtilities([]model.CollectorUtility{"dmidecode"}),
+		WithDisabledCollectorUtilities([]model.CollectorUtility{"dmidecode"}),
 	}
 
 	collector := NewInventoryCollectorAction(options...)
