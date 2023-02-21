@@ -12,10 +12,9 @@ import (
 
 // A asrockrack device has methods to collect hardware inventory, regardless of the vendor
 type asrockrack struct {
-	trace      bool
-	hw         *model.Hardware
-	logger     *logrus.Logger
-	collectors *actions.Collectors
+	trace  bool
+	hw     *model.Hardware
+	logger *logrus.Logger
 }
 
 // New returns a ASRockRack device manager
@@ -51,15 +50,15 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 }
 
 // Returns hardware inventory for the device
-func (a *asrockrack) GetInventory(ctx context.Context, dynamic bool) (*common.Device, error) {
-	// Collect device inventory from lshw
+func (a *asrockrack) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
+	// Collect device inventory
 	a.logger.Info("Collecting inventory")
 
 	deviceObj := common.NewDevice()
 	a.hw.Device = &deviceObj
 
-	err := actions.Collect(ctx, a.hw.Device, a.collectors, a.trace, false, dynamic)
-	if err != nil {
+	collector := actions.NewInventoryCollectorAction(options...)
+	if err := collector.Collect(ctx, a.hw.Device); err != nil {
 		return nil, err
 	}
 
