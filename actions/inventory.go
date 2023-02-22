@@ -229,10 +229,14 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	// Update StorageControllerCollectors based on controller vendor attributes
 	if a.dynamicCollection {
 		for _, sc := range a.device.StorageControllers {
-			a.collectors.StorageControllerCollectors = append(
-				a.collectors.StorageControllerCollectors,
-				StorageControllerCollectorByVendor(sc.Vendor, a.trace),
-			)
+			c := StorageControllerCollectorByVendor(sc.Vendor, a.trace)
+
+			if c != nil {
+				a.collectors.StorageControllerCollectors = append(
+					a.collectors.StorageControllerCollectors,
+					StorageControllerCollectorByVendor(sc.Vendor, a.trace),
+				)
+			}
 		}
 	}
 
@@ -245,14 +249,14 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	// Update DriveCollectors based on drive vendor attributes
 	if a.dynamicCollection {
 		for _, sc := range a.device.StorageControllers {
-			if sc.SupportedRAIDTypes == "" {
-				continue
-			}
+			c := DriveCollectorByStorageControllerVendor(sc.Vendor, a.trace)
 
-			a.collectors.DriveCollectors = append(
-				a.collectors.DriveCollectors,
-				DriveCollectorByStorageControllerVendor(sc.Vendor, a.trace),
-			)
+			if c != nil {
+				a.collectors.DriveCollectors = append(
+					a.collectors.DriveCollectors,
+					DriveCollectorByStorageControllerVendor(sc.Vendor, a.trace),
+				)
+			}
 
 			err = a.CollectDrives(ctx)
 
@@ -798,7 +802,7 @@ func (a *InventoryCollectorAction) vetUpdate(change *diff.Change) bool {
 			return true
 		}
 	case int:
-		if newValue != int(0) {
+		if newValue >= -1 {
 			return true
 		}
 	case int64:
