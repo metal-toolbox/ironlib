@@ -89,8 +89,10 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 			utils.NewHdparmCmd(trace),
 			utils.NewNvmeCmd(trace),
 		},
-		StorageControllerCollector: utils.NewStoreCLICmd(trace),
-		NICCollector:               utils.NewMlxupCmd(trace),
+		StorageControllerCollectors: []actions.StorageControllerCollector{
+			utils.NewStoreCLICmd(trace),
+		},
+		NICCollector: utils.NewMlxupCmd(trace),
 	}
 
 	options = append(options, actions.WithCollectors(collectors))
