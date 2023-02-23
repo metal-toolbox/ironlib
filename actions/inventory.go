@@ -53,9 +53,26 @@ type Collectors struct {
 	CPLDCollector
 	BIOSCollector
 	TPMCollector
-	StorageControllerCollector
+	StorageControllerCollectors []StorageControllerCollector
 	DriveCollectors             []DriveCollector
 	DriveCapabilitiesCollectors []DriveCapabilityCollector
+}
+
+// Empty returns a bool value
+func (c *Collectors) Empty() bool {
+	if c.InventoryCollector == nil &&
+		c.NICCollector == nil &&
+		c.BMCCollector == nil &&
+		c.CPLDCollector == nil &&
+		c.BIOSCollector == nil &&
+		c.TPMCollector == nil &&
+		len(c.StorageControllerCollectors) == 0 &&
+		len(c.DriveCollectors) == 0 &&
+		len(c.DriveCapabilitiesCollectors) == 0 {
+		return true
+	}
+
+	return false
 }
 
 // Option returns a function that sets a InventoryCollectorAction parameter
@@ -103,31 +120,31 @@ func WithDisabledCollectorUtilities(utilityNames []model.CollectorUtility) Optio
 
 // NewActionrunner returns an Actions runner that is capable of collecting inventory.
 func NewInventoryCollectorAction(options ...Option) *InventoryCollectorAction {
-	var trace bool
-
-	// set default collectors
-	a := &InventoryCollectorAction{
-		collectors: Collectors{
-			InventoryCollector: utils.NewLshwCmd(trace),
-			DriveCollectors: []DriveCollector{
-				utils.NewSmartctlCmd(trace),
-				utils.NewLsblkCmd(trace),
-			},
-			DriveCapabilitiesCollectors: []DriveCapabilityCollector{
-				utils.NewHdparmCmd(trace),
-				utils.NewNvmeCmd(trace),
-			},
-		},
-	}
+	a := &InventoryCollectorAction{}
 
 	// set options to override
 	for _, opt := range options {
 		opt(a)
 	}
 
+	// set default collectors when none have been set through options.
+	if a.collectors.Empty() {
+		a.collectors = Collectors{
+			InventoryCollector: utils.NewLshwCmd(a.trace),
+			DriveCollectors: []DriveCollector{
+				utils.NewSmartctlCmd(a.trace),
+				utils.NewLsblkCmd(a.trace),
+			},
+			DriveCapabilitiesCollectors: []DriveCapabilityCollector{
+				utils.NewHdparmCmd(a.trace),
+				utils.NewNvmeCmd(a.trace),
+			},
+		}
+	}
+
 	// the lshw collector cannot be disabled, since its the primary inventory collector.
 	if a.collectors.InventoryCollector == nil {
-		a.collectors.InventoryCollector = utils.NewLshwCmd(trace)
+		a.collectors.InventoryCollector = utils.NewLshwCmd(a.trace)
 	}
 
 	return a
