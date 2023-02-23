@@ -229,7 +229,10 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	// Update StorageControllerCollectors based on controller vendor attributes
 	if a.dynamicCollection {
 		for _, sc := range a.device.StorageControllers {
-			a.collectors.StorageControllerCollector = StorageControllerCollectorByVendor(sc.Vendor, a.trace)
+			a.collectors.StorageControllerCollectors = append(
+				a.collectors.StorageControllerCollectors,
+				StorageControllerCollectorByVendor(sc.Vendor, a.trace),
+			)
 		}
 	}
 
@@ -364,6 +367,7 @@ func (a *InventoryCollectorAction) CollectDrives(ctx context.Context) error {
 
 	return nil
 }
+
 func (a *InventoryCollectorAction) findDriveBySerial(serial string, drives []*common.Drive) *common.Drive {
 	for _, drive := range drives {
 		if strings.EqualFold(serial, drive.Serial) {
@@ -663,41 +667,61 @@ func (a *InventoryCollectorAction) CollectStorageControllers(ctx context.Context
 		return nil
 	}()
 
-	if a.collectors.StorageControllerCollector == nil {
+	if len(a.collectors.StorageControllerCollectors) == 0 {
 		return nil
 	}
 
-	// skip collector if its been disabled
-	collectorKind, _, _ := a.collectors.StorageControllerCollector.Attributes()
-	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
-		return nil
-	}
+	for _, collector := range a.collectors.StorageControllerCollectors {
+		// skip collector if its been disabled
+		collectorKind, _, _ := collector.Attributes()
+		if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
+			continue
+		}
 
-	found, err := a.collectors.StorageControllers(ctx)
-	if err != nil {
-		return err
-	}
+		found, err := collector.StorageControllers(ctx)
+		if err != nil {
+			return err
+		}
 
-	if len(found) == 0 {
-		return nil
-	}
+		if len(found) == 0 {
+			return nil
+		}
 
-	// TODO: handle case where the object may not already be present in device.Controllers and needs to be added
-	for _, e := range a.device.StorageControllers {
-		for _, n := range found {
-			// object is matched by serial identifier and patched
-			if strings.EqualFold(e.Serial, n.Serial) {
-				changelog, err := diff.Diff(e, n)
+		for _, existing := range a.device.StorageControllers {
+			a.findStorageControllerBySerial(existing.Serial, found)
+
+			if found != nil {
+				// diff existing fields with the one found
+				changelog, err := diff.Diff(existing, found)
 				if err != nil {
 					return err
 				}
 
 				changelog = a.vetChanges(changelog)
+				diff.Patch(changelog, existing)
 
-				if len(changelog) > 0 {
-					diff.Patch(changelog, e)
-				}
+				continue
 			}
+
+			// add storage controller if it isn't part of existing controllers on the device
+			for _, new := range found {
+				found := a.findStorageControllerBySerial(new.Serial, a.device.StorageControllers)
+				if found != nil && found.Serial != "" {
+					continue
+				}
+
+				a.device.StorageControllers = append(a.device.StorageControllers, new)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (a *InventoryCollectorAction) findStorageControllerBySerial(serial string, controllers []*common.StorageController) *common.StorageController {
+	for _, controller := range controllers {
+		if strings.EqualFold(serial, controller.Serial) {
+			return controller
 		}
 	}
 

@@ -113,14 +113,14 @@ func Test_Inventory_smc(t *testing.T) {
 	}
 
 	collectors := &Collectors{
-		InventoryCollector:         lshw,
-		DriveCollectors:            []DriveCollector{smartctl},
-		NICCollector:               mlxup,
-		CPLDCollector:              ipmicfg0,
-		BIOSCollector:              ipmicfg1,
-		BMCCollector:               ipmicfg2,
-		TPMCollector:               dmi,
-		StorageControllerCollector: storecli,
+		InventoryCollector:          lshw,
+		DriveCollectors:             []DriveCollector{smartctl},
+		NICCollector:                mlxup,
+		CPLDCollector:               ipmicfg0,
+		BIOSCollector:               ipmicfg1,
+		BMCCollector:                ipmicfg2,
+		TPMCollector:                dmi,
+		StorageControllerCollectors: []StorageControllerCollector{storecli},
 	}
 
 	collector := NewInventoryCollectorAction(WithCollectors(collectors), WithTraceLevel())
