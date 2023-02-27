@@ -20,6 +20,12 @@ func (d *dell) GetBIOSConfiguration(ctx context.Context) (map[string]string, err
 		}
 	}
 
+	// Make sure service that loads ipmi modules is running before attempting to collect bios config
+	err := d.startSrvHelper()
+	if err != nil {
+		return nil, err
+	}
+
 	racadm := utils.NewDellRacadm(false)
 
 	return racadm.GetBIOSConfiguration(ctx, model.FormatProductName(d.GetModel()))
