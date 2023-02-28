@@ -2880,7 +2880,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "Serial Attached SCSI controller",
-					Vendor:       "Broadcom / LSI",
+					Vendor:       "broadcom",
 					Model:        "SAS3008 PCI-Express Fusion-MPT SAS-3",
 					Serial:       "dead:beef",
 					ProductName:  "SAS3008 PCI-Express Fusion-MPT SAS-3",

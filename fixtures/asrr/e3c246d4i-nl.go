@@ -1000,7 +1000,7 @@ var E3C246D4INL = &common.Device{
 			Common: common.Common{
 				Oem:          false,
 				Description:  "SATA controller",
-				Vendor:       "Intel Corporation",
+				Vendor:       "intel",
 				Model:        "Cannon Lake PCH SATA AHCI Controller",
 				Serial:       "000f:d00f",
 				ProductName:  "Cannon Lake PCH SATA AHCI Controller",
