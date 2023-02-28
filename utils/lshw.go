@@ -559,7 +559,7 @@ func (l *Lshw) xStorageController(node *LshwNode) *common.StorageController {
 	sc := &common.StorageController{
 		Common: common.Common{
 			Description: node.Description,
-			Vendor:      node.Vendor,
+			Vendor:      common.FormatVendorName(node.Vendor),
 			Model:       node.Product,
 			Serial:      node.Serial,
 			ProductName: node.Product,
