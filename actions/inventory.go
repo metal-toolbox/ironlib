@@ -796,7 +796,7 @@ func (a *InventoryCollectorAction) vetUpdate(change *diff.Change) bool {
 			return true
 		}
 	case int:
-		if newValue != int(0) {
+		if newValue >= -1 {
 			return true
 		}
 	case int64:
