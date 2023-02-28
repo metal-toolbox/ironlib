@@ -1617,7 +1617,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "Serial Attached SCSI controller",
-					Vendor:       "Broadcom / LSI",
+					Vendor:       "broadcom",
 					Model:        "SAS3008 PCI-Express Fusion-MPT SAS-3",
 					Serial:       "dead:beef",
 					ProductName:  "SAS3008 PCI-Express Fusion-MPT SAS-3",
@@ -1680,7 +1680,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "SATA controller",
-					Vendor:       "Marvell Technology Group Ltd.",
+					Vendor:       "marvell",
 					Model:        "88SE9230 PCIe SATA 6Gb/s Controller",
 					Serial:       common.VendorMarvellPciID + ":beef",
 					ProductName:  "88SE9230 PCIe SATA 6Gb/s Controller",
@@ -3201,7 +3201,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "Serial Attached SCSI controller",
-					Vendor:       "Broadcom / LSI",
+					Vendor:       "broadcom",
 					Model:        "SAS3008 PCI-Express Fusion-MPT SAS-3",
 					Serial:       "dead:beef",
 					ProductName:  "SAS3008 PCI-Express Fusion-MPT SAS-3",
@@ -3264,7 +3264,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "SATA controller",
-					Vendor:       "Marvell Technology Group Ltd.",
+					Vendor:       "marvell",
 					Model:        "88SE9230 PCIe SATA 6Gb/s Controller",
 					Serial:       common.VendorMarvellPciID + ":beef",
 					ProductName:  "88SE9230 PCIe SATA 6Gb/s Controller",
