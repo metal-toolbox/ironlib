@@ -251,7 +251,9 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 			if c != nil {
 				a.collectors.DriveCollectors = append(a.collectors.DriveCollectors, c)
 			}
+		}
 
+		if len(a.collectors.DriveCollectors) > 0 {
 			err = a.CollectDrives(ctx)
 
 			if err != nil && a.failOnError {
