@@ -114,8 +114,9 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 				},
 			},
 
-			Type:        model.DriveTypeSlug(smartctlAll.ModelName),
-			SmartStatus: common.SmartStatusUnknown,
+			Type:                     model.DriveTypeSlug(smartctlAll.ModelName),
+			SmartStatus:              common.SmartStatusUnknown,
+			StorageControllerDriveID: -1,
 		}
 
 		if item.Vendor == "" {
