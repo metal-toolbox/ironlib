@@ -229,7 +229,9 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	// Update StorageControllerCollectors based on controller vendor attributes
 	if a.dynamicCollection {
 		for _, sc := range a.device.StorageControllers {
-			c := StorageControllerCollectorByVendor(sc.Vendor, a.trace)
+		if c := StorageControllerCollectorByVendor(sc.Vendor, a.trace); c != nil {
+            a.collectors.StorageControllerCollectors = append(a.collectors.StorageControllerCollectors, c)
+        }
 
 			if c != nil {
 				a.collectors.StorageControllerCollectors = append(a.collectors.StorageControllerCollectors, c)
