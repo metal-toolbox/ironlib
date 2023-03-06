@@ -229,11 +229,7 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	// Update StorageControllerCollectors based on controller vendor attributes
 	if a.dynamicCollection {
 		for _, sc := range a.device.StorageControllers {
-		if c := StorageControllerCollectorByVendor(sc.Vendor, a.trace); c != nil {
-            a.collectors.StorageControllerCollectors = append(a.collectors.StorageControllerCollectors, c)
-        }
-
-			if c != nil {
+			if c := StorageControllerCollectorByVendor(sc.Vendor, a.trace); c != nil {
 				a.collectors.StorageControllerCollectors = append(a.collectors.StorageControllerCollectors, c)
 			}
 		}
@@ -248,11 +244,7 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	// Update DriveCollectors based on drive vendor attributes
 	if a.dynamicCollection {
 		for _, sc := range a.device.StorageControllers {
-			c := DriveCollectorByStorageControllerVendor(sc.Vendor, a.trace)
-
 			if c := DriveCollectorByStorageControllerVendor(sc.Vendor, a.trace); c != nil {
-                a.collectors.DriveCollectors = append(a.collectors.DriveCollectors, c)
-            }
 				a.collectors.DriveCollectors = append(a.collectors.DriveCollectors, c)
 			}
 		}
