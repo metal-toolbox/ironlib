@@ -250,7 +250,9 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 		for _, sc := range a.device.StorageControllers {
 			c := DriveCollectorByStorageControllerVendor(sc.Vendor, a.trace)
 
-			if c != nil {
+			if c := DriveCollectorByStorageControllerVendor(sc.Vendor, a.trace); c != nil {
+                a.collectors.DriveCollectors = append(a.collectors.DriveCollectors, c)
+            }
 				a.collectors.DriveCollectors = append(a.collectors.DriveCollectors, c)
 			}
 		}
