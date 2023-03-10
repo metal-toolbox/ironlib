@@ -395,15 +395,8 @@ var (
 					Firmware:    nil,
 					Status:      nil,
 				},
-				ID: "",
-				NICPorts: []*common.NICPort{
-					{
-						SpeedBits:  0,
-						PhysicalID: "",
-						BusInfo:    "",
-						MacAddress: "",
-					},
-				},
+				ID:       "",
+				NICPorts: nil,
 			},
 		},
 		Mainboard: &common.Mainboard{
@@ -1961,15 +1954,8 @@ var (
 					Firmware:    nil,
 					Status:      nil,
 				},
-				ID: "",
-				NICPorts: []*common.NICPort{
-					{
-						SpeedBits:  0,
-						PhysicalID: "",
-						BusInfo:    "",
-						MacAddress: "",
-					},
-				},
+				ID:       "",
+				NICPorts: nil,
 			},
 		},
 		Mainboard: &common.Mainboard{
@@ -3373,15 +3359,8 @@ var (
 					Firmware:    nil,
 					Status:      nil,
 				},
-				ID: "",
-				NICPorts: []*common.NICPort{
-					{
-						SpeedBits:  0,
-						PhysicalID: "",
-						BusInfo:    "",
-						MacAddress: "",
-					},
-				},
+				ID:       "",
+				NICPorts: nil,
 			},
 		},
 		Mainboard: &common.Mainboard{

@@ -149,15 +149,8 @@ var E3C246D4INL = &common.Device{
 				Firmware:    nil,
 				Status:      nil,
 			},
-			ID: "",
-			NICPorts: []*common.NICPort{
-				{
-					SpeedBits:  0,
-					PhysicalID: "",
-					BusInfo:    "",
-					MacAddress: "",
-				},
-			},
+			ID:       "",
+			NICPorts: nil,
 		},
 	},
 	Mainboard: &common.Mainboard{
