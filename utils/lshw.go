@@ -382,11 +382,13 @@ func (l *Lshw) xNIC(node *LshwNode) *common.NIC {
 			ProductName:  node.Product,
 			Capabilities: l.xParseCapabilities(node.Capabilities),
 		},
-
-		Description: node.Description,
-		SpeedBits:   node.Capacity,
-		PhysicalID:  node.Physid,
-		BusInfo:     node.Businfo,
+		NICPorts: []*common.NICPort{
+			{
+				SpeedBits:  node.Capacity,
+				PhysicalID: node.Physid,
+				BusInfo:    node.Businfo,
+			},
+		},
 	}
 
 	nic.Common.PCIVendorID, nic.Common.PCIProductID, nic.Common.ProductName = lshwPciIDParse(node.Product)
