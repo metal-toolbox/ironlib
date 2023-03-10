@@ -149,12 +149,15 @@ var E3C246D4INL = &common.Device{
 				Firmware:    nil,
 				Status:      nil,
 			},
-			ID:          "",
-			Description: "",
-			SpeedBits:   0,
-			PhysicalID:  "",
-			BusInfo:     "",
-			MacAddress:  "",
+			ID: "",
+			NICPorts: []*common.NICPort{
+				{
+					SpeedBits:  0,
+					PhysicalID: "",
+					BusInfo:    "",
+					MacAddress: "",
+				},
+			},
 		},
 	},
 	Mainboard: &common.Mainboard{
@@ -931,12 +934,15 @@ var E3C246D4INL = &common.Device{
 					},
 				},
 			},
-			ID:          "",
-			Description: "Ethernet interface",
-			SpeedBits:   10000000000,
-			PhysicalID:  "0",
-			BusInfo:     "pci@0000:01:00.0",
-			MacAddress:  "",
+			ID: "",
+			NICPorts: []*common.NICPort{
+				{
+					SpeedBits:  10000000000,
+					PhysicalID: "0",
+					BusInfo:    "pci@0000:01:00.0",
+					MacAddress: "",
+				},
+			},
 		},
 	},
 	Drives: []*common.Drive{

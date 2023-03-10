@@ -2170,12 +2170,15 @@ var (
 						},
 					},
 				},
-				ID:          "",
-				Description: "Ethernet interface",
-				SpeedBits:   10000000000,
-				PhysicalID:  "0",
-				BusInfo:     "pci@0000:1a:00.0",
-				MacAddress:  "",
+				ID: "",
+				NICPorts: []*common.NICPort{
+					{
+						SpeedBits:  10000000000,
+						PhysicalID: "0",
+						BusInfo:    "pci@0000:1a:00.0",
+						MacAddress: "",
+					},
+				},
 			},
 			{
 				Common: common.Common{
@@ -2265,12 +2268,15 @@ var (
 						},
 					},
 				},
-				ID:          "",
-				Description: "Ethernet interface",
-				SpeedBits:   10000000000,
-				PhysicalID:  "0.1",
-				BusInfo:     "pci@0000:1a:00.1",
-				MacAddress:  "",
+				ID: "",
+				NICPorts: []*common.NICPort{
+					{
+						SpeedBits:  10000000000,
+						PhysicalID: "0.1",
+						BusInfo:    "pci@0000:1a:00.1",
+						MacAddress: "",
+					},
+				},
 			},
 			{
 				Common: common.Common{
@@ -2353,12 +2359,15 @@ var (
 						},
 					},
 				},
-				ID:          "",
-				Description: "Ethernet interface",
-				SpeedBits:   0,
-				PhysicalID:  "0",
-				BusInfo:     "pci@0000:d8:00.0",
-				MacAddress:  "",
+				ID: "",
+				NICPorts: []*common.NICPort{
+					{
+						SpeedBits:  0,
+						PhysicalID: "0",
+						BusInfo:    "pci@0000:d8:00.0",
+						MacAddress: "",
+					},
+				},
 			},
 		},
 		Drives: []*common.Drive{
