@@ -36,9 +36,14 @@ func Test_MlxupNICs(t *testing.T) {
 					},
 				},
 			},
-
-			SpeedBits:  0,
-			PhysicalID: "",
+			NICPorts: []*common.NICPort{
+				{
+					BusInfo:    "0000:d8:00.0",
+					SpeedBits:  0,
+					PhysicalID: "",
+					MacAddress: "b8:59:9f:de:86:fd",
+				},
+			},
 		},
 		{
 			Common: common.Common{
@@ -59,9 +64,14 @@ func Test_MlxupNICs(t *testing.T) {
 					},
 				},
 			},
-
-			SpeedBits:  0,
-			PhysicalID: "",
+			NICPorts: []*common.NICPort{
+				{
+					BusInfo:    "0000:d8:00.1",
+					SpeedBits:  0,
+					PhysicalID: "",
+					MacAddress: "b8:59:9f:de:86:f8",
+				},
+			},
 		},
 	}
 
