@@ -2364,8 +2364,8 @@ var (
 					{
 						SpeedBits:  0,
 						PhysicalID: "0",
-						BusInfo:    "pci@0000:d8:00.0",
-						MacAddress: "",
+						BusInfo:    "0000:d8:00.0",
+						MacAddress: "0c:42:a1:3d:bd:e0",
 					},
 				},
 			},
