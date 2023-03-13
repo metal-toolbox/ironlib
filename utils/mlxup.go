@@ -99,6 +99,12 @@ func (m *Mlxup) NICs(ctx context.Context) ([]*common.NIC, error) {
 				Metadata:    make(map[string]string),
 				Firmware:    common.NewFirmwareObj(),
 			},
+			NICPorts: []*common.NICPort{
+				{
+					BusInfo:    d.PCIDeviceName,
+					MacAddress: d.BaseMAC,
+				},
+			},
 		}
 
 		// populate NIC firmware attributes
