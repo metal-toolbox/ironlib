@@ -22,8 +22,8 @@ type Lsblk struct {
 }
 
 type lsblkDeviceAttributes struct {
-	Name      string `json:"kname"`
-	Device    string `json:"path"`
+	Name      string `json:"name"`
+	Device    string `json:"kname"`
 	Model     string `json:"model"`
 	Serial    string `json:"serial"`
 	Firmware  string `json:"rev:"`
@@ -103,7 +103,7 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 
 func (l *Lsblk) list(ctx context.Context) ([]byte, error) {
 	// lsblk --json --nodeps --output name,path,model,serial,tran -e1,7,11
-	l.Executor.SetArgs([]string{"--json", "--nodeps", "--output", "kname,path,model,serial,rev,tran", "-e1,7,11"})
+	l.Executor.SetArgs([]string{"--json", "--nodeps", "-p", "--output", "kname,name,model,serial,rev,tran", "-e1,7,11"})
 
 	result, err := l.Executor.ExecWithContext(ctx)
 	if err != nil {
