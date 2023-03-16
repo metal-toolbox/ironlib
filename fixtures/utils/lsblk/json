@@ -2,7 +2,7 @@
     "blockdevices": [
         {
             "name": "sda",
-            "path": "/dev/sda",
+            "kname": "/dev/sda",
             "model": "MTFDDAV240TDU",
             "serial": "203329F89392",
             "rev": "2B6Q",
@@ -10,7 +10,7 @@
         },
         {
             "name": "sdb",
-            "path": "/dev/sdb",
+            "kname": "/dev/sdb",
             "model": "MTFDDAV240TDU     ",
             "serial": "203329F89796",
             "rev": "2B6Q",
@@ -18,7 +18,7 @@
         },
         {
             "name": "nvme0",
-            "path": "/dev/nvme0",
+            "kname": "/dev/nvme0",
             "model": "Micron_9300_MTFDHAL3T8TDP         ",
             "serial": "202728F691F5         ",
             "rev": null,
@@ -26,7 +26,7 @@
         },
         {
             "name": "nvme0",
-            "path": "/dev/nvme1       ",
+            "kname": "/dev/nvme1       ",
             "model": "Micron_9300_MTFDHAL3T8TDP         ",
             "serial": "202728F691C6",
             "rev": null,
