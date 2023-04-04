@@ -43,23 +43,23 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
 
 # install misc support packages
 RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
-    lshw          \
-    pciutils      \
-    hdparm        \
-    util-linux    \
-    nvme-cli      \
     dmidecode     \
-    libssh2-devel \
-    kmod          \
-    tar           \
+    dosfstools    \
+    e2fsprogs     \
+    gdisk         \
     gzip          \
+    hdparm        \
+    kmod          \
+    libssh2-devel \
+    lshw          \
+    mdadm         \
+    nvme-cli      \
+    pciutils      \
+    smartmontools \
+    tar           \
     unzip         \
+    util-linux    \
     which         \
-    smartmontools && \
-    gdisk && \
-    e2fsprogs && \
-    dosfstools && \
-    mdadm && \
     microdnf clean all && \
     ln -s /usr/bin/microdnf /usr/bin/yum # since dell dsu expects yum
 
