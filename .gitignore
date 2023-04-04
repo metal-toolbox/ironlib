@@ -9,3 +9,6 @@
 *~
 .*.swp
 .*.swo
+
+# Docker image dependencies
+dependencies/
