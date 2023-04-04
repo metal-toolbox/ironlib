@@ -19,7 +19,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on \
     go build -o getbiosconfig examples/biosconfig/biosconfig.go && \
     install -m 755 -D getbiosconfig /usr/sbin/
 
-FROM almalinux:9-minimal
+FROM almalinux:9-minimal as stage1
 
 ARG DEPDIR="dependencies"
 COPY "${DEPDIR}" dependencies
@@ -59,7 +59,7 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
     tar           \
     unzip         \
     util-linux    \
-    which         \
+    which &&      \
     microdnf clean all && \
     ln -s /usr/bin/microdnf /usr/bin/yum # since dell dsu expects yum
 
@@ -67,7 +67,10 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
 RUN if [[ -f ${DEPDIR}/install-extra-deps.sh ]]; then cd ${DEPDIR} && bash install-extra-deps.sh; fi
 
 # Delete /tmp/* and dependencies dir as we don't need those included in the image.
-# for some reason this is not working in reducing the size of the image
 RUN rm -rf /tmp/* && rm -rf ${DEPDIR}
+
+# Build a lean image with dependencies installed.
+FROM scratch
+COPY --from=stage1 / /
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
