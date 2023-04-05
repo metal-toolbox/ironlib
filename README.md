@@ -108,3 +108,20 @@ IRONLIB_UTIL_STORECLI
 ```
 
 Check out this [snippet](examples/dependencies/main.go) to determine if all required dependencies are available to ironlib.
+
+# ironlib docker image
+
+A github workflow builds and releases a docker image based off the Dockerfile in this repository.
+
+The Dockerfile provides `ONBUILD` hooks so downstream users can build their own images including any further dependencies required (i.e. proprietary vendor tools). To use the `ONBUILD` functionality in a downstream docker image, add the extra tools to a `dependencies` directory and provide a script `install-extra-deps.sh` to install those within the image.
+
+Downstream `Dockerfile` can be as simple as:
+
+```
+# Use base ironlib image with ONBUILD instructions to include extra deps
+FROM ghcr.io/metal-toolbox/ironlib:latest as stage0
+
+# Keep image lean after all extra deps are installed
+FROM scratch
+COPY --from=stage0 / /
+```
