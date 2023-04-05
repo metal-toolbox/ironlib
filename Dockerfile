@@ -62,15 +62,18 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
     microdnf clean all && \
     ln -s /usr/bin/microdnf /usr/bin/yum # since dell dsu expects yum
 
-# Provide hook to include extra dependencies in the image
-RUN if [[ -f ${DEPDIR}/install-extra-deps.sh ]]; then cd ${DEPDIR} && bash install-extra-deps.sh; fi
 
 # Delete /tmp/* as we don't need those included in the image.
 RUN rm -rf /tmp/*
 
-
 # Build a lean image with dependencies installed.
 FROM scratch
 COPY --from=stage1 / /
+
+# Provide hook to include extra dependencies in the image
+ONBUILD ARG DEPDIR="dependencies"
+ONBUILD COPY "${DEPDIR}" dependencies
+ONBUILD RUN if [[ -f ${DEPDIR}/install-extra-deps.sh ]]; then cd ${DEPDIR} && bash install-extra-deps.sh; fi
+ONBUILD RUN rm -rf "${DEPDIR}"
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
