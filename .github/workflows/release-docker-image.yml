@@ -5,8 +5,8 @@ on:
     branches:
       - main
     tags:
-      - 'v*.*.*'
-      - 'v*.*.*-staging'
+      - "v*.*.*"
+      - "v*.*.*-staging"
 
 jobs:
   build:
@@ -55,7 +55,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Sign the images with GitHub OIDC Token
-        run: cosign sign ghcr.io/metal-toolbox/ironlib:${{ github.sha }}
+        run: cosign sign ghcr.io/metal-toolbox/ironlib:${{ steps.dockerbuild.outputs.digest }}
         env:
           COSIGN_EXPERIMENTAL: true
 
