@@ -55,7 +55,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Sign the images with GitHub OIDC Token
-        run: cosign sign ghcr.io/metal-toolbox/ironlib:${{ steps.dockerbuild.outputs.digest }}
+        run: cosign sign ghcr.io/metal-toolbox/ironlib@${{ steps.dockerbuild.outputs.digest }}
         env:
           COSIGN_EXPERIMENTAL: true
 
