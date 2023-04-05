@@ -21,16 +21,15 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on \
 
 FROM almalinux:9-minimal as stage1
 
-ARG DEPDIR="dependencies"
-COPY "${DEPDIR}" dependencies
-
 # copy ironlib wrapper binaries
 COPY --from=stage0 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
 
 # import and install tools
+RUN curl -sO https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 RUN microdnf install -y --setopt=tsflags=nodocs crypto-policies-scripts && \
     update-crypto-policies --set DEFAULT:SHA1 && \
-    rpm -ivh ${DEPDIR}/epel-release-latest-9.noarch.rpm
+    rpm -ivh epel-release-latest-9.noarch.rpm && \
+    rm -f epel-release-latest-9.noarch.rpm
 
 ## Prerequisite directories for Dell, ASRR, Supermicro
 ## /lib/firmware required for Dell updates to be installed successfullly
@@ -66,8 +65,9 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
 # Provide hook to include extra dependencies in the image
 RUN if [[ -f ${DEPDIR}/install-extra-deps.sh ]]; then cd ${DEPDIR} && bash install-extra-deps.sh; fi
 
-# Delete /tmp/* and dependencies dir as we don't need those included in the image.
-RUN rm -rf /tmp/* && rm -rf ${DEPDIR}
+# Delete /tmp/* as we don't need those included in the image.
+RUN rm -rf /tmp/*
+
 
 # Build a lean image with dependencies installed.
 FROM scratch
