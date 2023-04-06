@@ -68,7 +68,7 @@ jobs:
           # TODO(jaosorior): Fail build once we migrate off CentOS.
           fail-build: false
 
-      - uses: anchore/sbom-action/download-syft@v0.12.0
+      - uses: anchore/sbom-action/download-syft@v0.14.1
 
       # TODO(jaosorior): Uncomment once we migrate off CentOS.
       # - name: upload Anchore scan SARIF report
