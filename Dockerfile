@@ -15,7 +15,8 @@ RUN go mod download
 COPY . .
 
 # build helper util
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on \
+ARG TARGETOS TARGETARCH
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GO111MODULE=on \
     go build -o getbiosconfig examples/biosconfig/biosconfig.go && \
     install -m 755 -D getbiosconfig /usr/sbin/
 
@@ -34,11 +35,16 @@ RUN microdnf install -y --setopt=tsflags=nodocs crypto-policies-scripts && \
 ## Prerequisite directories for Dell, ASRR, Supermicro
 ## /lib/firmware required for Dell updates to be installed successfullly
 RUN mkdir -p /lib/firmware /opt/asrr /usr/libexec/dell_dup /opt/supermicro/sum/
+
+RUN echo "Target ARCH is $TARGETARCH"
+
 # Bootstrap Dell DSU repository
-RUN curl -O https://linux.dell.com/repo/hardware/dsu/bootstrap.cgi && bash bootstrap.cgi && rm -f bootstrap.cgi
 # Install Dell idracadm7 to enable collecting BIOS configuration and use install_weak_deps=0 to avoid pulling extra packages
-RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
-    srvadmin-idracadm7
+RUN if [[ $TARGETARCH = "amd64" ]] ; then \
+    curl -O https://linux.dell.com/repo/hardware/dsu/bootstrap.cgi && \
+    bash bootstrap.cgi && rm -f bootstrap.cgi && \
+    microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
+    srvadmin-idracadm7 ; fi
 
 # install misc support packages
 RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
