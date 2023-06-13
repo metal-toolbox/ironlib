@@ -56,30 +56,21 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64,linux/arm64
 
-      - name: Scan image
-        id: scan
-        uses: anchore/scan-action@v3
-        with:
-          image: ghcr.io/metal-toolbox/ironlib@${{ steps.dockerbuild.outputs.digest }}
-          acs-report-enable: true
-          # TODO(jaosorior): Fail build once we migrate off CentOS.
-          fail-build: false
+      # - name: Scan image
+      #   id: scan
+      #   uses: anchore/scan-action@v3
+      #   with:
+      #     image: ghcr.io/metal-toolbox/ironlib@${{ steps.dockerbuild.outputs.digest }}
+      #     acs-report-enable: true
+      #     # TODO(jaosorior): Fail build once we migrate off CentOS.
+      #     fail-build: false
 
       # - name: Sign the images with GitHub OIDC Token
       #   run: cosign sign --recursive --yes ghcr.io/metal-toolbox/ironlib@${{ steps.dockerbuild.outputs.digest }}
       #   env:
       #     COSIGN_EXPERIMENTAL: true
 
-      - name: Push Images Again
-        id: dockerpush
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          platforms: linux/amd64,linux/arm64
-
-      - uses: anchore/sbom-action/download-syft@v0.14.1
+      # - uses: anchore/sbom-action/download-syft@v0.14.1
 
       # TODO(jaosorior): Uncomment once we migrate off CentOS.
       # - name: upload Anchore scan SARIF report
@@ -89,7 +80,7 @@ jobs:
       #   # This should run even if we fail the container scan
       #   if: always()
 
-      - name: Inspect action SARIF report
-        run: cat ${{ steps.scan.outputs.sarif }}
-        # This should run even if we fail the container scan
-        if: always()
+      # - name: Inspect action SARIF report
+      #   run: cat ${{ steps.scan.outputs.sarif }}
+      #   # This should run even if we fail the container scan
+      #   if: always()
