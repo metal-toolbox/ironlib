@@ -34,8 +34,8 @@ jobs:
             type=semver,pattern={{raw}}
             type=sha
 
-      # - name: install cosign
-      #   uses: sigstore/cosign-installer@main
+      - name: install cosign
+        uses: sigstore/cosign-installer@main
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
@@ -51,7 +51,6 @@ jobs:
         id: dockerbuild
         uses: docker/build-push-action@v4
         with:
-          sbom: false
           provenance: false
           context: .
           push: true
@@ -67,10 +66,10 @@ jobs:
           # TODO(jaosorior): Fail build once we migrate off CentOS.
           fail-build: false
 
-      # - name: Sign the images with GitHub OIDC Token
-      #   run: cosign sign --recursive --yes ghcr.io/metal-toolbox/ironlib@${{ steps.dockerbuild.outputs.digest }}
-      #   env:
-      #     COSIGN_EXPERIMENTAL: true
+      - name: Sign the images with GitHub OIDC Token
+        run: cosign sign --recursive --yes ghcr.io/metal-toolbox/ironlib@${{ steps.dockerbuild.outputs.digest }}
+        env:
+          COSIGN_EXPERIMENTAL: true
 
       - uses: anchore/sbom-action/download-syft@v0.14.1
 
