@@ -51,6 +51,7 @@ jobs:
         id: dockerbuild
         uses: docker/build-push-action@v4
         with:
+          sbom: false
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -69,15 +70,6 @@ jobs:
       #   run: cosign sign --recursive --yes ghcr.io/metal-toolbox/ironlib@${{ steps.dockerbuild.outputs.digest }}
       #   env:
       #     COSIGN_EXPERIMENTAL: true
-
-      - name: Push Images Again
-        id: dockerpush
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          platforms: linux/amd64,linux/arm64
 
       - uses: anchore/sbom-action/download-syft@v0.14.1
 
