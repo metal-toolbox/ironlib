@@ -21,6 +21,7 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GO111MODULE=on \
     install -m 755 -D getbiosconfig /usr/sbin/
 
 FROM almalinux:9-minimal as stage1
+ARG TARGETOS TARGETARCH
 
 # copy ironlib wrapper binaries
 COPY --from=stage0 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
