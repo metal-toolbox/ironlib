@@ -47,6 +47,10 @@ RUN if [[ $TARGETARCH = "amd64" ]] ; then \
     microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
     srvadmin-idracadm7 ; fi
 
+# update dependencies
+RUN microdnf update -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
+                       --setopt=keepcache=0 && microdnf clean all
+
 # install misc support packages
 RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
     dmidecode     \
