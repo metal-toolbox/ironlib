@@ -2,8 +2,10 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/beevik/etree"
@@ -79,6 +81,124 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel strin
 	}
 
 	return normalizeBIOSConfiguration(cfg), nil
+}
+
+// SetBIOSConfiguration returns a BIOS configuration object
+func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, deviceModel string, cfg map[string]string) error {
+	// TODO(jwb) Probably need to handle deviceModel here like we do in GetBIOSConfiguration
+	err := s.racadmSetXML(ctx, cfg)
+	return err
+}
+
+// racadmSet executes the racadm 'set' subcommand and returns &utils.Result and (nil or error)
+func (s *DellRacadm) racadmSet(ctx context.Context, argInputConfigFile string, argFileType string) (result *Result, err error) {
+	var (
+		argShutdownType         string = "Graceful"
+		argGracefulWait         int    = 300
+		argPostImportPowerState string = "On"
+	)
+
+	cmd := []string{"set",
+		"-t", argFileType,
+		"-f", argInputConfigFile,
+		"-b", argShutdownType,
+		"-w", strconv.Itoa(argGracefulWait),
+		"-s", argPostImportPowerState,
+	}
+
+	s.Executor.SetArgs(cmd)
+
+	result, err = s.Executor.ExecWithContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if result.ExitCode != 0 {
+		return nil, newExecError(s.Executor.GetCmd(), result)
+	}
+
+	return result, nil
+}
+
+// racadmSetJSON executes racadm to set config as JSON and returns nil or error
+func (s *DellRacadm) racadmSetJSON(ctx context.Context, toSet string) (err error) {
+
+	// Open tmp file to hold toSet JSON
+	inputConfigTmpFile, err := os.CreateTemp("", "ironlib-racadmSetJSON")
+	if err != nil {
+		return
+	}
+
+	defer os.Remove(inputConfigTmpFile.Name())
+
+	// TODO(jwb) we need to process toSet and call the appropriate functions via the bmc-toolbox/common
+	// config abstraction(s)
+
+	cfg, err := dc.WriteConfig("JSON")
+
+	if err != nil {
+		return
+	}
+
+	inputConfigTmpFile.WriteString(toSet)
+	inputConfigTmpFile.Close()
+
+	_, err = s.racadmSet(ctx, inputConfigTmpFile.Name(), "json")
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// racadmSetJSON executes racadm to set config as JSON and returns nil or error
+func (s *DellRacadm) racadmSetXML(ctx context.Context, toSet map[string]string) (err error) {
+	// Open tmp file to hold toSet XML
+	inputConfigTmpFile, err := os.CreateTemp("", "ironlib-racadmSetXML")
+	if err != nil {
+		return
+	}
+
+	defer os.Remove(inputConfigTmpFile.Name())
+
+	dc := model.NewDellConfig()
+
+	dc.SystemConfiguration = &model.DellSystemConfiguration{
+		// Comments:   []string{"Test Comment"},
+		Model:      "PowerEdge R6515", // TODO(jwb) Need to pull this and the servicetag from the actual machine
+		ServiceTag: "G97ZTD3",
+		TimeStamp:  "Tue Jul  7 13:24:19 2020", // TODO(jwb) Generate this
+	}
+
+	biosComponent := &model.DellComponent{FQDD: "BIOS.Setup.1-1"}
+	dc.SystemConfiguration.Components = []*model.DellComponent{biosComponent}
+
+	// TODO(jwb) Call a function here that translates toSet generic options into provider specific options
+
+	// var attrs map[string]string = make(map[string]string)
+	// attrs["SriovGlobalEnable"] = "Disabled"
+
+	for k, v := range toSet {
+		dc.SystemConfiguration.Components[0].Attributes = append(dc.SystemConfiguration.Components[0].Attributes, &model.DellComponentAttribute{Name: k, Value: v})
+	}
+
+	cfg, err := dc.WriteConfig("xml")
+
+	if err != nil {
+		return
+	}
+
+	fmt.Printf("string(cfg): %v\n", string(cfg))
+
+	inputConfigTmpFile.WriteString(string(cfg))
+	inputConfigTmpFile.Close()
+
+	_, err = s.racadmSet(ctx, inputConfigTmpFile.Name(), "xml")
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 // racadmBIOSConfigXML executes racadm to retrieve BIOS config as XML and returns a map[string]string object

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/metal-toolbox/ironlib"
@@ -14,20 +12,32 @@ import (
 
 func main() {
 	logger := logrus.New()
+	logger.SetLevel(logrus.TraceLevel)
+
 	device, err := ironlib.New(logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	features, err := device.GetBIOSConfiguration(context.TODO())
-	if err != nil {
-		logger.Fatal(err)
-	}
+	// features, err := device.GetBIOSConfiguration(context.TODO())
+	// if err != nil {
+	// 	logger.Fatal(err)
+	// }
 
-	j, err := json.MarshalIndent(features, " ", "  ")
-	if err != nil {
-		logger.Fatal(err)
-	}
+	// j, err := json.MarshalIndent(features, " ", "  ")
+	// if err != nil {
+	// 	logger.Fatal(err)
+	// }
 
-	fmt.Println(string(j))
+	// fmt.Println(string(j))
+
+	fmt.Printf("device.GetVendor(): %v\n", device.GetVendor())
+
+	// biosSettings := config.
+	// var newBiosSettings = map[string]string{"SriovGlobalEnable": "Disabled"}
+
+	// err = device.SetBIOSConfiguration(context.TODO(), newBiosSettings)
+	// if err != nil {
+	// 	logger.Fatal(err)
+	// }
 }
