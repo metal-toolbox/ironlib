@@ -3,6 +3,7 @@ package actions
 
 import (
 	"context"
+	"fmt"
 	"runtime/debug"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/r3labs/diff/v2"
 	"golang.org/x/exp/slices"
 
+	"github.com/metal-toolbox/ironlib/firmware"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 )
@@ -53,6 +55,8 @@ type Collectors struct {
 	CPLDCollector
 	BIOSCollector
 	TPMCollector
+	FirmwareChecksumCollector
+	UEFIVarsCollector
 	StorageControllerCollectors []StorageControllerCollector
 	DriveCollectors             []DriveCollector
 	DriveCapabilitiesCollectors []DriveCapabilityCollector
@@ -68,7 +72,9 @@ func (c *Collectors) Empty() bool {
 		c.TPMCollector == nil &&
 		len(c.StorageControllerCollectors) == 0 &&
 		len(c.DriveCollectors) == 0 &&
-		len(c.DriveCapabilitiesCollectors) == 0 {
+		len(c.DriveCapabilitiesCollectors) == 0 &&
+		c.UEFIVarsCollector == nil &&
+		c.FirmwareChecksumCollector == nil {
 		return true
 	}
 
@@ -139,6 +145,9 @@ func NewInventoryCollectorAction(options ...Option) *InventoryCollectorAction {
 				utils.NewHdparmCmd(a.trace),
 				utils.NewNvmeCmd(a.trace),
 			},
+			FirmwareChecksumCollector: firmware.NewChecksumCollector(a.trace),
+			// implement uefi vars collector and plug in here
+			// UEFIVarsCollector: ,
 		}
 	}
 
@@ -224,6 +233,18 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	err = a.CollectTPMs(ctx)
 	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving TPM inventory")
+	}
+
+	// Collect Firmware checksums
+	err = a.CollectFirmwareChecksums(ctx)
+	if err != nil && a.failOnError {
+		return errors.Wrap(err, "error retrieving Firmware checksums")
+	}
+
+	// Collect UEFI variables
+	err = a.CollectUEFIVariables(ctx)
+	if err != nil && a.failOnError {
+		return errors.Wrap(err, "error retrieving UEFI variables")
 	}
 
 	// Update StorageControllerCollectors based on controller vendor attributes
@@ -645,6 +666,81 @@ func (a *InventoryCollectorAction) CollectTPMs(ctx context.Context) error {
 		diff.Patch(changelog, a.device.TPMs)
 	} else {
 		a.device.TPMs = append(a.device.TPMs, found...)
+	}
+
+	return nil
+}
+
+// CollectFirmwareChecksums executes the Firmware checksum collector and updates the component metadata.
+func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
+		}
+
+		return nil
+	}()
+
+	if a.collectors.FirmwareChecksumCollector == nil {
+		return nil
+	}
+
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.FirmwareChecksumCollector.Attributes()
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	sum, err := a.collectors.BIOSLogoChecksum(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(sum) == 0 || a.device.BIOS == nil {
+		return nil
+	}
+
+	// not sure if this is the ideal way to cover the byte array
+	// maybe the interface method should return a checksum string instead?
+	a.device.BIOS.Metadata["bios-checksum"] = fmt.Sprintf("%s", sum)
+
+	return nil
+}
+
+// CollectUEFIVariables executes the UEFI variable collector and stores them on the device object
+func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
+		}
+
+		return nil
+	}()
+
+	if a.collectors.UEFIVarsCollector == nil {
+		return nil
+	}
+
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.UEFIVarsCollector.Attributes()
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	keyValues, err := a.collectors.UEFIVariables(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(keyValues) == 0 || a.device.BIOS == nil {
+		return nil
+	}
+
+	for k, v := range keyValues {
+		// do we want a prefix?
+		a.device.Metadata["EFI_VAR-"+k] = v
 	}
 
 	return nil
