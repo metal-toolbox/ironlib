@@ -3,7 +3,6 @@ package actions
 
 import (
 	"context"
-	"fmt"
 	"runtime/debug"
 	"strings"
 
@@ -145,7 +144,10 @@ func NewInventoryCollectorAction(options ...Option) *InventoryCollectorAction {
 				utils.NewHdparmCmd(a.trace),
 				utils.NewNvmeCmd(a.trace),
 			},
-			FirmwareChecksumCollector: firmware.NewChecksumCollector(a.trace),
+			FirmwareChecksumCollector: firmware.NewChecksumCollector(
+				firmware.MakeOutputPath(),
+				firmware.TraceExecution(a.trace),
+			),
 			// implement uefi vars collector and plug in here
 			// UEFIVarsCollector: ,
 		}
@@ -686,24 +688,25 @@ func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context)
 		return nil
 	}
 
-	// skip collector if its been disabled
+	// skip collector if we explicitly disable anything related to firmware checksumming.
 	collectorKind, _, _ := a.collectors.FirmwareChecksumCollector.Attributes()
-	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) ||
+		slices.Contains(a.disabledCollectorUtilities, firmware.FirmwareDumpUtility) ||
+		slices.Contains(a.disabledCollectorUtilities, firmware.UEFIParserUtility) {
 		return nil
 	}
 
-	sum, err := a.collectors.BIOSLogoChecksum(ctx)
+	sumStr, err := a.collectors.FirmwareChecksumCollector.BIOSLogoChecksum(ctx)
 	if err != nil {
 		return err
 	}
 
-	if len(sum) == 0 || a.device.BIOS == nil {
+	if a.device.BIOS == nil {
+		// XXX: how did we get here?
 		return nil
 	}
 
-	// not sure if this is the ideal way to cover the byte array
-	// maybe the interface method should return a checksum string instead?
-	a.device.BIOS.Metadata["bios-checksum"] = fmt.Sprintf("%s", sum)
+	a.device.BIOS.Metadata["bios-logo-checksum"] = sumStr
 
 	return nil
 }

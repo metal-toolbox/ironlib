@@ -136,7 +136,8 @@ type TPMCollector interface {
 // FirmwareChecksumCollector defines an interface to collect firmware checksums
 type FirmwareChecksumCollector interface {
 	UtilAttributeGetter
-	BIOSLogoChecksum(ctx context.Context) (sha256 [32]byte, err error)
+	// return the sha-256 of the BIOS logo as a string, or the associated error
+	BIOSLogoChecksum(ctx context.Context) (string, error)
 }
 
 // UEFIVarsCollector defines an interface to collect EFI variables

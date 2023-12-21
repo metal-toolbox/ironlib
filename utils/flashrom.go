@@ -43,7 +43,7 @@ func (f *Flashrom) Attributes() (utilName model.CollectorUtility, absolutePath s
 }
 
 // ExtractBIOSImage writes the BIOS image to the given file system path.
-func (f *Flashrom) ExtractBIOSImage(ctx context.Context, path string) error {
+func (f *Flashrom) WriteBIOSImage(ctx context.Context, path string) error {
 	// flashrom -p internal --ifd -i bios -r /tmp/bios_region.img
 	f.Executor.SetArgs([]string{"-p", "internal", "--ifd", "-i", "bios", "-r", path})
 
