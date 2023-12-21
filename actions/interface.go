@@ -131,6 +131,20 @@ type TPMCollector interface {
 	TPMs(ctx context.Context) ([]*common.TPM, error)
 }
 
+// Checksum collectors
+
+// FirmwareChecksumCollector defines an interface to collect firmware checksums
+type FirmwareChecksumCollector interface {
+	UtilAttributeGetter
+	BIOSLogoChecksum(ctx context.Context) (sha256 [32]byte, err error)
+}
+
+// UEFIVarsCollector defines an interface to collect EFI variables
+type UEFIVarsCollector interface {
+	UtilAttributeGetter
+	UEFIVariables(ctx context.Context) (keyValues map[string]string, err error)
+}
+
 // Updaters
 
 // DriveUpdater defines an interface to update drive firmware
