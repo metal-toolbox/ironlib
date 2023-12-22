@@ -72,10 +72,13 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
     flashrom      \
     python        \
     python-devel  \
+    python-pip  \
+    python-setuptools \
     which &&      \
     microdnf clean all && \
-    ln -s /usr/bin/microdnf /usr/bin/yum # since dell dsu expects yum && \
-    pip install uefi_firmware==v1.11
+    ln -s /usr/bin/microdnf /usr/bin/yum 
+    
+RUN pip install uefi_firmware==v1.11
 
 
 # Delete /tmp/* as we don't need those included in the image.
