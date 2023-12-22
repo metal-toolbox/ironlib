@@ -4,10 +4,10 @@ import (
 	"context"
 )
 
-func (g *Generic) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) error {
+func (g *Generic) SetBIOSConfiguration(_ context.Context, _ map[string]string) error {
 	return nil
 }
 
-func (g *Generic) GetBIOSConfiguration(ctx context.Context) (map[string]string, error) {
+func (g *Generic) GetBIOSConfiguration(_ context.Context) (map[string]string, error) {
 	return nil, nil
 }

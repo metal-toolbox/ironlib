@@ -162,7 +162,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 }
 
 // GetBIOSConfiguration returns a BIOS configuration object
-func (a *AsrrBioscontrol) GetBIOSConfiguration(ctx context.Context, deviceModel string) (map[string]string, error) {
+func (a *AsrrBioscontrol) GetBIOSConfiguration(ctx context.Context, _ string) (map[string]string, error) {
 	var cfg map[string]string
 
 	// load kernel module

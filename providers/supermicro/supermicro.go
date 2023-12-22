@@ -6,6 +6,7 @@ import (
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/firmware"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
@@ -93,6 +94,11 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 			utils.NewStoreCLICmd(trace),
 		},
 		NICCollector: utils.NewMlxupCmd(trace),
+		FirmwareChecksumCollector: firmware.NewChecksumCollector(
+			firmware.MakeOutputPath(),
+			firmware.TraceExecution(trace),
+		),
+		UEFIVarsCollector: &utils.UEFIVariableCollector{},
 	}
 
 	options = append(options, actions.WithCollectors(collectors))
@@ -106,7 +112,7 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 }
 
 // ListUpdatesAvailable does nothing on a SMC device
-func (s *supermicro) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error) {
+func (s *supermicro) ListAvailableUpdates(_ context.Context, options *model.UpdateOptions) (*common.Device, error) {
 	return nil, nil
 }
 
@@ -141,12 +147,12 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (s *supermicro) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
+func (s *supermicro) GetInventoryOEM(_ context.Context, device *common.Device, options *model.UpdateOptions) error {
 	return nil
 }
 
 // ApplyUpdate is here to satisfy the actions.Updater interface
 // it is to be deprecated in favor of InstallUpdates.
-func (s *supermicro) ApplyUpdate(ctx context.Context, updateFile, component string) error {
+func (s *supermicro) ApplyUpdate(_ context.Context, updateFile, component string) error {
 	return nil
 }

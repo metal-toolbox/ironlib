@@ -97,7 +97,7 @@ func NewFakeDnf() *Dnf {
 // AddRepo sets up a dnf repo file with the given template and params
 //
 // path: the directory where the repo file is created, default: "/etc/yum.repos.d/"
-func (d *Dnf) AddRepo(path string, params *DnfRepoParams, tmpl []byte) (err error) {
+func (d *Dnf) AddRepo(path string, params *DnfRepoParams, _ []byte) (err error) {
 	if path == "" {
 		path = "/etc/yum.repos.d/"
 	}

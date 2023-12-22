@@ -8,7 +8,7 @@ import (
 	"github.com/metal-toolbox/ironlib/utils"
 )
 
-func (d *dell) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) error {
+func (d *dell) SetBIOSConfiguration(_ context.Context, cfg map[string]string) error {
 	return nil
 }
 

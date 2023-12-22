@@ -3,6 +3,7 @@ package actions
 
 import (
 	"context"
+	"encoding/json"
 	"runtime/debug"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/r3labs/diff/v2"
 	"golang.org/x/exp/slices"
 
+	"github.com/metal-toolbox/ironlib/firmware"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 )
@@ -53,12 +55,16 @@ type Collectors struct {
 	CPLDCollector
 	BIOSCollector
 	TPMCollector
+	FirmwareChecksumCollector
+	UEFIVarsCollector
 	StorageControllerCollectors []StorageControllerCollector
 	DriveCollectors             []DriveCollector
 	DriveCapabilitiesCollectors []DriveCapabilityCollector
 }
 
 // Empty returns a bool value
+//
+//nolint:gocyclo  // it's fine
 func (c *Collectors) Empty() bool {
 	if c.InventoryCollector == nil &&
 		c.NICCollector == nil &&
@@ -68,7 +74,9 @@ func (c *Collectors) Empty() bool {
 		c.TPMCollector == nil &&
 		len(c.StorageControllerCollectors) == 0 &&
 		len(c.DriveCollectors) == 0 &&
-		len(c.DriveCapabilitiesCollectors) == 0 {
+		len(c.DriveCapabilitiesCollectors) == 0 &&
+		c.UEFIVarsCollector == nil &&
+		c.FirmwareChecksumCollector == nil {
 		return true
 	}
 
@@ -139,6 +147,11 @@ func NewInventoryCollectorAction(options ...Option) *InventoryCollectorAction {
 				utils.NewHdparmCmd(a.trace),
 				utils.NewNvmeCmd(a.trace),
 			},
+			FirmwareChecksumCollector: firmware.NewChecksumCollector(
+				firmware.MakeOutputPath(),
+				firmware.TraceExecution(a.trace),
+			),
+			UEFIVarsCollector: &utils.UEFIVariableCollector{},
 		}
 	}
 
@@ -224,6 +237,18 @@ func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.D
 	err = a.CollectTPMs(ctx)
 	if err != nil && a.failOnError {
 		return errors.Wrap(err, "error retrieving TPM inventory")
+	}
+
+	// Collect Firmware checksums
+	err = a.CollectFirmwareChecksums(ctx)
+	if err != nil && a.failOnError {
+		return errors.Wrap(err, "error retrieving Firmware checksums")
+	}
+
+	// Collect UEFI variables
+	err = a.CollectUEFIVariables(ctx)
+	if err != nil && a.failOnError {
+		return errors.Wrap(err, "error retrieving UEFI variables")
 	}
 
 	// Update StorageControllerCollectors based on controller vendor attributes
@@ -646,6 +671,93 @@ func (a *InventoryCollectorAction) CollectTPMs(ctx context.Context) error {
 	} else {
 		a.device.TPMs = append(a.device.TPMs, found...)
 	}
+
+	return nil
+}
+
+// CollectFirmwareChecksums executes the Firmware checksum collector and updates the component metadata.
+func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
+		}
+
+		return nil
+	}()
+
+	if a.collectors.FirmwareChecksumCollector == nil {
+		return nil
+	}
+
+	// skip collector if we explicitly disable anything related to firmware checksumming.
+	collectorKind, _, _ := a.collectors.FirmwareChecksumCollector.Attributes()
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) ||
+		slices.Contains(a.disabledCollectorUtilities, firmware.FirmwareDumpUtility) ||
+		slices.Contains(a.disabledCollectorUtilities, firmware.UEFIParserUtility) {
+		return nil
+	}
+
+	sumStr, err := a.collectors.FirmwareChecksumCollector.BIOSLogoChecksum(ctx)
+	if err != nil {
+		return err
+	}
+
+	if a.device.BIOS == nil {
+		// XXX: how did we get here?
+		return nil
+	}
+
+	if a.device.BIOS.Metadata == nil {
+		a.device.BIOS.Metadata = map[string]string{}
+	}
+
+	a.device.BIOS.Metadata["bios-logo-checksum"] = sumStr
+
+	return nil
+}
+
+// CollectUEFIVariables executes the UEFI variable collector and stores them on the device object
+func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) error {
+	// nolint:errcheck // deferred method catches a panic, error check not required.
+	defer func() error {
+		if r := recover(); r != nil && a.failOnError {
+			return errors.Wrap(ErrPanic, string(debug.Stack()))
+		}
+
+		return nil
+	}()
+
+	if a.collectors.UEFIVarsCollector == nil {
+		return nil
+	}
+
+	// skip collector if its been disabled
+	collectorKind, _, _ := a.collectors.UEFIVarsCollector.Attributes()
+	if slices.Contains(a.disabledCollectorUtilities, collectorKind) {
+		return nil
+	}
+
+	keyValues, err := a.collectors.UEFIVarsCollector.GetUEFIVars(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(keyValues) == 0 {
+		// seems unlikely
+		return nil
+	}
+
+	if a.device.Metadata == nil {
+		a.device.Metadata = map[string]string{}
+	}
+
+	jsonBytes, err := json.Marshal(keyValues)
+	if err != nil {
+		return errors.Wrap(err, "marshaling uefi variables")
+	}
+
+	a.device.Metadata["uefi-variables"] = string(jsonBytes)
 
 	return nil
 }

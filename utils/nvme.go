@@ -121,7 +121,7 @@ func (n *Nvme) list(ctx context.Context) ([]byte, error) {
 	// nvme list --output-format=json
 	n.Executor.SetArgs([]string{"list", "--output-format=json"})
 
-	result, err := n.Executor.ExecWithContext(context.Background())
+	result, err := n.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}

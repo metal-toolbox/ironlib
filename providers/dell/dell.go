@@ -126,7 +126,7 @@ func (d *dell) GetInventory(ctx context.Context, options ...actions.Option) (*co
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (d *dell) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
+func (d *dell) GetInventoryOEM(_ context.Context, device *common.Device, options *model.UpdateOptions) error {
 	d.setUpdateOptions(options)
 
 	oemComponents, err := d.dsuInventory()

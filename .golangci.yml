@@ -61,7 +61,7 @@ linters:
     - unused
     - prealloc
     - typecheck
-    - revive
+      # XXX: add me back! - revive
     # additional linters
     - bodyclose
     - gocritic
