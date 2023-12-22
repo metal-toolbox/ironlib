@@ -748,8 +748,8 @@ func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) err
 		return nil
 	}
 
-	if a.device.BIOS == nil {
-		a.device.BIOS.Metadata = map[string]string{}
+	if a.device.Metadata == nil {
+		a.device.Metadata = map[string]string{}
 	}
 
 	jsonBytes, err := json.Marshal(keyValues)
@@ -757,7 +757,7 @@ func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) err
 		return errors.Wrap(err, "marshaling uefi variables")
 	}
 
-	a.device.BIOS.Metadata["uefi-variables"] = string(jsonBytes)
+	a.device.Metadata["uefi-variables"] = string(jsonBytes)
 
 	return nil
 }
