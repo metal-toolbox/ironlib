@@ -86,23 +86,23 @@ func (a *Generic) UpdatesApplied() bool {
 }
 
 // ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
-func (a *Generic) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error) {
+func (a *Generic) ListAvailableUpdates(_ context.Context, _ *model.UpdateOptions) (*common.Device, error) {
 	return nil, nil
 }
 
 // InstallUpdates installs updates based on updateOptions
-func (a *Generic) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
+func (a *Generic) InstallUpdates(_ context.Context, _ *model.UpdateOptions) error {
 	return nil
 }
 
 // ApplyUpdate is here to satisfy the actions.Updater interface
 // it is to be deprecated in favor of InstallUpdates.
-func (a *Generic) ApplyUpdate(ctx context.Context, updateFile, component string) error {
+func (a *Generic) ApplyUpdate(_ context.Context, _, _ string) error {
 	return nil
 }
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (a *Generic) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
+func (a *Generic) GetInventoryOEM(_ context.Context, _ *common.Device, _ *model.UpdateOptions) error {
 	return nil
 }

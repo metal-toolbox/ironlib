@@ -54,7 +54,7 @@ func (s *SupermicroSUM) Components() ([]*model.Component, error) {
 }
 
 // Collect implements the Utility interface
-func (s *SupermicroSUM) Collect(device *common.Device) error {
+func (s *SupermicroSUM) Collect(_ *common.Device) error {
 	return nil
 }
 
@@ -80,7 +80,7 @@ func (s *SupermicroSUM) UpdateBIOS(ctx context.Context, updateFile, modelNumber 
 }
 
 // UpdateBMC installs the SMC BMC update
-func (s *SupermicroSUM) UpdateBMC(ctx context.Context, updateFile, modelNumber string) error {
+func (s *SupermicroSUM) UpdateBMC(ctx context.Context, updateFile, _ string) error {
 	s.Executor.SetArgs([]string{"-c", "UpdateBmc", "--file", updateFile})
 
 	result, err := s.Executor.ExecWithContext(ctx)
@@ -117,7 +117,7 @@ func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSl
 }
 
 // GetBIOSConfiguration implements the Getter
-func (s *SupermicroSUM) GetBIOSConfiguration(ctx context.Context, deviceModel string) (map[string]string, error) {
+func (s *SupermicroSUM) GetBIOSConfiguration(ctx context.Context, _ string) (map[string]string, error) {
 	return s.parseBIOSConfig(ctx)
 }
 
@@ -198,7 +198,7 @@ func NewFakeSMCSum(stdin io.Reader) *SupermicroSUM {
 }
 
 // ExecWithContext implements the utils.Executor interface
-func (e *FakeSMCSumExecute) ExecWithContext(ctx context.Context) (*Result, error) {
+func (e *FakeSMCSumExecute) ExecWithContext(_ context.Context) (*Result, error) {
 	b := bytes.Buffer{}
 
 	if e.Stdin != nil {

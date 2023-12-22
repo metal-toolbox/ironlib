@@ -64,7 +64,7 @@ func NewFakeIpmicfg(r io.Reader) *Ipmicfg {
 }
 
 // BMC returns a SMC BMC component
-func (i Ipmicfg) BMC(ctx context.Context) (*common.BMC, error) {
+func (i Ipmicfg) BMC(_ context.Context) (*common.BMC, error) {
 	summary, err := i.Summary()
 	if err != nil {
 		return nil, err

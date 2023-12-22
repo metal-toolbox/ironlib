@@ -62,6 +62,8 @@ type Collectors struct {
 }
 
 // Empty returns a bool value
+//
+//nolint:gocyclo  // it's fine
 func (c *Collectors) Empty() bool {
 	if c.InventoryCollector == nil &&
 		c.NICCollector == nil &&

@@ -73,5 +73,5 @@ func TestHashDiscoveredLogo(t *testing.T) {
 	}
 	hash, err := cc.hashDiscoveredLogo(context.TODO(), "zip/zop/zoop/file-7bb28b99-61bb-11d5-9a5d-0090273fc14d/section0/section0.raw")
 	require.NoError(t, err)
-	require.Equal(t, "SHA256: 1be7aaf1938cc19af7d2fdeb48a11c381dff8a98d4c4b47b3b0a5044a5255c04", hash)
+	require.Equal(t, "SHA256:1be7aaf1938cc19af7d2fdeb48a11c381dff8a98d4c4b47b3b0a5044a5255c04", hash)
 }

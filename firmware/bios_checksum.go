@@ -113,6 +113,12 @@ func (cc *ChecksumCollector) BIOSLogoChecksum(ctx context.Context) (string, erro
 }
 
 func (cc *ChecksumCollector) hashDiscoveredLogo(ctx context.Context, logoFileName string) (string, error) {
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	default:
+	}
+
 	handle, err := os.Open(cc.extractPath + "/" + logoFileName)
 	if err != nil {
 		return "", errors.Wrap(err, "opening logo file")
@@ -124,7 +130,7 @@ func (cc *ChecksumCollector) hashDiscoveredLogo(ctx context.Context, logoFileNam
 		return "", errors.Wrap(err, "copying logo data to hasher")
 	}
 
-	return fmt.Sprintf("%s: %x", hashPrefix, hasher.Sum(nil)), nil
+	return fmt.Sprintf("%s:%x", hashPrefix, hasher.Sum(nil)), nil
 }
 
 func (cc *ChecksumCollector) dumpBIOS(ctx context.Context) error {

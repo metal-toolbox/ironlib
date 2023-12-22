@@ -96,15 +96,15 @@ func (e *Execute) DisableBinCheck() {
 }
 
 // SetStdout doesn't do much, is around for tests
-func (e *Execute) SetStdout(b []byte) {
+func (e *Execute) SetStdout(_ []byte) {
 }
 
 // SetStderr doesn't do much, is around for tests
-func (e *Execute) SetStderr(b []byte) {
+func (e *Execute) SetStderr(_ []byte) {
 }
 
 // SetExitCode doesn't do much, is around for tests
-func (e *Execute) SetExitCode(i int) {
+func (e *Execute) SetExitCode(_ int) {
 }
 
 // ExecWithContext executes the command and returns the Result object

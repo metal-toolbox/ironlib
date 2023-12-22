@@ -86,7 +86,7 @@ func NewFakeStoreCLI(r io.Reader) (*StoreCLI, error) {
 }
 
 // StorageControllers returns a slice of model.StorageControllers from the output of nvme list
-func (s *StoreCLI) StorageControllers(ctx context.Context) ([]*common.StorageController, error) {
+func (s *StoreCLI) StorageControllers(_ context.Context) ([]*common.StorageController, error) {
 	controllers := make([]*common.StorageController, 0)
 
 	out, err := s.ShowController0()

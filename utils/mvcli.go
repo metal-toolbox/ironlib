@@ -384,7 +384,7 @@ func parseKeyValueBlock(bSlice [][]byte) map[string]string {
 	return kv
 }
 
-func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, name string, blockSize uint, cacheMode bool, initMode string) error {
+func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, name string, blockSize uint, _ bool, initMode string) error {
 	if !slices.Contains(validRaidModes, raidMode) {
 		return InvalidRaidModeError(raidMode)
 	}

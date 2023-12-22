@@ -60,7 +60,7 @@ func (m *Msecli) Attributes() (utilName model.CollectorUtility, absolutePath str
 }
 
 // Drives returns a slice of drive components identified
-func (m *Msecli) Drives(ctx context.Context) ([]*common.Drive, error) {
+func (m *Msecli) Drives(_ context.Context) ([]*common.Drive, error) {
 	devices, err := m.Query()
 	if err != nil {
 		return nil, err
