@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/metal-toolbox/ironlib"
-	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,7 +19,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	inv, err := device.GetInventory(context.TODO(), actions.WithTraceLevel())
+	inv, err := device.GetInventory(context.TODO())
 	if err != nil {
 		logger.Fatal(err)
 	}
