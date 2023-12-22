@@ -6,6 +6,7 @@ import (
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
+	"github.com/metal-toolbox/ironlib/firmware"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
@@ -93,6 +94,10 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 			utils.NewStoreCLICmd(trace),
 		},
 		NICCollector: utils.NewMlxupCmd(trace),
+		FirmwareChecksumCollector: firmware.NewChecksumCollector(
+			firmware.MakeOutputPath(),
+			firmware.TraceExecution(trace),
+		),
 	}
 
 	options = append(options, actions.WithCollectors(collectors))
