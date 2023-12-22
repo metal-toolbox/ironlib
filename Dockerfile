@@ -16,15 +16,21 @@ COPY . .
 
 # build helper util
 ARG TARGETOS TARGETARCH
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GO111MODULE=on \
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     go build -o getbiosconfig examples/biosconfig/biosconfig.go && \
     install -m 755 -D getbiosconfig /usr/sbin/
+
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -o getinventory examples/inventory/inventory.go && \
+    install -m 755 -D getinventory /usr/sbin/
+
 
 FROM almalinux:9-minimal as stage1
 ARG TARGETOS TARGETARCH
 
 # copy ironlib wrapper binaries
 COPY --from=stage0 /usr/sbin/getbiosconfig /usr/sbin/getbiosconfig
+COPY --from=stage0 /usr/sbin/getinventory /usr/sbin/getinventory
 
 # import and install tools
 RUN curl -sO https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
@@ -76,8 +82,8 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
     python-setuptools \
     which &&      \
     microdnf clean all && \
-    ln -s /usr/bin/microdnf /usr/bin/yum 
-    
+    ln -s /usr/bin/microdnf /usr/bin/yum
+
 RUN pip install uefi_firmware==v1.11
 
 
