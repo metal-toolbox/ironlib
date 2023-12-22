@@ -143,7 +143,7 @@ type FirmwareChecksumCollector interface {
 // UEFIVarsCollector defines an interface to collect EFI variables
 type UEFIVarsCollector interface {
 	UtilAttributeGetter
-	UEFIVariables(ctx context.Context) (keyValues map[string]string, err error)
+	GetUEFIVars(ctx context.Context) (utils.UEFIVars, error)
 }
 
 // Updaters

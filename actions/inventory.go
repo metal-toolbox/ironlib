@@ -3,6 +3,7 @@ package actions
 
 import (
 	"context"
+	"encoding/json"
 	"runtime/debug"
 	"strings"
 
@@ -150,8 +151,7 @@ func NewInventoryCollectorAction(options ...Option) *InventoryCollectorAction {
 				firmware.MakeOutputPath(),
 				firmware.TraceExecution(a.trace),
 			),
-			// implement uefi vars collector and plug in here
-			// UEFIVarsCollector: ,
+			UEFIVarsCollector: &utils.UEFIVariableCollector{},
 		}
 	}
 
@@ -738,19 +738,26 @@ func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) err
 		return nil
 	}
 
-	keyValues, err := a.collectors.UEFIVariables(ctx)
+	keyValues, err := a.collectors.UEFIVarsCollector.GetUEFIVars(ctx)
 	if err != nil {
 		return err
 	}
 
-	if len(keyValues) == 0 || a.device.BIOS == nil {
+	if len(keyValues) == 0 {
+		// seems unlikely
 		return nil
 	}
 
-	for k, v := range keyValues {
-		// do we want a prefix?
-		a.device.Metadata["EFI_VAR-"+k] = v
+	if a.device.BIOS == nil {
+		a.device.BIOS.Metadata = map[string]string{}
 	}
+
+	jsonBytes, err := json.Marshal(keyValues)
+	if err != nil {
+		return errors.Wrap(err, "marshaling uefi variables")
+	}
+
+	a.device.BIOS.Metadata["uefi-variables"] = string(jsonBytes)
 
 	return nil
 }
