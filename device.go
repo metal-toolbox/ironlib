@@ -67,6 +67,8 @@ func CheckDependencies() {
 		utils.NewIpmicfgCmd(false),
 		utils.NewSupermicroSUM(false),
 		utils.NewStoreCLICmd(false),
+		utils.NewFlashromCmd(false),
+		utils.NewUefiFirmwareParserCmd(false),
 	}
 
 	red := "\033[31m"
