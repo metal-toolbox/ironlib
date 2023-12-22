@@ -67,18 +67,3 @@ func (u *UefiFirmwareParser) ExtractLogo(ctx context.Context, outputPath, biosIm
 	_, err := u.Executor.ExecWithContext(ctx)
 	return err
 }
-
-// mkdir dump && uefi-firmware-parser -b bios_region.img  -o dump -e
-//
-// # list out GUIDs in firmware
-// uefi-firmware-parser -b bios_region.img  > parsed_regions
-//
-// # locate the logo
-// grep -i bmp parsed_regions
-//   File 349: 7bb28b99-61bb-11d5-9a5d-0090273fc14d (EFI_DEFAULT_BMP_LOGO_GUID) type 0x02, attr 0x00, state 0x07, size 0x13a2b (80427 bytes), (freeform)
-//
-// # find the section raw dump identified by the GUID
-// find ./ | grep 7bb28b99-61bb-11d5-9a5d-0090273fc14d | grep raw
-// ./dump/volume-23658496/file-7bb28b99-61bb-11d5-9a5d-0090273fc14d/section0/section0.raw
-//
-// mv ./dump/volume-23658496/file-7bb28b99-61bb-11d5-9a5d-0090273fc14d/section0/section0.raw /tmp/logo.bmp
