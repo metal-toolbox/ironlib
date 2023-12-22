@@ -706,6 +706,10 @@ func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context)
 		return nil
 	}
 
+	if a.device.BIOS.Metadata == nil {
+		a.device.BIOS.Metadata = map[string]string{}
+	}
+
 	a.device.BIOS.Metadata["bios-logo-checksum"] = sumStr
 
 	return nil
