@@ -98,6 +98,7 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 			firmware.MakeOutputPath(),
 			firmware.TraceExecution(trace),
 		),
+		UEFIVarsCollector: &utils.UEFIVariableCollector{},
 	}
 
 	options = append(options, actions.WithCollectors(collectors))
