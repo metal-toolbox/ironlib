@@ -116,7 +116,7 @@ func (d *dell) GetInventory(ctx context.Context, options ...actions.Option) (*co
 	// Collect device inventory
 	d.logger.Info("Collecting hardware inventory")
 
-	collector := actions.NewInventoryCollectorAction(options...)
+	collector := actions.NewInventoryCollectorAction(d.logger, options...)
 	if err := collector.Collect(ctx, d.hw.Device); err != nil {
 		return nil, err
 	}

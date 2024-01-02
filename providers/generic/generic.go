@@ -61,7 +61,7 @@ func (a *Generic) GetInventory(ctx context.Context, options ...actions.Option) (
 	// Collect device inventory
 	a.logger.Info("Collecting inventory")
 
-	collector := actions.NewInventoryCollectorAction(options...)
+	collector := actions.NewInventoryCollectorAction(a.logger, options...)
 	if err := collector.Collect(ctx, a.hw.Device); err != nil {
 		return nil, err
 	}

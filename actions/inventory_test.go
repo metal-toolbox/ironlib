@@ -11,6 +11,7 @@ import (
 	smcFixtures "github.com/metal-toolbox/ironlib/fixtures/supermicro"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,7 +47,7 @@ func Test_Inventory_dell(t *testing.T) {
 		WithDisabledCollectorUtilities([]model.CollectorUtility{"dmidecode"}),
 	}
 
-	collector := NewInventoryCollectorAction(options...)
+	collector := NewInventoryCollectorAction(logrus.New(), options...)
 	if err := collector.Collect(context.TODO(), &device); err != nil {
 		t.Error(err)
 	}
@@ -123,7 +124,7 @@ func Test_Inventory_smc(t *testing.T) {
 		StorageControllerCollectors: []StorageControllerCollector{storecli},
 	}
 
-	collector := NewInventoryCollectorAction(WithCollectors(collectors), WithTraceLevel())
+	collector := NewInventoryCollectorAction(logrus.New(), WithCollectors(collectors), WithTraceLevel())
 	if err := collector.Collect(context.TODO(), &device); err != nil {
 		t.Error(err)
 	}
@@ -186,7 +187,7 @@ func TestNewInventoryCollectorAction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewInventoryCollectorAction(tt.options...)
+			got := NewInventoryCollectorAction(logrus.New(), tt.options...)
 
 			switch tt.name {
 			case "trace-enabled":
