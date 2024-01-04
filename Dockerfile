@@ -73,9 +73,9 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
     pciutils      \
     smartmontools \
     tar           \
+    udev          \
     unzip         \
     util-linux    \
-    flashrom      \
     python        \
     python-devel  \
     python-pip  \
@@ -86,6 +86,9 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
 
 RUN pip install uefi_firmware==v1.11
 
+# Install our custom flashrom package
+ADD https://github.com/metal-toolbox/flashrom/releases/download/v1.3.99/flashrom-1.3.99-0.el9.x86_64.rpm /tmp
+RUN rpm -ivh /tmp/flashrom*.rpm
 
 # Delete /tmp/* as we don't need those included in the image.
 RUN rm -rf /tmp/*
