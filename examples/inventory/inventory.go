@@ -14,6 +14,8 @@ import (
 
 func main() {
 	logger := logrus.New()
+	logger.Formatter = new(logrus.JSONFormatter)
+	logger.SetLevel(logrus.TraceLevel)
 	device, err := ironlib.New(logger)
 	if err != nil {
 		logger.Fatal(err)

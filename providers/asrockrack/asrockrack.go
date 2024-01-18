@@ -57,7 +57,7 @@ func (a *asrockrack) GetInventory(ctx context.Context, options ...actions.Option
 	deviceObj := common.NewDevice()
 	a.hw.Device = &deviceObj
 
-	collector := actions.NewInventoryCollectorAction(options...)
+	collector := actions.NewInventoryCollectorAction(a.logger, options...)
 	if err := collector.Collect(ctx, a.hw.Device); err != nil {
 		return nil, err
 	}

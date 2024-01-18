@@ -103,7 +103,7 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 
 	options = append(options, actions.WithCollectors(collectors))
 
-	collector := actions.NewInventoryCollectorAction(options...)
+	collector := actions.NewInventoryCollectorAction(s.logger, options...)
 	if err := collector.Collect(ctx, s.hw.Device); err != nil {
 		return nil, err
 	}
