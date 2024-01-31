@@ -24,7 +24,6 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     go build -o getinventory examples/inventory/inventory.go && \
     install -m 755 -D getinventory /usr/sbin/
 
-
 FROM almalinux:9-minimal as stage1
 ARG TARGETOS TARGETARCH
 
@@ -94,14 +93,39 @@ RUN if [[ $TARGETARCH = "amd64" ]] ; then \
 # Delete /tmp/* as we don't need those included in the image.
 RUN rm -rf /tmp/*
 
+# Install non-distributable files when the env var is set.
+#
+# The non-distributable files are executables provided by hardware vendors.
+ARG INSTALL_NON_DISTRIBUTABLE=false
+ENV INSTALL_NON_DISTRIBUTABLE=$INSTALL_NON_DISTRIBUTABLE
+
+# S3_BUCKET_ALIAS is the alias set on the S3 bucket, for details refer to the minio
+# client guide https://github.com/minio/mc/blob/master/docs/minio-client-complete-guide.md
+ARG S3_BUCKET_ALIAS=utils
+ENV S3_BUCKET_ALIAS=$S3_BUCKET_ALIAS
+
+# S3_PATH is the path in the s3 bucket where the non-distributable files are located
+# note, this generally includes the s3 bucket alias
+ARG S3_PATH
+ENV S3_PATH=$S3_PATH
+
+ARG ACCESS_KEY
+ENV ACCESS_KEY=$ACCESS_KEY
+
+ARG SECRET_KEY
+ENV SECRET_KEY=$SECRET_KEY
+
+COPY scripts scripts
+RUN if [[ $INSTALL_NON_DISTRIBUTABLE = "true" ]]; then \
+    mkdir -p non-distributable && \
+    cp scripts/install-non-distributable.sh ./non-distributable/install.sh && \
+    cd ./non-distributable/ && \
+    ./install.sh $S3_BUCKET_ALIAS && \
+    cd .. && rm -rf non-distributable; fi
+RUN rm -rf scripts/
+
 # Build a lean image with dependencies installed.
 FROM scratch
 COPY --from=stage1 / /
-
-# Provide hook to include extra dependencies in the image
-ONBUILD ARG DEPDIR="dependencies"
-ONBUILD COPY "${DEPDIR}" dependencies
-ONBUILD RUN if [[ -f ${DEPDIR}/install-extra-deps.sh ]]; then cd ${DEPDIR} && bash install-extra-deps.sh; fi
-ONBUILD RUN rm -rf "${DEPDIR}"
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
