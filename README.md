@@ -13,7 +13,6 @@ For the available methods,
 - The supported actions interface and method docs can be found [here](https://pkg.go.dev/github.com/metal-toolbox/ironlib/actions)
 - The supported utilities and its methods can be found [here](https://pkg.go.dev/github.com/metal-toolbox/ironlib/utils)
 
-
 ## Currently supported hardware
 
 - Dell
@@ -109,19 +108,27 @@ IRONLIB_UTIL_STORECLI
 
 Check out this [snippet](examples/dependencies/main.go) to determine if all required dependencies are available to ironlib.
 
-# ironlib docker image
+### Build image without the non-distributable files.
 
-A github workflow builds and releases a docker image based off the Dockerfile in this repository.
-
-The Dockerfile provides `ONBUILD` hooks so downstream users can build their own images including any further dependencies required (i.e. proprietary vendor tools). To use the `ONBUILD` functionality in a downstream docker image, add the extra tools to a `dependencies` directory and provide a script `install-extra-deps.sh` to install those within the image.
-
-Downstream `Dockerfile` can be as simple as:
-
+```sh
+docker build -f Dockerfile -t ironlib:devel .
 ```
-# Use base ironlib image with ONBUILD instructions to include extra deps
-FROM ghcr.io/metal-toolbox/ironlib:latest as stage0
 
-# Keep image lean after all extra deps are installed
-FROM scratch
-COPY --from=stage0 / /
+### Build image with non-distributable files
+
+ironlib will attempt to execute proprietary vendor executables based on the hardware its run on,
+to build docker image with executables like `mvcli`, `mlxup`, SMCI `sum` etc follow the steps below.
+
+- Ensure the executable files are made available in an s3 bucket, update the `S3_BUCKET_ALIAS` and `S3_PATH` in the snippet below.
+- The list of files expected can be found within the [install-non-distributable.sh](scripts/install-non-distributable.sh) script.
+- Build image with the `ACCESS_KEY`, `SECRET_KEY` values defined.
+
+```sh
+docker build -f Dockerfile \
+  --build-arg INSTALL_NON_DISTRIBUTABLE=true
+  --build-arg S3_BUCKET_ALIAS="tools"
+  --build-arg S3_PATH="tools/bucket-name/path/non-dist"
+  --build-arg ACCESS_KEY=<>
+  --build-arg SECRET_KEY=<>
+  -t ironlib:devel-non-dist .
 ```
