@@ -2,13 +2,14 @@ package utils
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/beevik/etree"
+	"github.com/bmc-toolbox/common"
+	"github.com/bmc-toolbox/common/config"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
@@ -20,6 +21,7 @@ const EnvVarRacadm7 = "IRONLIB_UTIL_RACADM7"
 var ErrDellBiosCfgNil = errors.New("expected valid bios config object, got nil")
 var ErrDellBiosCfgFileUndefined = errors.New("no BIOS config file defined")
 var ErrDellBiosCfgFileEmpty = errors.New("BIOS config file empty or invalid")
+var ErrDellBiosCfgFormatUnknown = errors.New("BIOS config file format unknown")
 
 // DellRacadm is a dell racadm executor
 type DellRacadm struct {
@@ -83,11 +85,77 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel strin
 	return normalizeBIOSConfiguration(cfg), nil
 }
 
-// SetBIOSConfiguration returns a BIOS configuration object
-func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, deviceModel string, cfg map[string]string) error {
-	// TODO(jwb) Probably need to handle deviceModel here like we do in GetBIOSConfiguration
-	err := s.racadmSetXML(ctx, cfg)
+// SetBIOSConfiguration takes a map of BIOS configurtation values and applies them to the host
+func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, deviceModel string, cfg map[string]string) (err error) {
+	// older hardware return BIOS config as XML
+	if strings.EqualFold(deviceModel, "c6320") {
+		cfgFile, err := generateConfig(cfg, "json", deviceModel)
+		if err != nil {
+			return err
+		}
+		_, err = s.racadmSetFile(ctx, cfgFile, "json")
+		if err != nil {
+			return err
+		}
+	} else {
+		cfgFile, err := generateConfig(cfg, "xml", deviceModel)
+		if err != nil {
+			return err
+		}
+		_, err = s.racadmSetFile(ctx, cfgFile, "xml")
+		if err != nil {
+			return err
+		}
+	}
+
 	return err
+}
+
+// SetBIOSConfigurationFromFile takes a raw file of BIOS configurtation values and applies them to the host
+func (s *DellRacadm) SetBIOSConfigurationFromFile(ctx context.Context, deviceModel string, cfg string) (err error) {
+	// older hardware return BIOS config as XML
+	if strings.EqualFold(deviceModel, "c6320") {
+		_, err = s.racadmSetFile(ctx, cfg, "json")
+	} else {
+		_, err = s.racadmSetFile(ctx, cfg, "xml")
+	}
+
+	return err
+}
+
+func generateConfig(cfg map[string]string, format, deviceModel string) (string, error) {
+	// TODO(jwb) replace FAKETAG with real tag...
+	vcm, err := config.NewVendorConfigManager(format, common.VendorDell, map[string]string{"model": deviceModel, "servicetag": "FAKETAG"})
+	if err != nil {
+		return "", err
+	}
+
+	// TODO(jwb) These should be replaced with functions in bmc-toolbox/common/config
+	for k, v := range cfg {
+		switch {
+		case k == "amd_sev":
+			vcm.Raw("CpuMinSevAsid", v, []string{"BIOS.Setup.1-1"})
+		case k == "boot_mode":
+			vcm.Raw("BootMode", v, []string{"BIOS.Setup.1-1"})
+		case k == "intel_txt":
+			vcm.Raw("IntelTxt", v, []string{"BIOS.Setup.1-1"})
+		case k == "intel_sgx":
+			vcm.Raw("Software Guard Extensions (SGX)", v, []string{"BIOS.Setup.1-1"})
+		case k == "secure_boot":
+			vcm.Raw("SecureBoot", v, []string{"BIOS.Setup.1-1"})
+		case k == "tpm":
+			vcm.Raw("TpmSecurity", v, []string{"BIOS.Setup.1-1"})
+		case k == "smt":
+			vcm.Raw("LogicalProc", v, []string{"BIOS.Setup.1-1"})
+		case k == "sr_iov":
+			vcm.Raw("SriovGlobalEnable", v, []string{"BIOS.Setup.1-1"})
+		case strings.HasPrefix(k, "raw:"):
+			// TODO(jwb) How do we want to handle raw: for things other than BIOS.Setup
+			vcm.Raw(strings.TrimPrefix(k, "raw:"), v, []string{"BIOS.Setup.1-1"})
+		}
+	}
+
+	return vcm.Marshal()
 }
 
 // racadmSet executes the racadm 'set' subcommand and returns &utils.Result and (nil or error)
@@ -121,84 +189,19 @@ func (s *DellRacadm) racadmSet(ctx context.Context, argInputConfigFile string, a
 }
 
 // racadmSetJSON executes racadm to set config as JSON and returns nil or error
-func (s *DellRacadm) racadmSetJSON(ctx context.Context, toSet string) (err error) {
-
+func (s *DellRacadm) racadmSetFile(ctx context.Context, contents string, format string) (result *Result, err error) {
 	// Open tmp file to hold toSet JSON
-	inputConfigTmpFile, err := os.CreateTemp("", "ironlib-racadmSetJSON")
+	inputConfigTmpFile, err := os.CreateTemp("", "ironlib-racadmSetFile")
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	defer os.Remove(inputConfigTmpFile.Name())
 
-	// TODO(jwb) we need to process toSet and call the appropriate functions via the bmc-toolbox/common
-	// config abstraction(s)
-
-	cfg, err := dc.WriteConfig("JSON")
-
-	if err != nil {
-		return
-	}
-
-	inputConfigTmpFile.WriteString(toSet)
+	inputConfigTmpFile.WriteString(contents)
 	inputConfigTmpFile.Close()
 
-	_, err = s.racadmSet(ctx, inputConfigTmpFile.Name(), "json")
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-// racadmSetJSON executes racadm to set config as JSON and returns nil or error
-func (s *DellRacadm) racadmSetXML(ctx context.Context, toSet map[string]string) (err error) {
-	// Open tmp file to hold toSet XML
-	inputConfigTmpFile, err := os.CreateTemp("", "ironlib-racadmSetXML")
-	if err != nil {
-		return
-	}
-
-	defer os.Remove(inputConfigTmpFile.Name())
-
-	dc := model.NewDellConfig()
-
-	dc.SystemConfiguration = &model.DellSystemConfiguration{
-		// Comments:   []string{"Test Comment"},
-		Model:      "PowerEdge R6515", // TODO(jwb) Need to pull this and the servicetag from the actual machine
-		ServiceTag: "G97ZTD3",
-		TimeStamp:  "Tue Jul  7 13:24:19 2020", // TODO(jwb) Generate this
-	}
-
-	biosComponent := &model.DellComponent{FQDD: "BIOS.Setup.1-1"}
-	dc.SystemConfiguration.Components = []*model.DellComponent{biosComponent}
-
-	// TODO(jwb) Call a function here that translates toSet generic options into provider specific options
-
-	// var attrs map[string]string = make(map[string]string)
-	// attrs["SriovGlobalEnable"] = "Disabled"
-
-	for k, v := range toSet {
-		dc.SystemConfiguration.Components[0].Attributes = append(dc.SystemConfiguration.Components[0].Attributes, &model.DellComponentAttribute{Name: k, Value: v})
-	}
-
-	cfg, err := dc.WriteConfig("xml")
-
-	if err != nil {
-		return
-	}
-
-	fmt.Printf("string(cfg): %v\n", string(cfg))
-
-	inputConfigTmpFile.WriteString(string(cfg))
-	inputConfigTmpFile.Close()
-
-	_, err = s.racadmSet(ctx, inputConfigTmpFile.Name(), "xml")
-	if err != nil {
-		return
-	}
-
-	return
+	return s.racadmSet(ctx, inputConfigTmpFile.Name(), format)
 }
 
 // racadmBIOSConfigXML executes racadm to retrieve BIOS config as XML and returns a map[string]string object
