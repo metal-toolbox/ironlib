@@ -1,8 +1,6 @@
 module github.com/metal-toolbox/ironlib
 
-go 1.21
-
-toolchain go1.21.5
+go 1.20
 
 require (
 	github.com/beevik/etree v1.1.0
