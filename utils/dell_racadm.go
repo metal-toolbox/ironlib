@@ -86,7 +86,7 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel strin
 }
 
 // SetBIOSConfiguration takes a map of BIOS configurtation values and applies them to the host
-func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, deviceModel string, cfg map[string]string) (err error) {
+func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, deviceModel string, cfg map[string]string) error {
 	// older hardware return BIOS config as XML
 	if strings.EqualFold(deviceModel, "c6320") {
 		cfgFile, err := generateConfig(cfg, "json", deviceModel)
@@ -108,11 +108,11 @@ func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, deviceModel strin
 		}
 	}
 
-	return err
+	return nil
 }
 
 // SetBIOSConfigurationFromFile takes a raw file of BIOS configurtation values and applies them to the host
-func (s *DellRacadm) SetBIOSConfigurationFromFile(ctx context.Context, deviceModel string, cfg string) (err error) {
+func (s *DellRacadm) SetBIOSConfigurationFromFile(ctx context.Context, deviceModel, cfg string) (err error) {
 	// older hardware return BIOS config as XML
 	if strings.EqualFold(deviceModel, "c6320") {
 		_, err = s.racadmSetFile(ctx, cfg, "json")
@@ -123,6 +123,7 @@ func (s *DellRacadm) SetBIOSConfigurationFromFile(ctx context.Context, deviceMod
 	return err
 }
 
+// nolint:gocyclo // going through all bios values to standardize them is going to be high complexity
 func generateConfig(cfg map[string]string, format, deviceModel string) (string, error) {
 	// TODO(jwb) replace FAKETAG with real tag...
 	vcm, err := config.NewVendorConfigManager(format, common.VendorDell, map[string]string{"model": deviceModel, "servicetag": "FAKETAG"})
@@ -159,11 +160,11 @@ func generateConfig(cfg map[string]string, format, deviceModel string) (string, 
 }
 
 // racadmSet executes the racadm 'set' subcommand and returns &utils.Result and (nil or error)
-func (s *DellRacadm) racadmSet(ctx context.Context, argInputConfigFile string, argFileType string) (result *Result, err error) {
+func (s *DellRacadm) racadmSet(ctx context.Context, argInputConfigFile, argFileType string) (result *Result, err error) {
 	var (
-		argShutdownType         string = "Graceful"
-		argGracefulWait         int    = 300
-		argPostImportPowerState string = "On"
+		argShutdownType         = "Graceful"
+		argGracefulWait         = 300
+		argPostImportPowerState = "On"
 	)
 
 	cmd := []string{"set",
@@ -189,7 +190,7 @@ func (s *DellRacadm) racadmSet(ctx context.Context, argInputConfigFile string, a
 }
 
 // racadmSetJSON executes racadm to set config as JSON and returns nil or error
-func (s *DellRacadm) racadmSetFile(ctx context.Context, contents string, format string) (result *Result, err error) {
+func (s *DellRacadm) racadmSetFile(ctx context.Context, contents, format string) (result *Result, err error) {
 	// Open tmp file to hold toSet JSON
 	inputConfigTmpFile, err := os.CreateTemp("", "ironlib-racadmSetFile")
 	if err != nil {
@@ -198,8 +199,15 @@ func (s *DellRacadm) racadmSetFile(ctx context.Context, contents string, format 
 
 	defer os.Remove(inputConfigTmpFile.Name())
 
-	inputConfigTmpFile.WriteString(contents)
-	inputConfigTmpFile.Close()
+	_, err = inputConfigTmpFile.WriteString(contents)
+	if err != nil {
+		return nil, err
+	}
+
+	err = inputConfigTmpFile.Close()
+	if err != nil {
+		return nil, err
+	}
 
 	return s.racadmSet(ctx, inputConfigTmpFile.Name(), format)
 }
