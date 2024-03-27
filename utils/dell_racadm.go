@@ -86,10 +86,10 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel strin
 }
 
 // SetBIOSConfiguration takes a map of BIOS configurtation values and applies them to the host
-func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, deviceModel string, cfg map[string]string) error {
+func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, vendorOptions map[string]string, cfg map[string]string) error {
 	// older hardware return BIOS config as XML
-	if strings.EqualFold(deviceModel, "c6320") {
-		cfgFile, err := generateConfig(cfg, "json", deviceModel)
+	if strings.EqualFold(vendorOptions["deviceModel"], "c6320") {
+		cfgFile, err := generateConfig(cfg, "json", vendorOptions["deviceModel"], vendorOptions["serviceTag"])
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, deviceModel strin
 			return err
 		}
 	} else {
-		cfgFile, err := generateConfig(cfg, "xml", deviceModel)
+		cfgFile, err := generateConfig(cfg, "xml", vendorOptions["deviceModel"], vendorOptions["serviceTag"])
 		if err != nil {
 			return err
 		}
@@ -124,9 +124,8 @@ func (s *DellRacadm) SetBIOSConfigurationFromFile(ctx context.Context, deviceMod
 }
 
 // nolint:gocyclo // going through all bios values to standardize them is going to be high complexity
-func generateConfig(cfg map[string]string, format, deviceModel string) (string, error) {
-	// TODO(jwb) replace FAKETAG with real tag...
-	vcm, err := config.NewVendorConfigManager(format, common.VendorDell, map[string]string{"model": deviceModel, "servicetag": "FAKETAG"})
+func generateConfig(cfg map[string]string, format, deviceModel, serviceTag string) (string, error) {
+	vcm, err := config.NewVendorConfigManager(format, common.VendorDell, map[string]string{"model": deviceModel, "servicetag": serviceTag})
 	if err != nil {
 		return "", err
 	}

@@ -16,15 +16,20 @@ func (d *dell) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) 
 		}
 	}
 
+	vendorOptions := map[string]string{
+		"deviceModel": d.GetModel(),
+		"serviceTag":  d.GetSerial(),
+	}
+
 	// Make sure service that loads ipmi modules is running before attempting to collect bios config
 	err := d.startSrvHelper()
 	if err != nil {
 		return err
 	}
 
-	racadm := utils.NewDellRacadm(false)
+	racadm := utils.NewDellRacadm(true)
 
-	return racadm.SetBIOSConfiguration(ctx, model.FormatProductName(d.GetModel()), cfg)
+	return racadm.SetBIOSConfiguration(ctx, vendorOptions, cfg)
 }
 
 func (d *dell) SetBIOSConfigurationFromFile(ctx context.Context, cfg string) error {
@@ -41,7 +46,7 @@ func (d *dell) SetBIOSConfigurationFromFile(ctx context.Context, cfg string) err
 		return err
 	}
 
-	racadm := utils.NewDellRacadm(false)
+	racadm := utils.NewDellRacadm(true)
 
 	return racadm.SetBIOSConfigurationFromFile(ctx, model.FormatProductName(d.GetModel()), cfg)
 }
