@@ -101,6 +101,11 @@ func (d *dell) GetVendor() string {
 	return d.hw.Device.Vendor
 }
 
+// GetSerial returns the device serial
+func (d *dell) GetSerial() string {
+	return d.hw.Device.Serial
+}
+
 // RebootRequired returns a bool value for when a device may be pending a reboot
 func (d *dell) RebootRequired() bool {
 	return d.hw.PendingReboot
