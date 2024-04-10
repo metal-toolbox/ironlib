@@ -2,7 +2,7 @@
 
 ## lint
 lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 run --config .golangci.yml
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57 run --config .golangci.yml
 
 ## Go test
 test: lint
