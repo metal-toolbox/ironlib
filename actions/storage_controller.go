@@ -14,6 +14,7 @@ import (
 
 var (
 	ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
+	ErrDiskkManagerUtilNotIdentified       = errors.New("disk management utility not identifed")
 )
 
 type StorageControllerAction struct {
@@ -79,4 +80,24 @@ func (s *StorageControllerAction) GetControllerUtility(vendorName, modelName str
 	}
 
 	return nil, errors.Wrap(ErrVirtualDiskManagerUtilNotIdentified, "vendor: "+vendorName+" model: "+modelName)
+}
+
+// GetWipeUtility returns the wipe utility based on the disk wipping features
+func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DiskWiper, error) {
+	var trace bool
+
+	if s.Logger.GetLevel().String() == "trace" {
+		trace = true
+	}
+
+	return utils.NewZeroWipeCmd(trace), nil
+}
+
+func (s *StorageControllerAction) WipeDisk(ctx context.Context, logicalName string) error {
+	util, err := s.GetWipeUtility(logicalName)
+	if err != nil {
+		return err
+	}
+
+	return util.WipeDisk(ctx, logicalName)
 }
