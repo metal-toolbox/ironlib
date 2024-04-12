@@ -47,7 +47,8 @@ func (z *ZeroWipe) Wipe(ctx context.Context, logicalName string) error {
 		log.Println(err)
 		return err
 	}
-	log.Println(partitionSize)
+
+	log.Printf("%s | Size in bytes: %d \n", partitionPath, partitionSize)
 
 	// Create a buffer fill with zeroes
 	buffer := make([]byte, bufferSize)
@@ -59,6 +60,7 @@ func (z *ZeroWipe) Wipe(ctx context.Context, logicalName string) error {
 	file.Seek(0, 0)
 
 	// Writting zeroes loop
+	i := 0
 	for bytesWritten < partitionSize {
 		n, err := file.Write(buffer)
 		if err != nil {
@@ -72,11 +74,20 @@ func (z *ZeroWipe) Wipe(ctx context.Context, logicalName string) error {
 			return err
 		}
 		bytesWritten += int64(n)
+		i++
+		// Calculate progress and ETA
+		progress := float64(bytesWritten) / float64(partitionSize) * 100
+		elapsed := time.Since(start).Seconds()
+		speed := float64(n*i) / elapsed                                              // Speed in bytes per second
+		remainingSeconds := (float64(partitionSize) - float64(bytesWritten)) / speed // Remaining time in seconds
+		remainingHours := float64(remainingSeconds / 3600)
+		mbPerSecond := speed / (1024 * 1024)
 
 		// Print progress each 10 seconds
 		if time.Since(start) >= 10*time.Second {
-			log.Printf("Progress: %.2f%%\n", float64(bytesWritten)/float64(partitionSize)*100)
+			log.Printf("%s | Progress: %.2f%% | Speed: %.2f MB/s | Estimated time left: %.2f hour(s)\n", partitionPath, progress, mbPerSecond, remainingHours)
 			start = time.Now()
+			i = 0
 		}
 	}
 
