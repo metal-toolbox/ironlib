@@ -8,8 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// This example invokes ironlib and prints out the device inventory
-// a sample output can be seen in the inventory.json file
+// This example invokes ironlib and wipes the disk /dev/sdZZZ
 
 func main() {
 	logger := logrus.New()
