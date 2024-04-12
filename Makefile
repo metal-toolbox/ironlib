@@ -1,11 +1,8 @@
-LINTER_EXPECTED_VERSION   := "1.55.2"
-
 .DEFAULT_GOAL := help
 
 ## lint
 lint:
-	(golangci-lint --version | grep -q "${LINTER_EXPECTED_VERSION}" && golangci-lint run --config .golangci.yml) \
-		|| echo "expected linter version: ${LINTER_EXPECTED_VERSION}"
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 run --config .golangci.yml
 
 ## Go test
 test: lint
