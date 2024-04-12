@@ -17,7 +17,7 @@ type Dmidecode struct {
 }
 
 func NewDmidecode() (d *Dmidecode, err error) {
-	var dmi = dmidecode.New()
+	dmi := dmidecode.New()
 
 	err = dmi.Run()
 	if err != nil {

@@ -12,12 +12,16 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-const DellRacadmPath = "/opt/dell/srvadmin/bin/idracadm7"
-const EnvVarRacadm7 = "IRONLIB_UTIL_RACADM7"
+const (
+	DellRacadmPath = "/opt/dell/srvadmin/bin/idracadm7"
+	EnvVarRacadm7  = "IRONLIB_UTIL_RACADM7"
+)
 
-var ErrDellBiosCfgNil = errors.New("expected valid bios config object, got nil")
-var ErrDellBiosCfgFileUndefined = errors.New("no BIOS config file defined")
-var ErrDellBiosCfgFileEmpty = errors.New("BIOS config file empty or invalid")
+var (
+	ErrDellBiosCfgNil           = errors.New("expected valid bios config object, got nil")
+	ErrDellBiosCfgFileUndefined = errors.New("no BIOS config file defined")
+	ErrDellBiosCfgFileEmpty     = errors.New("BIOS config file empty or invalid")
+)
 
 // DellRacadm is a dell racadm executor
 type DellRacadm struct {

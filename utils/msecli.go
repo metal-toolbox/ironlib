@@ -12,9 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	ErrMseCliDriveNotIdentified = errors.New("failed to identify drive for update")
-)
+var ErrMseCliDriveNotIdentified = errors.New("failed to identify drive for update")
 
 const (
 	EnvMsecliUtility = "IRONLIB_UTIL_MSECLI"

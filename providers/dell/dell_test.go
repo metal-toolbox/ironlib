@@ -9,16 +9,13 @@ import (
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
-
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/sirupsen/logrus"
 	"gotest.tools/assert"
 )
 
-var (
-	r6515fixtures = "../../fixtures/dell/r6515"
-)
+var r6515fixtures = "../../fixtures/dell/r6515"
 
 func newFakeDellDevice() (*dell, error) {
 	device := common.NewDevice()

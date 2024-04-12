@@ -6,9 +6,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io/fs"
-
-	//nolint:staticcheck // this is deprecated but I can't rewrite now
-	"io/ioutil"
+	"io/ioutil" //nolint:staticcheck // this is deprecated but I can't rewrite now
 	"path/filepath"
 
 	"github.com/metal-toolbox/ironlib/model"

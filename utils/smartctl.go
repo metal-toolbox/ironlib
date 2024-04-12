@@ -16,19 +16,17 @@ import (
 
 const EnvSmartctlUtility = "IRONLIB_UTIL_SMARTCTL"
 
-var (
-	// map of smartctl error bits to explanation - man 8 smartctl
-	smartclErrors = map[int]string{
-		0: "Command line did not parse",
-		1: "Device open failed, device did not return an IDENTIFY DEVICE structure, or device is in a low-power mode",
-		2: "Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure",
-		3: "SMART status check returned 'DISK FAILING'",
-		4: "We found prefail Attributes <= threshold",
-		5: "SMART status check returned 'DISK OK' but we found that some (usage or prefail) Attributes have been <= threshold at some time in the past",
-		6: "The device error log contains records of errors",
-		7: "The device self-test log contains records of errors. [ATA only] Failed self-tests outdated by a newer successful extended self-test are ignored",
-	}
-)
+// map of smartctl error bits to explanation - man 8 smartctl
+var smartclErrors = map[int]string{
+	0: "Command line did not parse",
+	1: "Device open failed, device did not return an IDENTIFY DEVICE structure, or device is in a low-power mode",
+	2: "Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure",
+	3: "SMART status check returned 'DISK FAILING'",
+	4: "We found prefail Attributes <= threshold",
+	5: "SMART status check returned 'DISK OK' but we found that some (usage or prefail) Attributes have been <= threshold at some time in the past",
+	6: "The device error log contains records of errors",
+	7: "The device self-test log contains records of errors. [ATA only] Failed self-tests outdated by a newer successful extended self-test are ignored",
+}
 
 type Smartctl struct {
 	Executor Executor

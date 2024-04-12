@@ -34,8 +34,10 @@ type LshwOutput []*LshwNode
 
 // fields of the ChildNodes in the lshw output
 // theres some fields with non-string attributes, in these fields, which are currently ignored
-type LshwNodeConfiguration map[string]string
-type LshwNodeCapabilities map[string]interface{}
+type (
+	LshwNodeConfiguration map[string]string
+	LshwNodeCapabilities  map[string]interface{}
+)
 
 // lshw -json output is unmarshalled into this struct
 // each ChildNode is a LshwNode with almost all of the same fields

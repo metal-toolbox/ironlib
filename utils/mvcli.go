@@ -397,7 +397,8 @@ func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, na
 		return InvalidInitModeError(initMode)
 	}
 
-	m.Executor.SetArgs([]string{"create",
+	m.Executor.SetArgs([]string{
+		"create",
 		"-o", "vd",
 		"-r", raidMode,
 		"-d", strings.Trim(strings.Join(strings.Fields(fmt.Sprint(physicalDiskIDs)), ","), "[]"),
@@ -427,7 +428,8 @@ func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, na
 
 func (m *Mvcli) Destroy(ctx context.Context, virtualDiskID int) error {
 	m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))
-	m.Executor.SetArgs([]string{"delete",
+	m.Executor.SetArgs([]string{
+		"delete",
 		"-o", "vd",
 		"-i", fmt.Sprintf("%d", virtualDiskID),
 	})
@@ -461,7 +463,6 @@ func (m *Mvcli) FindVdByID(ctx context.Context, virtualDiskID int) *MvcliDevice 
 
 func (m *Mvcli) FindVdBy(ctx context.Context, k string, v interface{}) *MvcliDevice {
 	virtualDisks, err := m.VirtualDisks(ctx)
-
 	if err != nil {
 		return nil
 	}
