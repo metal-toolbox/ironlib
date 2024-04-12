@@ -65,7 +65,7 @@ func (m *Mlxup) Attributes() (utilName model.CollectorUtility, absolutePath stri
 
 // NICs returns a slice of mellanox components as *common.NIC's
 func (m *Mlxup) NICs(ctx context.Context) ([]*common.NIC, error) {
-	devices, err := m.Query()
+	devices, err := m.Query(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func setNICFirmware(d *MlxupDevice, firmware *common.Firmware) {
 // UpdateNIC updates mellanox NIC with the given update file
 func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string) error {
 	// query list of nics
-	nics, err := m.Query()
+	nics, err := m.Query(ctx)
 	if err != nil {
 		return err
 	}
@@ -187,11 +187,11 @@ func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string) e
 }
 
 // Query returns a slice of mellanox devices
-func (m *Mlxup) Query() ([]*MlxupDevice, error) {
+func (m *Mlxup) Query(ctx context.Context) ([]*MlxupDevice, error) {
 	// mlxup --query
 	m.Executor.SetArgs([]string{"--query"})
 
-	result, err := m.Executor.ExecWithContext(context.Background())
+	result, err := m.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -74,7 +74,7 @@ var (
 		SlugDell64bitUefiDiagnostics:        {},
 	}
 
-	// DellComponentSlug is an ordered list of of dell component identifiers to component slug
+	// DellComponentSlug is an ordered list of dell component identifiers to component slug
 	// To identify components correctly, if two components contain a similar string
 	// e.g: "idrac", "dell emc idrac service module" the latter should be positioned before the former in the list.
 	DellComponentSlug = [][]string{

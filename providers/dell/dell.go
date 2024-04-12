@@ -126,10 +126,10 @@ func (d *dell) GetInventory(ctx context.Context, options ...actions.Option) (*co
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (d *dell) GetInventoryOEM(_ context.Context, device *common.Device, options *model.UpdateOptions) error {
+func (d *dell) GetInventoryOEM(ctx context.Context, _ *common.Device, options *model.UpdateOptions) error {
 	d.setUpdateOptions(options)
 
-	oemComponents, err := d.dsuInventory()
+	oemComponents, err := d.dsuInventory(ctx)
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOp
 
 	d.setUpdateOptions(options)
 
-	oemUpdates, err := d.dsuListUpdates()
+	oemUpdates, err := d.dsuListUpdates(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (d *dell) installAvailableUpdates(ctx context.Context, downloadOnly bool) e
 	// the installer returns non-zero return code on failure,
 	// when no updates are available
 	// or when the device requires a reboot
-	exitCode, err := d.dsuInstallUpdates(downloadOnly)
+	exitCode, err := d.dsuInstallUpdates(ctx, downloadOnly)
 	if err != nil {
 		switch exitCode {
 		case utils.DSUExitCodeNoUpdatesAvailable:
@@ -230,6 +230,6 @@ func (d *dell) setUpdateOptions(options *model.UpdateOptions) {
 
 // ApplyUpdate is here to satisfy the actions.Updater interface
 // it is to be deprecated in favor of InstallUpdates.
-func (d *dell) ApplyUpdate(ctx context.Context, updateFile, component string) error {
+func (d *dell) ApplyUpdate(context.Context, string, string) error {
 	return nil
 }

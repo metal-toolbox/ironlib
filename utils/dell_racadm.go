@@ -167,7 +167,7 @@ func (s *DellRacadm) racadmBIOSConfigJSON(ctx context.Context) (map[string]strin
 	attrs := map[string]string{}
 
 	attrJSON := gjson.Get(s.ConfigJSON, `SystemConfiguration.Components.#(FQDD=="BIOS.Setup.1-1").Attributes`)
-	attrJSON.ForEach(func(key, value gjson.Result) bool {
+	attrJSON.ForEach(func(_, value gjson.Result) bool {
 		n := value.Get("Name").String()
 		v := value.Get("Value").String()
 
@@ -209,7 +209,7 @@ func NewFakeRacadm(biosCfgFile string) *DellRacadm {
 }
 
 // ExecWithContext implements the utils.Executor interface
-func (e *FakeRacadmExecute) ExecWithContext(ctx context.Context) (*Result, error) {
+func (e *FakeRacadmExecute) ExecWithContext(context.Context) (*Result, error) {
 	return &Result{Stdout: []byte(`dummy`)}, nil
 }
 

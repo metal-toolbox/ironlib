@@ -87,14 +87,14 @@ func (s *Smartctl) Attributes() (utilName model.CollectorUtility, absolutePath s
 func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 	drives := make([]*common.Drive, 0)
 
-	DrivesList, err := s.Scan()
+	DrivesList, err := s.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, drive := range DrivesList.Drives {
 		// collect drive information with smartctl -a <drive>
-		smartctlAll, err := s.All(drive.Name)
+		smartctlAll, err := s.All(ctx, drive.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -142,10 +142,10 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 }
 
 // Scan runs smartctl scan -j and returns its value as an object
-func (s *Smartctl) Scan() (*SmartctlScan, error) {
+func (s *Smartctl) Scan(ctx context.Context) (*SmartctlScan, error) {
 	s.Executor.SetArgs([]string{"--scan", "-j"})
 
-	result, err := s.Executor.ExecWithContext(context.Background())
+	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -165,12 +165,12 @@ func (s *Smartctl) Scan() (*SmartctlScan, error) {
 }
 
 // All runs smartctl -a /dev/<device> and returns its value as an object
-func (s *Smartctl) All(device string) (*SmartctlDriveAttributes, error) {
+func (s *Smartctl) All(ctx context.Context, device string) (*SmartctlDriveAttributes, error) {
 	// smartctl -a /dev/sda1 -j
 	s.Executor.SetArgs([]string{"-a", device, "-j"})
 
 	// smartctl can exit with a non-zero status based on drive smart data
-	result, _ := s.Executor.ExecWithContext(context.Background())
+	result, _ := s.Executor.ExecWithContext(ctx)
 	// determine the errors if any based on the exit code
 	smartCtlErrs := smartCtlExitStatus(result.ExitCode)
 
@@ -282,7 +282,7 @@ func NewFakeSmartctl(dataDir string) *Smartctl {
 
 // nolint:gocyclo // test code
 // ExecWithContext implements the utils.Executor interface
-func (e *FakeSmartctlExecute) ExecWithContext(ctx context.Context) (*Result, error) {
+func (e *FakeSmartctlExecute) ExecWithContext(context.Context) (*Result, error) {
 	switch e.Args[0] {
 	case "--scan":
 		b, err := os.ReadFile(e.JSONFilesDir + "/scan.json")

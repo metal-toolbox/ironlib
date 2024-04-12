@@ -876,6 +876,7 @@ func (a *InventoryCollectorAction) vetChanges(changes diff.Changelog) diff.Chang
 
 	for _, change := range changes {
 		// Skip changes that delete items
+		change := change
 		if a.acceptChange(&change) {
 			accepted = append(accepted, change)
 		}
@@ -903,28 +904,54 @@ func (a *InventoryCollectorAction) acceptChange(change *diff.Change) bool {
 func (a *InventoryCollectorAction) vetUpdate(change *diff.Change) bool {
 	// allow vendor, model field changes only if the older value was not defined
 	if slices.Contains(change.Path, "Vendor") || slices.Contains(change.Path, "Model") {
-		if strings.TrimSpace(change.To.(string)) != "" && strings.TrimSpace(change.From.(string)) == "" {
+		from, ok := change.From.(string)
+		if !ok {
+			return false
+		}
+		to, ok := change.To.(string)
+		if !ok {
+			return false
+		}
+		if strings.TrimSpace(to) != "" && strings.TrimSpace(from) == "" {
 			return true
 		}
 	}
 
 	// accept description if its longer than the older value
 	if slices.Contains(change.Path, "Description") {
-		if len(strings.TrimSpace(change.To.(string))) > len(strings.TrimSpace(change.From.(string))) {
+		from, ok := change.From.(string)
+		if !ok {
+			return false
+		}
+		to, ok := change.To.(string)
+		if !ok {
+			return false
+		}
+
+		if len(strings.TrimSpace(to)) > len(strings.TrimSpace(from)) {
 			return true
 		}
 	}
 
 	// keep product name if not empty
 	if slices.Contains(change.Path, "ProductName") {
-		if strings.TrimSpace(change.From.(string)) != "" {
+		from, ok := change.From.(string)
+		if !ok {
+			return false
+		}
+
+		if strings.TrimSpace(from) != "" {
 			return false
 		}
 	}
 
 	// keep existing serial value if not empty
 	if slices.Contains(change.Path, "Serial") {
-		if strings.TrimSpace(change.From.(string)) != "" {
+		from, ok := change.From.(string)
+		if !ok {
+			return false
+		}
+		if strings.TrimSpace(from) != "" {
 			return false
 		}
 	}

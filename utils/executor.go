@@ -116,7 +116,7 @@ func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err erro
 		}
 	}
 
-	cmd := exec.CommandContext(ctx, e.Cmd, e.Args...)
+	cmd := exec.CommandContext(ctx, e.Cmd, e.Args...) //nolint:gosec // This is a generic command so need to support this
 	cmd.Env = append(cmd.Env, e.Env...)
 	cmd.Stdin = e.Stdin
 
