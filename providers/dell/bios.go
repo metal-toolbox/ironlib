@@ -9,11 +9,9 @@ import (
 )
 
 func (d *dell) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) error {
-	if envRacadmUtil := os.Getenv("IRONLIB_UTIL_RACADM7"); envRacadmUtil == "" {
-		err := d.pre() // ensure runtime pre-requisites are installed
-		if err != nil {
-			return err
-		}
+	err := d.prepareRacadm()
+	if err != nil {
+		return err
 	}
 
 	vendorOptions := map[string]string{
@@ -21,18 +19,31 @@ func (d *dell) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) 
 		"serviceTag":  d.GetSerial(),
 	}
 
-	// Make sure service that loads ipmi modules is running before attempting to collect bios config
-	err := d.startSrvHelper()
-	if err != nil {
-		return err
-	}
-
-	racadm := utils.NewDellRacadm(true)
-
+	racadm := utils.NewDellRacadm(true, utils.WithReboot())
 	return racadm.SetBIOSConfiguration(ctx, vendorOptions, cfg)
 }
 
 func (d *dell) SetBIOSConfigurationFromFile(ctx context.Context, cfg string) error {
+	err := d.prepareRacadm()
+	if err != nil {
+		return err
+	}
+
+	racadm := utils.NewDellRacadm(true, utils.WithReboot())
+	return racadm.SetBIOSConfigurationFromFile(ctx, model.FormatProductName(d.GetModel()), cfg)
+}
+
+func (d *dell) GetBIOSConfiguration(ctx context.Context) (map[string]string, error) {
+	err := d.prepareRacadm()
+	if err != nil {
+		return nil, err
+	}
+
+	racadm := utils.NewDellRacadm(false, utils.WithoutReboot())
+	return racadm.GetBIOSConfiguration(ctx, model.FormatProductName(d.GetModel()))
+}
+
+func (d *dell) prepareRacadm() error {
 	if envRacadmUtil := os.Getenv("IRONLIB_UTIL_RACADM7"); envRacadmUtil == "" {
 		err := d.pre() // ensure runtime pre-requisites are installed
 		if err != nil {
@@ -46,50 +57,5 @@ func (d *dell) SetBIOSConfigurationFromFile(ctx context.Context, cfg string) err
 		return err
 	}
 
-	racadm := utils.NewDellRacadm(true)
-
-	return racadm.SetBIOSConfigurationFromFile(ctx, model.FormatProductName(d.GetModel()), cfg)
+	return nil
 }
-
-func (d *dell) GetBIOSConfiguration(ctx context.Context) (map[string]string, error) {
-	if envRacadmUtil := os.Getenv("IRONLIB_UTIL_RACADM7"); envRacadmUtil == "" {
-		err := d.pre() // ensure runtime pre-requisites are installed
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Make sure service that loads ipmi modules is running before attempting to collect bios config
-	err := d.startSrvHelper()
-	if err != nil {
-		return nil, err
-	}
-
-	racadm := utils.NewDellRacadm(false)
-
-	return racadm.GetBIOSConfiguration(ctx, model.FormatProductName(d.GetModel()))
-}
-
-// func processSlice(toSet map[string]string, configFormat string) (err error, output string) {
-// 	dc, err := config.NewVendorConfigManager(configFormat, common.VendorDell)
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	// TODO(jwb) This limits us to only BIOS related values, we'll want to fix that.
-// 	for k, v := range toSet {
-// 		if strings.HasPrefix(k, "raw:") {
-// 			dc.Raw(strings.TrimPrefix(k, "raw:"), v, []string{"BIOS.Setup.1-1"})
-// 		} else {
-// 			// call func by name from k, passing v
-// 		}
-// 	}
-
-// 	output, err = dc.Marshal()
-
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	return
-// }

@@ -29,10 +29,13 @@ type DellRacadm struct {
 	ConfigJSON     string
 	BIOSCfgTmpFile string // where we dump the BIOS config to before processing it
 	KeepConfigFile bool   // flag to keep the BIOS config file generated (mainly for testing)
+	ShutdownType   string // Graceful, Forced or NoReboot
 }
 
+type DellRacadmOption func(r *DellRacadm)
+
 // Return a new Dell racadm command executor
-func NewDellRacadm(trace bool) *DellRacadm {
+func NewDellRacadm(trace bool, options ...DellRacadmOption) *DellRacadm {
 	racadmUtil := os.Getenv(EnvVarRacadm7)
 	if racadmUtil == "" {
 		racadmUtil = DellRacadmPath
@@ -45,7 +48,16 @@ func NewDellRacadm(trace bool) *DellRacadm {
 		e.SetQuiet()
 	}
 
-	return &DellRacadm{Executor: e, BIOSCfgTmpFile: "/tmp/bioscfg"}
+	r := &DellRacadm{
+		Executor:       e,
+		BIOSCfgTmpFile: "/tmp/bioscfg",
+		ShutdownType:   "Graceful"}
+
+	for _, opt := range options {
+		opt(r)
+	}
+
+	return r
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
@@ -86,7 +98,7 @@ func (s *DellRacadm) GetBIOSConfiguration(ctx context.Context, deviceModel strin
 }
 
 // SetBIOSConfiguration takes a map of BIOS configurtation values and applies them to the host
-func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, vendorOptions map[string]string, cfg map[string]string) error {
+func (s *DellRacadm) SetBIOSConfiguration(ctx context.Context, vendorOptions, cfg map[string]string) error {
 	// older hardware return BIOS config as XML
 	if strings.EqualFold(vendorOptions["deviceModel"], "c6320") {
 		cfgFile, err := generateConfig(cfg, "json", vendorOptions["deviceModel"], vendorOptions["serviceTag"])
@@ -158,10 +170,21 @@ func generateConfig(cfg map[string]string, format, deviceModel, serviceTag strin
 	return vcm.Marshal()
 }
 
+func WithReboot() DellRacadmOption {
+	return func(r *DellRacadm) {
+		r.ShutdownType = "Graceful"
+	}
+}
+
+func WithoutReboot() DellRacadmOption {
+	return func(r *DellRacadm) {
+		r.ShutdownType = "NoReboot"
+	}
+}
+
 // racadmSet executes the racadm 'set' subcommand and returns &utils.Result and (nil or error)
 func (s *DellRacadm) racadmSet(ctx context.Context, argInputConfigFile, argFileType string) (result *Result, err error) {
 	var (
-		argShutdownType         = "Graceful"
 		argGracefulWait         = 300
 		argPostImportPowerState = "On"
 	)
@@ -169,7 +192,7 @@ func (s *DellRacadm) racadmSet(ctx context.Context, argInputConfigFile, argFileT
 	cmd := []string{"set",
 		"-t", argFileType,
 		"-f", argInputConfigFile,
-		"-b", argShutdownType,
+		"-b", s.ShutdownType,
 		"-w", strconv.Itoa(argGracefulWait),
 		"-s", argPostImportPowerState,
 	}
