@@ -100,6 +100,8 @@ github.com/bmc-toolbox/common v0.0.0-20240320145617-fffe54a32044 h1:N7yfvPTaTowq
 github.com/bmc-toolbox/common v0.0.0-20240320145617-fffe54a32044/go.mod h1:SY//n1PJjZfbFbmAsB6GvEKbc7UXz3d30s3kWxfJQ/c=
 github.com/bmc-toolbox/common v0.0.0-20240326020737-874ca0d491be h1:9fNeFAUl2u35cpziMB8XJso2W7iWPAOX/EmEILnaFTM=
 github.com/bmc-toolbox/common v0.0.0-20240326020737-874ca0d491be/go.mod h1:SY//n1PJjZfbFbmAsB6GvEKbc7UXz3d30s3kWxfJQ/c=
+github.com/bmc-toolbox/common v0.0.0-20240415151737-268411c3b76b h1:TmF3xsjQNHK6t/89ikGJCtXmBVPo1NY35aG/jan8IzI=
+github.com/bmc-toolbox/common v0.0.0-20240415151737-268411c3b76b/go.mod h1:SY//n1PJjZfbFbmAsB6GvEKbc7UXz3d30s3kWxfJQ/c=
 github.com/bombsimon/wsl/v4 v4.2.1 h1:Cxg6u+XDWff75SIFFmNsqnIOgob+Q9hG6y/ioKbRFiM=
 github.com/bombsimon/wsl/v4 v4.2.1/go.mod h1:Xu/kDxGZTofQcDGCtQe9KCzhHphIe0fDuyWTxER9Feo=
 github.com/breml/bidichk v0.2.7 h1:dAkKQPLl/Qrk7hnP6P+E0xOodrq8Us7+U0o4UBOAlQY=

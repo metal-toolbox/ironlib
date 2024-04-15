@@ -6,7 +6,7 @@ toolchain go1.21.5
 
 require (
 	github.com/beevik/etree v1.1.0
-	github.com/bmc-toolbox/common v0.0.0-20240326020737-874ca0d491be
+	github.com/bmc-toolbox/common v0.0.0-20240415151737-268411c3b76b
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
 	github.com/pkg/errors v0.9.1
 	github.com/r3labs/diff/v2 v2.15.1
