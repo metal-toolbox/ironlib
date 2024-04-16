@@ -9,23 +9,23 @@ import (
 )
 
 const (
-	EnvZeroWipeUtility = "IRONLIB_UTIL_WIPE_ZERO"
+	EnvFillZeroUtility = "IRONLIB_UTIL_FILL_ZERO"
 	FileMode644        = 0o644 // Owner readwrite, group and others readonly
 	OneMBinBytes       = 1024 * 1024
 	SecondsPerHour     = 3600
 	TotalPercentage    = 100
 )
 
-type ZeroWipe struct {
+type FillZero struct {
 }
 
 // Return a new zerowipe executor
-func NewZeroWipeCmd(trace bool) *ZeroWipe {
-	return &ZeroWipe{}
+func NewFillZeroCmd(trace bool) *FillZero {
+	return &FillZero{}
 }
 
-func (z *ZeroWipe) Wipe(ctx context.Context, logicalName string) error {
-	log.Println("Start wiping with zeros...")
+func (z *FillZero) Fill(ctx context.Context, logicalName string) error {
+	log.Printf("Start overwriting with zeros %s", logicalName)
 	partitionPath := logicalName // example /dev/sdb
 
 	// Buffer size (in bytes)
@@ -106,6 +106,6 @@ func (z *ZeroWipe) Wipe(ctx context.Context, logicalName string) error {
 	return nil
 }
 
-func (z *ZeroWipe) WipeDisk(ctx context.Context, logicalName string) error {
-	return z.Wipe(ctx, logicalName)
+func (z *FillZero) WipeDisk(ctx context.Context, logicalName string) error {
+	return z.Fill(ctx, logicalName)
 }

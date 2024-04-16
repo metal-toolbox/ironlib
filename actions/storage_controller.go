@@ -89,7 +89,7 @@ func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DiskWiper,
 		trace = true
 	}
 
-	return utils.NewZeroWipeCmd(trace), nil
+	return utils.NewFillZeroCmd(trace), nil
 }
 
 func (s *StorageControllerAction) WipeDisk(ctx context.Context, logicalName string) error {
