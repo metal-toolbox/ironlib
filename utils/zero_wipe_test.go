@@ -24,7 +24,7 @@ func Test_Wipe(t *testing.T) {
 
 	// Write some content to the temporary file
 	expectedSize := int64(4096)
-	if _, err := tmpfile.Write(make([]byte, expectedSize)); err != nil {
+	if _, err = tmpfile.Write(make([]byte, expectedSize)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -60,7 +60,7 @@ func Test_WipeDisk(t *testing.T) {
 
 	// Write some content to the temporary file
 	expectedSize := int64(4096)
-	if _, err := tmpfile.Write(make([]byte, expectedSize)); err != nil {
+	if _, err = tmpfile.Write(make([]byte, expectedSize)); err != nil {
 		t.Fatal(err)
 	}
 

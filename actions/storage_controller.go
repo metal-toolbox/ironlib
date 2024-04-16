@@ -14,7 +14,6 @@ import (
 
 var (
 	ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
-	ErrDiskkManagerUtilNotIdentified       = errors.New("disk management utility not identifed")
 )
 
 type StorageControllerAction struct {
