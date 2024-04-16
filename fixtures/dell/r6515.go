@@ -1782,20 +1782,18 @@ var (
 	}
 
 	nvmeDriveCapabilities = []*common.Capability{
-		{Name: "sanicap", Description: "Sanitize Support"},
-		{Name: "ammasocsind", Description: "Additional media modification after sanitize operation completes successfully is not defined"},
-		{Name: "nasbiscs", Description: "No-Deallocate After Sanitize bit in Sanitize command Supported"},
-		{Name: "osons", Description: "Overwrite Sanitize Operation Not Supported"},
-		{Name: "besons", Description: "Block Erase Sanitize Operation Not Supported"},
-		{Name: "cesons", Description: "Crypto Erase Sanitize Operation Not Supported"},
 		{Name: "fna", Description: "Crypto Erase Support", Enabled: true},
-		{Name: "cesapose", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
-		{Name: "ceatsn", Description: "Crypto Erase Applies to Single Namespace(s)"},
-		{Name: "fatsn", Description: "Format Applies to Single Namespace(s)"},
+		{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)"},
+		{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)"},
+		{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
+		{Name: "sanicap", Description: "Sanitize Support"},
+		{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported"},
+		{Name: "ber", Description: "Block Erase Sanitize Operation Supported"},
+		{Name: "owr", Description: "Overwrite Sanitize Operation Supported"},
+		{Name: "ndi", Description: "No-Deallocate After Sanitize bit in Sanitize command Supported"},
 	}
 
-	//
-	//	// r6515 inventory taken with lshw, merged with data from smartctl
+	// r6515 inventory taken with lshw, merged with data from smartctl
 	R6515_inventory_lshw_smartctl = &common.Device{
 		Common: common.Common{
 			Oem:         false,

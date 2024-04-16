@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +13,8 @@ import (
 )
 
 const EnvNvmeUtility = "IRONLIB_UTIL_NVME"
+
+var errSanicapNODMMASReserved = errors.New("sanicap nodmmas reserved bits set, not sure what to do with them")
 
 type Nvme struct {
 	Executor Executor
@@ -153,179 +156,107 @@ func (n *Nvme) DriveCapabilities(ctx context.Context, logicalName string) ([]*co
 		SANICAP uint `json:"sanicap"`
 	}
 
-	if err := json.Unmarshal(out, &caps); err != nil {
+	err = json.Unmarshal(out, &caps)
+	if err != nil {
 		return nil, err
 	}
 
 	var capabilitiesFound []*common.Capability
-	capabilitiesFound = append(capabilitiesFound, parseSanicap(caps.SANICAP)...)
 	capabilitiesFound = append(capabilitiesFound, parseFna(caps.FNA)...)
+
+	var parsedCaps []*common.Capability
+	parsedCaps, err = parseSanicap(caps.SANICAP)
+	if err != nil {
+		return nil, err
+	}
+	capabilitiesFound = append(capabilitiesFound, parsedCaps...)
 
 	return capabilitiesFound, nil
 }
 
 func parseFna(fna uint) []*common.Capability {
-	// Bit masks values came from nvme-cli repo:
-	// https://github.com/linux-nvme/nvme-cli/blob/v2.8/nvme-print-stdout.c#L2199-L2217
+	// Bit masks values came from nvme-cli repo
+	// All but `fna` names come from internal nvme-cli names
+	// We will *not* keep in sync as these names form our API
+	// https: // github.com/linux-nvme/nvme-cli/blob/v2.8/nvme-print-stdout.c#L2199-L2217
 
-	caps := make([]*common.Capability, 0, 4)
-
-	caps = append(caps, &common.Capability{
-		Name:        "fna",
-		Description: "Crypto Erase Support",
-		Enabled:     fna != 0,
-	})
-
-	if (fna&(0b1<<2))>>2 == 0 {
-		caps = append(caps, &common.Capability{
-			Name:        "censapose",
-			Description: "Crypto Erase Not Supported as part of Secure Erase",
-			Enabled:     false,
-		})
-	} else {
-		caps = append(caps, &common.Capability{
-			Name:        "cesapose",
+	return []*common.Capability{
+		{
+			Name:        "fna",
+			Description: "Crypto Erase Support",
+			Enabled:     fna != 0,
+		},
+		{
+			Name:        "fmns",
+			Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)",
+			Enabled:     (fna&(0b1<<0))>>0 != 0,
+		},
+		{
+			Name:        "cens",
+			Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)",
+			Enabled:     (fna&(0b1<<1))>>1 != 0,
+		},
+		{
+			Name:        "cese",
 			Description: "Crypto Erase Supported as part of Secure Erase",
-			Enabled:     true,
-		})
+			Enabled:     (fna&(0b1<<2))>>2 != 0,
+		},
 	}
-
-	// nvme: cens
-	if (fna&(0b1<<1))>>1 == 0 {
-		caps = append(caps, &common.Capability{
-			Name:        "ceatsn",
-			Description: "Crypto Erase Applies to Single Namespace(s)",
-			Enabled:     false,
-		})
-	} else {
-		caps = append(caps, &common.Capability{
-			Name:        "ceatan",
-			Description: "Crypto Erase Applies to All Namespace(s)",
-			Enabled:     true,
-		})
-	}
-
-	// nvme: fmns
-	if (fna&(0b1<<0))>>0 == 0 {
-		caps = append(caps, &common.Capability{
-			Name:        "fatsn",
-			Description: "Format Applies to Single Namespace(s)",
-			Enabled:     false,
-		})
-	} else {
-		caps = append(caps, &common.Capability{
-			Name:        "fatan",
-			Description: "Format Applies to All Namespace(s)",
-			Enabled:     true,
-		})
-	}
-
-	return caps
 }
 
-func parseSanicap(sanicap uint) []*common.Capability {
-	// Bit masks values came from nvme-cli repo:
+func parseSanicap(sanicap uint) ([]*common.Capability, error) {
+	// Bit masks values came from nvme-cli repo
+	// All but `sanicap` names come from internal nvme-cli names
+	// We will *not* keep in sync as these names form our API
 	// https://github.com/linux-nvme/nvme-cli/blob/v2.8/nvme-print-stdout.c#L2064-L2093
 
-	caps := make([]*common.Capability, 0, 6)
+	caps := []*common.Capability{
+		{
+			Name:        "sanicap",
+			Description: "Sanitize Support",
+			Enabled:     sanicap != 0,
+		},
+		{
+			Name:        "cer",
+			Description: "Crypto Erase Sanitize Operation Supported",
+			Enabled:     (sanicap&(0b1<<0))>>0 != 0,
+		},
+		{
+			Name:        "ber",
+			Description: "Block Erase Sanitize Operation Supported",
+			Enabled:     (sanicap&(0b1<<1))>>1 != 0,
+		},
+		{
+			Name:        "owr",
+			Description: "Overwrite Sanitize Operation Supported",
+			Enabled:     (sanicap&(0b1<<2))>>2 != 0,
+		},
+		{
+			Name:        "ndi",
+			Description: "No-Deallocate After Sanitize bit in Sanitize command Supported",
+			Enabled:     (sanicap&(0b1<<29))>>29 != 0,
+		},
+	}
 
-	caps = append(caps, &common.Capability{
-		Name:        "sanicap",
-		Description: "Sanitize Support",
-		Enabled:     sanicap != 0,
-	})
-
-	// nvme: nodmmas
 	switch (sanicap & (0b11 << 30)) >> 30 {
 	case 0b00:
+		// nvme prints this out for 0b00:
+		//   "Additional media modification after sanitize operation completes successfully is not defined"
+		// So I'm taking "not defined" literally since we can't really represent 2 bits in a bool
+		// If we ever want this as a bool we could maybe call it "dmmas" maybe?
+	case 0b01, 0b10:
 		caps = append(caps, &common.Capability{
-			Name:        "ammasocsind",
-			Description: "Additional media modification after sanitize operation completes successfully is not defined",
-			Enabled:     false,
-		})
-	case 0b01:
-		caps = append(caps, &common.Capability{
-			Name:        "minamasocs",
-			Description: "Media is not additionally modified after sanitize operation completes successfully",
-			Enabled:     true,
-		})
-	case 0b10:
-		caps = append(caps, &common.Capability{
-			Name:        "miamasocs",
+			Name:        "nodmmas",
 			Description: "Media is additionally modified after sanitize operation completes successfully",
-			Enabled:     true,
+			Enabled:     (sanicap&(0b11<<30))>>30 == 0b10,
 		})
 	case 0b11:
-		caps = append(caps, &common.Capability{
-			Name:        "",
-			Description: "Reserved",
-			Enabled:     true,
-		})
+		return nil, errSanicapNODMMASReserved
 	default:
 		panic("unreachable")
 	}
 
-	// nvme: ndi
-	if (sanicap&(0b1<<29))>>29 == 0 {
-		caps = append(caps, &common.Capability{
-			Name:        "nasbiscs",
-			Description: "No-Deallocate After Sanitize bit in Sanitize command Supported",
-			Enabled:     false,
-		})
-	} else {
-		caps = append(caps, &common.Capability{
-			Name:        "nasbiscns",
-			Description: "No-Deallocate After Sanitize bit in Sanitize command Not Supported",
-			Enabled:     true,
-		})
-	}
-
-	// nvme: owr
-	if (sanicap&(0b1<<2))>>2 == 0 {
-		caps = append(caps, &common.Capability{
-			Name:        "osons",
-			Description: "Overwrite Sanitize Operation Not Supported",
-			Enabled:     false,
-		})
-	} else {
-		caps = append(caps, &common.Capability{
-			Name:        "osos",
-			Description: "Overwrite Sanitize Operation Supported",
-			Enabled:     true,
-		})
-	}
-
-	// nvme: ber
-	if (sanicap&(0b1<<1))>>1 == 0 {
-		caps = append(caps, &common.Capability{
-			Name:        "besons",
-			Description: "Block Erase Sanitize Operation Not Supported",
-			Enabled:     false,
-		})
-	} else {
-		caps = append(caps, &common.Capability{
-			Name:        "besos",
-			Description: "Block Erase Sanitize Operation Supported",
-			Enabled:     true,
-		})
-	}
-
-	// nvme: cer
-	if (sanicap&(0b1<<0))>>0 == 0 {
-		caps = append(caps, &common.Capability{
-			Name:        "cesons",
-			Description: "Crypto Erase Sanitize Operation Not Supported",
-			Enabled:     false,
-		})
-	} else {
-		caps = append(caps, &common.Capability{
-			Name:        "cesos",
-			Description: "Crypto Erase Sanitize Operation Supported",
-			Enabled:     true,
-		})
-	}
-
-	return caps
+	return caps, nil
 }
 
 // NewFakeNvme returns a mock nvme collector that returns mock data for use in tests.
