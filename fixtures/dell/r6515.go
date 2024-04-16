@@ -1782,11 +1782,9 @@ var (
 	}
 
 	nvmeDriveCapabilities = []*common.Capability{
-		{Name: "fna", Description: "Crypto Erase Support", Enabled: true},
 		{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)"},
 		{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)"},
 		{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
-		{Name: "sanicap", Description: "Sanitize Support"},
 		{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported"},
 		{Name: "ber", Description: "Block Erase Sanitize Operation Supported"},
 		{Name: "owr", Description: "Overwrite Sanitize Operation Supported"},

@@ -16,12 +16,10 @@ func Test_NvmeComponents(t *testing.T) {
 				"Block Erase Sanitize Operation Supported":                          "false",
 				"Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)": "false",
 				"Crypto Erase Sanitize Operation Supported":                         "false",
-				"Crypto Erase Support":                                              "true",
 				"Crypto Erase Supported as part of Secure Erase":                    "true",
 				"Format Applies to All/Single Namespace(s) (t:All, f:Single)":       "false",
 				"No-Deallocate After Sanitize bit in Sanitize command Supported":    "false",
 				"Overwrite Sanitize Operation Supported":                            "false",
-				"Sanitize Support":                                                  "false",
 			},
 		}},
 		{Common: common.Common{
@@ -30,12 +28,10 @@ func Test_NvmeComponents(t *testing.T) {
 				"Block Erase Sanitize Operation Supported":                          "false",
 				"Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)": "false",
 				"Crypto Erase Sanitize Operation Supported":                         "false",
-				"Crypto Erase Support":                                              "true",
 				"Crypto Erase Supported as part of Secure Erase":                    "true",
 				"Format Applies to All/Single Namespace(s) (t:All, f:Single)":       "false",
 				"No-Deallocate After Sanitize bit in Sanitize command Supported":    "false",
 				"Overwrite Sanitize Operation Supported":                            "false",
-				"Sanitize Support":                                                  "false",
 			},
 		}},
 	}
@@ -64,11 +60,9 @@ func Test_NvmeDriveCapabilities(t *testing.T) {
 }
 
 var fixtureNvmeDeviceCapabilities = []*common.Capability{
-	{Name: "fna", Description: "Crypto Erase Support", Enabled: true},
 	{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
 	{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
 	{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
-	{Name: "sanicap", Description: "Sanitize Support", Enabled: false},
 	{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported", Enabled: false},
 	{Name: "ber", Description: "Block Erase Sanitize Operation Supported", Enabled: false},
 	{Name: "owr", Description: "Overwrite Sanitize Operation Supported", Enabled: false},

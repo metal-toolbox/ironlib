@@ -176,16 +176,11 @@ func (n *Nvme) DriveCapabilities(ctx context.Context, logicalName string) ([]*co
 
 func parseFna(fna uint) []*common.Capability {
 	// Bit masks values came from nvme-cli repo
-	// All but `fna` names come from internal nvme-cli names
+	// All names come from internal nvme-cli names
 	// We will *not* keep in sync as these names form our API
 	// https: // github.com/linux-nvme/nvme-cli/blob/v2.8/nvme-print-stdout.c#L2199-L2217
 
 	return []*common.Capability{
-		{
-			Name:        "fna",
-			Description: "Crypto Erase Support",
-			Enabled:     fna != 0,
-		},
 		{
 			Name:        "fmns",
 			Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)",
@@ -206,16 +201,11 @@ func parseFna(fna uint) []*common.Capability {
 
 func parseSanicap(sanicap uint) ([]*common.Capability, error) {
 	// Bit masks values came from nvme-cli repo
-	// All but `sanicap` names come from internal nvme-cli names
+	// All names come from internal nvme-cli names
 	// We will *not* keep in sync as these names form our API
 	// https://github.com/linux-nvme/nvme-cli/blob/v2.8/nvme-print-stdout.c#L2064-L2093
 
 	caps := []*common.Capability{
-		{
-			Name:        "sanicap",
-			Description: "Sanitize Support",
-			Enabled:     sanicap != 0,
-		},
 		{
 			Name:        "cer",
 			Description: "Crypto Erase Sanitize Operation Supported",
