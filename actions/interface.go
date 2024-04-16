@@ -23,7 +23,8 @@ type RaidController interface {
 
 // Setter interface declares methods to set attributes on a system.
 type Setter interface {
-	SetBIOSConfiguration(ctx context.Context, config map[string]string) error
+	SetBIOSConfiguration(ctx context.Context, cfg map[string]string) error
+	SetBIOSConfigurationFromFile(ctx context.Context, cfg string) error
 }
 
 // Getter interface declares methods implemented by providers to return various attributes.
