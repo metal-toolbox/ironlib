@@ -13,7 +13,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
+var (
+	ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
+	ErrWipeVerificationNotSatisfactory     = errors.New("ineffective wipe")
+)
 
 type StorageControllerAction struct {
 	Logger *logrus.Logger
@@ -100,6 +103,20 @@ func (s *StorageControllerAction) WipeDisk(ctx context.Context, logicalName stri
 	if err != nil {
 		return err
 	}
+	// Watermark disk
+	check, err := utils.PrepWatermarks(logicalName)
+	if err != nil {
+		return err
+	}
 
-	return util.WipeDisk(ctx, logicalName)
+	err = util.WipeDisk(ctx, logicalName)
+	if err != nil {
+		return err
+	}
+
+	if check() {
+		return nil
+	} else {
+		return errors.Wrap(ErrWipeVerificationNotSatisfactory, "Watermark still present, disk not wipped")
+	}
 }
