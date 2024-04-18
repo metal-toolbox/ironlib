@@ -14,14 +14,14 @@ const (
 	numWatermarks = 10
 )
 
-type watermak struct {
+type watermark struct {
 	position uint64
 	data     []byte
 }
 
 func PrepWatermarks(disk string) (func() bool, error) {
 	log.Printf("%s | Initiating watermarking process", disk)
-	watermarks := make([]watermak, numWatermarks)
+	watermarks := make([]watermark, numWatermarks)
 
 	// Write open
 	file, err := os.OpenFile(disk, os.O_WRONLY, FileMode644)
@@ -79,7 +79,7 @@ func PrepWatermarks(disk string) (func() bool, error) {
 	return checker, nil
 }
 
-func writeWatermarks(file *os.File, fileSize int64, watermarks []watermak) error {
+func writeWatermarks(file *os.File, fileSize int64, watermarks []watermark) error {
 	for i := 0; i < numWatermarks; i++ {
 		data := make([]byte, bufferSize)
 		_, err := rand.Read(data)
