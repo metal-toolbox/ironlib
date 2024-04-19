@@ -21,7 +21,6 @@ func NewFillZeroCmd(trace bool) *FillZero {
 	return &FillZero{}
 }
 
-//noline:gomnd // the magic numbers here are fine
 func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
 	fmt.Println("Starting zero-fill of", path)
 	// Write open
@@ -60,12 +59,14 @@ func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
 			printProgress(totalBytesWritten, partitionSize, &start, &bytesSinceLastPrint, bytesRemaining, path)
 		}
 	}
-	file.Sync()
+	err = file.Sync()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-//noline:gomnd // the magic numbers here are fine
-func printProgress(totalBytesWritten int64, partitionSize int64, start *time.Time, bytesSinceLastPrint *int64, bytesRemaining int64, path string) {
+func printProgress(totalBytesWritten, partitionSize int64, start *time.Time, bytesSinceLastPrint *int64, bytesRemaining int64, path string) {
 	// Calculate progress and ETA
 	progress := float64(totalBytesWritten) / float64(partitionSize) * 100
 	elapsed := time.Since(*start).Seconds()
