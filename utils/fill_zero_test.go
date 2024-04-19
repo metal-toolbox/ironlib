@@ -14,9 +14,7 @@ func Test_NewFillZeroCmd(t *testing.T) {
 		t.Error("Expected non-nil pointer, got nil")
 	}
 }
-
 func Test_WipeDisk(t *testing.T) {
-
 	for _, size := range []int{4095, 4096, 4097, 8192} {
 		t.Run(strconv.Itoa(size), func(t *testing.T) {
 			// Create a temporary file for testing
