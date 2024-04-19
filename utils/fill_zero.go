@@ -42,38 +42,44 @@ func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
 	if err != nil {
 		return err
 	}
-	var bytesSinceLastPrint int
-	var totalBytesWritten int
+	var bytesSinceLastPrint int64
+	var totalBytesWritten int64
 	buffer := make([]byte, 4096)
 	start := time.Now()
-	for bytesRemaining := int(partitionSize); bytesRemaining > 0; {
-		l := min(len(buffer), bytesRemaining)
+	for bytesRemaining := partitionSize; bytesRemaining > 0; {
+		l := min(int64(len(buffer)), bytesRemaining)
 		bytesWritten, err := file.Write(buffer[:l])
 		if err != nil {
 			return err
 		}
-		totalBytesWritten += bytesWritten
-		bytesSinceLastPrint += bytesWritten
-		bytesRemaining -= bytesWritten
+		totalBytesWritten += int64(bytesWritten)
+		bytesSinceLastPrint += int64(bytesWritten)
+		bytesRemaining -= int64(bytesWritten)
 		// Print progress report every 10 seconds and when done
 		if bytesRemaining == 0 || time.Since(start) >= 10*time.Second {
-			progress := float64(totalBytesWritten) / float64(partitionSize) * 100
-			elapsed := time.Since(start)
-			rate := int(int64(bytesSinceLastPrint) / elapsed.Nanoseconds())
-			remaining := time.Duration(bytesRemaining / rate)
-			mbPerSecond := float64(time.Duration(rate)*time.Second) / (1 * 1024 * 1024)
-			fmt.Printf("%s | Progress: %6.2f%% | Speed: %.2f MB/s | Estimated time left: %5.2fh\n",
-				path, progress, mbPerSecond, remaining.Hours())
-			start = time.Now()
-			bytesSinceLastPrint = 0
+			printProgress(totalBytesWritten, partitionSize, &start, &bytesSinceLastPrint, bytesRemaining, path)
 		}
 	}
 	file.Sync()
 	return nil
 }
 
+//noline:gomnd // the magic numbers here are fine
+func printProgress(totalBytesWritten int64, partitionSize int64, start *time.Time, bytesSinceLastPrint *int64, bytesRemaining int64, path string) {
+	// Calculate progress and ETA
+	progress := float64(totalBytesWritten) / float64(partitionSize) * 100
+	elapsed := time.Since(*start).Seconds()
+	speed := float64(*bytesSinceLastPrint) / elapsed                                  // Speed in bytes per second
+	remainingSeconds := (float64(partitionSize) - float64(totalBytesWritten)) / speed // Remaining time in seconds
+	remainingHours := float64(remainingSeconds / 3600)
+	mbPerSecond := speed / (1024 * 1024)
+	log.Printf("%s | Progress: %.2f%% | Speed: %.2f MB/s | Estimated time left: %.2f hour(s)\n", path, progress, mbPerSecond, remainingHours)
+	*start = time.Now()
+	*bytesSinceLastPrint = 0
+}
+
 // We are in go 1.19 min not available yet
-func min(a, b int) int {
+func min(a, b int64) int64 {
 	if a < b {
 		return a
 	}
