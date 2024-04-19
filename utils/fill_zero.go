@@ -22,7 +22,7 @@ func NewFillZeroCmd(trace bool) *FillZero {
 }
 
 func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
-	fmt.Println("Starting zero-fill of", path)
+	log.Println("Starting zero-fill of", path)
 	// Write open
 	file, err := os.OpenFile(path, os.O_WRONLY, 0)
 	if err != nil {
@@ -36,7 +36,7 @@ func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
 		log.Println(err)
 		return err
 	}
-	fmt.Printf("%s | Size: %dB\n", path, partitionSize)
+	log.Printf("%s | Size: %dB\n", path, partitionSize)
 	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
 		return err
