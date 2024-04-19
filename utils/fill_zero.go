@@ -2,18 +2,15 @@ package utils
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
 const (
 	EnvFillZeroUtility = "IRONLIB_UTIL_FILL_ZERO"
-	FileMode644        = 0o644 // Owner readwrite, group and others readonly
-	OneMBinBytes       = 1024 * 1024
-	SecondsPerHour     = 3600
-	TotalPercentage    = 100
 )
 
 type FillZero struct {
@@ -24,88 +21,61 @@ func NewFillZeroCmd(trace bool) *FillZero {
 	return &FillZero{}
 }
 
-func (z *FillZero) Fill(ctx context.Context, logicalName string) error {
-	log.Printf("Start overwriting with zeros %s", logicalName)
-	partitionPath := logicalName // example /dev/sdb
-
-	// Buffer size (in bytes)
-	bufferSize := 4096 // to use 1MB = 1024 * 1024
-
+//noline:gomnd // the magic numbers here are fine
+func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
+	fmt.Println("Starting zero-fill of", path)
 	// Write open
-	file, err := os.OpenFile(partitionPath, os.O_WRONLY, FileMode644)
+	file, err := os.OpenFile(path, os.O_WRONLY, 0)
 	if err != nil {
-		log.Println("Failed to open :"+logicalName, err)
+		log.Println(fmt.Errorf("%w", err))
 		return err
 	}
 	defer file.Close()
-
 	// Get disk or partition size
-	whence := 2 // 2 means relative to the end, check Seek function
-	partitionSize, err := file.Seek(0, whence)
+	partitionSize, err := file.Seek(0, io.SeekEnd)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-
-	log.Printf("%s | Size in bytes: %d \n", partitionPath, partitionSize)
-
-	// Create a buffer fill with zeroes
-	buffer := make([]byte, bufferSize)
-
-	var totalBytesWritten int64
-	var bytesSinceLastPrint int64
+	fmt.Printf("%s | Size: %dB\n", path, partitionSize)
+	_, err = file.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
+	var bytesSinceLastPrint int
+	var totalBytesWritten int
+	buffer := make([]byte, 4096)
 	start := time.Now()
-
-	// rewind cassette tape ;=)
-	whence = 0 // 0 means relative to the origin of the file, check Seek function
-	_, err = file.Seek(0, whence)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	// Writing zeroes loop
-	bytesSinceLastPrint = 0
-	for totalBytesWritten < partitionSize {
-		bytesWritten, err := file.Write(buffer)
+	for bytesRemaining := int(partitionSize); bytesRemaining > 0; {
+		l := min(len(buffer), bytesRemaining)
+		bytesWritten, err := file.Write(buffer[:l])
 		if err != nil {
-			if strings.Contains(err.Error(), "no space left on device") { // syscall.ENOSPC
-				// Check if the last write loop didn't write all the buffer size, the reason is partitionSize % bufferSize is not 0
-				if totalBytesWritten+int64(bytesWritten) == partitionSize {
-					log.Println("we have reached the end of the devices.")
-					return nil
-				} else {
-					log.Println("we have a problem with the write to disk: ", err)
-				}
-			} else {
-				// Other errors
-				log.Println("failed to write to disk: ", err)
-			}
 			return err
 		}
-		totalBytesWritten += int64(bytesWritten)
-		bytesSinceLastPrint += int64(bytesWritten)
-
-		// Print progress each 10 seconds
-		if time.Since(start) >= 10*time.Second {
-			// Calculate progress and ETA
-			progress := float64(totalBytesWritten) / float64(partitionSize) * TotalPercentage
-			elapsed := time.Since(start).Seconds()
-			speed := float64(bytesSinceLastPrint) / elapsed                                   // Speed in bytes per second
-			remainingSeconds := (float64(partitionSize) - float64(totalBytesWritten)) / speed // Remaining time in seconds
-			remainingHours := float64(remainingSeconds / SecondsPerHour)
-			mbPerSecond := speed / OneMBinBytes
-			log.Printf("%s | Progress: %.2f%% | Speed: %.2f MB/s | Estimated time left: %.2f hour(s)\n", partitionPath, progress, mbPerSecond, remainingHours)
+		totalBytesWritten += bytesWritten
+		bytesSinceLastPrint += bytesWritten
+		bytesRemaining -= bytesWritten
+		// Print progress report every 10 seconds and when done
+		if bytesRemaining == 0 || time.Since(start) >= 10*time.Second {
+			progress := float64(totalBytesWritten) / float64(partitionSize) * 100
+			elapsed := time.Since(start)
+			rate := int(int64(bytesSinceLastPrint) / elapsed.Nanoseconds())
+			remaining := time.Duration(bytesRemaining / rate)
+			mbPerSecond := float64(time.Duration(rate)*time.Second) / (1 * 1024 * 1024)
+			fmt.Printf("%s | Progress: %6.2f%% | Speed: %.2f MB/s | Estimated time left: %5.2fh\n",
+				path, progress, mbPerSecond, remaining.Hours())
 			start = time.Now()
 			bytesSinceLastPrint = 0
 		}
 	}
-
-	log.Printf("%s has been completely overwritten with zeros", partitionPath)
-
+	file.Sync()
 	return nil
 }
 
-func (z *FillZero) WipeDisk(ctx context.Context, logicalName string) error {
-	return z.Fill(ctx, logicalName)
+// We are in go 1.19 min not available yet
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
