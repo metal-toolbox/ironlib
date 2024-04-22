@@ -5,7 +5,7 @@ import (
 	"github.com/metal-toolbox/ironlib/model"
 )
 
-// nolint // test data
+// nolint:dupl,misspell,revive,stylecheck
 var (
 	R6515_oem_components = &model.OemComponents{
 		Dell: []*model.Component{

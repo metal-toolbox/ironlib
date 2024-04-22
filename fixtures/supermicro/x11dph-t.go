@@ -5,7 +5,7 @@ import (
 	"github.com/metal-toolbox/ironlib/model"
 )
 
-// nolint // test data
+// nolint:dupl,misspell,revive,stylecheck
 var (
 	Testdata_X11DPH_T_Components = []*model.Component{
 		{

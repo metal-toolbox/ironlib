@@ -4,8 +4,9 @@ import (
 	"github.com/bmc-toolbox/common"
 )
 
-// nolint //testcode
-// inventory taken with lshw
+// E3C246D4INL is an example inventory taken with lshw
+//
+//nolint:misspell
 var E3C246D4INL = &common.Device{
 	Common: common.Common{
 		Oem:         false,
