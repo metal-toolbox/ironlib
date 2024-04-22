@@ -93,26 +93,27 @@ func initCheckBinTests() []checkBinTester {
 func Test_CheckExecutable(t *testing.T) {
 	tests := initCheckBinTests()
 	for _, c := range tests {
-		if c.createFile {
-			f, err := os.Create(c.filePath)
-			if err != nil {
-				t.Error(err)
-			}
-
-			// nolint:gocritic // test code
-			defer os.Remove(c.filePath)
-
-			if c.fileMode != 0 {
-				err = f.Chmod(fs.FileMode(c.fileMode))
+		t.Run(c.testName, func(t *testing.T) {
+			if c.createFile {
+				f, err := os.Create(c.filePath)
 				if err != nil {
 					t.Error(err)
 				}
-			}
-		}
 
-		e := new(Execute)
-		e.Cmd = c.filePath
-		err := e.CheckExecutable()
-		assert.Equal(t, c.expectedErr, errors.Cause(err), c.testName)
+				defer os.Remove(c.filePath)
+
+				if c.fileMode != 0 {
+					err = f.Chmod(fs.FileMode(c.fileMode))
+					if err != nil {
+						t.Error(err)
+					}
+				}
+			}
+
+			e := new(Execute)
+			e.Cmd = c.filePath
+			err := e.CheckExecutable()
+			assert.Equal(t, c.expectedErr, errors.Cause(err), c.testName)
+		})
 	}
 }
