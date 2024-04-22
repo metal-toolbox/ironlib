@@ -222,7 +222,6 @@ func smartCtlExitStatus(exitCode int) []string {
 // maskExitCode identifies error bits set based on the smartctl exit code
 // it returns a slice of bits that are set to a value > 0
 // see man 8 smartctl for details
-// nolint:gomnd // comments clarify magic numbers
 func maskExitCode(e int) []int {
 	set := []int{}
 
