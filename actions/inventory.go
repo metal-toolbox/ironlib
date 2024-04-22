@@ -341,14 +341,11 @@ func (a *InventoryCollectorAction) setDefaultAttributes() {
 
 // CollectDrives executes drive collectors and merges the data into device.[]*Drive
 // nolint:gocyclo // TODO(joel) if theres more conditionals to be added in here, the method is to be split up.
-func (a *InventoryCollectorAction) CollectDrives(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectDrives(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if a.collectors.DriveCollectors == nil {
@@ -439,14 +436,11 @@ func (a *InventoryCollectorAction) findDriveByLogicalName(logicalName string, dr
 // CollectDriveCapabilities executes drive capability collectors
 //
 // The capability collector is identified based on the drive logical name.
-func (a *InventoryCollectorAction) CollectDriveCapabilities(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectDriveCapabilities(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	for _, drive := range a.device.Drives {
@@ -483,14 +477,11 @@ func (a *InventoryCollectorAction) CollectDriveCapabilities(ctx context.Context)
 }
 
 // CollectNICs executes nic collectors and merges the nic data into device.[]*NIC
-func (a *InventoryCollectorAction) CollectNICs(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectNICs(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if a.collectors.NICCollector == nil {
@@ -532,14 +523,11 @@ func (a *InventoryCollectorAction) CollectNICs(ctx context.Context) error {
 }
 
 // CollectBMC executes the bmc collector and updates device bmc information
-func (a *InventoryCollectorAction) CollectBMC(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectBMC(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if a.collectors.BMCCollector == nil {
@@ -569,14 +557,11 @@ func (a *InventoryCollectorAction) CollectBMC(ctx context.Context) error {
 }
 
 // CollectCPLDs executes the bmc collector and updates device cpld information
-func (a *InventoryCollectorAction) CollectCPLDs(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectCPLDs(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if a.collectors.CPLDCollector == nil {
@@ -615,14 +600,11 @@ func (a *InventoryCollectorAction) CollectCPLDs(ctx context.Context) error {
 }
 
 // CollectBIOS executes the bios collector and updates device bios information
-func (a *InventoryCollectorAction) CollectBIOS(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectBIOS(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if a.collectors.BIOSCollector == nil {
@@ -656,14 +638,11 @@ func (a *InventoryCollectorAction) CollectBIOS(ctx context.Context) error {
 }
 
 // CollectTPMs executes the TPM collector and updates device TPM information
-func (a *InventoryCollectorAction) CollectTPMs(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectTPMs(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if a.collectors.TPMCollector == nil {
@@ -701,14 +680,11 @@ func (a *InventoryCollectorAction) CollectTPMs(ctx context.Context) error {
 }
 
 // CollectFirmwareChecksums executes the Firmware checksum collector and updates the component metadata.
-func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if a.collectors.FirmwareChecksumCollector == nil {
@@ -747,14 +723,11 @@ func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context)
 }
 
 // CollectUEFIVariables executes the UEFI variable collector and stores them on the device object
-func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if a.collectors.UEFIVarsCollector == nil {
@@ -792,14 +765,11 @@ func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) err
 }
 
 // CollectStorageControllers executes the StorageControllers collectors and updates device storage controller data
-func (a *InventoryCollectorAction) CollectStorageControllers(ctx context.Context) error {
-	// nolint:errcheck // deferred method catches a panic, error check not required.
-	defer func() error {
+func (a *InventoryCollectorAction) CollectStorageControllers(ctx context.Context) (err error) {
+	defer func() {
 		if r := recover(); r != nil && a.failOnError {
-			return errors.Wrap(ErrPanic, string(debug.Stack()))
+			err = errors.Wrap(ErrPanic, string(debug.Stack()))
 		}
-
-		return nil
 	}()
 
 	if len(a.collectors.StorageControllerCollectors) == 0 {
