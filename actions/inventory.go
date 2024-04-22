@@ -66,8 +66,6 @@ type Collectors struct {
 }
 
 // Empty returns a bool value
-//
-//nolint:gocyclo  // it's fine
 func (c *Collectors) Empty() bool {
 	if c.InventoryCollector == nil &&
 		c.NICCollector == nil &&
@@ -485,8 +483,6 @@ func (a *InventoryCollectorAction) CollectDriveCapabilities(ctx context.Context)
 }
 
 // CollectNICs executes nic collectors and merges the nic data into device.[]*NIC
-//
-// nolint:gocyclo // this is fine for now.
 func (a *InventoryCollectorAction) CollectNICs(ctx context.Context) error {
 	// nolint:errcheck // deferred method catches a panic, error check not required.
 	defer func() error {
@@ -796,8 +792,6 @@ func (a *InventoryCollectorAction) CollectUEFIVariables(ctx context.Context) err
 }
 
 // CollectStorageControllers executes the StorageControllers collectors and updates device storage controller data
-//
-// nolint:gocyclo // this is fine for now
 func (a *InventoryCollectorAction) CollectStorageControllers(ctx context.Context) error {
 	// nolint:errcheck // deferred method catches a panic, error check not required.
 	defer func() error {

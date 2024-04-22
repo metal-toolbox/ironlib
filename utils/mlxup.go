@@ -222,7 +222,6 @@ func (m *Mlxup) parseMlxQueryOutput(b []byte) []*MlxupDevice {
 }
 
 // parseMlxDeviceAttributes a mlx device information section into *MlxupDevice
-// nolint:gocyclo // line parsing is cyclomatic
 func parseMlxDeviceAttributes(bSlice [][]byte) *MlxupDevice {
 	device := &MlxupDevice{}
 
@@ -276,8 +275,6 @@ func parseMlxDeviceAttributes(bSlice [][]byte) *MlxupDevice {
 //
 // version["FW"][0] indicates fw version installed
 // version["FW"][1] indicates fw version available
-//
-// nolint:gocyclo // line based parsing is cyclomatic
 func parseMlxVersions(bSlice [][]byte) map[string][]string {
 	versions := map[string][]string{
 		"FW":   make([]string, 0),

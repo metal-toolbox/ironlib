@@ -279,7 +279,6 @@ func NewFakeSmartctl(dataDir string) *Smartctl {
 	return &Smartctl{Executor: executor}
 }
 
-// nolint:gocyclo // test code
 // ExecWithContext implements the utils.Executor interface
 func (e *FakeSmartctlExecute) ExecWithContext(context.Context) (*Result, error) {
 	switch e.Args[0] {
