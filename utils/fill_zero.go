@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-const (
-	EnvFillZeroUtility = "IRONLIB_UTIL_FILL_ZERO"
-)
-
 type FillZero struct {
 }
 
@@ -20,10 +16,10 @@ func NewFillZeroCmd(trace bool) *FillZero {
 	return &FillZero{}
 }
 
-func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
-	log.Println("Starting zero-fill of", path)
+func (z *FillZero) WipeDisk(ctx context.Context, logicalName string) error {
+	log.Println("Starting zero-fill of", logicalName)
 	// Write open
-	file, err := os.OpenFile(path, os.O_WRONLY, 0)
+	file, err := os.OpenFile(logicalName, os.O_WRONLY, 0)
 	if err != nil {
 		return err
 	}
@@ -33,7 +29,7 @@ func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("%s | Size: %dB\n", path, partitionSize)
+	log.Printf("%s | Size: %dB\n", logicalName, partitionSize)
 	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
 		return err
@@ -43,19 +39,26 @@ func (z *FillZero) WipeDisk(ctx context.Context, path string) error {
 	buffer := make([]byte, 4096)
 	start := time.Now()
 	for bytesRemaining := partitionSize; bytesRemaining > 0; {
-		l := min(int64(len(buffer)), bytesRemaining)
-		bytesWritten, err := file.Write(buffer[:l])
-		if err != nil {
-			return err
-		}
-		totalBytesWritten += int64(bytesWritten)
-		bytesSinceLastPrint += int64(bytesWritten)
-		bytesRemaining -= int64(bytesWritten)
-		// Print progress report every 10 seconds and when done
-		if bytesRemaining == 0 || time.Since(start) >= 10*time.Second {
-			printProgress(totalBytesWritten, partitionSize, &start, &bytesSinceLastPrint, path)
-			start = time.Now()
-			bytesSinceLastPrint = 0
+		// Check if the context has been canceled
+		select {
+		case <-ctx.Done():
+			log.Println("Context canceled. Stopping WipeDisk")
+			return ctx.Err()
+		default:
+			l := min(int64(len(buffer)), bytesRemaining)
+			bytesWritten, err := file.Write(buffer[:l])
+			if err != nil {
+				return err
+			}
+			totalBytesWritten += int64(bytesWritten)
+			bytesSinceLastPrint += int64(bytesWritten)
+			bytesRemaining -= int64(bytesWritten)
+			// Print progress report every 10 seconds and when done
+			if bytesRemaining == 0 || time.Since(start) >= 10*time.Second {
+				printProgress(totalBytesWritten, partitionSize, &start, &bytesSinceLastPrint, logicalName)
+				start = time.Now()
+				bytesSinceLastPrint = 0
+			}
 		}
 	}
 	err = file.Sync()
