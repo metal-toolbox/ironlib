@@ -12,9 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	ErrMseCliDriveNotIdentified = errors.New("failed to identify drive for update")
-)
+var ErrMseCliDriveNotIdentified = errors.New("failed to identify drive for update")
 
 const (
 	EnvMsecliUtility = "IRONLIB_UTIL_MSECLI"
@@ -60,8 +58,8 @@ func (m *Msecli) Attributes() (utilName model.CollectorUtility, absolutePath str
 }
 
 // Drives returns a slice of drive components identified
-func (m *Msecli) Drives(_ context.Context) ([]*common.Drive, error) {
-	devices, err := m.Query()
+func (m *Msecli) Drives(ctx context.Context) ([]*common.Drive, error) {
+	devices, err := m.Query(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +89,7 @@ func (m *Msecli) Drives(_ context.Context) ([]*common.Drive, error) {
 // UpdateDrive installs drive updates
 func (m *Msecli) UpdateDrive(ctx context.Context, updateFile, modelNumber, serialNumber string) error {
 	// query list of drives
-	drives, err := m.Query()
+	drives, err := m.Query(ctx)
 	if err != nil {
 		return err
 	}
@@ -161,10 +159,10 @@ func (m *Msecli) updateDrive(ctx context.Context, modelNumber, updateFile string
 }
 
 // Query parses the output of mseli -L and returns a slice of *MsecliDevice's
-func (m *Msecli) Query() ([]*MsecliDevice, error) {
+func (m *Msecli) Query(ctx context.Context) ([]*MsecliDevice, error) {
 	m.Executor.SetArgs([]string{"-L"})
 
-	result, err := m.Executor.ExecWithContext(context.Background())
+	result, err := m.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}

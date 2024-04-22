@@ -12,9 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
-)
+var ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
 
 type StorageControllerAction struct {
 	Logger *logrus.Logger

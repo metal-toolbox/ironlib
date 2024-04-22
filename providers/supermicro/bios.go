@@ -8,7 +8,7 @@ import (
 )
 
 // SetBIOSConfiguration sets bios configuration settings
-func (s *supermicro) SetBIOSConfiguration(_ context.Context, cfg map[string]string) error {
+func (s *supermicro) SetBIOSConfiguration(context.Context, map[string]string) error {
 	return nil
 }
 

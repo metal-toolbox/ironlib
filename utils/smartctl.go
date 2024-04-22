@@ -16,19 +16,17 @@ import (
 
 const EnvSmartctlUtility = "IRONLIB_UTIL_SMARTCTL"
 
-var (
-	// map of smartctl error bits to explanation - man 8 smartctl
-	smartclErrors = map[int]string{
-		0: "Command line did not parse",
-		1: "Device open failed, device did not return an IDENTIFY DEVICE structure, or device is in a low-power mode",
-		2: "Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure",
-		3: "SMART status check returned 'DISK FAILING'",
-		4: "We found prefail Attributes <= threshold",
-		5: "SMART status check returned 'DISK OK' but we found that some (usage or prefail) Attributes have been <= threshold at some time in the past",
-		6: "The device error log contains records of errors",
-		7: "The device self-test log contains records of errors. [ATA only] Failed self-tests outdated by a newer successful extended self-test are ignored",
-	}
-)
+// map of smartctl error bits to explanation - man 8 smartctl
+var smartclErrors = map[int]string{
+	0: "Command line did not parse",
+	1: "Device open failed, device did not return an IDENTIFY DEVICE structure, or device is in a low-power mode",
+	2: "Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure",
+	3: "SMART status check returned 'DISK FAILING'",
+	4: "We found prefail Attributes <= threshold",
+	5: "SMART status check returned 'DISK OK' but we found that some (usage or prefail) Attributes have been <= threshold at some time in the past",
+	6: "The device error log contains records of errors",
+	7: "The device self-test log contains records of errors. [ATA only] Failed self-tests outdated by a newer successful extended self-test are ignored",
+}
 
 type Smartctl struct {
 	Executor Executor
@@ -89,14 +87,14 @@ func (s *Smartctl) Attributes() (utilName model.CollectorUtility, absolutePath s
 func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 	drives := make([]*common.Drive, 0)
 
-	DrivesList, err := s.Scan()
+	DrivesList, err := s.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, drive := range DrivesList.Drives {
 		// collect drive information with smartctl -a <drive>
-		smartctlAll, err := s.All(drive.Name)
+		smartctlAll, err := s.All(ctx, drive.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -144,10 +142,10 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 }
 
 // Scan runs smartctl scan -j and returns its value as an object
-func (s *Smartctl) Scan() (*SmartctlScan, error) {
+func (s *Smartctl) Scan(ctx context.Context) (*SmartctlScan, error) {
 	s.Executor.SetArgs([]string{"--scan", "-j"})
 
-	result, err := s.Executor.ExecWithContext(context.Background())
+	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -167,12 +165,12 @@ func (s *Smartctl) Scan() (*SmartctlScan, error) {
 }
 
 // All runs smartctl -a /dev/<device> and returns its value as an object
-func (s *Smartctl) All(device string) (*SmartctlDriveAttributes, error) {
+func (s *Smartctl) All(ctx context.Context, device string) (*SmartctlDriveAttributes, error) {
 	// smartctl -a /dev/sda1 -j
 	s.Executor.SetArgs([]string{"-a", device, "-j"})
 
 	// smartctl can exit with a non-zero status based on drive smart data
-	result, _ := s.Executor.ExecWithContext(context.Background())
+	result, _ := s.Executor.ExecWithContext(ctx)
 	// determine the errors if any based on the exit code
 	smartCtlErrs := smartCtlExitStatus(result.ExitCode)
 
@@ -284,7 +282,7 @@ func NewFakeSmartctl(dataDir string) *Smartctl {
 
 // nolint:gocyclo // test code
 // ExecWithContext implements the utils.Executor interface
-func (e *FakeSmartctlExecute) ExecWithContext(ctx context.Context) (*Result, error) {
+func (e *FakeSmartctlExecute) ExecWithContext(context.Context) (*Result, error) {
 	switch e.Args[0] {
 	case "--scan":
 		b, err := os.ReadFile(e.JSONFilesDir + "/scan.json")

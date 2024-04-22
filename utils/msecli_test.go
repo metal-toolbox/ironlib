@@ -61,7 +61,7 @@ func Test_MsecliDrives(t *testing.T) {
 		t.Error(err)
 	}
 
-	drives, err := m.Drives(context.TODO())
+	drives, err := m.Drives(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -129,6 +129,6 @@ func Test_QueryOutputEmpty(t *testing.T) {
 
 	m.Executor.SetArgs([]string{"-L"})
 
-	_, err = m.Query()
+	_, err = m.Query(context.Background())
 	assert.Equal(t, ErrNoCommandOutput, errors.Cause(err))
 }

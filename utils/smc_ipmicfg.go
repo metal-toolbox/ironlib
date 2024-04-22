@@ -64,8 +64,8 @@ func NewFakeIpmicfg(r io.Reader) *Ipmicfg {
 }
 
 // BMC returns a SMC BMC component
-func (i Ipmicfg) BMC(_ context.Context) (*common.BMC, error) {
-	summary, err := i.Summary()
+func (i Ipmicfg) BMC(ctx context.Context) (*common.BMC, error) {
+	summary, err := i.Summary(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (i Ipmicfg) BMC(_ context.Context) (*common.BMC, error) {
 
 // BIOS returns a SMC BIOS component
 func (i *Ipmicfg) BIOS(ctx context.Context) (*common.BIOS, error) {
-	summary, err := i.Summary()
+	summary, err := i.Summary(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (i *Ipmicfg) BIOS(ctx context.Context) (*common.BIOS, error) {
 
 // CPLDs returns a slice of SMC CPLD components
 func (i Ipmicfg) CPLDs(ctx context.Context) ([]*common.CPLD, error) {
-	summary, err := i.Summary()
+	summary, err := i.Summary(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -127,11 +127,11 @@ func (i Ipmicfg) CPLDs(ctx context.Context) ([]*common.CPLD, error) {
 	return cplds, nil
 }
 
-func (i *Ipmicfg) Summary() (*IpmicfgSummary, error) {
+func (i *Ipmicfg) Summary(ctx context.Context) (*IpmicfgSummary, error) {
 	// smc-ipmicfg --summary
 	i.Executor.SetArgs([]string{"-summary"})
 
-	result, err := i.Executor.ExecWithContext(context.Background())
+	result, err := i.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}

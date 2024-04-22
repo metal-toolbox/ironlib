@@ -34,8 +34,10 @@ type LshwOutput []*LshwNode
 
 // fields of the ChildNodes in the lshw output
 // theres some fields with non-string attributes, in these fields, which are currently ignored
-type LshwNodeConfiguration map[string]string
-type LshwNodeCapabilities map[string]interface{}
+type (
+	LshwNodeConfiguration map[string]string
+	LshwNodeCapabilities  map[string]interface{}
+)
 
 // lshw -json output is unmarshalled into this struct
 // each ChildNode is a LshwNode with almost all of the same fields
@@ -105,7 +107,7 @@ func (l *Lshw) Collect(ctx context.Context, device *common.Device) error {
 	l.Device = device
 
 	// lshw output
-	lshwDevice, err := l.ListJSON()
+	lshwDevice, err := l.ListJSON(ctx)
 	if err != nil {
 		return errors.Wrap(err, ErrParseLshwOutput.Error())
 	}
@@ -141,11 +143,11 @@ func (l *Lshw) Collect(ctx context.Context, device *common.Device) error {
 }
 
 // ListJSON returns the lshw output as a struct
-func (l *Lshw) ListJSON() (*LshwOutput, error) {
+func (l *Lshw) ListJSON(ctx context.Context) (*LshwOutput, error) {
 	// lshw -json -notime
 	l.Executor.SetArgs([]string{"-json", "-notime", "-numeric"})
 
-	result, err := l.Executor.ExecWithContext(context.Background())
+	result, err := l.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -670,7 +672,7 @@ func NewFakeLshw(stdin io.Reader) *Lshw {
 }
 
 // ExecWithContext implements the utils.Executor interface
-func (e *FakeLshwExecute) ExecWithContext(ctx context.Context) (*Result, error) {
+func (e *FakeLshwExecute) ExecWithContext(context.Context) (*Result, error) {
 	b := bytes.Buffer{}
 
 	_, err := b.ReadFrom(e.Stdin)

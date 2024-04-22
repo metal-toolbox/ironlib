@@ -43,7 +43,8 @@ func Test_SMCUpdateBios(t *testing.T) {
 }
 
 func Test_parseSMCBIOSConfig_X11SCHFF(t *testing.T) {
-	expected := map[string]string{"boot_mode": "BIOS",
+	expected := map[string]string{
+		"boot_mode":                                 "BIOS",
 		"intel_sgx":                                 "Software Controlled",
 		"secure_boot":                               "Disabled",
 		"smt":                                       "Enabled",

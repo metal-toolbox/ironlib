@@ -21,15 +21,15 @@ var (
 )
 
 // dsuInstallUpdates installs DSU identified updates
-func (d *dell) dsuInstallUpdates(downloadOnly bool) (int, error) {
+func (d *dell) dsuInstallUpdates(ctx context.Context, downloadOnly bool) (int, error) {
 	// install pre-requisites
-	err := d.pre()
+	err := d.pre(ctx)
 	if err != nil {
 		return 0, errors.Wrap(err, "error installing pre-requisites for DSU")
 	}
 
 	// Fetch DSU identified update files
-	exitCode, err := d.dsu.FetchUpdateFiles(utils.LocalUpdatesDirectory)
+	exitCode, err := d.dsu.FetchUpdateFiles(ctx, utils.LocalUpdatesDirectory)
 	if err != nil {
 		return exitCode, err
 	}
@@ -39,7 +39,7 @@ func (d *dell) dsuInstallUpdates(downloadOnly bool) (int, error) {
 	}
 
 	// Install DSU fetched local update files
-	return d.dsu.ApplyLocalUpdates(utils.LocalUpdatesDirectory)
+	return d.dsu.ApplyLocalUpdates(ctx, utils.LocalUpdatesDirectory)
 }
 
 // installUpdate installs a given dell update file (DUP)
@@ -59,7 +59,7 @@ func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 
 	// set files executable
 	// nolint gocritic: this fs mode declaration is as clear as it gets
-	err := os.Chmod(updateFile, 0744)
+	err := os.Chmod(updateFile, 0o744)
 	if err != nil {
 		return 0, err
 	}
@@ -97,14 +97,14 @@ func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 }
 
 // dsuListUpdates runs the dell-system-update utility to retrieve device inventory
-func (d *dell) dsuListUpdates() ([]*model.Component, error) {
-	err := d.pre()
+func (d *dell) dsuListUpdates(ctx context.Context) ([]*model.Component, error) {
+	err := d.pre(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "error ensuring prerequisites for dsu update list")
 	}
 
 	// collect firmware updates available for components
-	updates, exitCode, err := d.dsu.ComponentFirmwareUpdatePreview()
+	updates, exitCode, err := d.dsu.ComponentFirmwareUpdatePreview(ctx)
 	if err != nil && exitCode != utils.DSUExitCodeNoUpdatesAvailable {
 		return nil, errors.Wrap(err, "error running dsu update preview")
 	}
@@ -113,17 +113,17 @@ func (d *dell) dsuListUpdates() ([]*model.Component, error) {
 }
 
 // runs the dell-system-update utility to identify and list firmware updates available
-func (d *dell) dsuInventory() ([]*model.Component, error) {
-	err := d.pre()
+func (d *dell) dsuInventory(ctx context.Context) ([]*model.Component, error) {
+	err := d.pre(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return d.dsu.Inventory()
+	return d.dsu.Inventory(ctx)
 }
 
 // pre sets up prequisites for dealing with updates
-func (d *dell) pre() (err error) {
+func (d *dell) pre(ctx context.Context) (err error) {
 	errPrefix := "dell dsu prereqs setup error: "
 
 	if d.DsuPrequisitesInstalled {
@@ -131,7 +131,7 @@ func (d *dell) pre() (err error) {
 	}
 
 	actions := []func() error{
-		d.addDsuRepo, d.installPkgs, d.startSrvHelper,
+		d.addDsuRepo, d.installPkgs, func() error { return d.startSrvHelper(ctx) },
 	}
 
 	for _, action := range actions {
@@ -199,7 +199,7 @@ func (d *dell) addDsuRepo() error {
 // Since we're running dsu within a docker container on the target host,
 // this was found to be required to ensure dsu was able to inventorize the host correctly.
 // else it would not be able to retrieve data over IPMI
-func (d *dell) startSrvHelper() error {
+func (d *dell) startSrvHelper(ctx context.Context) error {
 	if os.Getenv("IRONLIB_TEST") != "" {
 		return nil
 	}
@@ -207,7 +207,7 @@ func (d *dell) startSrvHelper() error {
 	e := utils.NewExecutor("/usr/libexec/instsvcdrv-helper")
 	e.SetArgs([]string{"start"})
 
-	result, err := e.ExecWithContext(context.Background())
+	result, err := e.ExecWithContext(ctx)
 
 	if err != nil || result.ExitCode != 0 {
 		return err

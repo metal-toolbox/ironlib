@@ -15,18 +15,24 @@ import (
 	"github.com/pkg/errors"
 )
 
-const FirmwareDumpUtility model.CollectorUtility = "flashrom"
-const UEFIParserUtility model.CollectorUtility = "uefi-firmware-parser"
-const ChecksumComposedCollector model.CollectorUtility = "checksum-collector"
-const hashPrefix = "SHA256"
-const uefiDefaultBMPLogoGUID = "7bb28b99-61bb-11d5-9a5d-0090273fc14d"
+const (
+	FirmwareDumpUtility       model.CollectorUtility = "flashrom"
+	UEFIParserUtility         model.CollectorUtility = "uefi-firmware-parser"
+	ChecksumComposedCollector model.CollectorUtility = "checksum-collector"
+	hashPrefix                                       = "SHA256"
+	uefiDefaultBMPLogoGUID                           = "7bb28b99-61bb-11d5-9a5d-0090273fc14d"
+)
 
-var defaultOutputPath = "/tmp/bios_checksum"
-var defaultBIOSImgName = "bios_img.bin"
-var expectedLogoSuffix = fmt.Sprintf("file-%s/section0/section0.raw", uefiDefaultBMPLogoGUID)
+var (
+	defaultOutputPath  = "/tmp/bios_checksum"
+	defaultBIOSImgName = "bios_img.bin"
+	expectedLogoSuffix = fmt.Sprintf("file-%s/section0/section0.raw", uefiDefaultBMPLogoGUID)
+)
 
-var directoryPermissions fs.FileMode = 0o750
-var errNoLogo = errors.New("no logo found")
+var (
+	directoryPermissions fs.FileMode = 0o750
+	errNoLogo                        = errors.New("no logo found")
+)
 
 // ChecksumCollector implements the FirmwareChecksumCollector interface
 type ChecksumCollector struct {
@@ -185,7 +191,6 @@ func (cc *ChecksumCollector) findExtractedRawLogo(ctx context.Context) (string, 
 		// XXX: Check the DirEntry for a bogus size so we don't blow up trying to hash the thing!
 		return nil
 	})
-
 	if err != nil {
 		return "", errors.Wrap(err, "walking the extract directory")
 	}

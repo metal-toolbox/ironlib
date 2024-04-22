@@ -241,7 +241,8 @@ func Test_RacadmBIOSConfigJSON(t *testing.T) {
 }
 
 func Test_RacadmBIOSConfigXML(t *testing.T) {
-	expected := map[string]string{"AcPwrRcvry": "Last",
+	expected := map[string]string{
+		"AcPwrRcvry":              "Last",
 		"AcPwrRcvryDelay":         "Immediate",
 		"BootMode":                "Bios",
 		"BootSeqRetry":            "Enabled",

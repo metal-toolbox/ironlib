@@ -82,23 +82,23 @@ func (a *asrockrack) UpdatesApplied() bool {
 }
 
 // ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
-func (a *asrockrack) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error) {
+func (a *asrockrack) ListAvailableUpdates(context.Context, *model.UpdateOptions) (*common.Device, error) {
 	return nil, nil
 }
 
 // InstallUpdates for asrockrack based on updateOptions
-func (a *asrockrack) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
+func (a *asrockrack) InstallUpdates(context.Context, *model.UpdateOptions) error {
 	return nil
 }
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (a *asrockrack) GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error {
+func (a *asrockrack) GetInventoryOEM(context.Context, *common.Device, *model.UpdateOptions) error {
 	return nil
 }
 
 // ApplyUpdate is here to satisfy the actions.Updater interface
 // it is to be deprecated in favor of InstallUpdates.
-func (a *asrockrack) ApplyUpdate(ctx context.Context, updateFile, component string) error {
+func (a *asrockrack) ApplyUpdate(context.Context, string, string) error {
 	return nil
 }
