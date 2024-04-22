@@ -1,4 +1,3 @@
-// nolint: wsl,gocritic
 package utils
 
 import (

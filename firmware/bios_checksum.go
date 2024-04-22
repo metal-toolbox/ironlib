@@ -1,4 +1,3 @@
-//nolint:wsl // it's useless
 package firmware
 
 import (
