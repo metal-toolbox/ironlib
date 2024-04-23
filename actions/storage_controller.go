@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
@@ -88,6 +89,8 @@ func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DiskWiper,
 	if s.Logger.GetLevel().String() == "trace" {
 		trace = true
 	}
+	// TODO: use disk wipping features to return the best wipe utility, currently only one available
+	log.Printf("%s | Detecting wipe utility", logicalName)
 
 	return utils.NewFillZeroCmd(trace), nil
 }

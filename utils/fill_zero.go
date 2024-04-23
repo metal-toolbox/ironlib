@@ -9,11 +9,16 @@ import (
 )
 
 type FillZero struct {
+	Quiet bool
 }
 
 // Return a new zerowipe executor
 func NewFillZeroCmd(trace bool) *FillZero {
-	return &FillZero{}
+	z := FillZero{}
+	if !trace {
+		z.SetQuiet()
+	}
+	return &z
 }
 
 func (z *FillZero) WipeDisk(ctx context.Context, logicalName string) error {
@@ -46,9 +51,9 @@ func (z *FillZero) WipeDisk(ctx context.Context, logicalName string) error {
 			return ctx.Err()
 		default:
 			l := min(int64(len(buffer)), bytesRemaining)
-			bytesWritten, err := file.Write(buffer[:l])
-			if err != nil {
-				return err
+			bytesWritten, writeError := file.Write(buffer[:l])
+			if writeError != nil {
+				return writeError
 			}
 			totalBytesWritten += int64(bytesWritten)
 			bytesSinceLastPrint += int64(bytesWritten)
@@ -85,4 +90,9 @@ func min(a, b int64) int64 {
 		return a
 	}
 	return b
+}
+
+// SetQuiet lowers the verbosity
+func (z *FillZero) SetQuiet() {
+	z.Quiet = true
 }
