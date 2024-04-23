@@ -88,7 +88,7 @@ func NewFakeDsu(r io.Reader) (*Dsu, error) {
 // NOTE:
 // dsu 1.8 drops update files under the given $updateDir
 // dsu 1.9 creates a directory '$updateDir/dellupdates' and drops the updates in there
-func (d *Dsu) FetchUpdateFiles(dstDir string) (int, error) {
+func (d *Dsu) FetchUpdateFiles(ctx context.Context, dstDir string) (int, error) {
 	// purge any existing update file/directory with the same name
 	_ = os.Remove(dstDir)
 
@@ -97,7 +97,7 @@ func (d *Dsu) FetchUpdateFiles(dstDir string) (int, error) {
 	// because... yeah dsu wants to fetch updates interactively
 	d.Executor.SetStdin(bytes.NewReader([]byte("a\nc\n")))
 
-	result, err := d.Executor.ExecWithContext(context.Background())
+	result, err := d.Executor.ExecWithContext(ctx)
 
 	return result.ExitCode, err
 }
@@ -105,7 +105,7 @@ func (d *Dsu) FetchUpdateFiles(dstDir string) (int, error) {
 // ApplyLocalUpdates installs update files fetched by FetchUpdateFiles()
 // DSU needs to be pointed to the right inventory bin or it barfs
 // returns the resulting exitcode and error if any
-func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
+func (d *Dsu) ApplyLocalUpdates(ctx context.Context, updateDir string) (int, error) {
 	// ensure the updates directory exists
 	_, err := os.Stat(updateDir)
 	if err != nil {
@@ -140,17 +140,17 @@ func (d *Dsu) ApplyLocalUpdates(updateDir string) (int, error) {
 		},
 	)
 
-	result, err := d.Executor.ExecWithContext(context.Background())
+	result, err := d.Executor.ExecWithContext(ctx)
 
 	return result.ExitCode, err
 }
 
 // Inventory collects inventory with the dell-system-update utility and
 // updates device component firmware based on data listed by the dell system update tool
-func (d *Dsu) Inventory() ([]*model.Component, error) {
+func (d *Dsu) Inventory(ctx context.Context) ([]*model.Component, error) {
 	d.Executor.SetArgs([]string{"--import-public-key", "--inventory"})
 
-	result, err := d.Executor.ExecWithContext(context.Background())
+	result, err := d.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -164,10 +164,10 @@ func (d *Dsu) Inventory() ([]*model.Component, error) {
 }
 
 // Returns component firmware updates available based on the dell system update
-func (d *Dsu) ComponentFirmwareUpdatePreview() ([]*model.Component, int, error) {
+func (d *Dsu) ComponentFirmwareUpdatePreview(ctx context.Context) ([]*model.Component, int, error) {
 	d.Executor.SetArgs([]string{"--import-public-key", "--preview"})
 
-	result, err := d.Executor.ExecWithContext(context.Background())
+	result, err := d.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, result.ExitCode, err
 	}

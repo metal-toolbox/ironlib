@@ -75,12 +75,12 @@ func (a *AsrrBioscontrol) Attributes() (utilName model.CollectorUtility, absolut
 }
 
 // kernelVersion returns the host kernel version
-func kernelVersion() (string, error) {
+func kernelVersion(ctx context.Context) (string, error) {
 	unameExec := NewExecutor("uname")
 	unameExec.SetArgs([]string{"-r"})
 	unameExec.SetQuiet()
 
-	r, err := unameExec.ExecWithContext(context.TODO())
+	r, err := unameExec.ExecWithContext(ctx)
 	if err != nil {
 		return "", errors.Wrap(err, "error executing uname -r")
 	}
@@ -89,11 +89,11 @@ func kernelVersion() (string, error) {
 }
 
 // kernelModuleLoaded returns bool if the given module name is loaded
-func kernelModuleLoaded(name string) (bool, error) {
+func kernelModuleLoaded(ctx context.Context, name string) (bool, error) {
 	lsmodExec := NewExecutor("lsmod")
 	lsmodExec.SetQuiet()
 
-	r, err := lsmodExec.ExecWithContext(context.TODO())
+	r, err := lsmodExec.ExecWithContext(ctx)
 	if err != nil {
 		return false, errors.Wrap(err, "error executing lsmod")
 	}
@@ -109,13 +109,13 @@ func kernelModuleLoaded(name string) (bool, error) {
 func loadAsrrBiosKernelModule(ctx context.Context) error {
 	// begin ick code
 	// 1. identify kernel release
-	kernelVersion, err := kernelVersion()
+	kernelVersion, err := kernelVersion(ctx)
 	if err != nil {
 		return errors.Wrap(ErrASRRBIOSKernelModule, err.Error())
 	}
 
 	// 2. figure if the kernel module is loaded
-	isLoaded, err := kernelModuleLoaded("asrdev")
+	isLoaded, err := kernelModuleLoaded(ctx, "asrdev")
 	if err != nil {
 		return errors.Wrap(ErrASRRBIOSKernelModule, err.Error())
 	}
@@ -199,7 +199,7 @@ type asrrBiosParam struct {
 }
 
 // asrrBiosConfigurationJSON returns a map of BIOS settings and values
-func asrrBiosConfigurationJSON(ctx context.Context, configBytes []byte) (map[string]string, error) {
+func asrrBiosConfigurationJSON(_ context.Context, configBytes []byte) (map[string]string, error) {
 	cfg := make(map[string]string)
 
 	params := []*asrrBiosParam{}
@@ -237,7 +237,11 @@ func asrrBiosConfigurationJSON(ctx context.Context, configBytes []byte) (map[str
 
 // asrrBiosConfigValueTitle returns the Title name of the BIOS attribute value
 func asrrBiosConfigValueTitle(value, valueType string, validValues interface{}) string {
-	for _, m := range validValues.([]interface{}) {
+	values, ok := validValues.([]interface{})
+	if !ok {
+		panic(fmt.Sprintf("validValues is an unexpected type...%v", validValues))
+	}
+	for _, m := range values {
 		// UINT8, UINT16 fields
 		switch param := m.(type) {
 		// slice item is map
@@ -254,7 +258,11 @@ func asrrBiosConfigValueTitle(value, valueType string, validValues interface{}) 
 			}
 
 			if v == value {
-				return param["Title"].(string)
+				title, ok := param["Title"].(string)
+				if !ok {
+					panic(fmt.Sprintf("Title is not a string...%v", param["Title"]))
+				}
+				return title
 			}
 		// BOOLEAN fields
 		// slice item is a float64

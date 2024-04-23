@@ -9,7 +9,6 @@ import (
 	"github.com/bmc-toolbox/common"
 	asrrFixtures "github.com/metal-toolbox/ironlib/fixtures/asrr"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
-
 	"github.com/stretchr/testify/assert"
 )
 

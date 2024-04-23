@@ -91,4 +91,3 @@ issues:
     - linters:
         - stylecheck
       text: "ST1016"
-

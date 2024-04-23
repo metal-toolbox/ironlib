@@ -17,7 +17,7 @@ type Dmidecode struct {
 }
 
 func NewDmidecode() (d *Dmidecode, err error) {
-	var dmi = dmidecode.New()
+	dmi := dmidecode.New()
 
 	err = dmi.Run()
 	if err != nil {
@@ -119,7 +119,7 @@ func (d *Dmidecode) BIOSVersion() (string, error) {
 	return d.query("BIOS Information", "Version")
 }
 
-func (d *Dmidecode) TPMs(ctx context.Context) ([]*common.TPM, error) {
+func (d *Dmidecode) TPMs(context.Context) ([]*common.TPM, error) {
 	// TPM type ID
 	tpmTypeID := 43
 

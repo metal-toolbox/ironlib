@@ -204,7 +204,7 @@ func (n *Nvme) DriveCapabilities(ctx context.Context, logicalName string) ([]*co
 		case (fnaStart || saniStart):
 			capability := new(common.Capability)
 
-			var partsLen = 2
+			partsLen := 2
 
 			parts := strings.Split(line, ":")
 			if len(parts) != partsLen {
@@ -234,7 +234,7 @@ func (n *Nvme) DriveCapabilities(ctx context.Context, logicalName string) ([]*co
 		case (fnaBool && !fnaEnd && !isBlank):
 			capability := new(common.Capability)
 
-			var partsLen = 3
+			partsLen := 3
 
 			parts := strings.Split(line, ":")
 			if len(parts) != partsLen {
@@ -265,7 +265,7 @@ func (n *Nvme) DriveCapabilities(ctx context.Context, logicalName string) ([]*co
 		case (saniBool && !saniEnd && !isBlank):
 			capability := new(common.Capability)
 
-			var partsLen = 3
+			partsLen := 3
 
 			parts := strings.Split(line, ":")
 			if len(parts) != partsLen {

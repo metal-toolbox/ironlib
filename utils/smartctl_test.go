@@ -27,7 +27,7 @@ func Test_SmartctlScan(t *testing.T) {
 
 	s := newFakeSmartctl()
 
-	scan, err := s.Scan()
+	scan, err := s.Scan(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -39,7 +39,7 @@ func Test_SmartctlAllSCSI(t *testing.T) {
 	expected := &SmartctlDriveAttributes{ModelName: "Micron_5200_MTFDDAK960TDN", ModelFamily: "Micron 5100 Pro / 5200 SSDs", SerialNumber: "2013273A99BD", FirmwareVersion: "D1MU020", Status: &SmartctlStatus{Passed: true}}
 	s := newFakeSmartctl()
 
-	results, err := s.All("/dev/sda")
+	results, err := s.All(context.Background(), "/dev/sda")
 	if err != nil {
 		t.Error(err)
 	}
@@ -51,7 +51,7 @@ func Test_SmartctlAllNVME(t *testing.T) {
 	expected := &SmartctlDriveAttributes{ModelName: "KXG60ZNV256G TOSHIBA", SerialNumber: "Z9DF70I8FY3L", FirmwareVersion: "AGGA4104", Status: &SmartctlStatus{Passed: true}}
 	s := newFakeSmartctl()
 
-	results, err := s.All("/dev/nvme0")
+	results, err := s.All(context.Background(), "/dev/nvme0")
 	if err != nil {
 		t.Error(err)
 	}
@@ -69,7 +69,7 @@ func Test_SmartctlDeviceAttributes(t *testing.T) {
 	}
 	s := newFakeSmartctl()
 
-	drives, err := s.Drives(context.TODO())
+	drives, err := s.Drives(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -95,7 +95,7 @@ func Test_SmartctlNonZeroExit(t *testing.T) {
 	s := newFakeSmartctl()
 	s.Executor.SetExitCode(4)
 
-	results, err := s.All("/dev/sdc")
+	results, err := s.All(context.Background(), "/dev/sdc")
 	if err != nil {
 		t.Error(err)
 	}

@@ -226,7 +226,7 @@ func (m *Mvcli) Info(ctx context.Context, infoType string) ([]*MvcliDevice, erro
 
 	m.Executor.SetArgs([]string{"info", "-o", infoType})
 
-	result, err := m.Executor.ExecWithContext(context.Background())
+	result, err := m.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -397,7 +397,8 @@ func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, na
 		return InvalidInitModeError(initMode)
 	}
 
-	m.Executor.SetArgs([]string{"create",
+	m.Executor.SetArgs([]string{
+		"create",
 		"-o", "vd",
 		"-r", raidMode,
 		"-d", strings.Trim(strings.Join(strings.Fields(fmt.Sprint(physicalDiskIDs)), ","), "[]"),
@@ -418,7 +419,7 @@ func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, na
 	// Specified RAID mode is not supported.
 	// Gigabyte rounding scheme is not supported
 
-	if match, _ := regexp.MatchString(`^SG driver version \S+\n$`, string(result.Stdout)); !match {
+	if match, _ := regexp.Match(`^SG driver version \S+\n$`, result.Stdout); !match {
 		return CreateVirtualDiskError(result.Stdout)
 	}
 
@@ -427,7 +428,8 @@ func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, na
 
 func (m *Mvcli) Destroy(ctx context.Context, virtualDiskID int) error {
 	m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))
-	m.Executor.SetArgs([]string{"delete",
+	m.Executor.SetArgs([]string{
+		"delete",
 		"-o", "vd",
 		"-i", fmt.Sprintf("%d", virtualDiskID),
 	})
@@ -444,7 +446,7 @@ func (m *Mvcli) Destroy(ctx context.Context, virtualDiskID int) error {
 	// Possible errors:
 	// Unable to get status of VD \S (error 59: Specified virtual disk doesn't exist).
 
-	if match, _ := regexp.MatchString(`Delete VD \S successfully.`, string(result.Stdout)); !match {
+	if match, _ := regexp.Match(`Delete VD \S successfully.`, result.Stdout); !match {
 		return DestroyVirtualDiskError(result.Stdout)
 	}
 
@@ -461,7 +463,6 @@ func (m *Mvcli) FindVdByID(ctx context.Context, virtualDiskID int) *MvcliDevice 
 
 func (m *Mvcli) FindVdBy(ctx context.Context, k string, v interface{}) *MvcliDevice {
 	virtualDisks, err := m.VirtualDisks(ctx)
-
 	if err != nil {
 		return nil
 	}

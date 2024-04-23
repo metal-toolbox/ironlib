@@ -6,9 +6,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io/fs"
-
-	//nolint:staticcheck // this is deprecated but I can't rewrite now
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/metal-toolbox/ironlib/model"
@@ -44,14 +42,14 @@ func (UEFIVariableCollector) GetUEFIVars(ctx context.Context) (UEFIVars, error) 
 			// Capture all errors, even directories
 			entry.Error = true
 			uefivars[info.Name()] = entry
-			return nil // Keep walking
+			return nil //nolint:nilerr // Not an error, keep walking
 		}
 		// No need to capture anything for directory entries without errors
 		if info.IsDir() {
 			return nil
 		}
 		entry.Size = info.Size()
-		b, err := ioutil.ReadFile(path)
+		b, err := os.ReadFile(path)
 		if err != nil {
 			entry.Error = true
 		} else {

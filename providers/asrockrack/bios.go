@@ -7,7 +7,7 @@ import (
 	"github.com/metal-toolbox/ironlib/utils"
 )
 
-func (a *asrockrack) SetBIOSConfiguration(ctx context.Context, cfg map[string]string) error {
+func (a *asrockrack) SetBIOSConfiguration(context.Context, map[string]string) error {
 	return nil
 }
 

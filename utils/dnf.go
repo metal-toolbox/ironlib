@@ -3,14 +3,12 @@ package utils
 import (
 	"context"
 	"os"
-
 	"text/template"
 
 	"github.com/metal-toolbox/ironlib/model"
 )
 
-var (
-	DellRepoTemplate = `[{{ .Name }}-{{ .RepoVersion }}-system-update_independent]
+var DellRepoTemplate = `[{{ .Name }}-{{ .RepoVersion }}-system-update_independent]
 name={{ .Name}}-{{ .RepoVersion }}
 baseurl={{ .BaseURL }}/os_independent/
 {{- if .GPGCheck }}
@@ -40,7 +38,6 @@ gpgkey=file:///usr/libexec/dell_dup/0x756ba70b1019ced6.asc
 		file:///usr/libexec/dell_dup/0xca77951d23b66a9d.asc
 		file:///usr/libexec/dell_dup/0x3CA66B4946770C59.asc
 enabled=1`
-)
 
 const (
 	// EnvDnfUtility - to override the utility path

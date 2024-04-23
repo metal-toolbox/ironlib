@@ -183,8 +183,7 @@ func (e *FakeExecute) GetCmd() string {
 	return strings.Join(cmd, " ")
 }
 
-var (
-	nvmeListDummyJSON = []byte(`{
+var nvmeListDummyJSON = []byte(`{
 		"Devices" : [
 		  {
 			"NameSpace" : 1,
@@ -215,4 +214,3 @@ var (
 		]
 	  }
 	`)
-)
