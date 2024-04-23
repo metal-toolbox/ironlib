@@ -22,5 +22,5 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	fmt.Println("Wiped")
+	fmt.Println("Wiped successfully!")
 }
