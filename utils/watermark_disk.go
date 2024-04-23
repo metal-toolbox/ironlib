@@ -24,7 +24,7 @@ func PrepWatermarks(disk string) (func() bool, error) {
 	watermarks := make([]watermark, numWatermarks)
 
 	// Write open
-	file, err := os.OpenFile(disk, os.O_WRONLY, FileMode644)
+	file, err := os.OpenFile(disk, os.O_WRONLY, 0)
 	if err != nil {
 		log.Println("Failed to open :"+disk, err)
 		return nil, err
@@ -47,7 +47,7 @@ func PrepWatermarks(disk string) (func() bool, error) {
 	checker := func() bool {
 		log.Printf("%s | Checking if the watermark has been removed", disk)
 
-		file, err := os.OpenFile(disk, os.O_RDONLY, FileMode644)
+		file, err := os.OpenFile(disk, os.O_RDONLY, 0)
 		if err != nil {
 			log.Printf("%s | Failed to open disk for reading: %s", disk, err)
 			return false

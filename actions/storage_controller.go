@@ -116,7 +116,6 @@ func (s *StorageControllerAction) WipeDisk(ctx context.Context, logicalName stri
 
 	if check() {
 		return nil
-	} else {
-		return errors.Wrap(ErrWipeVerificationNotSatisfactory, "Watermark still present, disk not wipped")
 	}
+	return errors.Wrap(ErrWipeVerificationNotSatisfactory, "Watermark still present, disk not wipped")
 }
