@@ -26,7 +26,7 @@ func PrepWatermarks(disk string) (func() bool, error) {
 	// Write open
 	file, err := os.OpenFile(disk, os.O_WRONLY, 0)
 	if err != nil {
-		log.Println("Failed to open :"+disk, err)
+		log.Printf("%s | Failed to open disk, err: %s", disk, err)
 		return nil, err
 	}
 	defer file.Close()
@@ -34,13 +34,13 @@ func PrepWatermarks(disk string) (func() bool, error) {
 	// Get disk or partition size
 	fileSize, err := file.Seek(0, io.SeekEnd)
 	if err != nil {
-		log.Println(err)
+		log.Printf("%s | Failed to get size, err: %s", disk, err)
 		return nil, err
 	}
 	// Write watermarks on random locations
 	err = writeWatermarks(file, fileSize, watermarks)
 	if err != nil {
-		log.Println(err)
+		log.Printf("%s | Failed to write watermarks, err: %s", disk, err)
 		return nil, err
 	}
 
@@ -57,23 +57,23 @@ func PrepWatermarks(disk string) (func() bool, error) {
 		for _, watermark := range watermarks {
 			_, err = file.Seek(int64(watermark.position), io.SeekStart)
 			if err != nil {
-				log.Println("Error moving rw pointer:", err)
+				log.Printf("%s | Error moving rw pointer: %s", disk, err)
 				return false
 			}
 			// Read the watermark written to the position
 			currentValue := make([]byte, bufferSize)
 			_, err = file.Read(currentValue)
 			if err != nil {
-				log.Println("Failed to read from file:", err)
+				log.Printf("%s | Error reading from file: %s", disk, err)
 				return false
 			}
 			// Check if the watermark is still in the disk
 			if slices.Equal(currentValue, watermark.data) {
-				log.Println("We have an existing watermark in the file:", err)
+				log.Printf("%s | Error existing watermark in the file", disk)
 				return false
 			}
 		}
-		log.Printf("%s | Watermark has been removed", disk)
+		log.Printf("%s | Watermarks has been removed", disk)
 		return true
 	}
 	return checker, nil
