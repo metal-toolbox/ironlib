@@ -199,3 +199,8 @@ type VirtualDiskManager interface {
 	VirtualDiskDestroyer
 	VirtualDisks(ctx context.Context) ([]*utils.MvcliDevice, error)
 }
+
+// DiskWiper defines an interface to override disk data
+type DiskWiper interface {
+	WipeDisk(ctx context.Context, logicalName string) error
+}

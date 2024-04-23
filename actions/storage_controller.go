@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
@@ -77,4 +78,28 @@ func (s *StorageControllerAction) GetControllerUtility(vendorName, modelName str
 	}
 
 	return nil, errors.Wrap(ErrVirtualDiskManagerUtilNotIdentified, "vendor: "+vendorName+" model: "+modelName)
+}
+
+// GetWipeUtility returns the wipe utility based on the disk wipping features
+func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DiskWiper, error) {
+	var trace bool
+
+	if s.Logger.GetLevel().String() == "trace" {
+		trace = true
+	}
+	// TODO: use disk wipping features to return the best wipe utility, currently only one available
+	if trace {
+		log.Printf("%s | Detecting wipe utility", logicalName)
+	}
+
+	return utils.NewFillZeroCmd(trace), nil
+}
+
+func (s *StorageControllerAction) WipeDisk(ctx context.Context, logicalName string) error {
+	util, err := s.GetWipeUtility(logicalName)
+	if err != nil {
+		return err
+	}
+
+	return util.WipeDisk(ctx, logicalName)
 }
