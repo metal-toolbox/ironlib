@@ -3,8 +3,10 @@ package utils
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -65,6 +67,40 @@ func (e *FakeExecute) Exec(_ context.Context) (*Result, error) {
 			}
 
 			e.Stdout = b
+		case "sanitize":
+			dev := e.Args[len(e.Args)-1]
+			f, err := os.OpenFile(dev, os.O_WRONLY, 0)
+			if err != nil {
+				return nil, err
+			}
+			size, err := f.Seek(0, io.SeekEnd)
+			if err != nil {
+				return nil, err
+			}
+			err = f.Truncate(0)
+			if err != nil {
+				return nil, err
+			}
+			err = f.Sync()
+			if err != nil {
+				return nil, err
+			}
+			err = f.Truncate(size)
+			if err != nil {
+				return nil, err
+			}
+			err = f.Sync()
+			if err != nil {
+				return nil, err
+			}
+			err = f.Close()
+			if err != nil {
+				return nil, err
+			}
+		case "sanitize-log":
+			dev := e.Args[len(e.Args)-1]
+			dev = path.Base(dev)
+			e.Stdout = []byte(fmt.Sprintf(`{%q:{"sprog":65535}}`, dev))
 		}
 	case "hdparm":
 		if e.Args[0] == "-I" {

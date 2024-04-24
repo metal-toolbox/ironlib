@@ -4,17 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"os"
+	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
+	"github.com/sirupsen/logrus"
 )
 
 const EnvNvmeUtility = "IRONLIB_UTIL_NVME"
 
-var errSanicapNODMMASReserved = errors.New("sanicap nodmmas reserved bits set, not sure what to do with them")
+var (
+	errSanicapNODMMASReserved = errors.New("sanicap nodmmas reserved bits set, not sure what to do with them")
+	errSanitizeInvalidAction  = errors.New("invalid sanitize action")
+)
 
 type Nvme struct {
 	Executor Executor
@@ -257,6 +265,107 @@ func parseSanicap(sanicap uint) ([]*common.Capability, error) {
 	}
 
 	return caps, nil
+}
+
+//go:generate stringer -type SanitizeAction
+type SanitizeAction uint8
+
+const (
+	Invalid SanitizeAction = iota
+	ExitFailureMode
+	BlockErase
+	Overwrite
+	CryptoErase
+)
+
+// WipeDisk implements DiskWiper by running nvme sanitize
+func (n *Nvme) WipeDisk(ctx context.Context, logger *logrus.Logger, device string) error {
+	caps, err := n.DriveCapabilities(ctx, device)
+	if err != nil {
+		return fmt.Errorf("WipeDisk: %w", err)
+	}
+	return n.wipe(ctx, logger, device, caps)
+}
+
+func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, device string, caps []*common.Capability) error {
+	var ber bool
+	var cer bool
+	for _, cap := range caps {
+		switch cap.Name {
+		case "ber":
+			ber = cap.Enabled
+		case "cer":
+			cer = cap.Enabled
+		}
+	}
+
+	if cer {
+		l := logger.WithField("method", "sanitize").WithField("action", CryptoErase)
+		l.Info("trying wipe")
+		err := n.Sanitize(ctx, device, CryptoErase)
+		if err == nil {
+			return nil
+		}
+		l.WithError(err).Info("failed")
+	}
+	if ber {
+		l := logger.WithField("method", "sanitize").WithField("action", BlockErase)
+		l.Info("trying wipe")
+		err := n.Sanitize(ctx, device, BlockErase)
+		if err == nil {
+			return nil
+		}
+		l.WithError(err).Info("failed")
+	}
+	return ErrIneffectiveWipe
+}
+
+func (n *Nvme) Sanitize(ctx context.Context, device string, sanact SanitizeAction) error {
+	switch sanact { // nolint:exhaustive
+	case BlockErase, CryptoErase:
+	default:
+		return fmt.Errorf("%w: %v", errSanitizeInvalidAction, sanact)
+	}
+
+	verify, err := ApplyWatermarks(device)
+	if err != nil {
+		return err
+	}
+
+	n.Executor.SetArgs("sanitize", "--sanact="+strconv.Itoa(int(sanact)), device)
+	_, err = n.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	// now we loop until sanitize-log reports that sanitization is complete
+	dev := path.Base(device)
+	var log map[string]struct {
+		Progress uint16 `json:"sprog"`
+	}
+	for {
+		n.Executor.SetArgs("sanitize-log", "--output-format=json", device)
+		result, err := n.Executor.Exec(ctx)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(result.Stdout, &log)
+		if err != nil {
+			return err
+		}
+
+		l, ok := log[dev]
+		if !ok {
+			return fmt.Errorf("%s: device not present in sanitize-log: %w: %s", dev, io.ErrUnexpectedEOF, result.Stdout)
+		}
+
+		if l.Progress == 65535 {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	return verify()
 }
 
 // NewFakeNvme returns a mock nvme collector that returns mock data for use in tests.

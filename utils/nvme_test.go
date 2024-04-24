@@ -2,10 +2,13 @@ package utils
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"strconv"
 	"testing"
 
 	"github.com/bmc-toolbox/common"
+	tlogrus "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -156,4 +159,79 @@ func Test_NvmeParseSanicap(t *testing.T) {
 		require.Error(t, err)
 		require.Nil(t, caps)
 	})
+}
+
+func fakeNVMEDevice(t *testing.T) string {
+	dir := t.TempDir()
+	f, err := os.Create(dir + "/nvme0n1")
+	require.NoError(t, err)
+	require.NoError(t, f.Truncate(20*1024))
+	require.NoError(t, f.Close())
+	return f.Name()
+}
+
+func Test_NvmeSanitize(t *testing.T) {
+	for action := range CryptoErase {
+		t.Run(action.String(), func(t *testing.T) {
+			n := NewFakeNvme()
+			dev := fakeNVMEDevice(t)
+			err := n.Sanitize(context.Background(), dev, action)
+
+			switch action { // nolint:exhaustive
+			case BlockErase, CryptoErase:
+				require.NoError(t, err)
+				// FakeExecute is a bad mocker since it doesn't record all calls and sanitize-log calls aren't that interesting
+				// TODO: Setup better mocks
+				//
+				// e, ok := n.Executor.(*FakeExecute)
+				// require.True(t, ok)
+				// require.Equal(t, []string{"sanitize", "--sanact=2", dev}, e.Args)
+			default:
+				require.Error(t, err)
+				require.ErrorIs(t, err, errSanitizeInvalidAction)
+			}
+		})
+	}
+}
+
+func Test_NvmeWipe(t *testing.T) {
+	tests := []struct {
+		caps map[string]bool
+		args []string
+	}{
+		{caps: map[string]bool{"ber": false, "cer": false}},
+		{caps: map[string]bool{"ber": false, "cer": true}, args: []string{"sanitize", "--sanact=4"}},
+		{caps: map[string]bool{"ber": true, "cer": false}, args: []string{"sanitize", "--sanact=2"}},
+		{caps: map[string]bool{"ber": true, "cer": true}, args: []string{"sanitize", "--sanact=4"}},
+	}
+	for _, test := range tests {
+		name := fmt.Sprintf("ber=%v,cer=%v", test.caps["ber"], test.caps["cer"])
+		t.Run(name, func(t *testing.T) {
+			caps := []*common.Capability{
+				{Name: "ber", Enabled: test.caps["ber"]},
+				{Name: "cer", Enabled: test.caps["cer"]},
+			}
+			n := NewFakeNvme()
+			dev := fakeNVMEDevice(t)
+			logger, hook := tlogrus.NewNullLogger()
+			defer hook.Reset()
+
+			err := n.wipe(context.Background(), logger, dev, caps)
+
+			if test.args == nil {
+				require.Error(t, err)
+				require.ErrorIs(t, err, ErrIneffectiveWipe)
+				return
+			}
+
+			require.NoError(t, err)
+			// FakeExecute is a bad mocker since it doesn't record all calls and sanitize-log calls aren't that interesting
+			// TODO: Setup better mocks
+			//
+			// e, ok := n.Executor.(*FakeExecute)
+			// require.True(t, ok)
+			// test.args = append(test.args, dev)
+			// require.Equal(t, test.args, e.Args)
+		})
+	}
 }
