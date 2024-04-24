@@ -129,9 +129,9 @@ func (n *Nvme) list(ctx context.Context) ([]byte, error) {
 	return result.Stdout, nil
 }
 
-func (n *Nvme) cmdListCapabilities(ctx context.Context, logicalPath string) ([]byte, error) {
+func (n *Nvme) cmdListCapabilities(ctx context.Context, device string) ([]byte, error) {
 	// nvme id-ctrl --output-format=json devicepath
-	n.Executor.SetArgs("id-ctrl", "--output-format=json", logicalPath)
+	n.Executor.SetArgs("id-ctrl", "--output-format=json", device)
 	result, err := n.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
@@ -142,11 +142,11 @@ func (n *Nvme) cmdListCapabilities(ctx context.Context, logicalPath string) ([]b
 
 // DriveCapabilities returns the drive capability attributes obtained through nvme
 //
-// The logicalName is the kernel/OS assigned drive name - /dev/nvmeX
+// The device is the kernel/OS assigned drive name - /dev/nvmeX
 //
 // This method implements the actions.DriveCapabilityCollector interface.
-func (n *Nvme) DriveCapabilities(ctx context.Context, logicalName string) ([]*common.Capability, error) {
-	out, err := n.cmdListCapabilities(ctx, logicalName)
+func (n *Nvme) DriveCapabilities(ctx context.Context, device string) ([]*common.Capability, error) {
+	out, err := n.cmdListCapabilities(ctx, device)
 	if err != nil {
 		return nil, err
 	}
