@@ -2,11 +2,13 @@ package utils
 
 import (
 	"crypto/rand"
+	"fmt"
 	"io"
-	"log"
 	"math/big"
 	"os"
 	"slices"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -15,91 +17,98 @@ const (
 )
 
 type watermark struct {
-	position uint64
+	position int64
 	data     []byte
 }
 
-func PrepWatermarks(disk string) (func() bool, error) {
-	log.Printf("%s | Initiating watermarking process", disk)
-	watermarks := make([]watermark, numWatermarks)
-
+func ApplyWatermarks(logicalName string) func() error {
 	// Write open
-	file, err := os.OpenFile(disk, os.O_WRONLY, 0)
+	file, err := os.OpenFile(logicalName, os.O_WRONLY, 0)
 	if err != nil {
-		log.Printf("%s | Failed to open disk, err: %s", disk, err)
-		return nil, err
+		return func() error {
+			return err
+		}
 	}
 	defer file.Close()
 
 	// Get disk or partition size
 	fileSize, err := file.Seek(0, io.SeekEnd)
 	if err != nil {
-		log.Printf("%s | Failed to get size, err: %s", disk, err)
-		return nil, err
+		return func() error {
+			return err
+		}
 	}
 	// Write watermarks on random locations
-	err = writeWatermarks(file, fileSize, watermarks)
-	if err != nil {
-		log.Printf("%s | Failed to write watermarks, err: %s", disk, err)
-		return nil, err
+	watermarks := writeWatermarks(file, 0, fileSize, numWatermarks)
+	if len(watermarks) != numWatermarks {
+		return func() error {
+			ErrorWritingWatermarks := errors.New("Error writing watermarks in the file")
+			return fmt.Errorf("%s | %w", logicalName, ErrorWritingWatermarks)
+		}
 	}
 
-	checker := func() bool {
-		log.Printf("%s | Checking if the watermark has been removed", disk)
-
-		file, err := os.OpenFile(disk, os.O_RDONLY, 0)
+	checker := func() error {
+		file, err := os.OpenFile(logicalName, os.O_RDONLY, 0)
 		if err != nil {
-			log.Printf("%s | Failed to open disk for reading: %s", disk, err)
-			return false
+			return err
 		}
 		defer file.Close()
 
 		for _, watermark := range watermarks {
-			_, err = file.Seek(int64(watermark.position), io.SeekStart)
+			_, err = file.Seek(watermark.position, io.SeekStart)
 			if err != nil {
-				log.Printf("%s | Error moving rw pointer: %s", disk, err)
-				return false
+				return err
 			}
 			// Read the watermark written to the position
 			currentValue := make([]byte, bufferSize)
-			_, err = file.Read(currentValue)
+			_, err = io.ReadFull(file, currentValue)
 			if err != nil {
-				log.Printf("%s | Error reading from file: %s", disk, err)
-				return false
+				return err
 			}
 			// Check if the watermark is still in the disk
 			if slices.Equal(currentValue, watermark.data) {
-				log.Printf("%s | Error existing watermark in the file", disk)
-				return false
+				ErrorExistingWatermark := errors.New("Error existing watermark in the file")
+				return fmt.Errorf("%s | %w", logicalName, ErrorExistingWatermark)
 			}
 		}
-		log.Printf("%s | Watermarks has been removed", disk)
-		return true
+		return nil
 	}
-	return checker, nil
+	return checker
 }
 
-func writeWatermarks(file *os.File, fileSize int64, watermarks []watermark) error {
-	for i := 0; i < numWatermarks; i++ {
+func writeWatermarks(file *os.File, a, b int64, count int) []watermark {
+	if count == 1 {
 		data := make([]byte, bufferSize)
 		_, err := rand.Read(data)
 		if err != nil {
-			log.Println("error:", err)
-			return err
+			return nil
 		}
-		randomPosition, err := rand.Int(rand.Reader, big.NewInt(fileSize))
+		offset, err := rand.Int(rand.Reader, big.NewInt(b-a-bufferSize))
 		if err != nil {
-			log.Println(err)
-			return err
+			return nil
+		}
+		randomPosition := int64(offset.Uint64()) + a
+		_, err = file.Seek(randomPosition, io.SeekStart)
+		if err != nil {
+			return nil
+		}
+		_, err = file.Write(data)
+		if err != nil {
+			return nil
 		}
 
-		_, err = file.Seek(int64(randomPosition.Uint64()), io.SeekStart)
-		if err != nil {
-			log.Println("Error moving rw pointer:", err)
-			return err
+		w := watermark{
+			position: randomPosition,
+			data:     data,
 		}
-		watermarks[i].position = randomPosition.Uint64()
-		watermarks[i].data = data
+		return []watermark{w}
 	}
-	return nil
+	// Divide the intervals into two equal parts (approximately)
+	mid := (a + b) / 2
+
+	// Return recursively the call of function with the two remaining intervals
+	leftCount := count / 2
+	rightCount := count - leftCount
+
+	return append(writeWatermarks(file, a, mid-1, leftCount), writeWatermarks(file, mid, b, rightCount)...)
 }
