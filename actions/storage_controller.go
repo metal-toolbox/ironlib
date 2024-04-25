@@ -102,8 +102,10 @@ func (s *StorageControllerAction) WipeDisk(ctx context.Context, logicalName stri
 	}
 	// Watermark disk
 	log.Printf("%s | Initiating watermarking process", logicalName)
-	check := utils.ApplyWatermarks(logicalName)
-
+	check, err := utils.ApplyWatermarks(logicalName)
+	if err != nil {
+		return err
+	}
 	err = util.WipeDisk(ctx, logicalName)
 	if err != nil {
 		return err

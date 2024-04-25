@@ -21,30 +21,23 @@ type watermark struct {
 	data     []byte
 }
 
-func ApplyWatermarks(logicalName string) func() error {
+func ApplyWatermarks(logicalName string) (func() error, error) {
 	// Write open
 	file, err := os.OpenFile(logicalName, os.O_WRONLY, 0)
 	if err != nil {
-		return func() error {
-			return err
-		}
+		return nil, err
 	}
 	defer file.Close()
 
 	// Get disk or partition size
 	fileSize, err := file.Seek(0, io.SeekEnd)
 	if err != nil {
-		return func() error {
-			return err
-		}
+		return nil, err
 	}
 	// Write watermarks on random locations
 	watermarks := writeWatermarks(file, 0, fileSize, numWatermarks)
 	if len(watermarks) != numWatermarks {
-		return func() error {
-			ErrorWritingWatermarks := errors.New("Error writing watermarks in the file")
-			return fmt.Errorf("%s | %w", logicalName, ErrorWritingWatermarks)
-		}
+		return nil, err
 	}
 
 	checker := func() error {
@@ -73,7 +66,7 @@ func ApplyWatermarks(logicalName string) func() error {
 		}
 		return nil
 	}
-	return checker
+	return checker, nil
 }
 
 func writeWatermarks(file *os.File, a, b int64, count int) []watermark {
