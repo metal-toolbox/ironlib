@@ -34,6 +34,11 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if fileSize == 0 {
+		return nil, errors.New("No space for watermarking")
+	}
+
 	// Write watermarks on random locations
 	watermarks, err := writeWatermarks(file, fileSize, numWatermarks)
 	if err != nil {
@@ -60,8 +65,8 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 			}
 			// Check if the watermark is still in the disk
 			if slices.Equal(currentValue, watermark.data) {
-				ErrorExistingWatermark := errors.New("Error existing watermark in the file")
-				return fmt.Errorf("%s | %w", logicalName, ErrorExistingWatermark)
+				ErrorExistingWatermark := errors.New("Error existing watermark in the position: ")
+				return fmt.Errorf("%s | %w %d", logicalName, ErrorExistingWatermark, watermark.position)
 			}
 		}
 		return nil

@@ -1,0 +1,87 @@
+package utils
+
+import (
+	"crypto/rand"
+	"os"
+	"testing"
+
+	"gotest.tools/assert"
+)
+
+func Test_ApplyWatermarks(t *testing.T) {
+	// Create a temporary file
+	tempFile, err := os.CreateTemp("", "testfile")
+	if err != nil {
+		t.Fatalf("Failed to create temporary file: %v", err)
+	}
+	defer os.Remove(tempFile.Name())
+
+	// Close the file since we'll be reopening it in ApplyWatermarks
+	tempFile.Close()
+
+	t.Run("NegativeTest", func(t *testing.T) {
+		// Create a ~15KB empty file, no room for all watermarks
+		err := os.WriteFile(tempFile.Name(), make([]byte, 1*1024), 0o600)
+		if err != nil {
+			t.Fatalf("Failed to create empty file: %v", err)
+		}
+
+		// Apply watermarks and expect an error
+		checker, err := ApplyWatermarks(tempFile.Name())
+
+		if checker != nil {
+			err = checker()
+			if err == nil {
+				t.Error("Expected error, got none")
+			}
+		}
+		assert.ErrorContains(t, err, "invalid argument")
+	})
+
+	t.Run("EmptyFile", func(t *testing.T) {
+		// Wipe the file
+		err := os.WriteFile(tempFile.Name(), make([]byte, 0), 0o600)
+		if err != nil {
+			t.Fatalf("Failed to truncate file: %v", err)
+		}
+
+		// Apply watermarks and expect no error
+		checker, err := ApplyWatermarks(tempFile.Name())
+		assert.Error(t, err, "No space for watermarking")
+		if checker != nil {
+			err := checker()
+			if err != nil {
+				t.Errorf("Expected no error, got: %v", err)
+			}
+		}
+	})
+	t.Run("PositiveTestWithRandomDataAndWipe", func(t *testing.T) {
+		// Write the file full of random data
+		randomData := make([]byte, 15*1024*1024)
+		_, err := rand.Read(randomData)
+		if err != nil {
+			t.Fatalf("Failed to generate random data: %v", err)
+		}
+		err = os.WriteFile(tempFile.Name(), randomData, 0o600)
+		if err != nil {
+			t.Fatalf("Failed to write random data to file: %v", err)
+		}
+
+		// Apply watermarks and expect no error
+		checker, err := ApplyWatermarks(tempFile.Name())
+		if err != nil {
+			t.Fatalf("Error applying watermarks: %v", err)
+		}
+		// simulate wipe
+		zeroData := make([]byte, 15*1024*1024)
+		err = os.WriteFile(tempFile.Name(), zeroData, 0o600)
+		if err != nil {
+			t.Fatalf("Failed to write zero data to file: %v", err)
+		}
+
+		err = checker()
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+	})
+}
