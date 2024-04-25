@@ -35,8 +35,8 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 		return nil, err
 	}
 	// Write watermarks on random locations
-	watermarks := writeWatermarks(file, 0, fileSize, numWatermarks)
-	if len(watermarks) != numWatermarks {
+	watermarks, err := writeWatermarks(file, fileSize, numWatermarks)
+	if err != nil {
 		return nil, err
 	}
 
@@ -69,39 +69,33 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 	return checker, nil
 }
 
-func writeWatermarks(file *os.File, a, b int64, count int) []watermark {
-	if count == 1 {
+// writeWatermarks creates random watermarks and writes them uniformly into a given file.
+func writeWatermarks(file *os.File, fileSize, count int64) ([]watermark, error) {
+	origin := int64(0)
+	intervalSize := fileSize / count
+	watermarks := make([]watermark, count)
+	for i := 0; i < numWatermarks; i++ {
 		data := make([]byte, bufferSize)
 		_, err := rand.Read(data)
 		if err != nil {
-			return nil
+			return nil, err
 		}
-		offset, err := rand.Int(rand.Reader, big.NewInt(b-a-bufferSize))
+		offset, err := rand.Int(rand.Reader, big.NewInt(intervalSize))
 		if err != nil {
-			return nil
+			return nil, err
 		}
-		randomPosition := int64(offset.Uint64()) + a
+		randomPosition := int64(offset.Uint64()) + origin - bufferSize
 		_, err = file.Seek(randomPosition, io.SeekStart)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 		_, err = file.Write(data)
 		if err != nil {
-			return nil
+			return nil, err
 		}
-
-		w := watermark{
-			position: randomPosition,
-			data:     data,
-		}
-		return []watermark{w}
+		watermarks[i].position = randomPosition
+		watermarks[i].data = data
+		origin += intervalSize
 	}
-	// Divide the intervals into two equal parts (approximately)
-	mid := (a + b) / 2
-
-	// Return recursively the call of function with the two remaining intervals
-	leftCount := count / 2
-	rightCount := count - leftCount
-
-	return append(writeWatermarks(file, a, mid-1, leftCount), writeWatermarks(file, mid, b, rightCount)...)
+	return watermarks, nil
 }
