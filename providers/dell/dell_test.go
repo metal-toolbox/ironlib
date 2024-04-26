@@ -12,7 +12,7 @@ import (
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/sirupsen/logrus"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 var r6515fixtures = "../../fixtures/dell/r6515"
@@ -92,8 +92,8 @@ func TestGetInventory(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.DeepEqual(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
-	assert.DeepEqual(t, expectedOemComponents, dell.hw.OemComponents)
+	assert.Equal(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
+	assert.Equal(t, expectedOemComponents, dell.hw.OemComponents)
 }
 
 // Get inventory, not listing updates available
@@ -121,5 +121,5 @@ func TestListUpdates(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.DeepEqual(t, dellFixtures.R6515_updatePreview, device)
+	assert.Equal(t, dellFixtures.R6515_updatePreview, device)
 }
