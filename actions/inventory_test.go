@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/go-logr/logr/testr"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	smcFixtures "github.com/metal-toolbox/ironlib/fixtures/supermicro"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,9 +47,7 @@ func Test_Inventory_dell(t *testing.T) {
 		WithDisabledCollectorUtilities([]model.CollectorUtility{"dmidecode"}),
 	}
 
-	logger, hook := test.NewNullLogger()
-	defer hook.Reset()
-	collector := NewInventoryCollectorAction(logger, options...)
+	collector := NewInventoryCollectorAction(testr.New(t), options...)
 	if err := collector.Collect(context.TODO(), &device); err != nil {
 		t.Error(err)
 	}
@@ -126,9 +124,7 @@ func Test_Inventory_smc(t *testing.T) {
 		StorageControllerCollectors: []StorageControllerCollector{storecli},
 	}
 
-	logger, hook := test.NewNullLogger()
-	defer hook.Reset()
-	collector := NewInventoryCollectorAction(logger, WithCollectors(collectors), WithTraceLevel())
+	collector := NewInventoryCollectorAction(testr.New(t), WithCollectors(collectors), WithTraceLevel())
 	if err := collector.Collect(context.TODO(), &device); err != nil {
 		t.Error(err)
 	}
@@ -191,9 +187,7 @@ func TestNewInventoryCollectorAction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logger, hook := test.NewNullLogger()
-			defer hook.Reset()
-			got := NewInventoryCollectorAction(logger, tt.options...)
+			got := NewInventoryCollectorAction(testr.New(t), tt.options...)
 
 			switch tt.name {
 			case "trace-enabled":

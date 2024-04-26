@@ -5,7 +5,9 @@ go 1.22
 require (
 	github.com/beevik/etree v1.1.0
 	github.com/bmc-toolbox/common v0.0.0-20230220061748-93ff001f4a1d
+	github.com/bombsimon/logrusr/v4 v4.1.0
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
+	github.com/go-logr/logr v1.4.1
 	github.com/pkg/errors v0.9.1
 	github.com/r3labs/diff/v2 v2.15.1
 	github.com/sirupsen/logrus v1.9.0

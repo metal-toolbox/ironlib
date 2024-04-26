@@ -5,12 +5,12 @@ import (
 	"os"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/go-logr/logr"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // The dell device provider struct
@@ -19,7 +19,7 @@ type dell struct {
 	hw                      *model.Hardware
 	dnf                     *utils.Dnf
 	dsu                     *utils.Dsu
-	logger                  *logrus.Logger
+	logger                  logr.Logger
 	trace                   bool
 	updateBaseURL           string
 
@@ -33,7 +33,7 @@ type dell struct {
 }
 
 // New returns a new Dell device manager
-func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l logr.Logger) (actions.DeviceManager, error) {
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", "", 0), err.Error())
@@ -73,7 +73,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 	updateBaseURL := os.Getenv(model.EnvUpdateBaseURL)
 
 	// set device manager
-	trace := l.Level >= logrus.TraceLevel
+	trace := l.GetV() >= 2
 	dm := &dell{
 		hw:                model.NewHardware(&device),
 		dnf:               utils.NewDnf(trace),
@@ -154,7 +154,7 @@ func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOp
 		return nil, nil
 	}
 
-	d.logger.WithField("count", count).Info("component updates identified..")
+	d.logger.WithValues("count", count).Info("component updates identified..")
 
 	d.hw.OemComponents.Dell = append(d.hw.OemComponents.Dell, oemUpdates...)
 
@@ -187,10 +187,10 @@ func (d *dell) installAvailableUpdates(ctx context.Context, downloadOnly bool) e
 	if err != nil {
 		switch exitCode {
 		case utils.DSUExitCodeNoUpdatesAvailable:
-			d.logger.Debug("update(s) not applicable for this device")
+			d.logger.V(1).Info("update(s) not applicable for this device")
 			return errs.ErrNoUpdatesApplicable
 		case utils.DSUExitCodeRebootRequired:
-			d.logger.Debug("update(s) applied, device requires a reboot")
+			d.logger.V(1).Info("update(s) applied, device requires a reboot")
 			d.hw.PendingReboot = true
 		default:
 			return err
@@ -216,12 +216,10 @@ func (d *dell) setUpdateOptions(options *model.UpdateOptions) {
 		d.updateBaseURL = options.BaseURL
 	}
 
-	d.logger.WithFields(
-		logrus.Fields{
-			"dsu version": d.dsuPackageVersion,
-			"dsu repo":    d.dsuReleaseVersion,
-			"base url":    d.updateBaseURL,
-		},
+	d.logger.WithValues(
+		"dsu version", d.dsuPackageVersion,
+		"dsu repo", d.dsuReleaseVersion,
+		"base url", d.updateBaseURL,
 	).Info("update parameters")
 }
 

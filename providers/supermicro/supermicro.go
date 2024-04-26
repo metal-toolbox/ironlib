@@ -4,23 +4,23 @@ import (
 	"context"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/go-logr/logr"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/firmware"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type supermicro struct {
 	trace     bool
 	hw        *model.Hardware
-	logger    *logrus.Logger
+	logger    logr.Logger
 	dmidecode *utils.Dmidecode
 }
 
-func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l logr.Logger) (actions.DeviceManager, error) {
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", "", 0), err.Error())
@@ -47,7 +47,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 		hw:        model.NewHardware(&device),
 		logger:    l,
 		dmidecode: dmidecode,
-		trace:     l.Level >= logrus.TraceLevel,
+		trace:     l.GetV() >= 2,
 	}, nil
 }
 

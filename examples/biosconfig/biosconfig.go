@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
+	"github.com/bombsimon/logrusr/v4"
 	"github.com/metal-toolbox/ironlib"
 	"github.com/sirupsen/logrus"
 )
@@ -13,20 +15,27 @@ import (
 // a sample output can be seen in the biosconfig.json file
 
 func main() {
-	logger := logrus.New()
+	l := logrus.New()
+	l.Formatter = &logrus.JSONFormatter{}
+	l.Level = logrus.TraceLevel
+	logger := logrusr.New(l)
+
 	device, err := ironlib.New(logger)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err, "creating ironlib manager")
+		os.Exit(1)
 	}
 
 	features, err := device.GetBIOSConfiguration(context.TODO())
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err, "getting bios config")
+		os.Exit(1)
 	}
 
 	j, err := json.MarshalIndent(features, " ", "  ")
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err, "formatting json")
+		os.Exit(1)
 	}
 
 	fmt.Println(string(j))
