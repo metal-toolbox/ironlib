@@ -74,7 +74,7 @@ func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 	e := utils.NewExecutor(updateFile)
 	e.SetArgs(args)
 
-	if d.logger.Level == logrus.TraceLevel {
+	if d.logger.Level >= logrus.TraceLevel {
 		e.SetVerbose()
 	}
 

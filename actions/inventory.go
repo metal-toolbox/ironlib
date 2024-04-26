@@ -132,7 +132,8 @@ func WithDisabledCollectorUtilities(utilityNames []model.CollectorUtility) Optio
 // NewActionrunner returns an Actions runner that is capable of collecting inventory.
 func NewInventoryCollectorAction(ll *logrus.Logger, options ...Option) *InventoryCollectorAction {
 	a := &InventoryCollectorAction{
-		log: ll,
+		log:   ll,
+		trace: ll.Level >= logrus.TraceLevel,
 	}
 
 	// set options to override
