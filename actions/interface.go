@@ -6,6 +6,7 @@ import (
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
+	"github.com/sirupsen/logrus"
 )
 
 // DeviceManager interface is returned to the caller when calling ironlib.New()
@@ -202,5 +203,5 @@ type VirtualDiskManager interface {
 
 // DiskWiper defines an interface to override disk data
 type DiskWiper interface {
-	WipeDisk(ctx context.Context, logicalName string) error
+	WipeDisk(ctx context.Context, log *logrus.Logger, logicalName string) error
 }
