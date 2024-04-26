@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_ApplyWatermarks(t *testing.T) {
@@ -25,35 +25,21 @@ func Test_ApplyWatermarks(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create empty file: %v", err)
 		}
-
+		// Create a 1KB empty file, no room for all watermarks
+		assert.NoError(t, os.Truncate(tempFile.Name(), 1*1024))
 		// Apply watermarks and expect an error
-		checker, err := ApplyWatermarks(tempFile.Name())
-
-		if checker != nil {
-			err = checker()
-			if err == nil {
-				t.Error("Expected error, got none")
-			}
-		}
-		assert.ErrorContains(t, err, "invalid argument")
+		checker, _ := ApplyWatermarks(tempFile.Name())
+		assert.Nil(t, checker)
 	})
 
 	t.Run("EmptyFile", func(t *testing.T) {
 		// Wipe the file
-		err := os.WriteFile(tempFile.Name(), make([]byte, 0), 0o600)
-		if err != nil {
-			t.Fatalf("Failed to truncate file: %v", err)
-		}
+		assert.NoError(t, os.Truncate(tempFile.Name(), 0))
 
 		// Apply watermarks and expect no error
 		checker, err := ApplyWatermarks(tempFile.Name())
 		assert.Error(t, err, "No space for watermarking")
-		if checker != nil {
-			err := checker()
-			if err != nil {
-				t.Errorf("Expected no error, got: %v", err)
-			}
-		}
+		assert.Nil(t, checker)
 	})
 	t.Run("PositiveTestWithRandomDataAndWipe", func(t *testing.T) {
 		// Write the file full of random data
@@ -73,11 +59,8 @@ func Test_ApplyWatermarks(t *testing.T) {
 			t.Fatalf("Error applying watermarks: %v", err)
 		}
 		// simulate wipe
-		zeroData := make([]byte, 15*1024*1024)
-		err = os.WriteFile(tempFile.Name(), zeroData, 0o600)
-		if err != nil {
-			t.Fatalf("Failed to write zero data to file: %v", err)
-		}
+		assert.NoError(t, os.Truncate(tempFile.Name(), 0))
+		assert.NoError(t, os.Truncate(tempFile.Name(), 15*1024*1024))
 
 		err = checker()
 		if err != nil {

@@ -21,6 +21,9 @@ type watermark struct {
 	data     []byte
 }
 
+// ApplyWatermarks applies watermarks to the specified disk.
+// It returns a function that checks if the applied watermarks still exist on the file.
+// It relies on the writeWatermarks function to uniformly write watermarks across the disk.
 func ApplyWatermarks(logicalName string) (func() error, error) {
 	// Write open
 	file, err := os.OpenFile(logicalName, os.O_WRONLY, 0)
@@ -66,7 +69,7 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 			// Check if the watermark is still in the disk
 			if slices.Equal(currentValue, watermark.data) {
 				ErrorExistingWatermark := errors.New("Error existing watermark in the position: ")
-				return fmt.Errorf("%s | %w %d", logicalName, ErrorExistingWatermark, watermark.position)
+				return fmt.Errorf("%s@%d | %w", logicalName, watermark.position, ErrorExistingWatermark)
 			}
 		}
 		return nil
