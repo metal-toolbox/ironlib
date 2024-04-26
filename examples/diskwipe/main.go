@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/metal-toolbox/ironlib/actions"
@@ -22,5 +21,5 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	fmt.Println("Wiped")
+	logger.Println("Wiped successfully!")
 }
