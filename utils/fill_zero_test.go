@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 )
 
 func Test_NewFillZeroCmd(t *testing.T) {
@@ -40,7 +40,9 @@ func Test_WipeDisk(t *testing.T) {
 			zw := &FillZero{}
 
 			// Test Fill function
-			err = zw.WipeDisk(ctx, logrus.New(), tmpfile.Name())
+			logger, hook := test.NewNullLogger()
+			defer hook.Reset()
+			err = zw.WipeDisk(ctx, logger, tmpfile.Name())
 			if err != nil {
 				t.Errorf("Fill returned an error: %v", err)
 			}
