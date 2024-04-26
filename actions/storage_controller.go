@@ -3,7 +3,6 @@ package actions
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
@@ -87,38 +86,31 @@ func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DiskWiper,
 	if s.Logger.GetLevel().String() == "trace" {
 		trace = true
 	}
+
+	s.Logger.Tracef("%s | Detecting wipe utility", logicalName)
 	// TODO: use disk wipping features to return the best wipe utility, currently only one available
-	if trace {
-		log.Printf("%s | Detecting wipe utility", logicalName)
-	}
 
 	return utils.NewFillZeroCmd(trace), nil
 }
 
-func (s *StorageControllerAction) WipeDisk(ctx context.Context, logicalName string) error {
+func (s *StorageControllerAction) WipeDisk(ctx context.Context, log *logrus.Logger, logicalName string) error {
 	util, err := s.GetWipeUtility(logicalName)
 	if err != nil {
 		return err
 	}
+
 	// Watermark disk
 	// Before wiping the disk, we apply watermarks to later verify successful deletion
-	log.Printf("%s | Initiating watermarking process", logicalName)
 	check, err := utils.ApplyWatermarks(logicalName)
 	if err != nil {
 		return err
 	}
+
 	// Wipe the disk
-	err = util.WipeDisk(ctx, logicalName)
+	err = util.WipeDisk(ctx, log, logicalName)
 	if err != nil {
 		return err
 	}
-	// Check if the watermark has been removed after wiping
-	log.Printf("%s | Checking if the watermark has been removed", logicalName)
-	err = check()
-	if err != nil {
-		return err
-	}
-	// Watermarks have been successfully removed, indicating successful deletion
-	log.Printf("%s | Watermarks has been removed", logicalName)
-	return nil
+
+	return check()
 }

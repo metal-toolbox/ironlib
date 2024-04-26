@@ -14,10 +14,12 @@ func main() {
 	logger := logrus.New()
 	logger.Formatter = new(logrus.JSONFormatter)
 	logger.SetLevel(logrus.TraceLevel)
+
 	sca := actions.NewStorageControllerAction(logger)
 	ctx, cancel := context.WithTimeout(context.Background(), 86400*time.Second)
 	defer cancel()
-	err := sca.WipeDisk(ctx, "/dev/sdZZZ")
+
+	err := sca.WipeDisk(ctx, logger, "/dev/sdZZZ")
 	if err != nil {
 		logger.Fatal(err)
 	}
