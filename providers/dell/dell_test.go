@@ -11,14 +11,13 @@ import (
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/neilotoole/slogt"
 	"github.com/stretchr/testify/assert"
 )
 
 var r6515fixtures = "../../fixtures/dell/r6515"
 
-func newFakeDellDevice(logger *logrus.Logger) *dell {
+func newFakeDellDevice(t *testing.T) *dell {
 	device := common.NewDevice()
 	device.Oem = true
 
@@ -32,7 +31,7 @@ func newFakeDellDevice(logger *logrus.Logger) *dell {
 	return &dell{
 		hw:     hardware,
 		dnf:    utils.NewFakeDnf(),
-		logger: logger,
+		logger: slogt.New(t),
 	}
 }
 
@@ -43,9 +42,7 @@ func TestGetInventory(t *testing.T) {
 	expected.Oem = true
 	expectedOemComponents := dellFixtures.R6515_oem_components
 
-	logger, hook := test.NewNullLogger()
-	defer hook.Reset()
-	dell := newFakeDellDevice(logger)
+	dell := newFakeDellDevice(t)
 
 	// dsu
 	b, err := os.ReadFile(r6515fixtures + "/dsu_inventory")
@@ -101,9 +98,7 @@ func TestGetInventory(t *testing.T) {
 
 // Get inventory, not listing updates available
 func TestListUpdates(t *testing.T) {
-	logger, hook := test.NewNullLogger()
-	defer hook.Reset()
-	dell := newFakeDellDevice(logger)
+	dell := newFakeDellDevice(t)
 
 	// dsu
 	b, err := os.ReadFile(r6515fixtures + "/dsu_preview")

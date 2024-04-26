@@ -6,9 +6,9 @@ require (
 	github.com/beevik/etree v1.1.0
 	github.com/bmc-toolbox/common v0.0.0-20230220061748-93ff001f4a1d
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
+	github.com/neilotoole/slogt v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/r3labs/diff/v2 v2.15.1
-	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.2
 	github.com/tidwall/gjson v1.14.4
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
@@ -24,7 +24,6 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
-	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect

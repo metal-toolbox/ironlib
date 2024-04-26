@@ -3,26 +3,26 @@ package actions
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 var ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
 
 type StorageControllerAction struct {
-	Logger *logrus.Logger
+	Logger *slog.Logger
 	trace  bool
 }
 
-func NewStorageControllerAction(logger *logrus.Logger) *StorageControllerAction {
+func NewStorageControllerAction(logger *slog.Logger) *StorageControllerAction {
 	return &StorageControllerAction{
 		Logger: logger,
-		trace:  logger.Level >= logrus.TraceLevel,
+		trace:  logger.Enabled(nil, -5),
 	}
 }
 
@@ -79,13 +79,11 @@ func (s *StorageControllerAction) GetControllerUtility(vendorName, modelName str
 
 // GetWipeUtility returns the wipe utility based on the disk wipping features
 func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DiskWiper, error) {
-	s.Logger.Tracef("%s | Detecting wipe utility", logicalName)
-	// TODO: use disk wipping features to return the best wipe utility, currently only one available
-
+	s.Logger.Debug("Detecting wipe utility", "device", logicalName)
 	return utils.NewFillZeroCmd(s.trace), nil
 }
 
-func (s *StorageControllerAction) WipeDisk(ctx context.Context, log *logrus.Logger, logicalName string) error {
+func (s *StorageControllerAction) WipeDisk(ctx context.Context, log *slog.Logger, logicalName string) error {
 	util, err := s.GetWipeUtility(logicalName)
 	if err != nil {
 		return err
