@@ -8,13 +8,11 @@ require (
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
 	github.com/pkg/errors v0.9.1
 	github.com/r3labs/diff/v2 v2.15.1
-	github.com/r3labs/diff/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.2
 	github.com/tidwall/gjson v1.14.4
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/net v0.9.0
-	gotest.tools v2.2.0+incompatible
 )
 
 require (
