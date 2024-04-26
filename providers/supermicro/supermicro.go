@@ -47,7 +47,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 		hw:        model.NewHardware(&device),
 		logger:    l,
 		dmidecode: dmidecode,
-		trace:     l.GetLevel().String() == "trace",
+		trace:     l.Level >= logrus.TraceLevel,
 	}, nil
 }
 
@@ -72,31 +72,26 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 	// Collect device inventory
 	s.logger.Info("Collecting hardware inventory")
 
-	var trace bool
-	if s.logger.GetLevel().String() == "trace" {
-		trace = true
-	}
-
 	// define collectors for supermicro hardware
 	collectors := &actions.Collectors{
-		BMCCollector:  utils.NewIpmicfgCmd(trace),
-		BIOSCollector: utils.NewIpmicfgCmd(trace),
-		CPLDCollector: utils.NewIpmicfgCmd(trace),
+		BMCCollector:  utils.NewIpmicfgCmd(s.trace),
+		BIOSCollector: utils.NewIpmicfgCmd(s.trace),
+		CPLDCollector: utils.NewIpmicfgCmd(s.trace),
 		DriveCollectors: []actions.DriveCollector{
-			utils.NewSmartctlCmd(trace),
-			utils.NewLsblkCmd(trace),
+			utils.NewSmartctlCmd(s.trace),
+			utils.NewLsblkCmd(s.trace),
 		},
 		DriveCapabilitiesCollectors: []actions.DriveCapabilityCollector{
-			utils.NewHdparmCmd(trace),
-			utils.NewNvmeCmd(trace),
+			utils.NewHdparmCmd(s.trace),
+			utils.NewNvmeCmd(s.trace),
 		},
 		StorageControllerCollectors: []actions.StorageControllerCollector{
-			utils.NewStoreCLICmd(trace),
+			utils.NewStoreCLICmd(s.trace),
 		},
-		NICCollector: utils.NewMlxupCmd(trace),
+		NICCollector: utils.NewMlxupCmd(s.trace),
 		FirmwareChecksumCollector: firmware.NewChecksumCollector(
 			firmware.MakeOutputPath(),
-			firmware.TraceExecution(trace),
+			firmware.TraceExecution(s.trace),
 		),
 		UEFIVarsCollector: &utils.UEFIVariableCollector{},
 	}

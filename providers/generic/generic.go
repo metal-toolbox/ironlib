@@ -21,12 +21,6 @@ type Generic struct {
 
 // New returns a generic device manager
 func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
-	var trace bool
-
-	if l.GetLevel().String() == "trace" {
-		trace = true
-	}
-
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", "", 0), err.Error())
@@ -52,7 +46,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 	return &Generic{
 		hw:     model.NewHardware(&device),
 		logger: l,
-		trace:  trace,
+		trace:  l.Level >= logrus.TraceLevel,
 	}, nil
 }
 
