@@ -128,7 +128,7 @@ func (s *StoreCLI) StorageControllers(ctx context.Context) ([]*common.StorageCon
 // ShowController0 runs storecli to list controller 0
 func (s *StoreCLI) ShowController0(ctx context.Context) ([]byte, error) {
 	// /opt/MegaRAID/storcli/storcli64 /c0 show J
-	s.Executor.SetArgs([]string{"/c0", "show", "J"})
+	s.Executor.SetArgs("/c0", "show", "J")
 
 	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {

@@ -119,7 +119,7 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 
 func (n *Nvme) list(ctx context.Context) ([]byte, error) {
 	// nvme list --output-format=json
-	n.Executor.SetArgs([]string{"list", "--output-format=json"})
+	n.Executor.SetArgs("list", "--output-format=json")
 
 	result, err := n.Executor.ExecWithContext(ctx)
 	if err != nil {
@@ -131,7 +131,7 @@ func (n *Nvme) list(ctx context.Context) ([]byte, error) {
 
 func (n *Nvme) cmdListCapabilities(ctx context.Context, logicalPath string) ([]byte, error) {
 	// nvme id-ctrl --output-format=json devicepath
-	n.Executor.SetArgs([]string{"id-ctrl", "--output-format=json", logicalPath})
+	n.Executor.SetArgs("id-ctrl", "--output-format=json", logicalPath)
 	result, err := n.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err

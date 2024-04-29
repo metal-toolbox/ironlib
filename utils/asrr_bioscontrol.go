@@ -77,7 +77,7 @@ func (a *AsrrBioscontrol) Attributes() (utilName model.CollectorUtility, absolut
 // kernelVersion returns the host kernel version
 func kernelVersion(ctx context.Context) (string, error) {
 	unameExec := NewExecutor("uname")
-	unameExec.SetArgs([]string{"-r"})
+	unameExec.SetArgs("-r")
 	unameExec.SetQuiet()
 
 	r, err := unameExec.ExecWithContext(ctx)
@@ -140,7 +140,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 
 	// 3. depmod to rebuild /lib/modules/$(uname -r)/modules.dep
 	depmodExec := NewExecutor("depmod")
-	depmodExec.SetArgs([]string{"-a"})
+	depmodExec.SetArgs("-a")
 	depmodExec.SetQuiet()
 
 	_, err = depmodExec.ExecWithContext(ctx)
@@ -150,7 +150,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 
 	// 4. load module
 	modprobeExec := NewExecutor("modprobe")
-	modprobeExec.SetArgs([]string{"asrdev"})
+	modprobeExec.SetArgs("asrdev")
 	modprobeExec.SetQuiet()
 
 	_, err = modprobeExec.ExecWithContext(ctx)
@@ -171,7 +171,7 @@ func (a *AsrrBioscontrol) GetBIOSConfiguration(ctx context.Context, _ string) (m
 		return nil, err
 	}
 
-	a.Executor.SetArgs([]string{"/g", a.tmpJSONFile})
+	a.Executor.SetArgs("/g", a.tmpJSONFile)
 
 	_, err = a.Executor.ExecWithContext(ctx)
 	if err != nil {

@@ -224,7 +224,7 @@ func (m *Mvcli) Info(ctx context.Context, infoType string) ([]*MvcliDevice, erro
 		return nil, InvalidInfoTypeError(infoType)
 	}
 
-	m.Executor.SetArgs([]string{"info", "-o", infoType})
+	m.Executor.SetArgs("info", "-o", infoType)
 
 	result, err := m.Executor.ExecWithContext(ctx)
 	if err != nil {
@@ -397,15 +397,9 @@ func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, na
 		return InvalidInitModeError(initMode)
 	}
 
-	m.Executor.SetArgs([]string{
-		"create",
-		"-o", "vd",
-		"-r", raidMode,
-		"-d", strings.Trim(strings.Join(strings.Fields(fmt.Sprint(physicalDiskIDs)), ","), "[]"),
-		"-n", name,
-		"-b", fmt.Sprintf("%d", blockSize),
-	})
+	devices := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(physicalDiskIDs)), ","), "[]")
 
+	m.Executor.SetArgs("create", "-o", "vd", "-r", raidMode, "-d", devices, "-n", name, "-b", fmt.Sprintf("%d", blockSize))
 	result, err := m.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return err
@@ -428,12 +422,8 @@ func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, na
 
 func (m *Mvcli) Destroy(ctx context.Context, virtualDiskID int) error {
 	m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))
-	m.Executor.SetArgs([]string{
-		"delete",
-		"-o", "vd",
-		"-i", fmt.Sprintf("%d", virtualDiskID),
-	})
 
+	m.Executor.SetArgs("delete", "-o", "vd", "-i", fmt.Sprintf("%d", virtualDiskID))
 	result, err := m.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return err

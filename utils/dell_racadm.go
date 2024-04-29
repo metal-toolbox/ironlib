@@ -90,9 +90,8 @@ func (s *DellRacadm) racadmBIOSConfigXML(ctx context.Context) (map[string]string
 	// Dump the current BIOS config to dellBiosTempFilename. The racadm
 	// command won't dump the config to stdout directly, so we do this in
 	// a two-step process, and read the tempfile during the parsing step.
-	cmd := []string{"get", "-t", "xml", "-f", s.BIOSCfgTmpFile}
-	s.Executor.SetArgs(cmd)
 
+	s.Executor.SetArgs("get", "-t", "xml", "-f", s.BIOSCfgTmpFile)
 	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
@@ -141,9 +140,8 @@ func (s *DellRacadm) racadmBIOSConfigJSON(ctx context.Context) (map[string]strin
 	// Dump the current BIOS config to dellBiosTempFilename. The racadm
 	// command won't dump the config to stdout directly, so we do this in
 	// a two-step process, and read the tempfile during the parsing step.
-	cmd := []string{"get", "-t", "json", "-f", s.BIOSCfgTmpFile}
-	s.Executor.SetArgs(cmd)
 
+	s.Executor.SetArgs("get", "-t", "json", "-f", s.BIOSCfgTmpFile)
 	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
@@ -214,6 +212,6 @@ func (e *FakeRacadmExecute) ExecWithContext(context.Context) (*Result, error) {
 }
 
 // SetArgs is to set cmd args to the fake execute method
-func (e *FakeRacadmExecute) SetArgs(a []string) {
+func (e *FakeRacadmExecute) SetArgs(a ...string) {
 	e.Args = a
 }

@@ -143,7 +143,7 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 
 // Scan runs smartctl scan -j and returns its value as an object
 func (s *Smartctl) Scan(ctx context.Context) (*SmartctlScan, error) {
-	s.Executor.SetArgs([]string{"--scan", "-j"})
+	s.Executor.SetArgs("--scan", "-j")
 
 	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
@@ -167,7 +167,7 @@ func (s *Smartctl) Scan(ctx context.Context) (*SmartctlScan, error) {
 // All runs smartctl -a /dev/<device> and returns its value as an object
 func (s *Smartctl) All(ctx context.Context, device string) (*SmartctlDriveAttributes, error) {
 	// smartctl -a /dev/sda1 -j
-	s.Executor.SetArgs([]string{"-a", device, "-j"})
+	s.Executor.SetArgs("-a", device, "-j")
 
 	// smartctl can exit with a non-zero status based on drive smart data
 	result, _ := s.Executor.ExecWithContext(ctx)
@@ -321,7 +321,7 @@ func (e *FakeSmartctlExecute) SetStdin(r io.Reader) {
 }
 
 // SetArgs is to set cmd args to the fake execute method
-func (e *FakeSmartctlExecute) SetArgs(a []string) {
+func (e *FakeSmartctlExecute) SetArgs(a ...string) {
 	e.Args = a
 }
 

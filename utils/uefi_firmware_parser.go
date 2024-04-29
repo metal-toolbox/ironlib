@@ -55,14 +55,7 @@ func (u *UefiFirmwareParser) ExtractLogo(ctx context.Context, outputPath, biosIm
 		return err
 	}
 
-	u.Executor.SetArgs([]string{
-		"-b",
-		biosImg,
-		"-o",
-		outputPath,
-		"-e",
-	})
-
+	u.Executor.SetArgs("-b", biosImg, "-o", outputPath, "-e")
 	_, err := u.Executor.ExecWithContext(ctx)
 	return err
 }

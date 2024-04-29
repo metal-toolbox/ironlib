@@ -60,11 +60,11 @@ func (s *SupermicroSUM) Collect(_ *common.Device) error {
 
 // UpdateBIOS installs the SMC BIOS update
 func (s *SupermicroSUM) UpdateBIOS(ctx context.Context, updateFile, modelNumber string) error {
-	s.Executor.SetArgs([]string{"-c", "UpdateBios", "--preserve_setting", "--file", updateFile})
+	s.Executor.SetArgs("-c", "UpdateBios", "--preserve_setting", "--file", updateFile)
 
 	// X12STH-SYS does not support the preserve_setting option
 	if strings.EqualFold(modelNumber, "X12STH-SYS") {
-		s.Executor.SetArgs([]string{"-c", "UpdateBios", "--file", updateFile})
+		s.Executor.SetArgs("-c", "UpdateBios", "--file", updateFile)
 	}
 
 	result, err := s.Executor.ExecWithContext(ctx)
@@ -81,7 +81,7 @@ func (s *SupermicroSUM) UpdateBIOS(ctx context.Context, updateFile, modelNumber 
 
 // UpdateBMC installs the SMC BMC update
 func (s *SupermicroSUM) UpdateBMC(ctx context.Context, updateFile, _ string) error {
-	s.Executor.SetArgs([]string{"-c", "UpdateBmc", "--file", updateFile})
+	s.Executor.SetArgs("-c", "UpdateBmc", "--file", updateFile)
 
 	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
@@ -99,9 +99,9 @@ func (s *SupermicroSUM) UpdateBMC(ctx context.Context, updateFile, _ string) err
 func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSlug string) error {
 	switch componentSlug {
 	case common.SlugBIOS:
-		s.Executor.SetArgs([]string{"-c", "UpdateBios", "--preserve_setting", "--file", updateFile})
+		s.Executor.SetArgs("-c", "UpdateBios", "--preserve_setting", "--file", updateFile)
 	case common.SlugBMC:
-		s.Executor.SetArgs([]string{"-c", "UpdateBmc", "--file", updateFile})
+		s.Executor.SetArgs("-c", "UpdateBmc", "--file", updateFile)
 	}
 
 	result, err := s.Executor.ExecWithContext(ctx)
@@ -123,7 +123,7 @@ func (s *SupermicroSUM) GetBIOSConfiguration(ctx context.Context, _ string) (map
 
 // parseBIOSConfig parses the SMC sum command output BIOS config and returns a model.BIOSConfiguration object
 func (s *SupermicroSUM) parseBIOSConfig(ctx context.Context) (map[string]string, error) {
-	s.Executor.SetArgs([]string{"-c", "GetCurrentBiosCfg"})
+	s.Executor.SetArgs("-c", "GetCurrentBiosCfg")
 
 	result, err := s.Executor.ExecWithContext(ctx)
 	if err != nil {
@@ -217,7 +217,7 @@ func (e *FakeSMCSumExecute) SetStdin(r io.Reader) {
 }
 
 // SetArgs is to set cmd args to the fake execute method
-func (e *FakeSMCSumExecute) SetArgs(a []string) {
+func (e *FakeSMCSumExecute) SetArgs(a ...string) {
 	e.Args = a
 }
 

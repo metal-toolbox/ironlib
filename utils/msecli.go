@@ -137,13 +137,12 @@ func (m *Msecli) UpdateDrive(ctx context.Context, updateFile, modelNumber, seria
 func (m *Msecli) updateDrive(ctx context.Context, modelNumber, updateFile string) error {
 	// echo 'y'
 	m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))
-	m.Executor.SetArgs([]string{
+	m.Executor.SetArgs(
 		"-U", // update
 		"-m", // model
 		modelNumber,
 		"-i", // directory containing the update file
 		filepath.Dir(updateFile),
-	},
 	)
 
 	result, err := m.Executor.ExecWithContext(ctx)
@@ -160,7 +159,7 @@ func (m *Msecli) updateDrive(ctx context.Context, modelNumber, updateFile string
 
 // Query parses the output of mseli -L and returns a slice of *MsecliDevice's
 func (m *Msecli) Query(ctx context.Context) ([]*MsecliDevice, error) {
-	m.Executor.SetArgs([]string{"-L"})
+	m.Executor.SetArgs("-L")
 
 	result, err := m.Executor.ExecWithContext(ctx)
 	if err != nil {

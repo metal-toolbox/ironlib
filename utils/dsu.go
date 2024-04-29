@@ -92,7 +92,7 @@ func (d *Dsu) FetchUpdateFiles(ctx context.Context, dstDir string) (int, error) 
 	// purge any existing update file/directory with the same name
 	_ = os.Remove(dstDir)
 
-	d.Executor.SetArgs([]string{"--destination-type=CBD", "--destination-location=" + dstDir})
+	d.Executor.SetArgs("--destination-type=CBD", "--destination-location="+dstDir)
 
 	// because... yeah dsu wants to fetch updates interactively
 	d.Executor.SetStdin(bytes.NewReader([]byte("a\nc\n")))
@@ -130,16 +130,7 @@ func (d *Dsu) ApplyLocalUpdates(ctx context.Context, updateDir string) (int, err
 	updateDir = filepath.Dir(invcol)
 
 	// dsu --log-level=4 --non-interactive --source-type=REPOSITORY --source-location=/root/dsu/dellupdates --ic-location=/root/dsu/dellupdates/invcol_5N2WM_LN64_20_09_200_921_A00.BIN
-	d.Executor.SetArgs(
-		[]string{
-			"--non-interactive",
-			"--log-level=4",
-			"--source-type=REPOSITORY",
-			"--source-location=" + updateDir,
-			"--ic-location=" + invcol,
-		},
-	)
-
+	d.Executor.SetArgs("--non-interactive", "--log-level=4", "--source-type=REPOSITORY", "--source-location="+updateDir, "--ic-location="+invcol)
 	result, err := d.Executor.ExecWithContext(ctx)
 
 	return result.ExitCode, err
@@ -148,8 +139,7 @@ func (d *Dsu) ApplyLocalUpdates(ctx context.Context, updateDir string) (int, err
 // Inventory collects inventory with the dell-system-update utility and
 // updates device component firmware based on data listed by the dell system update tool
 func (d *Dsu) Inventory(ctx context.Context) ([]*model.Component, error) {
-	d.Executor.SetArgs([]string{"--import-public-key", "--inventory"})
-
+	d.Executor.SetArgs("--import-public-key", "--inventory")
 	result, err := d.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, err
@@ -165,8 +155,7 @@ func (d *Dsu) Inventory(ctx context.Context) ([]*model.Component, error) {
 
 // Returns component firmware updates available based on the dell system update
 func (d *Dsu) ComponentFirmwareUpdatePreview(ctx context.Context) ([]*model.Component, int, error) {
-	d.Executor.SetArgs([]string{"--import-public-key", "--preview"})
-
+	d.Executor.SetArgs("--import-public-key", "--preview")
 	result, err := d.Executor.ExecWithContext(ctx)
 	if err != nil {
 		return nil, result.ExitCode, err
@@ -177,9 +166,7 @@ func (d *Dsu) ComponentFirmwareUpdatePreview(ctx context.Context) ([]*model.Comp
 
 // ApplyUpdates installs all available updates
 func (d *Dsu) ApplyUpdates() (int, error) {
-	args := []string{"--non-interactive", "--log-level=4"}
-	d.Executor.SetArgs(args)
-
+	d.Executor.SetArgs("--non-interactive", "--log-level=4")
 	result, err := d.Executor.ExecWithContext(context.Background())
 	// our executor returns err if exitcode is not zero
 	// 34 - no updates applicable
@@ -189,7 +176,7 @@ func (d *Dsu) ApplyUpdates() (int, error) {
 // Version returns the dsu currently installed
 func (d *Dsu) Version() (string, error) {
 	e := NewExecutor("rpm")
-	e.SetArgs([]string{"-q", "dell-system-update", "--queryformat=%{VERSION}-%{RELEASE}"})
+	e.SetArgs("-q", "dell-system-update", "--queryformat=%{VERSION}-%{RELEASE}")
 	e.SetVerbose()
 
 	result, err := e.ExecWithContext(context.Background())

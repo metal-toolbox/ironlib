@@ -129,7 +129,7 @@ func (i Ipmicfg) CPLDs(ctx context.Context) ([]*common.CPLD, error) {
 
 func (i *Ipmicfg) Summary(ctx context.Context) (*IpmicfgSummary, error) {
 	// smc-ipmicfg --summary
-	i.Executor.SetArgs([]string{"-summary"})
+	i.Executor.SetArgs("-summary")
 
 	result, err := i.Executor.ExecWithContext(ctx)
 	if err != nil {

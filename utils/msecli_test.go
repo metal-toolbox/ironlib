@@ -88,7 +88,7 @@ func Test_parseMsecliQueryOutput(t *testing.T) {
 		t.Error(err)
 	}
 
-	m.Executor.SetArgs([]string{"-L"})
+	m.Executor.SetArgs("-L")
 
 	result, err := m.Executor.ExecWithContext(context.Background())
 	if err != nil {
@@ -108,7 +108,7 @@ func Test_parseMsecliQueryOutputCmdFailure(t *testing.T) {
 		t.Error(err)
 	}
 
-	m.Executor.SetArgs([]string{"-L"})
+	m.Executor.SetArgs("-L")
 
 	result, err := m.Executor.ExecWithContext(context.Background())
 	if err != nil {
@@ -127,7 +127,7 @@ func Test_QueryOutputEmpty(t *testing.T) {
 		t.Error(err)
 	}
 
-	m.Executor.SetArgs([]string{"-L"})
+	m.Executor.SetArgs("-L")
 
 	_, err = m.Query(context.Background())
 	assert.Equal(t, ErrNoCommandOutput, errors.Cause(err))

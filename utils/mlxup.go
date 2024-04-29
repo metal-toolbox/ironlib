@@ -165,14 +165,7 @@ func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string) e
 			}
 		}
 
-		m.Executor.SetArgs([]string{
-			"--yes",
-			"--dev",
-			nic.PCIDeviceName,
-			"--image-file",
-			updateFile,
-		})
-
+		m.Executor.SetArgs("--yes", "--dev", nic.PCIDeviceName, "--image-file", updateFile)
 		result, err := m.Executor.ExecWithContext(ctx)
 		if err != nil {
 			return err
@@ -189,7 +182,7 @@ func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string) e
 // Query returns a slice of mellanox devices
 func (m *Mlxup) Query(ctx context.Context) ([]*MlxupDevice, error) {
 	// mlxup --query
-	m.Executor.SetArgs([]string{"--query"})
+	m.Executor.SetArgs("--query")
 
 	result, err := m.Executor.ExecWithContext(ctx)
 	if err != nil {
