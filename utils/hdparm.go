@@ -48,7 +48,7 @@ func (h *Hdparm) Attributes() (utilName model.CollectorUtility, absolutePath str
 
 func (h *Hdparm) cmdListCapabilities(ctx context.Context, logicalName string) ([]byte, error) {
 	// hdparm -I devicepath
-	h.Executor.SetArgs([]string{"-I", logicalName})
+	h.Executor.SetArgs("-I", logicalName)
 
 	result, err := h.Executor.ExecWithContext(ctx)
 	if err != nil {

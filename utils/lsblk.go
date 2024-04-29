@@ -103,7 +103,7 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 
 func (l *Lsblk) list(ctx context.Context) ([]byte, error) {
 	// lsblk --json --nodeps --output name,path,model,serial,tran -e1,7,11
-	l.Executor.SetArgs([]string{"--json", "--nodeps", "-p", "--output", "kname,name,model,serial,rev,tran", "-e1,7,11"})
+	l.Executor.SetArgs("--json", "--nodeps", "-p", "--output", "kname,name,model,serial,rev,tran", "-e1,7,11")
 
 	result, err := l.Executor.ExecWithContext(ctx)
 	if err != nil {

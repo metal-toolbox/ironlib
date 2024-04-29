@@ -121,8 +121,7 @@ func (d *Dnf) Install(pkgNames []string) (err error) {
 	args := []string{"install", "-y"}
 	args = append(args, pkgNames...)
 
-	d.Executor.SetArgs(args)
-
+	d.Executor.SetArgs(args...)
 	_, err = d.Executor.ExecWithContext(context.Background())
 
 	return err

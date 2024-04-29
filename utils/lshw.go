@@ -145,7 +145,7 @@ func (l *Lshw) Collect(ctx context.Context, device *common.Device) error {
 // ListJSON returns the lshw output as a struct
 func (l *Lshw) ListJSON(ctx context.Context) (*LshwOutput, error) {
 	// lshw -json -notime
-	l.Executor.SetArgs([]string{"-json", "-notime", "-numeric"})
+	l.Executor.SetArgs("-json", "-notime", "-numeric")
 
 	result, err := l.Executor.ExecWithContext(ctx)
 	if err != nil {
@@ -689,6 +689,6 @@ func (e *FakeLshwExecute) SetStdin(r io.Reader) {
 }
 
 // SetArgs is to set cmd args to the fake execute method
-func (e *FakeLshwExecute) SetArgs(a []string) {
+func (e *FakeLshwExecute) SetArgs(a ...string) {
 	e.Args = a
 }

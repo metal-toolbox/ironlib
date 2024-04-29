@@ -140,7 +140,7 @@ func (e *FakeExecute) CmdPath() string {
 	return e.Cmd
 }
 
-func (e *FakeExecute) SetArgs(a []string) {
+func (e *FakeExecute) SetArgs(a ...string) {
 	e.Args = a
 }
 

@@ -17,7 +17,7 @@ func initFakeIPMICfg() (*Ipmicfg, error) {
 	}
 
 	i := NewFakeIpmicfg(bytes.NewReader(b))
-	i.Executor.SetArgs([]string{"-summary"})
+	i.Executor.SetArgs("-summary")
 
 	return i, nil
 }

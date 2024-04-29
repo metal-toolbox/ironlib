@@ -15,7 +15,7 @@ import (
 // Executor interface lets us implement dummy executors for tests
 type Executor interface {
 	ExecWithContext(context.Context) (*Result, error)
-	SetArgs([]string)
+	SetArgs(...string)
 	SetEnv([]string)
 	SetQuiet()
 	SetVerbose()
@@ -66,7 +66,7 @@ func (e *Execute) CmdPath() string {
 }
 
 // SetArgs sets the command args
-func (e *Execute) SetArgs(a []string) {
+func (e *Execute) SetArgs(a ...string) {
 	e.Args = a
 }
 
