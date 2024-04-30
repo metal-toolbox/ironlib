@@ -254,8 +254,6 @@ func parseSanicap(sanicap uint) ([]*common.Capability, error) {
 		})
 	case 0b11:
 		return nil, errSanicapNODMMASReserved
-	default:
-		panic("unreachable")
 	}
 
 	return caps, nil
