@@ -77,8 +77,8 @@ func writeWatermarks(file *os.File, watermarksCount, watermarksSize int64) ([]wa
 		return nil, err
 	}
 
-	if fileSize == 0 {
-		return nil, errors.New("no space for watermarking")
+	if fileSize <= watermarksCount*watermarksSize {
+		return nil, fmt.Errorf("no space for watermarking: %w", io.ErrUnexpectedEOF)
 	}
 	chunkSize := fileSize / watermarksCount
 
