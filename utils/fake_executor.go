@@ -29,7 +29,7 @@ func NewFakeExecutor(cmd string) Executor {
 // nolint:gocyclo // TODO: break this method up and move into each $util_test.go
 // FakeExecute method returns whatever you want it to return
 // Set e.Stdout and e.Stderr to data to be returned
-func (e *FakeExecute) ExecWithContext(_ context.Context) (*Result, error) {
+func (e *FakeExecute) Exec(_ context.Context) (*Result, error) {
 	switch e.Cmd {
 	case "ipmicfg":
 		if e.Args[0] == "-summary" {

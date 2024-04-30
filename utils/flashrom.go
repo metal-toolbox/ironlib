@@ -47,7 +47,7 @@ func (f *Flashrom) WriteBIOSImage(ctx context.Context, path string) error {
 	// flashrom -p internal --ifd -i bios -r /tmp/bios_region.img
 	f.Executor.SetArgs("-p", "internal", "--ifd", "-i", "bios", "-r", path)
 
-	_, err := f.Executor.ExecWithContext(ctx)
+	_, err := f.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}

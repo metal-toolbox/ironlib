@@ -131,7 +131,7 @@ func (i *Ipmicfg) Summary(ctx context.Context) (*IpmicfgSummary, error) {
 	// smc-ipmicfg --summary
 	i.Executor.SetArgs("-summary")
 
-	result, err := i.Executor.ExecWithContext(ctx)
+	result, err := i.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}

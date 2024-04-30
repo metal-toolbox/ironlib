@@ -14,7 +14,7 @@ import (
 
 // Executor interface lets us implement dummy executors for tests
 type Executor interface {
-	ExecWithContext(context.Context) (*Result, error)
+	Exec(context.Context) (*Result, error)
 	SetArgs(...string)
 	SetEnv([]string)
 	SetQuiet()
@@ -107,8 +107,8 @@ func (e *Execute) SetStderr(_ []byte) {
 func (e *Execute) SetExitCode(_ int) {
 }
 
-// ExecWithContext executes the command and returns the Result object
-func (e *Execute) ExecWithContext(ctx context.Context) (result *Result, err error) {
+// Exec executes the command and returns the Result object
+func (e *Execute) Exec(ctx context.Context) (result *Result, err error) {
 	if e.CheckBin {
 		err = e.CheckExecutable()
 		if err != nil {

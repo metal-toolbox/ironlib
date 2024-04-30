@@ -81,7 +81,7 @@ func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 		logrus.Fields{"file": updateFile},
 	).Info("Installing dell Update Bin file")
 
-	result, err := e.ExecWithContext(ctx)
+	result, err := e.Exec(ctx)
 	if err != nil {
 		return result.ExitCode, err
 	}
@@ -206,7 +206,7 @@ func (d *dell) startSrvHelper(ctx context.Context) error {
 	e := utils.NewExecutor("/usr/libexec/instsvcdrv-helper")
 	e.SetArgs("start")
 
-	result, err := e.ExecWithContext(ctx)
+	result, err := e.Exec(ctx)
 
 	if err != nil || result.ExitCode != 0 {
 		return err

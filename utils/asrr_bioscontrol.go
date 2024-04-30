@@ -80,7 +80,7 @@ func kernelVersion(ctx context.Context) (string, error) {
 	unameExec.SetArgs("-r")
 	unameExec.SetQuiet()
 
-	r, err := unameExec.ExecWithContext(ctx)
+	r, err := unameExec.Exec(ctx)
 	if err != nil {
 		return "", errors.Wrap(err, "error executing uname -r")
 	}
@@ -93,7 +93,7 @@ func kernelModuleLoaded(ctx context.Context, name string) (bool, error) {
 	lsmodExec := NewExecutor("lsmod")
 	lsmodExec.SetQuiet()
 
-	r, err := lsmodExec.ExecWithContext(ctx)
+	r, err := lsmodExec.Exec(ctx)
 	if err != nil {
 		return false, errors.Wrap(err, "error executing lsmod")
 	}
@@ -143,7 +143,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 	depmodExec.SetArgs("-a")
 	depmodExec.SetQuiet()
 
-	_, err = depmodExec.ExecWithContext(ctx)
+	_, err = depmodExec.Exec(ctx)
 	if err != nil {
 		return errors.Wrap(err, ErrASRRBIOSKernelModule.Error())
 	}
@@ -153,7 +153,7 @@ func loadAsrrBiosKernelModule(ctx context.Context) error {
 	modprobeExec.SetArgs("asrdev")
 	modprobeExec.SetQuiet()
 
-	_, err = modprobeExec.ExecWithContext(ctx)
+	_, err = modprobeExec.Exec(ctx)
 	if err != nil {
 		return errors.Wrap(err, ErrASRRBIOSKernelModule.Error())
 	}
@@ -173,7 +173,7 @@ func (a *AsrrBioscontrol) GetBIOSConfiguration(ctx context.Context, _ string) (m
 
 	a.Executor.SetArgs("/g", a.tmpJSONFile)
 
-	_, err = a.Executor.ExecWithContext(ctx)
+	_, err = a.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}

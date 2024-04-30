@@ -90,7 +90,7 @@ func Test_parseMsecliQueryOutput(t *testing.T) {
 
 	m.Executor.SetArgs("-L")
 
-	result, err := m.Executor.ExecWithContext(context.Background())
+	result, err := m.Executor.Exec(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -110,7 +110,7 @@ func Test_parseMsecliQueryOutputCmdFailure(t *testing.T) {
 
 	m.Executor.SetArgs("-L")
 
-	result, err := m.Executor.ExecWithContext(context.Background())
+	result, err := m.Executor.Exec(context.Background())
 	if err != nil {
 		t.Error(err)
 	}

@@ -147,7 +147,7 @@ func (l *Lshw) ListJSON(ctx context.Context) (*LshwOutput, error) {
 	// lshw -json -notime
 	l.Executor.SetArgs("-json", "-notime", "-numeric")
 
-	result, err := l.Executor.ExecWithContext(ctx)
+	result, err := l.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -671,8 +671,8 @@ func NewFakeLshw(stdin io.Reader) *Lshw {
 	return &Lshw{Executor: executor, nicSerials: make(map[string]bool)}
 }
 
-// ExecWithContext implements the utils.Executor interface
-func (e *FakeLshwExecute) ExecWithContext(context.Context) (*Result, error) {
+// Exec implements the utils.Executor interface
+func (e *FakeLshwExecute) Exec(context.Context) (*Result, error) {
 	b := bytes.Buffer{}
 
 	_, err := b.ReadFrom(e.Stdin)

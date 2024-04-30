@@ -145,7 +145,7 @@ func (m *Msecli) updateDrive(ctx context.Context, modelNumber, updateFile string
 		filepath.Dir(updateFile),
 	)
 
-	result, err := m.Executor.ExecWithContext(ctx)
+	result, err := m.Executor.Exec(ctx)
 	if err != nil {
 		return newExecError(m.Executor.GetCmd(), result)
 	}
@@ -161,7 +161,7 @@ func (m *Msecli) updateDrive(ctx context.Context, modelNumber, updateFile string
 func (m *Msecli) Query(ctx context.Context) ([]*MsecliDevice, error) {
 	m.Executor.SetArgs("-L")
 
-	result, err := m.Executor.ExecWithContext(ctx)
+	result, err := m.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
