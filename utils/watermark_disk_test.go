@@ -2,6 +2,7 @@ package utils
 
 import (
 	"crypto/rand"
+	"io"
 	"os"
 	"testing"
 
@@ -28,7 +29,7 @@ func Test_ApplyWatermarks(t *testing.T) {
 
 		checker, err := ApplyWatermarks(tempFile)
 		assert.Nil(t, checker)
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, io.ErrUnexpectedEOF)
 	})
 
 	t.Run("EmptyFile", func(t *testing.T) {
@@ -36,7 +37,7 @@ func Test_ApplyWatermarks(t *testing.T) {
 
 		checker, err := ApplyWatermarks(tempFile)
 		assert.Nil(t, checker)
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, io.ErrUnexpectedEOF)
 	})
 
 	t.Run("WipeSucceeded", func(t *testing.T) {
@@ -72,6 +73,6 @@ func Test_ApplyWatermarks(t *testing.T) {
 		checker, err := ApplyWatermarks(tempFile)
 		assert.NoError(t, err)
 
-		assert.Error(t, checker())
+		assert.ErrorIs(t, checker(), ErrIneffectiveWipe)
 	})
 }
