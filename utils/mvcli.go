@@ -226,7 +226,7 @@ func (m *Mvcli) Info(ctx context.Context, infoType string) ([]*MvcliDevice, erro
 
 	m.Executor.SetArgs("info", "-o", infoType)
 
-	result, err := m.Executor.ExecWithContext(ctx)
+	result, err := m.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -400,7 +400,7 @@ func (m *Mvcli) Create(ctx context.Context, physicalDiskIDs []uint, raidMode, na
 	devices := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(physicalDiskIDs)), ","), "[]")
 
 	m.Executor.SetArgs("create", "-o", "vd", "-r", raidMode, "-d", devices, "-n", name, "-b", fmt.Sprintf("%d", blockSize))
-	result, err := m.Executor.ExecWithContext(ctx)
+	result, err := m.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -424,7 +424,7 @@ func (m *Mvcli) Destroy(ctx context.Context, virtualDiskID int) error {
 	m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))
 
 	m.Executor.SetArgs("delete", "-o", "vd", "-i", fmt.Sprintf("%d", virtualDiskID))
-	result, err := m.Executor.ExecWithContext(ctx)
+	result, err := m.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}

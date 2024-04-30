@@ -107,7 +107,7 @@ func Test_MlxupParseQueryOutput(t *testing.T) {
 
 	cli.Executor.SetStdout(b)
 
-	result, err := cli.Executor.ExecWithContext(context.Background())
+	result, err := cli.Executor.Exec(context.Background())
 	if err != nil {
 		t.Error(err)
 	}

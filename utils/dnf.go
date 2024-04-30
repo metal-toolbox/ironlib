@@ -122,7 +122,7 @@ func (d *Dnf) Install(pkgNames []string) (err error) {
 	args = append(args, pkgNames...)
 
 	d.Executor.SetArgs(args...)
-	_, err = d.Executor.ExecWithContext(context.Background())
+	_, err = d.Executor.Exec(context.Background())
 
 	return err
 }

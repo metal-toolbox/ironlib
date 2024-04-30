@@ -78,7 +78,7 @@ func Test_IpmicfgParseSummaryOutput(t *testing.T) {
 		t.Error(err)
 	}
 
-	result, err := i.Executor.ExecWithContext(context.Background())
+	result, err := i.Executor.Exec(context.Background())
 	if err != nil {
 		t.Error(err)
 	}

@@ -20,7 +20,7 @@ func Test_Stdin(t *testing.T) {
 	e.Stdin = bytes.NewReader([]byte("hello"))
 	e.SetQuiet()
 
-	result, err := e.ExecWithContext(context.Background())
+	result, err := e.Exec(context.Background())
 	if err != nil {
 		fmt.Println(err.Error())
 	}

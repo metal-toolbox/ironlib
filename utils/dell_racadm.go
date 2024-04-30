@@ -92,7 +92,7 @@ func (s *DellRacadm) racadmBIOSConfigXML(ctx context.Context) (map[string]string
 	// a two-step process, and read the tempfile during the parsing step.
 
 	s.Executor.SetArgs("get", "-t", "xml", "-f", s.BIOSCfgTmpFile)
-	result, err := s.Executor.ExecWithContext(ctx)
+	result, err := s.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (s *DellRacadm) racadmBIOSConfigJSON(ctx context.Context) (map[string]strin
 	// a two-step process, and read the tempfile during the parsing step.
 
 	s.Executor.SetArgs("get", "-t", "json", "-f", s.BIOSCfgTmpFile)
-	result, err := s.Executor.ExecWithContext(ctx)
+	result, err := s.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -206,8 +206,8 @@ func NewFakeRacadm(biosCfgFile string) *DellRacadm {
 	return &DellRacadm{Executor: executor, BIOSCfgTmpFile: biosCfgFile, KeepConfigFile: true}
 }
 
-// ExecWithContext implements the utils.Executor interface
-func (e *FakeRacadmExecute) ExecWithContext(context.Context) (*Result, error) {
+// Exec implements the utils.Executor interface
+func (e *FakeRacadmExecute) Exec(context.Context) (*Result, error) {
 	return &Result{Stdout: []byte(`dummy`)}, nil
 }
 

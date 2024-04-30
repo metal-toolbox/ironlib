@@ -145,7 +145,7 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 func (s *Smartctl) Scan(ctx context.Context) (*SmartctlScan, error) {
 	s.Executor.SetArgs("--scan", "-j")
 
-	result, err := s.Executor.ExecWithContext(ctx)
+	result, err := s.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (s *Smartctl) All(ctx context.Context, device string) (*SmartctlDriveAttrib
 	s.Executor.SetArgs("-a", device, "-j")
 
 	// smartctl can exit with a non-zero status based on drive smart data
-	result, _ := s.Executor.ExecWithContext(ctx)
+	result, _ := s.Executor.Exec(ctx)
 	// determine the errors if any based on the exit code
 	smartCtlErrs := smartCtlExitStatus(result.ExitCode)
 
@@ -279,8 +279,8 @@ func NewFakeSmartctl(dataDir string) *Smartctl {
 	return &Smartctl{Executor: executor}
 }
 
-// ExecWithContext implements the utils.Executor interface
-func (e *FakeSmartctlExecute) ExecWithContext(context.Context) (*Result, error) {
+// Exec implements the utils.Executor interface
+func (e *FakeSmartctlExecute) Exec(context.Context) (*Result, error) {
 	switch e.Args[0] {
 	case "--scan":
 		b, err := os.ReadFile(e.JSONFilesDir + "/scan.json")

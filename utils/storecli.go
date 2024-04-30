@@ -130,7 +130,7 @@ func (s *StoreCLI) ShowController0(ctx context.Context) ([]byte, error) {
 	// /opt/MegaRAID/storcli/storcli64 /c0 show J
 	s.Executor.SetArgs("/c0", "show", "J")
 
-	result, err := s.Executor.ExecWithContext(ctx)
+	result, err := s.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}

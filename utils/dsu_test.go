@@ -48,7 +48,7 @@ func Test_dsuParseInventoryBytes(t *testing.T) {
 
 	d.Executor.SetArgs("--import-public-key", "--inventory")
 
-	result, err := d.Executor.ExecWithContext(context.Background())
+	result, err := d.Executor.Exec(context.Background())
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -70,7 +70,7 @@ func Test_dsuParsePreviewBytes(t *testing.T) {
 		t.Error(err)
 	}
 
-	result, err := d.Executor.ExecWithContext(context.Background())
+	result, err := d.Executor.Exec(context.Background())
 	if err != nil {
 		t.Errorf(err.Error())
 	}

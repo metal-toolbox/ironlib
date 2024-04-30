@@ -50,7 +50,7 @@ func (h *Hdparm) cmdListCapabilities(ctx context.Context, logicalName string) ([
 	// hdparm -I devicepath
 	h.Executor.SetArgs("-I", logicalName)
 
-	result, err := h.Executor.ExecWithContext(ctx)
+	result, err := h.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}

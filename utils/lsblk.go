@@ -105,7 +105,7 @@ func (l *Lsblk) list(ctx context.Context) ([]byte, error) {
 	// lsblk --json --nodeps --output name,path,model,serial,tran -e1,7,11
 	l.Executor.SetArgs("--json", "--nodeps", "-p", "--output", "kname,name,model,serial,rev,tran", "-e1,7,11")
 
-	result, err := l.Executor.ExecWithContext(ctx)
+	result, err := l.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}

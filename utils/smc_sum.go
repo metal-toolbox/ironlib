@@ -67,7 +67,7 @@ func (s *SupermicroSUM) UpdateBIOS(ctx context.Context, updateFile, modelNumber 
 		s.Executor.SetArgs("-c", "UpdateBios", "--file", updateFile)
 	}
 
-	result, err := s.Executor.ExecWithContext(ctx)
+	result, err := s.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (s *SupermicroSUM) UpdateBIOS(ctx context.Context, updateFile, modelNumber 
 func (s *SupermicroSUM) UpdateBMC(ctx context.Context, updateFile, _ string) error {
 	s.Executor.SetArgs("-c", "UpdateBmc", "--file", updateFile)
 
-	result, err := s.Executor.ExecWithContext(ctx)
+	result, err := s.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (s *SupermicroSUM) ApplyUpdate(ctx context.Context, updateFile, componentSl
 		s.Executor.SetArgs("-c", "UpdateBmc", "--file", updateFile)
 	}
 
-	result, err := s.Executor.ExecWithContext(ctx)
+	result, err := s.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (s *SupermicroSUM) GetBIOSConfiguration(ctx context.Context, _ string) (map
 func (s *SupermicroSUM) parseBIOSConfig(ctx context.Context) (map[string]string, error) {
 	s.Executor.SetArgs("-c", "GetCurrentBiosCfg")
 
-	result, err := s.Executor.ExecWithContext(ctx)
+	result, err := s.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -197,8 +197,8 @@ func NewFakeSMCSum(stdin io.Reader) *SupermicroSUM {
 	return &SupermicroSUM{Executor: executor}
 }
 
-// ExecWithContext implements the utils.Executor interface
-func (e *FakeSMCSumExecute) ExecWithContext(_ context.Context) (*Result, error) {
+// Exec implements the utils.Executor interface
+func (e *FakeSMCSumExecute) Exec(_ context.Context) (*Result, error) {
 	b := bytes.Buffer{}
 
 	if e.Stdin != nil {
