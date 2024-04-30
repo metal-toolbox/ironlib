@@ -190,17 +190,17 @@ func parseFna(fna uint) []*common.Capability {
 		{
 			Name:        "fmns",
 			Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)",
-			Enabled:     (fna&(0b1<<0))>>0 != 0,
+			Enabled:     fna&(0b1<<0) != 0,
 		},
 		{
 			Name:        "cens",
 			Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)",
-			Enabled:     (fna&(0b1<<1))>>1 != 0,
+			Enabled:     fna&(0b1<<1) != 0,
 		},
 		{
 			Name:        "cese",
 			Description: "Crypto Erase Supported as part of Secure Erase",
-			Enabled:     (fna&(0b1<<2))>>2 != 0,
+			Enabled:     fna&(0b1<<2) != 0,
 		},
 	}
 }
@@ -221,26 +221,26 @@ func parseSanicap(sanicap uint) ([]*common.Capability, error) {
 		{
 			Name:        "cer",
 			Description: "Crypto Erase Sanitize Operation Supported",
-			Enabled:     (sanicap&(0b1<<0))>>0 != 0,
+			Enabled:     sanicap&(0b1<<0) != 0,
 		},
 		{
 			Name:        "ber",
 			Description: "Block Erase Sanitize Operation Supported",
-			Enabled:     (sanicap&(0b1<<1))>>1 != 0,
+			Enabled:     sanicap&(0b1<<1) != 0,
 		},
 		{
 			Name:        "owr",
 			Description: "Overwrite Sanitize Operation Supported",
-			Enabled:     (sanicap&(0b1<<2))>>2 != 0,
+			Enabled:     sanicap&(0b1<<2) != 0,
 		},
 		{
 			Name:        "ndi",
 			Description: "No-Deallocate After Sanitize bit in Sanitize command Supported",
-			Enabled:     (sanicap&(0b1<<29))>>29 != 0,
+			Enabled:     sanicap&(0b1<<29) != 0,
 		},
 	}
 
-	switch (sanicap & (0b11 << 30)) >> 30 {
+	switch sanicap & (0b11 << 30) >> 30 {
 	case 0b00:
 		// nvme prints this out for 0b00:
 		//   "Additional media modification after sanitize operation completes successfully is not defined"
@@ -250,7 +250,7 @@ func parseSanicap(sanicap uint) ([]*common.Capability, error) {
 		caps = append(caps, &common.Capability{
 			Name:        "nodmmas",
 			Description: "Media is additionally modified after sanitize operation completes successfully",
-			Enabled:     (sanicap&(0b11<<30))>>30 == 0b10,
+			Enabled:     sanicap&(0b11<<30)>>30 == 0b10,
 		})
 	case 0b11:
 		return nil, errSanicapNODMMASReserved
