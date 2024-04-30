@@ -11,11 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	bufferSize    = 512
-	numWatermarks = 10
-)
-
 var ErrIneffectiveWipe = errors.New("found left over data after wiping disk")
 
 type watermark struct {
@@ -23,9 +18,8 @@ type watermark struct {
 	data     []byte
 }
 
-// ApplyWatermarks applies watermarks to the specified disk.
-// It returns a function that checks if the applied watermarks still exist on the file.
-// It relies on the writeWatermarks function to uniformly write watermarks across the disk.
+// ApplyWatermarks applies random watermarks randomly through out the specified device/file.
+// It returns a function that checks if the applied watermarks still exists on the device/file.
 func ApplyWatermarks(logicalName string) (func() error, error) {
 	// Write open
 	file, err := os.OpenFile(logicalName, os.O_WRONLY, 0)
@@ -34,18 +28,9 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 	}
 	defer file.Close()
 
-	// Get disk or partition size
-	fileSize, err := file.Seek(0, io.SeekEnd)
-	if err != nil {
-		return nil, err
-	}
-
-	if fileSize == 0 {
-		return nil, errors.New("No space for watermarking")
-	}
-
 	// Write watermarks on random locations
-	watermarks, err := writeWatermarks(file, fileSize, numWatermarks)
+	watermarkSize := int64(512)
+	watermarks, err := writeWatermarks(file, 10, watermarkSize)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +48,7 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 				return err
 			}
 			// Read the watermark written to the position
-			currentValue := make([]byte, bufferSize)
+			currentValue := make([]byte, watermarkSize)
 			_, err = io.ReadFull(file, currentValue)
 			if err != nil {
 				return err
@@ -78,33 +63,52 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 	return checker, nil
 }
 
-// writeWatermarks creates random watermarks and writes them uniformly into a given file.
-func writeWatermarks(file *os.File, fileSize, count int64) ([]watermark, error) {
-	origin := int64(0)
-	intervalSize := fileSize / count
-	watermarks := make([]watermark, count)
-	for i := 0; i < numWatermarks; i++ {
-		data := make([]byte, bufferSize)
+// writeWatermarks creates random watermarks and writes them randomlyish throughout the given file.
+//
+// It calculates a chunksize by dividing the file size by _watermarksCount_.
+// The disk is sectioned off into these chunks.
+// We will generate a random byte slice of _watermarksSize_ that will be written into a chunk.
+// The position within the chunk is randomly generated such that the write does not spill into the next chunk.
+// Both the random bytes and sub-chunk start position is independently generated for each chunk.
+func writeWatermarks(file *os.File, watermarksCount, watermarksSize int64) ([]watermark, error) {
+	// Get disk or partition watermarksSize
+	fileSize, err := file.Seek(0, io.SeekEnd)
+	if err != nil {
+		return nil, err
+	}
+
+	if fileSize == 0 {
+		return nil, errors.New("no space for watermarking")
+	}
+	chunkSize := fileSize / watermarksCount
+
+	watermarks := make([]watermark, watermarksCount)
+	for chunkStart, i := int64(0), 0; chunkStart < fileSize; chunkStart, i = chunkStart+chunkSize, i+1 {
+		data := make([]byte, watermarksSize)
 		_, err := rand.Read(data)
 		if err != nil {
 			return nil, err
 		}
-		offset, err := rand.Int(rand.Reader, big.NewInt(intervalSize))
+
+		offset, err := rand.Int(rand.Reader, big.NewInt(chunkSize))
 		if err != nil {
 			return nil, err
 		}
-		randomPosition := int64(offset.Uint64()) + origin - bufferSize
+
+		randomPosition := chunkStart + offset.Int64() - watermarksSize
 		_, err = file.Seek(randomPosition, io.SeekStart)
 		if err != nil {
 			return nil, err
 		}
+
 		_, err = file.Write(data)
 		if err != nil {
 			return nil, err
 		}
+
 		watermarks[i].position = randomPosition
 		watermarks[i].data = data
-		origin += intervalSize
 	}
+
 	return watermarks, nil
 }
