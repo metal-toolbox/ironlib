@@ -4,23 +4,23 @@ import (
 	"context"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/go-logr/logr"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/firmware"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type supermicro struct {
 	trace     bool
 	hw        *model.Hardware
-	logger    *logrus.Logger
+	logger    logr.Logger
 	dmidecode *utils.Dmidecode
 }
 
-func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
+func New(dmidecode *utils.Dmidecode, l logr.Logger) (actions.DeviceManager, error) {
 	deviceVendor, err := dmidecode.Manufacturer()
 	if err != nil {
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("manufacturer", "", 0), err.Error())
@@ -47,7 +47,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 		hw:        model.NewHardware(&device),
 		logger:    l,
 		dmidecode: dmidecode,
-		trace:     l.GetLevel().String() == "trace",
+		trace:     l.GetV() >= 2,
 	}, nil
 }
 
@@ -72,31 +72,26 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 	// Collect device inventory
 	s.logger.Info("Collecting hardware inventory")
 
-	var trace bool
-	if s.logger.GetLevel().String() == "trace" {
-		trace = true
-	}
-
 	// define collectors for supermicro hardware
 	collectors := &actions.Collectors{
-		BMCCollector:  utils.NewIpmicfgCmd(trace),
-		BIOSCollector: utils.NewIpmicfgCmd(trace),
-		CPLDCollector: utils.NewIpmicfgCmd(trace),
+		BMCCollector:  utils.NewIpmicfgCmd(s.trace),
+		BIOSCollector: utils.NewIpmicfgCmd(s.trace),
+		CPLDCollector: utils.NewIpmicfgCmd(s.trace),
 		DriveCollectors: []actions.DriveCollector{
-			utils.NewSmartctlCmd(trace),
-			utils.NewLsblkCmd(trace),
+			utils.NewSmartctlCmd(s.trace),
+			utils.NewLsblkCmd(s.trace),
 		},
 		DriveCapabilitiesCollectors: []actions.DriveCapabilityCollector{
-			utils.NewHdparmCmd(trace),
-			utils.NewNvmeCmd(trace),
+			utils.NewHdparmCmd(s.trace),
+			utils.NewNvmeCmd(s.trace),
 		},
 		StorageControllerCollectors: []actions.StorageControllerCollector{
-			utils.NewStoreCLICmd(trace),
+			utils.NewStoreCLICmd(s.trace),
 		},
-		NICCollector: utils.NewMlxupCmd(trace),
+		NICCollector: utils.NewMlxupCmd(s.trace),
 		FirmwareChecksumCollector: firmware.NewChecksumCollector(
 			firmware.MakeOutputPath(),
-			firmware.TraceExecution(trace),
+			firmware.TraceExecution(s.trace),
 		),
 		UEFIVarsCollector: &utils.UEFIVariableCollector{},
 	}

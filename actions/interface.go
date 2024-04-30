@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/go-logr/logr"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 )
@@ -202,5 +203,5 @@ type VirtualDiskManager interface {
 
 // DiskWiper defines an interface to override disk data
 type DiskWiper interface {
-	WipeDisk(ctx context.Context, logicalName string) error
+	WipeDisk(ctx context.Context, log logr.Logger, logicalName string) error
 }

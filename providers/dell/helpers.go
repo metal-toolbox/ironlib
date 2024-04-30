@@ -8,7 +8,6 @@ import (
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -73,22 +72,19 @@ func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 	e := utils.NewExecutor(updateFile)
 	e.SetArgs(args)
 
-	if d.logger.Level == logrus.TraceLevel {
+	if d.trace {
 		e.SetVerbose()
 	}
 
-	d.logger.WithFields(
-		logrus.Fields{"file": updateFile},
-	).Info("Installing dell Update Bin file")
+	logger := d.logger.WithValues("file", updateFile)
+	logger.Info("Installing dell Update Bin file")
 
 	result, err := e.ExecWithContext(ctx)
 	if err != nil {
 		return result.ExitCode, err
 	}
 
-	d.logger.WithFields(
-		logrus.Fields{"file": updateFile},
-	).Info("Installed")
+	logger.Info("Installed")
 
 	d.hw.PendingReboot = true
 
@@ -223,17 +219,17 @@ func (d *dell) checkExitCode(exitCode int) error {
 	case utils.DSUExitCodeUpdatesApplied:
 		d.hw.UpdatesInstalled = true
 		d.hw.PendingReboot = true
-		d.logger.Trace("update applied successfully")
+		d.logger.V(2).Info("update applied successfully")
 
 		return nil
 	case utils.DSUExitCodeRebootRequired, BinUpdateExitCodeRebootRequired: // updates applied, reboot required
-		d.logger.Trace("update applied, reboot required")
+		d.logger.V(2).Info("update applied, reboot required")
 		d.hw.UpdatesInstalled = true
 		d.hw.PendingReboot = true
 
 		return nil
 	case utils.DSUExitCodeNoUpdatesAvailable: // no applicable updates
-		d.logger.Trace("no pending/applicable update(s) for device")
+		d.logger.V(2).Info("no pending/applicable update(s) for device")
 
 		return nil
 	default:

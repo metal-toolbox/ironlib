@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/go-logr/logr/testr"
 )
 
 func Test_NewFillZeroCmd(t *testing.T) {
@@ -24,25 +26,31 @@ func Test_WipeDisk(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer os.Remove(tmpfile.Name()) // clean up
+
 			// Write some content to the temporary file
 			expectedSize := int64(4096)
 			if _, err = tmpfile.Write(make([]byte, expectedSize)); err != nil {
 				t.Fatal(err)
 			}
+
 			// Simulate a context
 			ctx := context.Background()
+
 			// Create a FillZero instance
 			zw := &FillZero{}
+
 			// Test Fill function
-			err = zw.WipeDisk(ctx, tmpfile.Name())
+			err = zw.WipeDisk(ctx, testr.New(t), tmpfile.Name())
 			if err != nil {
 				t.Errorf("Fill returned an error: %v", err)
 			}
+
 			// Check if the file size remains the same after overwrite
 			fileInfo, err := os.Stat(tmpfile.Name())
 			if err != nil {
 				t.Fatal(err)
 			}
+
 			if size := fileInfo.Size(); size != expectedSize {
 				t.Errorf("Expected file size to remain %d after overwrite, got %d", expectedSize, size)
 			}

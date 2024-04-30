@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/bombsimon/logrusr/v4"
 	"github.com/metal-toolbox/ironlib"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/sirupsen/logrus"
@@ -13,11 +15,15 @@ import (
 // This example invokes ironlib to install the supermicro BMC firmware
 
 func main() {
-	logger := logrus.New()
+	l := logrus.New()
+	l.Formatter = &logrus.JSONFormatter{}
+	l.Level = logrus.TraceLevel
+	logger := logrusr.New(l)
 
 	device, err := ironlib.New(logger)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err, "creating ironlib manager")
+		os.Exit(1)
 	}
 
 	options := &model.UpdateOptions{
@@ -29,13 +35,15 @@ func main() {
 
 	hardware, err := device.GetInventory(context.TODO())
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err, "getting inventory")
+		os.Exit(1)
 	}
 
 	fmt.Println(hardware.BMC.Firmware.Installed)
 
 	err = device.InstallUpdates(context.TODO(), options)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err, "insatlling updates")
+		os.Exit(1)
 	}
 }

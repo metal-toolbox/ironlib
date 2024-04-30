@@ -4,29 +4,21 @@ import (
 	"context"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/go-logr/logr"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/sirupsen/logrus"
 )
 
 // A asrockrack device has methods to collect hardware inventory, regardless of the vendor
 type asrockrack struct {
 	trace  bool
 	hw     *model.Hardware
-	logger *logrus.Logger
+	logger logr.Logger
 }
 
 // New returns a ASRockRack device manager
-func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {
-	var trace bool
-
-	if l.Level == logrus.TraceLevel {
-		trace = true
-	}
-
-	var err error
-
+func New(dmidecode *utils.Dmidecode, l logr.Logger) (actions.DeviceManager, error) {
 	// set device
 	device := common.NewDevice()
 
@@ -43,7 +35,6 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 	dm := &asrockrack{
 		hw:     model.NewHardware(&device),
 		logger: l,
-		trace:  trace,
 	}
 
 	return dm, nil
