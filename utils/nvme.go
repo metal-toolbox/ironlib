@@ -179,6 +179,12 @@ func parseFna(fna uint) []*common.Capability {
 	// All names come from internal nvme-cli names
 	// We will *not* keep in sync as these names form our API
 	// https: // github.com/linux-nvme/nvme-cli/blob/v2.8/nvme-print-stdout.c#L2199-L2217
+	//
+	// This function uses go's binary notation + bitshifts instead of masking of hex numbers
+	// I think its easier to see whats going on this way vs hex masks
+	// Refresher:
+	//   1<<N makes gives us all zeros except for the Nth bit which is a one
+	//   fna & 1<<N is bitwise and, the result will be 1 if fna had a 1 in Nth bi
 
 	return []*common.Capability{
 		{
@@ -204,6 +210,12 @@ func parseSanicap(sanicap uint) ([]*common.Capability, error) {
 	// All names come from internal nvme-cli names
 	// We will *not* keep in sync as these names form our API
 	// https://github.com/linux-nvme/nvme-cli/blob/v2.8/nvme-print-stdout.c#L2064-L2093
+	//
+	// This function uses go's binary notation + bitshifts instead of masking of hex numbers
+	// I think its easier to see whats going on this way vs hex masks
+	// Refresher:
+	//   1<<N makes gives us all zeros except for the Nth bit which is a one
+	//   sanicap & 1<<N is bitwise and, the result will be 1 if sanicap had a 1 in Nth bit
 
 	caps := []*common.Capability{
 		{
