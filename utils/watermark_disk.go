@@ -90,12 +90,12 @@ func writeWatermarks(file *os.File, watermarksCount, watermarksSize int64) ([]wa
 			return nil, err
 		}
 
-		offset, err := rand.Int(rand.Reader, big.NewInt(chunkSize))
+		offset, err := rand.Int(rand.Reader, big.NewInt(chunkSize-watermarksSize))
 		if err != nil {
 			return nil, err
 		}
 
-		randomPosition := chunkStart + offset.Int64() - watermarksSize
+		randomPosition := chunkStart + offset.Int64()
 		_, err = file.Seek(randomPosition, io.SeekStart)
 		if err != nil {
 			return nil, err
