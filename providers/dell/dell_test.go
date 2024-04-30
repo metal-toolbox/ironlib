@@ -11,13 +11,13 @@ import (
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/sirupsen/logrus"
-	"gotest.tools/assert"
+	"github.com/neilotoole/slogt"
+	"github.com/stretchr/testify/assert"
 )
 
 var r6515fixtures = "../../fixtures/dell/r6515"
 
-func newFakeDellDevice() *dell {
+func newFakeDellDevice(t *testing.T) *dell {
 	device := common.NewDevice()
 	device.Oem = true
 
@@ -31,7 +31,7 @@ func newFakeDellDevice() *dell {
 	return &dell{
 		hw:     hardware,
 		dnf:    utils.NewFakeDnf(),
-		logger: logrus.New(),
+		logger: slogt.New(t),
 	}
 }
 
@@ -42,7 +42,7 @@ func TestGetInventory(t *testing.T) {
 	expected.Oem = true
 	expectedOemComponents := dellFixtures.R6515_oem_components
 
-	dell := newFakeDellDevice()
+	dell := newFakeDellDevice(t)
 
 	// dsu
 	b, err := os.ReadFile(r6515fixtures + "/dsu_inventory")
@@ -92,13 +92,13 @@ func TestGetInventory(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.DeepEqual(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
-	assert.DeepEqual(t, expectedOemComponents, dell.hw.OemComponents)
+	assert.Equal(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
+	assert.Equal(t, expectedOemComponents, dell.hw.OemComponents)
 }
 
 // Get inventory, not listing updates available
 func TestListUpdates(t *testing.T) {
-	dell := newFakeDellDevice()
+	dell := newFakeDellDevice(t)
 
 	// dsu
 	b, err := os.ReadFile(r6515fixtures + "/dsu_preview")
@@ -121,5 +121,5 @@ func TestListUpdates(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.DeepEqual(t, dellFixtures.R6515_updatePreview, device)
+	assert.Equal(t, dellFixtures.R6515_updatePreview, device)
 }

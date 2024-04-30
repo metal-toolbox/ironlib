@@ -3,24 +3,27 @@ package actions
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 var ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")
 
 type StorageControllerAction struct {
-	Logger *logrus.Logger
+	Logger *slog.Logger
+	trace  bool
 }
 
-func NewStorageControllerAction(logger *logrus.Logger) *StorageControllerAction {
-	return &StorageControllerAction{logger}
+func NewStorageControllerAction(logger *slog.Logger) *StorageControllerAction {
+	return &StorageControllerAction{
+		Logger: logger,
+		trace:  logger.Enabled(nil, -5),
+	}
 }
 
 func (s *StorageControllerAction) CreateVirtualDisk(ctx context.Context, hba *common.StorageController, options *model.CreateVirtualDiskOptions) error {
@@ -67,14 +70,8 @@ func (s *StorageControllerAction) ListVirtualDisks(ctx context.Context, hba *com
 
 // GetControllerUtility returns the utility command for the given vendor
 func (s *StorageControllerAction) GetControllerUtility(vendorName, modelName string) (VirtualDiskManager, error) {
-	var trace bool
-
-	if s.Logger.GetLevel().String() == "trace" {
-		trace = true
-	}
-
 	if strings.EqualFold(vendorName, common.VendorMarvell) {
-		return utils.NewMvcliCmd(trace), nil
+		return utils.NewMvcliCmd(s.trace), nil
 	}
 
 	return nil, errors.Wrap(ErrVirtualDiskManagerUtilNotIdentified, "vendor: "+vendorName+" model: "+modelName)
@@ -82,43 +79,28 @@ func (s *StorageControllerAction) GetControllerUtility(vendorName, modelName str
 
 // GetWipeUtility returns the wipe utility based on the disk wipping features
 func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DiskWiper, error) {
-	var trace bool
-
-	if s.Logger.GetLevel().String() == "trace" {
-		trace = true
-	}
-	// TODO: use disk wipping features to return the best wipe utility, currently only one available
-	if trace {
-		log.Printf("%s | Detecting wipe utility", logicalName)
-	}
-
-	return utils.NewFillZeroCmd(trace), nil
+	s.Logger.Debug("Detecting wipe utility", "device", logicalName)
+	return utils.NewFillZeroCmd(s.trace), nil
 }
 
-func (s *StorageControllerAction) WipeDisk(ctx context.Context, logicalName string) error {
+func (s *StorageControllerAction) WipeDisk(ctx context.Context, log *slog.Logger, logicalName string) error {
 	util, err := s.GetWipeUtility(logicalName)
 	if err != nil {
 		return err
 	}
+
 	// Watermark disk
 	// Before wiping the disk, we apply watermarks to later verify successful deletion
-	log.Printf("%s | Initiating watermarking process", logicalName)
 	check, err := utils.ApplyWatermarks(logicalName)
 	if err != nil {
 		return err
 	}
+
 	// Wipe the disk
-	err = util.WipeDisk(ctx, logicalName)
+	err = util.WipeDisk(ctx, log, logicalName)
 	if err != nil {
 		return err
 	}
-	// Check if the watermark has been removed after wiping
-	log.Printf("%s | Checking if the watermark has been removed", logicalName)
-	err = check()
-	if err != nil {
-		return err
-	}
-	// Watermarks have been successfully removed, indicating successful deletion
-	log.Printf("%s | Watermarks has been removed", logicalName)
-	return nil
+
+	return check()
 }

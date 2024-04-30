@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
@@ -202,5 +203,5 @@ type VirtualDiskManager interface {
 
 // DiskWiper defines an interface to override disk data
 type DiskWiper interface {
-	WipeDisk(ctx context.Context, logicalName string) error
+	WipeDisk(ctx context.Context, log *slog.Logger, logicalName string) error
 }
