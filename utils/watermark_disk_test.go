@@ -8,63 +8,70 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func createTestFile(t *testing.T) string {
+	// Create a temporary directory
+	// go will clean up the whole directory tree when the test is done
+	dir := t.TempDir()
+
+	f, err := os.Create(dir + "/test-file")
+	assert.NoError(t, err)
+	assert.NoError(t, f.Close())
+	return f.Name()
+}
+
 func Test_ApplyWatermarks(t *testing.T) {
-	// Create a temporary file
-	tempFile, err := os.CreateTemp("", "testfile")
-	if err != nil {
-		t.Fatalf("Failed to create temporary file: %v", err)
-	}
-	defer os.Remove(tempFile.Name())
+	t.Run("NotEnoughSpace", func(t *testing.T) {
+		tempFile := createTestFile(t)
 
-	// Close the file since we'll be reopening it in ApplyWatermarks
-	tempFile.Close()
-
-	t.Run("NegativeTest", func(t *testing.T) {
-		// Create a ~15KB empty file, no room for all watermarks
-		err := os.WriteFile(tempFile.Name(), make([]byte, 1*1024), 0o600)
-		if err != nil {
-			t.Fatalf("Failed to create empty file: %v", err)
-		}
 		// Create a 1KB empty file, no room for all watermarks
-		assert.NoError(t, os.Truncate(tempFile.Name(), 1*1024))
-		// Apply watermarks and expect an error
-		checker, _ := ApplyWatermarks(tempFile.Name())
+		assert.NoError(t, os.Truncate(tempFile, 1*1024))
+
+		checker, err := ApplyWatermarks(tempFile)
 		assert.Nil(t, checker)
+		assert.Error(t, err)
 	})
 
 	t.Run("EmptyFile", func(t *testing.T) {
-		// Wipe the file
-		assert.NoError(t, os.Truncate(tempFile.Name(), 0))
+		tempFile := createTestFile(t)
 
-		// Apply watermarks and expect no error
-		checker, err := ApplyWatermarks(tempFile.Name())
-		assert.Error(t, err, "No space for watermarking")
+		checker, err := ApplyWatermarks(tempFile)
 		assert.Nil(t, checker)
+		assert.Error(t, err)
 	})
-	t.Run("PositiveTestWithRandomDataAndWipe", func(t *testing.T) {
+
+	t.Run("WipeSucceeded", func(t *testing.T) {
+		tempFile := createTestFile(t)
+
 		// Write the file full of random data
 		randomData := make([]byte, 15*1024*1024)
 		_, err := rand.Read(randomData)
-		if err != nil {
-			t.Fatalf("Failed to generate random data: %v", err)
-		}
-		err = os.WriteFile(tempFile.Name(), randomData, 0o600)
-		if err != nil {
-			t.Fatalf("Failed to write random data to file: %v", err)
-		}
+		assert.NoError(t, err)
+		assert.NoError(t, os.WriteFile(tempFile, randomData, 0o600))
 
 		// Apply watermarks and expect no error
-		checker, err := ApplyWatermarks(tempFile.Name())
-		if err != nil {
-			t.Fatalf("Error applying watermarks: %v", err)
-		}
-		// simulate wipe
-		assert.NoError(t, os.Truncate(tempFile.Name(), 0))
-		assert.NoError(t, os.Truncate(tempFile.Name(), 15*1024*1024))
+		checker, err := ApplyWatermarks(tempFile)
+		assert.NoError(t, err)
 
-		err = checker()
-		if err != nil {
-			t.Errorf("Expected no error, got: %v", err)
-		}
+		// simulate wipe
+		assert.NoError(t, os.Truncate(tempFile, 0))
+		assert.NoError(t, os.Truncate(tempFile, 15*1024*1024))
+
+		assert.NoError(t, checker())
+	})
+
+	t.Run("WipeFailed", func(t *testing.T) {
+		tempFile := createTestFile(t)
+
+		// Write the file full of random data
+		randomData := make([]byte, 15*1024*1024)
+		_, err := rand.Read(randomData)
+		assert.NoError(t, err)
+		assert.NoError(t, os.WriteFile(tempFile, randomData, 0o600))
+
+		// Apply watermarks and expect no error
+		checker, err := ApplyWatermarks(tempFile)
+		assert.NoError(t, err)
+
+		assert.Error(t, checker())
 	})
 }
