@@ -1,4 +1,3 @@
-//nolint:wsl // god it's useless
 package utils
 
 import (

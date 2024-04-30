@@ -84,14 +84,6 @@ func printProgress(totalBytesWritten, partitionSize int64, start *time.Time, byt
 	log.Printf("%s | Progress: %.2f%% | Speed: %.2f MB/s | Estimated time left: %.2f hour(s)\n", path, progress, mbPerSecond, remainingHours)
 }
 
-// We are in go 1.19 min not available yet
-func min(a, b int64) int64 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // SetQuiet lowers the verbosity
 func (z *FillZero) SetQuiet() {
 	z.Quiet = true

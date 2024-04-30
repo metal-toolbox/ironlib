@@ -86,10 +86,7 @@ func Test_dsuParsePreviewBytes(t *testing.T) {
 func Test_findDSUInventoryCollector(t *testing.T) {
 	invb := "invcol_5N2WM_LN64_20_09_200_921_A00.BIN"
 
-	tmpDir, err := os.MkdirTemp("/tmp", "ironlibtest")
-	if err != nil {
-		t.Error(err)
-	}
+	tmpDir := t.TempDir()
 
 	dirs := []string{
 		tmpDir + "/foo/dsu",
@@ -98,10 +95,7 @@ func Test_findDSUInventoryCollector(t *testing.T) {
 
 	expected := []string{}
 
-	// nolint:gocritic // test code
 	for _, d := range dirs {
-		defer func() { _ = os.RemoveAll(d) }()
-
 		err := os.MkdirAll(d, 0o744)
 		if err != nil {
 			t.Error(err)

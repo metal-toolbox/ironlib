@@ -222,7 +222,6 @@ func smartCtlExitStatus(exitCode int) []string {
 // maskExitCode identifies error bits set based on the smartctl exit code
 // it returns a slice of bits that are set to a value > 0
 // see man 8 smartctl for details
-// nolint:gomnd // comments clarify magic numbers
 func maskExitCode(e int) []int {
 	set := []int{}
 
@@ -280,7 +279,6 @@ func NewFakeSmartctl(dataDir string) *Smartctl {
 	return &Smartctl{Executor: executor}
 }
 
-// nolint:gocyclo // test code
 // ExecWithContext implements the utils.Executor interface
 func (e *FakeSmartctlExecute) ExecWithContext(context.Context) (*Result, error) {
 	switch e.Args[0] {
