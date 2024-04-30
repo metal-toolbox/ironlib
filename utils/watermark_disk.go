@@ -16,6 +16,8 @@ const (
 	numWatermarks = 10
 )
 
+var ErrIneffectiveWipe = errors.New("found left over data after wiping disk")
+
 type watermark struct {
 	position int64
 	data     []byte
@@ -68,8 +70,7 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 			}
 			// Check if the watermark is still in the disk
 			if slices.Equal(currentValue, watermark.data) {
-				ErrorExistingWatermark := errors.New("Error existing watermark in the position: ")
-				return fmt.Errorf("%s@%d | %w", logicalName, watermark.position, ErrorExistingWatermark)
+				return fmt.Errorf("verify wipe %s@%d: %w", logicalName, watermark.position, ErrIneffectiveWipe)
 			}
 		}
 		return nil
