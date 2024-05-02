@@ -12,7 +12,7 @@ import (
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/pkg/errors"
-	"github.com/r3labs/diff/v2"
+	"github.com/r3labs/diff/v3"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 )
