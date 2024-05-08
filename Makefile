@@ -4,12 +4,21 @@ export GOBIN=$(CURDIR)/bin
 export PATH:=$(PATH):$(GOBIN)
 
 ## Run all linters
-lint: golangci-lint
+lint: golangci-lint check-go-generated
 
 ## Run golangci-lint
 golangci-lint:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57
 	golangci-lint run --config .golangci.yml
+
+## Run go generate
+generate:
+	go install golang.org/x/tools/cmd/stringer@v0.21.0
+	go generate ./...
+
+## Check generated files are up to date
+check-go-generated: generate
+	git diff | (! grep .)
 
 ## Run go test
 go-test:
