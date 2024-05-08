@@ -1,17 +1,17 @@
 .DEFAULT_GOAL := help
 
-## lint
+## Run all linters
 lint: golangci-lint
 
-## golangci-lint
+## Run golangci-lint
 golangci-lint:
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57 run --config .golangci.yml
 
-## go test
+## Run go test
 go-test:
 	CGO_ENABLED=0 go test -v -covermode=atomic ./...
 
-## test
+## Run all tests and linters
 test: go-test lint
 
 # https://gist.github.com/prwhite/8168133
