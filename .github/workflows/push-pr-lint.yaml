@@ -16,6 +16,9 @@ jobs:
     - name: Run golangci-lint
       run: make golangci-lint
 
+    - name: Check go generated files
+      run: make check-go-generated
+
     - name: Run go tests
       run: make go-test
 
