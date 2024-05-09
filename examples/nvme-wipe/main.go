@@ -32,8 +32,14 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
+	logger.Info("resetting namespaces")
+	err = nvme.ResetNS(ctx, *device)
+	if err != nil {
+		logger.WithError(err).Fatal("exiting")
+	}
+
 	logger.Info("wiping")
-	err = nvme.WipeDisk(ctx, logger, *device)
+	err = nvme.WipeDisk(ctx, logger, *device+"n1")
 	if err != nil {
 		logger.WithError(err).Fatal("exiting")
 	}
