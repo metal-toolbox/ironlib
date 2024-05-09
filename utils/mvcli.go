@@ -7,13 +7,13 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
-	"golang.org/x/exp/slices"
 )
 
 const (
