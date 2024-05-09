@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"runtime/debug"
+	"slices"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
@@ -14,7 +15,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/r3labs/diff/v3"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 )
 
 var (
