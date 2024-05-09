@@ -84,7 +84,7 @@ func writeWatermarks(file *os.File, watermarksCount, watermarksSize int64) ([]wa
 	chunkSize := fileSize / watermarksCount
 
 	watermarks := make([]watermark, watermarksCount)
-	for chunkStart, i := int64(0), 0; chunkStart < fileSize; chunkStart, i = chunkStart+chunkSize, i+1 {
+	for chunkStart, i := int64(0), int64(0); i < watermarksCount; chunkStart, i = chunkStart+chunkSize, i+1 {
 		data := make([]byte, watermarksSize)
 		_, err := rand.Read(data)
 		if err != nil {
