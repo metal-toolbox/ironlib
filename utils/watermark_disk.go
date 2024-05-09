@@ -41,20 +41,22 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 		}
 		defer file.Close()
 
-		for _, watermark := range watermarks {
+		for i, watermark := range watermarks {
 			_, err = file.Seek(watermark.position, io.SeekStart)
 			if err != nil {
-				return err
+				return fmt.Errorf("watermark verification, %s@%d(mark=%d), seek: %w", logicalName, watermark.position, i, err)
 			}
+
 			// Read the watermark written to the position
 			currentValue := make([]byte, watermarkSize)
 			_, err = io.ReadFull(file, currentValue)
 			if err != nil {
-				return err
+				return fmt.Errorf("read watermark %s@%d(mark=%d): %w", logicalName, watermark.position, i, err)
 			}
+
 			// Check if the watermark is still in the disk
 			if slices.Equal(currentValue, watermark.data) {
-				return fmt.Errorf("verify wipe %s@%d: %w", logicalName, watermark.position, ErrIneffectiveWipe)
+				return fmt.Errorf("verify wipe %s@%d(mark=%d): %w", logicalName, watermark.position, i, ErrIneffectiveWipe)
 			}
 		}
 		return nil
