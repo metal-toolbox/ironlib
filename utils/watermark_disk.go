@@ -2,13 +2,12 @@ package utils
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io"
 	"math/big"
 	"os"
 	"slices"
-
-	"github.com/pkg/errors"
 )
 
 var ErrIneffectiveWipe = errors.New("found left over data after wiping disk")
