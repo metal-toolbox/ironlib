@@ -1,11 +1,15 @@
 .DEFAULT_GOAL := help
 
+export GOBIN=$(CURDIR)/bin
+export PATH:=$(PATH):$(GOBIN)
+
 ## Run all linters
 lint: golangci-lint
 
 ## Run golangci-lint
 golangci-lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57 run --config .golangci.yml
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57
+	golangci-lint run --config .golangci.yml
 
 ## Run go test
 go-test:
