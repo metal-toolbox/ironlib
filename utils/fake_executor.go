@@ -67,7 +67,7 @@ func (e *FakeExecute) Exec(_ context.Context) (*Result, error) {
 			}
 
 			e.Stdout = b
-		case "sanitize":
+		case "format", "sanitize":
 			dev := e.Args[len(e.Args)-1]
 			f, err := os.OpenFile(dev, os.O_WRONLY, 0)
 			if err != nil {

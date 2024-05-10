@@ -22,6 +22,7 @@ const EnvNvmeUtility = "IRONLIB_UTIL_NVME"
 var (
 	errSanicapNODMMASReserved = errors.New("sanicap nodmmas reserved bits set, not sure what to do with them")
 	errSanitizeInvalidAction  = errors.New("invalid sanitize action")
+	errFormatInvalidSetting   = errors.New("invalid format setting")
 )
 
 type Nvme struct {
@@ -278,6 +279,16 @@ const (
 	CryptoErase
 )
 
+//go:generate stringer -type SecureEraseSetting
+type SecureEraseSetting uint8
+
+const (
+	None SecureEraseSetting = iota
+	UserDataErase
+	CryptographicErase
+	Reserved
+)
+
 // WipeDisk implements DiskWiper by running nvme sanitize
 func (n *Nvme) WipeDisk(ctx context.Context, logger *logrus.Logger, device string) error {
 	caps, err := n.DriveCapabilities(ctx, device)
@@ -290,12 +301,15 @@ func (n *Nvme) WipeDisk(ctx context.Context, logger *logrus.Logger, device strin
 func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, device string, caps []*common.Capability) error {
 	var ber bool
 	var cer bool
+	var cese bool
 	for _, cap := range caps {
 		switch cap.Name {
 		case "ber":
 			ber = cap.Enabled
 		case "cer":
 			cer = cap.Enabled
+		case "cese":
+			cese = cap.Enabled
 		}
 	}
 
@@ -317,6 +331,23 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, device string, c
 		}
 		l.WithError(err).Info("failed")
 	}
+	if cese {
+		l := logger.WithField("method", "format").WithField("setting", CryptographicErase)
+		l.Info("trying wipe")
+		err := n.Format(ctx, device, CryptographicErase)
+		if err == nil {
+			return nil
+		}
+		l.WithError(err).Info("failed")
+	}
+
+	l := logger.WithField("method", "format").WithField("setting", UserDataErase)
+	l.Info("trying wipe")
+	err := n.Format(ctx, device, UserDataErase)
+	if err == nil {
+		return nil
+	}
+	l.WithError(err).Info("failed")
 	return ErrIneffectiveWipe
 }
 
@@ -363,6 +394,27 @@ func (n *Nvme) Sanitize(ctx context.Context, device string, sanact SanitizeActio
 			break
 		}
 		time.Sleep(100 * time.Millisecond)
+	}
+
+	return verify()
+}
+
+func (n *Nvme) Format(ctx context.Context, device string, ses SecureEraseSetting) error {
+	switch ses { // nolint:exhaustive
+	case UserDataErase, CryptographicErase:
+	default:
+		return fmt.Errorf("%w: %v", errFormatInvalidSetting, ses)
+	}
+
+	verify, err := ApplyWatermarks(device)
+	if err != nil {
+		return err
+	}
+
+	n.Executor.SetArgs("format", "--ses="+strconv.Itoa(int(ses)), device)
+	_, err = n.Executor.Exec(ctx)
+	if err != nil {
+		return err
 	}
 
 	return verify()

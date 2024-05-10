@@ -194,22 +194,48 @@ func Test_NvmeSanitize(t *testing.T) {
 	}
 }
 
+func Test_NvmeFormat(t *testing.T) {
+	for action := range Reserved {
+		t.Run(action.String(), func(t *testing.T) {
+			n := NewFakeNvme()
+			dev := fakeNVMEDevice(t)
+			err := n.Format(context.Background(), dev, action)
+
+			switch action { // nolint:exhaustive
+			case UserDataErase, CryptographicErase:
+				require.NoError(t, err)
+				e, ok := n.Executor.(*FakeExecute)
+				require.True(t, ok)
+				require.Equal(t, []string{"format", "--ses=" + strconv.Itoa(int(action)), dev}, e.Args)
+			default:
+				require.Error(t, err)
+				require.ErrorIs(t, err, errFormatInvalidSetting)
+			}
+		})
+	}
+}
+
 func Test_NvmeWipe(t *testing.T) {
 	tests := []struct {
 		caps map[string]bool
 		args []string
 	}{
-		{caps: map[string]bool{"ber": false, "cer": false}},
-		{caps: map[string]bool{"ber": false, "cer": true}, args: []string{"sanitize", "--sanact=4"}},
-		{caps: map[string]bool{"ber": true, "cer": false}, args: []string{"sanitize", "--sanact=2"}},
-		{caps: map[string]bool{"ber": true, "cer": true}, args: []string{"sanitize", "--sanact=4"}},
+		{caps: map[string]bool{"ber": false, "cer": false, "cese": false}, args: []string{"format", "--ses=1"}},
+		{caps: map[string]bool{"ber": false, "cer": false, "cese": true}, args: []string{"format", "--ses=2"}},
+		{caps: map[string]bool{"ber": false, "cer": true, "cese": false}, args: []string{"sanitize", "--sanact=4"}},
+		{caps: map[string]bool{"ber": false, "cer": true, "cese": true}, args: []string{"sanitize", "--sanact=4"}},
+		{caps: map[string]bool{"ber": true, "cer": false, "cese": false}, args: []string{"sanitize", "--sanact=2"}},
+		{caps: map[string]bool{"ber": true, "cer": false, "cese": true}, args: []string{"sanitize", "--sanact=2"}},
+		{caps: map[string]bool{"ber": true, "cer": true, "cese": false}, args: []string{"sanitize", "--sanact=4"}},
+		{caps: map[string]bool{"ber": true, "cer": true, "cese": true}, args: []string{"sanitize", "--sanact=4"}},
 	}
 	for _, test := range tests {
-		name := fmt.Sprintf("ber=%v,cer=%v", test.caps["ber"], test.caps["cer"])
+		name := fmt.Sprintf("ber=%v,cer=%v,cese=%v", test.caps["ber"], test.caps["cer"], test.caps["cese"])
 		t.Run(name, func(t *testing.T) {
 			caps := []*common.Capability{
 				{Name: "ber", Enabled: test.caps["ber"]},
 				{Name: "cer", Enabled: test.caps["cer"]},
+				{Name: "cese", Enabled: test.caps["cese"]},
 			}
 			n := NewFakeNvme()
 			dev := fakeNVMEDevice(t)
@@ -217,21 +243,16 @@ func Test_NvmeWipe(t *testing.T) {
 			defer hook.Reset()
 
 			err := n.wipe(context.Background(), logger, dev, caps)
-
-			if test.args == nil {
-				require.Error(t, err)
-				require.ErrorIs(t, err, ErrIneffectiveWipe)
-				return
-			}
-
 			require.NoError(t, err)
+
 			// FakeExecute is a bad mocker since it doesn't record all calls and sanitize-log calls aren't that interesting
 			// TODO: Setup better mocks
-			//
-			// e, ok := n.Executor.(*FakeExecute)
-			// require.True(t, ok)
-			// test.args = append(test.args, dev)
-			// require.Equal(t, test.args, e.Args)
+			if test.args[0] == "format" {
+				e, ok := n.Executor.(*FakeExecute)
+				require.True(t, ok)
+				test.args = append(test.args, dev)
+				require.Equal(t, test.args, e.Args)
+			}
 		})
 	}
 }
