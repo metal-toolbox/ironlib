@@ -49,7 +49,17 @@ func (e *FakeExecute) Exec(_ context.Context) (*Result, error) {
 		switch e.Args[0] {
 		case "list":
 			e.Stdout = nvmeListDummyJSON
-
+		case "list-ns":
+			e.Stdout = []byte(`{"nsid_list":[{"nsid":1}]}`)
+		case "delete-ns":
+			e.Stdout = []byte("delete-ns: Success, deleted nsid:1\n")
+		case "create-ns":
+			e.Stdout = []byte("create-ns: Success, created nsid:1\n")
+		case "attach-ns":
+			e.Stdout = []byte("attach-ns: Success, nsid:1\n")
+		case "id-ns":
+			e.Stdout = []byte(`{"lbafs":[{"ds":9},{"ds":12}]}`)
+		case "reset", "ns-rescan":
 		case "id-ctrl":
 			cwd, _ := os.Getwd()
 			f := "../fixtures/utils/nvme/nvmecli-id-ctrl"

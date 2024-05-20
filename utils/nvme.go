@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -23,6 +24,7 @@ var (
 	errSanicapNODMMASReserved = errors.New("sanicap nodmmas reserved bits set, not sure what to do with them")
 	errSanitizeInvalidAction  = errors.New("invalid sanitize action")
 	errFormatInvalidSetting   = errors.New("invalid format setting")
+	errInvalidCreateNSArgs    = errors.New("invalid ns-create args")
 )
 
 type Nvme struct {
@@ -416,8 +418,182 @@ func (n *Nvme) Format(ctx context.Context, device string, ses SecureEraseSetting
 	if err != nil {
 		return err
 	}
-
 	return verify()
+}
+
+func (n *Nvme) listNS(ctx context.Context, device string) ([]uint, error) {
+	n.Executor.SetArgs("list-ns", "--output-format=json", "--all", device)
+	result, err := n.Executor.Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	list := struct {
+		Namespaces []struct {
+			ID uint `json:"nsid"`
+		} `json:"nsid_list"`
+	}{}
+	err = json.Unmarshal(result.Stdout, &list)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make([]uint, len(list.Namespaces))
+	for i := range list.Namespaces {
+		ret[i] = list.Namespaces[i].ID
+	}
+	return ret, nil
+}
+
+func (n *Nvme) createNS(ctx context.Context, device string, size, blocksize uint) (uint, error) {
+	if blocksize == 0 {
+		return 0, fmt.Errorf("%w: blocksize(0) is zero", errInvalidCreateNSArgs)
+	}
+	if size <= blocksize {
+		return 0, fmt.Errorf("%w: size(%d) is not larger than blocksize(%d), arguments may be swapped", errInvalidCreateNSArgs, size, blocksize)
+	}
+	if size%blocksize != 0 {
+		return 0, fmt.Errorf("%w: size(%d) is not a multiple of blocksize(%d)", errInvalidCreateNSArgs, size, blocksize)
+	}
+
+	_size := strconv.Itoa(int(size / blocksize))
+	_blocksize := strconv.Itoa(int(blocksize))
+	n.Executor.SetArgs("create-ns", device, "--dps=0", "--nsze="+_size, "--ncap="+_size, "--blocksize="+_blocksize)
+	result, err := n.Executor.Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	// parse namespace id from stdout which looks like: `create-ns: Success, created nsid:1`
+	out := bytes.TrimSpace(result.Stdout)
+	parts := bytes.Split(out, []byte(":"))
+	if len(parts) != 3 {
+		return 0, fmt.Errorf("unable to parse nsid: %w", io.ErrUnexpectedEOF)
+	}
+	nsid, err := strconv.Atoi(string(parts[2]))
+	return uint(nsid), err
+}
+
+func (n *Nvme) deleteNS(ctx context.Context, device string, namespaceID uint) error {
+	nsid := strconv.Itoa(int(namespaceID))
+	n.Executor.SetArgs("delete-ns", device, "--namespace-id="+nsid)
+	_, err := n.Executor.Exec(ctx)
+	return err
+}
+
+func (n *Nvme) attachNS(ctx context.Context, device string, controllerID, namespaceID uint) error {
+	cntlid := strconv.Itoa(int(controllerID))
+	nsid := strconv.Itoa(int(namespaceID))
+	n.Executor.SetArgs("attach-ns", device, "--controllers="+cntlid, "--namespace-id="+nsid)
+	_, err := n.Executor.Exec(ctx)
+	return err
+}
+
+func (n *Nvme) idNS(ctx context.Context, device string, namespaceID uint) ([]byte, error) {
+	nsid := strconv.Itoa(int(namespaceID))
+	n.Executor.SetArgs("id-ns", "--output-format=json", device, "--namespace-id="+nsid)
+	result, err := n.Executor.Exec(ctx)
+	return result.Stdout, err
+}
+
+func (n *Nvme) ResetNS(ctx context.Context, device string) error { // nolint:gocyclo
+	out, err := n.cmdListCapabilities(ctx, device)
+	if err != nil {
+		return err
+	}
+
+	ctrl := struct {
+		CNTLID  uint `json:"cntlid"`
+		TNVMCAP uint `json:"tnvmcap"`
+	}{}
+	err = json.Unmarshal(out, &ctrl)
+	if err != nil {
+		return err
+	}
+
+	namespaces, err := n.listNS(ctx, device)
+	if err != nil {
+		return err
+	}
+
+	// we need to have at least 1 namespace so we can interogate the features supported
+	if len(namespaces) == 0 {
+		var nsid uint
+		nsid, err = n.createNS(ctx, device, ctrl.TNVMCAP, 512)
+		if err != nil {
+			return err
+		}
+
+		err = n.attachNS(ctx, device, ctrl.CNTLID, nsid)
+		if err != nil {
+			return err
+		}
+
+		namespaces, err = n.listNS(ctx, device)
+		if err != nil {
+			return err
+		}
+		if len(namespaces) == 0 {
+			err = fmt.Errorf("%s: failed to find namespaces: %w", device, io.ErrUnexpectedEOF)
+			return err
+		}
+	}
+
+	out, err = n.idNS(ctx, device, namespaces[0])
+	if err != nil {
+		return err
+	}
+	ns := struct {
+		LBAFS []struct {
+			DS uint `json:"ds"`
+		} `json:"lbafs"`
+	}{}
+	err = json.Unmarshal(out, &ns)
+	if err != nil {
+		return err
+	}
+
+	ds := uint(0)
+	for _, lbafs := range ns.LBAFS {
+		// ds is specified in bit-shift count, usually 9:(512b) or 12:(4096)
+		ds = max(ds, 1<<lbafs.DS)
+	}
+
+	// info gathered and looks ok, lets get dangerous
+
+	// delete all namespaces
+	for _, ns := range namespaces {
+		err = n.deleteNS(ctx, device, ns)
+		if err != nil {
+			return err
+		}
+	}
+
+	// figure out nsze and ncap in terms of blocksize, we want both to be the same
+	var nsid uint
+	nsid, err = n.createNS(ctx, device, ctrl.TNVMCAP, ds)
+	if err != nil {
+		return err
+	}
+
+	err = n.attachNS(ctx, device, ctrl.CNTLID, nsid)
+	if err != nil {
+		return err
+	}
+
+	n.Executor.SetArgs("reset", device)
+	_, err = n.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	n.Executor.SetArgs("ns-rescan", device)
+	_, err = n.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // NewFakeNvme returns a mock nvme collector that returns mock data for use in tests.

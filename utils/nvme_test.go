@@ -256,3 +256,29 @@ func Test_NvmeWipe(t *testing.T) {
 		})
 	}
 }
+
+func Test_NvmeCreateNS(t *testing.T) {
+	nvme := NewFakeNvme()
+	for name, test := range map[string]struct {
+		size      uint
+		blocksize uint
+		msg       string
+	}{
+		"zero blocksize":                 {0, 0, "is zero"},
+		"args swapped":                   {0, 1, "swapped"},
+		"args equal":                     {1, 1, "swapped"},
+		"size not multiple of blocksize": {3, 2, "not a multiple"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			id, err := nvme.createNS(context.Background(), "/dev/nvme0", test.size, test.blocksize)
+			assert.Equal(t, uint(0), id)
+			assert.ErrorIs(t, err, errInvalidCreateNSArgs)
+			assert.Contains(t, err.Error(), test.msg)
+		})
+	}
+}
+
+func Test_NvmeResetNS(t *testing.T) {
+	err := NewFakeNvme().ResetNS(context.Background(), "/dev/nvme0")
+	assert.NoError(t, err)
+}
