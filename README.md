@@ -31,6 +31,7 @@ Ironlib identifies the hardware and executes tooling respective to the hardware/
 
 The list of tools that ironlib wraps around, in no particular order,
 
+- blkdiscard
 - dell racadm
 - dmidecode
 - dell dsu
@@ -93,6 +94,7 @@ IRONLIB_UTIL_ASRR_BIOSCONTROL
 IRONLIB_UTIL_RACADM7
 IRONLIB_UTIL_DNF
 IRONLIB_UTIL_DSU
+IRONLIB_UTIL_BLKDISCARD
 IRONLIB_UTIL_HDPARM
 IRONLIB_UTIL_LSBLK
 IRONLIB_UTIL_LSHW
