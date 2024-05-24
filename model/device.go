@@ -8,7 +8,7 @@ type Hardware struct {
 	UpdatesInstalled bool // set when updates were installed on the device
 	UpdatesAvailable int  // -1 == no update lookup as yet,  0 == no updates available, 1 == updates available
 	Device           *common.Device
-	OemComponents    *OemComponents // OemComponents hold OEM specific components that may not show up in dmidecode/lshw and other collectors.
+	OEMComponents    []*Component // OEMComponents hold OEM specific components that may not show up in dmidecode/lshw and other collectors.
 }
 
 // NewHardware returns the base Hardware struct that various providers inherit

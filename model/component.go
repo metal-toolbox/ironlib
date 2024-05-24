@@ -31,11 +31,6 @@ type UpdateOptions struct {
 	BaseURL           string // The BaseURL for the updates
 }
 
-// OemComponents are OEM specific device components
-type OemComponents struct {
-	Dell []*Component `json:"dell"`
-}
-
 type CreateVirtualDiskOptions struct {
 	RaidMode        string
 	PhysicalDiskIDs []uint

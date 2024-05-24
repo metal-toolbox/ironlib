@@ -131,7 +131,7 @@ func (d *dell) GetInventoryOEM(ctx context.Context, _ *common.Device, options *m
 		return err
 	}
 
-	d.hw.OemComponents.Dell = append(d.hw.OemComponents.Dell, oemComponents...)
+	d.hw.OEMComponents = append(d.hw.OEMComponents, oemComponents...)
 
 	return nil
 }
@@ -156,7 +156,7 @@ func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOp
 
 	d.logger.WithField("count", count).Info("component updates identified..")
 
-	d.hw.OemComponents.Dell = append(d.hw.OemComponents.Dell, oemUpdates...)
+	d.hw.OEMComponents = append(d.hw.OEMComponents, oemUpdates...)
 
 	return d.hw.Device, nil
 }
