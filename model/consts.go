@@ -8,12 +8,6 @@ import (
 // CollectorUtility is the name of a utility defined in utils/
 type CollectorUtility string
 
-// UpdateReleaseEnvironments is the list of update environments
-// this is related to the fup tooling
-func UpdateReleaseEnvironments() []string {
-	return []string{"production", "canary", "vanguard"}
-}
-
 var (
 
 	// ModelDriveTypeSlug is a map of drive models number to slug
