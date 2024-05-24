@@ -10,11 +10,29 @@ import (
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
-	"github.com/metal-toolbox/ironlib/model/supermicro"
 	"golang.org/x/net/html/charset"
 )
 
 const EnvVarSumPath = "IRONLIB_UTIL_SUM"
+
+type biosCfg struct {
+	XMLName xml.Name `xml:"BiosCfg"`
+	Text    string   `xml:",chardata"`
+	Menu    []*menu  `xml:"Menu,omitempty"`
+}
+
+type menu struct {
+	Name    string     `xml:"name,attr"`
+	Setting []*setting `xml:"Setting,omitempty"`
+	Menu    []*menu    `xml:"Menu,omitempty"`
+}
+
+type setting struct {
+	Name           string `xml:"name,attr"`
+	Type           string `xml:"type,attr"`
+	SelectedOption string `xml:"selectedOption,attr,omitempty"`
+	CheckedStatus  string `xml:"checkedStatus,attr,omitempty"`
+}
 
 type SupermicroSUM struct {
 	Executor Executor
@@ -134,7 +152,7 @@ func (s *SupermicroSUM) parseBIOSConfig(ctx context.Context) (map[string]string,
 		return nil, newExecError(s.Executor.GetCmd(), result)
 	}
 
-	cfg := &supermicro.BiosCfg{}
+	cfg := &biosCfg{}
 
 	// the xml exported by sum is ISO-8859-1 encoded
 	decoder := xml.NewDecoder(bytes.NewReader(result.Stdout))
@@ -153,7 +171,7 @@ func (s *SupermicroSUM) parseBIOSConfig(ctx context.Context) (map[string]string,
 }
 
 // recurseMenus recurses through SMC BIOS menu options and gathers all settings with a selected option
-func (s *SupermicroSUM) recurseMenus(menus []*supermicro.Menu, kv map[string]string) {
+func (s *SupermicroSUM) recurseMenus(menus []*menu, kv map[string]string) {
 	for _, menu := range menus {
 		for _, s := range menu.Setting {
 			s.Name = strings.TrimSpace(s.Name)

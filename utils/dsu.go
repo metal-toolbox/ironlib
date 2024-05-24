@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
@@ -25,10 +26,55 @@ const (
 	DSUExitCodeRebootRequired     = 8
 	DSUExitCodeNoUpdatesAvailable = 34
 
+	// Dell specific component slugs
+	slugDellSystemCPLD                  = "Dell System CPLD"
+	slugDellBossAdapter                 = "Boss Adapter"
+	slugDellBossAdapterDisk0            = "Boss Adapter - Disk 0"
+	slugDellBossAdapterDisk1            = "Boss Adapter - Disk 1"
+	slugDellIdracServiceModule          = "IDrac Service Module"
+	slugDellLifeCycleController         = "Lifecycle Controller"
+	slugDellOSCollector                 = "OS Collector"
+	slugDell64bitUefiDiagnostics        = "Dell 64 bit uEFI diagnostics"
+	slugDellBackplaneExpander           = "Backplane-Expander"
+	slugDellNonExpanderStorageBackplane = "Non-Expander Storage Backplane (SEP)"
+
+	// EnvDellDSURelease is the Dell DSU release version
+	//
+	// e.g: 21.11.12 from https://linux.dell.com/repo/hardware/DSU_21.11.12/
+	EnvDellDSURelease = "DELL_DSU_RELEASE"
+
+	// EnvDellDSUVersion is the Dell DSU utility package version
+	//
+	// e.g: 1.9.2.0-21.07.00 from https://linux.dell.com/repo/hardware/DSU_21.11.12/os_independent/x86_64/dell-system-update-1.9.2.0-21.07.00.x86_64.rpm
+	EnvDellDSUVersion = "DELL_DSU_VERSION"
+
 	LocalUpdatesDirectory = "/root/dsu"
 
 	EnvDsuUtility = "IRONLIB_UTIL_DSU"
 )
+
+// DellComponentSlug is an ordered list of dell component identifiers to component slug
+// To identify components correctly, if two components contain a similar string
+// e.g: "idrac", "dell emc idrac service module" the latter should be positioned before the former in the list.
+var dellComponentSlug = [][]string{
+	{"bios", common.SlugBIOS},
+	{"ethernet", common.SlugNIC},
+	{"dell emc idrac service module", slugDellIdracServiceModule},
+	{"idrac", common.SlugBMC},
+	{"backplane", common.SlugBackplaneExpander},
+	{"power supply", common.SlugPSU},
+	{"hba330", common.SlugStorageController},
+	{"nvmepcissd", common.SlugDrive},
+	{"system cpld", slugDellSystemCPLD},
+	{"sep firmware", slugDellNonExpanderStorageBackplane},
+	{"lifecycle controller", slugDellLifeCycleController},
+	{"os collector", slugDellOSCollector},
+	{"disk 0 of boss adapter", slugDellBossAdapterDisk0},
+	{"disk 1 of boss adapter", slugDellBossAdapterDisk1},
+	{"boss", slugDellBossAdapter},
+	{"dell 64 bit uefi diagnostics", slugDell64bitUefiDiagnostics},
+	{"integrated dell remote access controller", common.SlugBMC},
+}
 
 var (
 	ErrDsuInventoryCollectorBinMissing   = errors.New("dsu inventory collector executable missing 'invcol_*_*.BIN'")
@@ -282,7 +328,7 @@ func findDSUInventoryCollector(path string) []string {
 func dsuComponentNameToSlug(n string) string {
 	componentName := strings.ToLower(n)
 
-	for _, componentSlug := range model.DellComponentSlug {
+	for _, componentSlug := range dellComponentSlug {
 		identifier, slug := componentSlug[0], componentSlug[1]
 		if strings.EqualFold(componentName, identifier) {
 			return slug

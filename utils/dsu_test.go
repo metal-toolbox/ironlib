@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
-	"github.com/metal-toolbox/ironlib/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,18 +14,18 @@ func Test_dsuComponentNameToSlug(t *testing.T) {
 	kv := map[string]string{
 		"BIOS":                    common.SlugBIOS,
 		"Power Supply":            common.SlugPSU,
-		"Disk 0 of BOSS Adapter ": model.SlugDellBossAdapterDisk0,
-		"BOSS":                    model.SlugDellBossAdapter,
+		"Disk 0 of BOSS Adapter ": slugDellBossAdapterDisk0,
+		"BOSS":                    slugDellBossAdapter,
 		"Dell HBA330 Mini Controller 0 Firmware ":                    common.SlugStorageController,
-		"Backplane Expander FW ":                                     model.SlugDellBackplaneExpander,
+		"Backplane Expander FW ":                                     slugDellBackplaneExpander,
 		"Intel(R) Ethernet 10G 4P X710 SFP+ rNDC":                    common.SlugNIC,
 		"Intel(R) Ethernet 10G X710 rNDC ":                           common.SlugNIC,
 		"Intel(R) Ethernet 10G X710 rNDC":                            common.SlugNIC,
 		"iDRAC":                                                      common.SlugBMC,
 		"NVMePCISSD Model Number: Micron_9200_MTFDHAL3T8TCT":         common.SlugDrive,
-		"Lifecycle Controller":                                       model.SlugDellLifeCycleController,
-		"System CPLD":                                                model.SlugDellSystemCPLD,
-		"Dell EMC iDRAC Service Module Embedded Package v3.5.0, A00": model.SlugDellIdracServiceModule,
+		"Lifecycle Controller":                                       slugDellLifeCycleController,
+		"System CPLD":                                                slugDellSystemCPLD,
+		"Dell EMC iDRAC Service Module Embedded Package v3.5.0, A00": slugDellIdracServiceModule,
 	}
 
 	for componentName, expectedSlug := range kv {
