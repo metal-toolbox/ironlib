@@ -85,24 +85,23 @@ func (s *Smartctl) Attributes() (utilName model.CollectorUtility, absolutePath s
 }
 
 // Drives returns drives identified by smartctl
-func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
-	drives := make([]*common.Drive, 0)
-
+func (s *Smartctl) Drives(ctx context.Context) ([]*model.Drive, error) {
 	DrivesList, err := s.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, drive := range DrivesList.Drives {
+	drives := make([]*model.Drive, 0, len(DrivesList.Drives))
+	for _, d := range DrivesList.Drives {
 		// collect drive information with smartctl -a <drive>
-		smartctlAll, err := s.All(ctx, drive.Name)
+		smartctlAll, err := s.All(ctx, d.Name)
 		if err != nil {
 			return nil, err
 		}
 
 		item := &common.Drive{
 			Common: common.Common{
-				LogicalName: drive.Name,
+				LogicalName: d.Name,
 				Vendor: cmp.Or(
 					common.VendorFromString(smartctlAll.ModelName),
 					common.VendorFromString(smartctlAll.ModelFamily),
@@ -120,13 +119,8 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 			Type:                     model.DriveTypeSlug(smartctlAll.ModelName),
 			SmartStatus:              common.SmartStatusUnknown,
 			StorageControllerDriveID: -1,
+			OemID:                    strings.TrimSpace(smartctlAll.OemProductID),
 		}
-
-		if item.Vendor == "" {
-			item.Vendor = common.VendorFromString(smartctlAll.ModelFamily)
-		}
-
-		item.OemID = strings.TrimSpace(smartctlAll.OemProductID)
 
 		if smartctlAll.Status != nil {
 			if smartctlAll.Status.Passed {
@@ -140,7 +134,7 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 			item.SmartErrors = smartctlAll.Errors
 		}
 
-		drives = append(drives, item)
+		drives = append(drives, model.NewDrive(item, nil))
 	}
 
 	return drives, nil

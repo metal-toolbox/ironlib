@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/stretchr/testify/assert"
 )
 
-func createTestDrive(t *testing.T) *common.Drive {
+func createTestDrive(t *testing.T) *model.Drive {
 	// Create a temporary directory
 	// go will clean up the whole directory tree when the test is done
 	dir := t.TempDir()
@@ -18,7 +19,7 @@ func createTestDrive(t *testing.T) *common.Drive {
 	f, err := os.Create(dir + "/test-file")
 	assert.NoError(t, err)
 	assert.NoError(t, f.Close())
-	return &common.Drive{Common: common.Common{LogicalName: f.Name()}}
+	return &model.Drive{Drive: common.Drive{Common: common.Common{LogicalName: f.Name()}}}
 }
 
 func Test_ApplyWatermarks(t *testing.T) {

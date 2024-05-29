@@ -85,7 +85,7 @@ type InventoryCollector interface {
 // DriveCollector defines an interface to return disk drive inventory
 type DriveCollector interface {
 	UtilAttributeGetter
-	Drives(ctx context.Context) ([]*common.Drive, error)
+	Drives(ctx context.Context) ([]*model.Drive, error)
 }
 
 // DriveCapabilityCollector defines an interface to collect disk drive capability attributes
@@ -204,5 +204,5 @@ type VirtualDiskManager interface {
 // DriveWiper defines an interface to override disk data
 type DriveWiper interface {
 	// WipeDrive wipes away all data from the drive, wipe is always verified to have succeeded
-	WipeDrive(context.Context, *logrus.Logger, *common.Drive) error
+	WipeDrive(context.Context, *logrus.Logger, *model.Drive) error
 }

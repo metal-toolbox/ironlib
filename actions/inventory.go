@@ -402,19 +402,19 @@ func (a *InventoryCollectorAction) CollectDrives(ctx context.Context) (err error
 
 		// add drive if it isn't part of the drives slice based on its serial
 		for _, new := range ndrives {
-			found := a.findDriveBySerial(new.Serial, a.device.Drives)
+			found := a.findCommonDriveBySerial(new.Serial, a.device.Drives)
 			if found != nil && found.Serial != "" {
 				continue
 			}
 
-			a.device.Drives = append(a.device.Drives, new)
+			a.device.Drives = append(a.device.Drives, &new.Drive)
 		}
 	}
 
 	return nil
 }
 
-func (a *InventoryCollectorAction) findDriveBySerial(serial string, drives []*common.Drive) *common.Drive {
+func (a *InventoryCollectorAction) findCommonDriveBySerial(serial string, drives []*common.Drive) *common.Drive {
 	for _, drive := range drives {
 		if strings.EqualFold(serial, drive.Serial) {
 			return drive
@@ -424,7 +424,17 @@ func (a *InventoryCollectorAction) findDriveBySerial(serial string, drives []*co
 	return nil
 }
 
-func (a *InventoryCollectorAction) findDriveByLogicalName(logicalName string, drives []*common.Drive) *common.Drive {
+func (a *InventoryCollectorAction) findDriveBySerial(serial string, drives []*model.Drive) *model.Drive {
+	for _, drive := range drives {
+		if strings.EqualFold(serial, drive.Serial) {
+			return drive
+		}
+	}
+
+	return nil
+}
+
+func (a *InventoryCollectorAction) findDriveByLogicalName(logicalName string, drives []*model.Drive) *model.Drive {
 	for _, drive := range drives {
 		if strings.EqualFold(logicalName, drive.LogicalName) {
 			return drive

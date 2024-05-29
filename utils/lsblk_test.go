@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,8 +20,8 @@ func Test_lsblk_Drives(t *testing.T) {
 	assert.Equal(t, fixtureLsblkDrives, drives)
 }
 
-var fixtureLsblkDrives = []*common.Drive{
-	{
+var fixtureLsblkDrives = []*model.Drive{
+	{Drive: common.Drive{
 		Common: common.Common{
 			Model:       "MTFDDAV240TDU",
 			Serial:      "203329F89392",
@@ -28,8 +29,8 @@ var fixtureLsblkDrives = []*common.Drive{
 		},
 		Protocol:                 "sata",
 		StorageControllerDriveID: -1,
-	},
-	{
+	}},
+	{Drive: common.Drive{
 		Common: common.Common{
 			Model:       "MTFDDAV240TDU",
 			Serial:      "203329F89796",
@@ -37,8 +38,8 @@ var fixtureLsblkDrives = []*common.Drive{
 		},
 		Protocol:                 "sata",
 		StorageControllerDriveID: -1,
-	},
-	{
+	}},
+	{Drive: common.Drive{
 		Common: common.Common{
 			Model:       "Micron_9300_MTFDHAL3T8TDP",
 			Serial:      "202728F691F5",
@@ -46,8 +47,8 @@ var fixtureLsblkDrives = []*common.Drive{
 		},
 		Protocol:                 "nvme",
 		StorageControllerDriveID: -1,
-	},
-	{
+	}},
+	{Drive: common.Drive{
 		Common: common.Common{
 			Model:       "Micron_9300_MTFDHAL3T8TDP",
 			Serial:      "202728F691C6",
@@ -55,5 +56,5 @@ var fixtureLsblkDrives = []*common.Drive{
 		},
 		Protocol:                 "nvme",
 		StorageControllerDriveID: -1,
-	},
+	}},
 }

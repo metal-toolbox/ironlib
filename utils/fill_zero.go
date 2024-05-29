@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,7 +24,7 @@ func NewFillZeroCmd(trace bool) *FillZero {
 	return &z
 }
 
-func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
+func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *model.Drive) error {
 	log := logger.WithField("drive", drive.LogicalName).WithField("method", "zero-fill")
 	log.Info("wiping")
 

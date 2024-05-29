@@ -58,15 +58,14 @@ func (m *Msecli) Attributes() (utilName model.CollectorUtility, absolutePath str
 }
 
 // Drives returns a slice of drive components identified
-func (m *Msecli) Drives(ctx context.Context) ([]*common.Drive, error) {
+func (m *Msecli) Drives(ctx context.Context) ([]*model.Drive, error) {
 	devices, err := m.Query(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	drives := []*common.Drive{}
-
-	for _, d := range devices {
+	drives := make([]*model.Drive, len(devices))
+	for i, d := range devices {
 		item := &common.Drive{
 			Common: common.Common{
 				Model:       d.ModelNumber,
@@ -80,7 +79,7 @@ func (m *Msecli) Drives(ctx context.Context) ([]*common.Drive, error) {
 			Type: model.DriveTypeSlug(d.ModelNumber),
 		}
 
-		drives = append(drives, item)
+		drives[i] = model.NewDrive(item, nil)
 	}
 
 	return drives, nil
