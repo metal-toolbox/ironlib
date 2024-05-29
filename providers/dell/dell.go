@@ -13,6 +13,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// EnvUpdateStoreURL defines up the update store base URL prefix
+const EnvUpdateBaseURL = "UPDATE_BASE_URL"
+
 // The dell device provider struct
 type dell struct {
 	DsuPrequisitesInstalled bool
@@ -58,19 +61,19 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 
 	// when default, the repo URL will point to the default repository
 	// this expects a EnvUpdateStoreURL/dell/default/ is made available
-	dsuReleaseVersion := os.Getenv(model.EnvDellDSURelease)
+	dsuReleaseVersion := os.Getenv(utils.EnvDellDSURelease)
 	if dsuReleaseVersion == "" {
 		dsuReleaseVersion = "default"
 	}
 
 	// when default, whichever version of DSU is available will be installed
-	dsuPackageVersion := os.Getenv(model.EnvDellDSUVersion)
+	dsuPackageVersion := os.Getenv(utils.EnvDellDSUVersion)
 	if dsuPackageVersion == "" {
 		dsuPackageVersion = "default"
 	}
 
 	// the base url for updates
-	updateBaseURL := os.Getenv(model.EnvUpdateBaseURL)
+	updateBaseURL := os.Getenv(EnvUpdateBaseURL)
 
 	// set device manager
 	trace := l.Level >= logrus.TraceLevel
@@ -131,7 +134,7 @@ func (d *dell) GetInventoryOEM(ctx context.Context, _ *common.Device, options *m
 		return err
 	}
 
-	d.hw.OemComponents.Dell = append(d.hw.OemComponents.Dell, oemComponents...)
+	d.hw.OEMComponents = append(d.hw.OEMComponents, oemComponents...)
 
 	return nil
 }
@@ -156,7 +159,7 @@ func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOp
 
 	d.logger.WithField("count", count).Info("component updates identified..")
 
-	d.hw.OemComponents.Dell = append(d.hw.OemComponents.Dell, oemUpdates...)
+	d.hw.OEMComponents = append(d.hw.OEMComponents, oemUpdates...)
 
 	return d.hw.Device, nil
 }

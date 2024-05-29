@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"cmp"
 	"context"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/bmc-toolbox/common"
@@ -12,24 +14,33 @@ import (
 	"github.com/pkg/errors"
 )
 
+const EnvDmidecodeUtility = "IRONLIB_UTIL_DMIDECODE"
+
 type Dmidecode struct {
 	dmi *dmidecode.DMI
 }
 
 func NewDmidecode() (d *Dmidecode, err error) {
-	dmi := dmidecode.New()
+	utility := cmp.Or(os.Getenv(EnvDmidecodeUtility), "dmidecode")
 
-	err = dmi.Run()
+	dmi := dmidecode.New()
+	output, err := dmi.ExecDmidecode(utility)
 	if err != nil {
-		return d, err
+		return nil, err
 	}
 
-	return &Dmidecode{dmi: dmi}, err
+	err = dmi.ParseDmidecode(output)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Dmidecode{dmi: dmi}, nil
 }
 
 // Attributes implements the actions.UtilAttributeGetter interface
 func (d *Dmidecode) Attributes() (utilName model.CollectorUtility, absolutePath string, err error) {
-	path, err := d.dmi.FindBin("dmidecode")
+	utility := cmp.Or(os.Getenv(EnvDmidecodeUtility), "dmidecode")
+	path, err := exec.LookPath(utility)
 
 	return "dmidecode", path, err
 }

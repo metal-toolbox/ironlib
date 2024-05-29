@@ -27,7 +27,7 @@ func newFakeDellDevice(logger *logrus.Logger) *dell {
 	device.Vendor = "dell"
 
 	hardware := model.NewHardware(&device)
-	hardware.OemComponents = &model.OemComponents{Dell: []*model.Component{}}
+	hardware.OEMComponents = []*model.Component{}
 
 	return &dell{
 		hw:     hardware,
@@ -96,7 +96,7 @@ func TestGetInventory(t *testing.T) {
 	}
 
 	assert.Equal(t, dellFixtures.R6515_inventory_lshw_smartctl, device)
-	assert.Equal(t, expectedOemComponents, dell.hw.OemComponents)
+	assert.Equal(t, expectedOemComponents, dell.hw.OEMComponents)
 }
 
 // Get inventory, not listing updates available
