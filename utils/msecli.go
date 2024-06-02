@@ -124,10 +124,7 @@ func (m *Msecli) UpdateDrive(ctx context.Context, updateFile, modelNumber, seria
 			}
 		}
 
-		// get the product name from the model number - msecli expects the product name
-		modelNForMsecli := model.FormatProductName(d.ModelNumber)
-
-		return m.updateDrive(ctx, modelNForMsecli, updateFile)
+		return m.updateDrive(ctx, d.ModelNumber, updateFile)
 	}
 
 	return ErrMseCliDriveNotIdentified
@@ -135,12 +132,18 @@ func (m *Msecli) UpdateDrive(ctx context.Context, updateFile, modelNumber, seria
 
 // updateDrive installs the given updatefile
 func (m *Msecli) updateDrive(ctx context.Context, modelNumber, updateFile string) error {
+	// get the product name from the model number - msecli expects the product name
+	modelNForMsecli, err := mseCLIModelType(modelNumber)
+	if err != nil {
+		return err
+	}
+
 	// echo 'y'
 	m.Executor.SetStdin(bytes.NewReader([]byte("y\n")))
 	m.Executor.SetArgs(
 		"-U", // update
 		"-m", // model
-		modelNumber,
+		modelNForMsecli,
 		"-i", // directory containing the update file
 		filepath.Dir(updateFile),
 	)
@@ -218,4 +221,26 @@ func parseMsecliDeviceAttributes(bSlice []byte) *MsecliDevice {
 	}
 
 	return device
+}
+
+// msecli expects a model type which we derive from the model number
+//
+//	Invalid model type MICRON_5200_MTFDDAK480TDN! Valid options are:
+//	M500, M510, M550, MX100, M600, M500DC, MX200, BX100, P400M, P400E, M510DC,
+//	M500IT, BX200, BX300, S610DC, S630DC, S650DC, S655DC, 9100PRO, 9100MAX, 2100,
+//	TX3, MX300, 1100, M500ITL, 7100ECO, 7100MAX, 5100ECO, 5100PRO, 5100MAX, 5300PRO,
+//	5300MAX, 5300BOOT, 5200ECO, 5200PRO, 5200MAX, 9200ECO, 9200MAX, 9200PRO, 9300ECO, 9300MAX,
+//	9300PRO, 7300ECO, 7300MAX, 7300PRO, MX500, 5210, 1300, MX600, BX500, P1,
+//	2200, 2200S, P4, 2300, 2300V, 2210, P1W2, 2100IT, 3400, 2450,
+//	BX503, BX504, P7
+func mseCLIModelType(model string) (string, error) {
+	errUnsupported := errors.New("unsupported model number: " + model)
+	switch model {
+	case "Micron_5300_MTFDDAK480TDT":
+		return "5300MAX", nil
+	case "Micron_5200_MTFDDAK480TDN":
+		return "5200MAX", nil
+	default:
+		return "", errors.Wrap(errUnsupported, model)
+	}
 }

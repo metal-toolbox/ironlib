@@ -79,7 +79,8 @@ RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
     python-devel  \
     python-pip  \
     python-setuptools \
-    which &&      \
+    which        \
+    mstflint &&  \
     microdnf clean all && \
     ln -s /usr/bin/microdnf /usr/bin/yum
 

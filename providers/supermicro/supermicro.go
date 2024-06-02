@@ -14,10 +14,11 @@ import (
 )
 
 type supermicro struct {
-	trace     bool
-	hw        *model.Hardware
-	logger    *logrus.Logger
-	dmidecode *utils.Dmidecode
+	trace         bool
+	hw            *model.Hardware
+	logger        *logrus.Logger
+	dmidecode     *utils.Dmidecode
+	collectorOpts actions.Collectors
 }
 
 func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, error) {

@@ -13,7 +13,8 @@ import (
 // https://github.com/linuxboot/fiano
 
 const (
-	EnvUefiFirmwareParserUtility = "IRONLIB_UTIL_UTIL_UEFI_FIRMWARE_PARSER"
+	EnvUefiFirmwareParserUtility                        = "IRONLIB_UTIL_UTIL_UEFI_FIRMWARE_PARSER"
+	UefiFirmwareParserUtility    model.CollectorUtility = "uefi-firmware-parser"
 )
 
 type UefiFirmwareParser struct {
@@ -24,7 +25,7 @@ var directoryPermissions fs.FileMode = 0o750
 
 // Return a new UefiFirmwareParser executor
 func NewUefiFirmwareParserCmd(trace bool) *UefiFirmwareParser {
-	utility := "uefi-firmware-parser"
+	utility := string(UefiFirmwareParserUtility)
 
 	// lookup env var for util
 	if eVar := os.Getenv(EnvUefiFirmwareParserUtility); eVar != "" {
@@ -46,7 +47,7 @@ func (u *UefiFirmwareParser) Attributes() (model.CollectorUtility, string, error
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	err := u.Executor.CheckExecutable()
 
-	return "uefi-firmware-parser", u.Executor.CmdPath(), err
+	return UefiFirmwareParserUtility, u.Executor.CmdPath(), err
 }
 
 // ExtractLogo extracts the Logo BMP image. It creates the output directory if required.
