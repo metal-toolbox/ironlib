@@ -158,7 +158,7 @@ type DriveUpdater interface {
 // NICUpdater defines an interface to update NIC firmware
 type NICUpdater interface {
 	UtilAttributeGetter
-	UpdateNIC(ctx context.Context, updateFile, modelNumber string) error
+	UpdateNIC(ctx context.Context, updateFile, modelNumber string, force bool) error
 }
 
 // BMCUpdater defines an interface to update BMC firmware

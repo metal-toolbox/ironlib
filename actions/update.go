@@ -63,6 +63,7 @@ func Update(ctx context.Context, device *common.Device, options []*model.UpdateO
 		}
 	}
 
+	//TODO: return reboot required bool
 	return nil
 }
 
@@ -124,16 +125,17 @@ func GetNICUpdater(vendor string) (NICUpdater, error) {
 // UpdateNIC identifies the nic eligible for update from the inventory and runs the firmware update utility based on the nic vendor
 func UpdateNIC(ctx context.Context, nics []*common.NIC, options *model.UpdateOptions) error {
 	for _, nic := range nics {
-		if !strings.EqualFold(options.Vendor, nic.Vendor) {
+		nicVendor := common.FormatVendorName(nic.Vendor)
+		if !strings.EqualFold(options.Vendor, nicVendor) {
 			continue
 		}
 
-		updater, err := GetNICUpdater(nic.Vendor)
+		updater, err := GetNICUpdater(nicVendor)
 		if err != nil {
 			return err
 		}
 
-		return updater.UpdateNIC(ctx, options.UpdateFile, options.Model)
+		return updater.UpdateNIC(ctx, options.UpdateFile, options.Model, options.ForceInstall)
 	}
 
 	return errors.Wrap(ErrUpdaterUtilNotIdentified, options.Vendor)
