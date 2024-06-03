@@ -100,6 +100,7 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 		}
 		drive := &common.Drive{
 			Common: common.Common{
+				LogicalName: d.DevicePath,
 				Serial:      d.SerialNumber,
 				Vendor:      vendor,
 				Model:       dModel,

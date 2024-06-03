@@ -16,7 +16,7 @@ import (
 func Test_NvmeComponents(t *testing.T) {
 	expected := []*common.Drive{
 		{Common: common.Common{
-			Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
+			LogicalName: "/dev/nvme0n1", Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
 			Metadata: map[string]string{
 				"Block Erase Sanitize Operation Supported":                          "false",
 				"Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)": "false",
@@ -28,7 +28,7 @@ func Test_NvmeComponents(t *testing.T) {
 			},
 		}},
 		{Common: common.Common{
-			Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
+			LogicalName: "/dev/nvme1n1", Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
 			Metadata: map[string]string{
 				"Block Erase Sanitize Operation Supported":                          "false",
 				"Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)": "false",

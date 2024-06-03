@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -101,7 +102,11 @@ func (s *Smartctl) Drives(ctx context.Context) ([]*common.Drive, error) {
 
 		item := &common.Drive{
 			Common: common.Common{
-				Vendor:      common.VendorFromString(smartctlAll.ModelName),
+				LogicalName: drive.Name,
+				Vendor: cmp.Or(
+					common.VendorFromString(smartctlAll.ModelName),
+					common.VendorFromString(smartctlAll.ModelFamily),
+				),
 				Model:       smartctlAll.ModelName,
 				Serial:      smartctlAll.SerialNumber,
 				ProductName: smartctlAll.ModelName,
