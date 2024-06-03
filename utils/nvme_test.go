@@ -14,9 +14,19 @@ import (
 )
 
 func Test_NvmeComponents(t *testing.T) {
+	// nolint:dupl
 	expected := []*common.Drive{
 		{Common: common.Common{
 			LogicalName: "/dev/nvme0n1", Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
+			Capabilities: []*common.Capability{
+				{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
+				{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
+				{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
+				{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported", Enabled: false},
+				{Name: "ber", Description: "Block Erase Sanitize Operation Supported", Enabled: false},
+				{Name: "owr", Description: "Overwrite Sanitize Operation Supported", Enabled: false},
+				{Name: "ndi", Description: "No-Deallocate After Sanitize bit in Sanitize command Supported", Enabled: false},
+			},
 			Metadata: map[string]string{
 				"Block Erase Sanitize Operation Supported":                          "false",
 				"Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)": "false",
@@ -29,6 +39,15 @@ func Test_NvmeComponents(t *testing.T) {
 		}},
 		{Common: common.Common{
 			LogicalName: "/dev/nvme1n1", Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
+			Capabilities: []*common.Capability{
+				{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
+				{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
+				{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
+				{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported", Enabled: false},
+				{Name: "ber", Description: "Block Erase Sanitize Operation Supported", Enabled: false},
+				{Name: "owr", Description: "Overwrite Sanitize Operation Supported", Enabled: false},
+				{Name: "ndi", Description: "No-Deallocate After Sanitize bit in Sanitize command Supported", Enabled: false},
+			},
 			Metadata: map[string]string{
 				"Block Erase Sanitize Operation Supported":                          "false",
 				"Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)": "false",

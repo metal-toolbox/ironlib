@@ -74,8 +74,6 @@ func (n *Nvme) Attributes() (utilName model.CollectorUtility, absolutePath strin
 
 // Executes nvme list, parses the output and returns a slice of *common.Drive
 func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
-	drives := make([]*common.Drive, 0)
-
 	out, err := n.list(ctx)
 	if err != nil {
 		return nil, err
@@ -88,7 +86,8 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 		return nil, err
 	}
 
-	for _, d := range list.Devices {
+	drives := make([]*common.Drive, len(list.Devices))
+	for i, d := range list.Devices {
 		dModel := d.ModelNumber
 
 		var vendor string
@@ -98,20 +97,6 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 		if len(modelTokens) > 1 {
 			vendor = modelTokens[1]
 		}
-		drive := &common.Drive{
-			Common: common.Common{
-				LogicalName: d.DevicePath,
-				Serial:      d.SerialNumber,
-				Vendor:      vendor,
-				Model:       dModel,
-				ProductName: d.ProductName,
-				Description: d.ModelNumber,
-				Firmware: &common.Firmware{
-					Installed: d.Firmware,
-				},
-				Metadata: map[string]string{},
-			},
-		}
 
 		// Collect drive capabilitiesFound
 		capabilitiesFound, err := n.DriveCapabilities(ctx, d.DevicePath)
@@ -119,11 +104,24 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 			return nil, err
 		}
 
+		metadata := map[string]string{}
 		for _, f := range capabilitiesFound {
-			drive.Common.Metadata[f.Description] = strconv.FormatBool(f.Enabled)
+			metadata[f.Description] = strconv.FormatBool(f.Enabled)
 		}
 
-		drives = append(drives, drive)
+		drives[i] = &common.Drive{
+			Common: common.Common{
+				LogicalName:  d.DevicePath,
+				Serial:       d.SerialNumber,
+				Vendor:       vendor,
+				Model:        dModel,
+				ProductName:  d.ProductName,
+				Description:  d.ModelNumber,
+				Firmware:     &common.Firmware{Installed: d.Firmware},
+				Capabilities: capabilitiesFound,
+				Metadata:     metadata,
+			},
+		}
 	}
 
 	return drives, nil
