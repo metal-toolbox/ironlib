@@ -38,11 +38,11 @@ type Getter interface {
 	// Check if any updates were applied
 	UpdatesApplied() bool
 	// Retrieve inventory for the device
-	GetInventory(ctx context.Context, options ...Option) (*common.Device, error)
+	GetInventory(ctx context.Context, options ...Option) (*model.Device, error)
 	// Retrieve inventory using the OEM tooling for the device,
-	GetInventoryOEM(ctx context.Context, device *common.Device, options *model.UpdateOptions) error
+	GetInventoryOEM(ctx context.Context, device *model.Device, options *model.UpdateOptions) error
 	// List updates identifed by the vendor tooling (DSU for dells)
-	ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error)
+	ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error)
 	// Retrieve BIOS configuration for device
 	GetBIOSConfiguration(ctx context.Context) (map[string]string, error)
 }
@@ -79,7 +79,7 @@ type Updater interface {
 // InventoryCollector defines an interface to collect all device inventory
 type InventoryCollector interface {
 	UtilAttributeGetter
-	Collect(ctx context.Context, device *common.Device) error
+	Collect(ctx context.Context, device *model.Device) error
 }
 
 // DriveCollector defines an interface to return disk drive inventory

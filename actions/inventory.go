@@ -31,7 +31,7 @@ type InventoryCollectorAction struct {
 	log *logrus.Logger
 
 	// device is the model in which the collected inventory is recorded.
-	device *common.Device
+	device *model.Device
 
 	// Enable trace logging on the collectors.
 	trace bool
@@ -175,11 +175,10 @@ func NewInventoryCollectorAction(ll *logrus.Logger, options ...Option) *Inventor
 //
 // The lshw collector always executes first and is included by default.
 // nolint:gocyclo //since we're collecting inventory for each type, this is cyclomatic
-func (a *InventoryCollectorAction) Collect(ctx context.Context, device *common.Device) error {
+func (a *InventoryCollectorAction) Collect(ctx context.Context, device *model.Device) error {
 	// initialize a new device object - when a device isn't already provided
 	if device == nil {
-		deviceObj := common.NewDevice()
-		device = &deviceObj
+		device = &model.Device{}
 	}
 
 	a.device = device
@@ -402,22 +401,12 @@ func (a *InventoryCollectorAction) CollectDrives(ctx context.Context) (err error
 
 		// add drive if it isn't part of the drives slice based on its serial
 		for _, new := range ndrives {
-			found := a.findCommonDriveBySerial(new.Serial, a.device.Drives)
+			found := a.findDriveBySerial(new.Serial, a.device.Drives)
 			if found != nil && found.Serial != "" {
 				continue
 			}
 
-			a.device.Drives = append(a.device.Drives, &new.Drive)
-		}
-	}
-
-	return nil
-}
-
-func (a *InventoryCollectorAction) findCommonDriveBySerial(serial string, drives []*common.Drive) *common.Drive {
-	for _, drive := range drives {
-		if strings.EqualFold(serial, drive.Serial) {
-			return drive
+			a.device.Drives = append(a.device.Drives, new)
 		}
 	}
 

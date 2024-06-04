@@ -53,7 +53,7 @@ func main() {
 	var drive *model.Drive
 	for _, d := range inventory.Drives {
 		if d.LogicalName == *logicalName {
-			drive = model.NewDrive(d, nil)
+			drive = d
 			break
 		}
 	}
