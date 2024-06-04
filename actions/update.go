@@ -25,46 +25,73 @@ type Updaters struct {
 	StorageControllers StorageControllerUpdater
 }
 
-// Update runs updates based on given options
-func Update(ctx context.Context, device *common.Device, options []*model.UpdateOptions) error {
+func UpdateComponent(ctx context.Context, device *common.Device, option *model.UpdateOptions) error {
 	var err error
+	switch {
+	// Update BIOS
+	case strings.EqualFold(common.SlugBIOS, option.Slug):
+		err = UpdateBIOS(ctx, device.BIOS, option)
+		if err != nil {
+			return errors.Wrap(err, "error updating bios")
+		}
 
+	// Update Drive
+	case strings.EqualFold(common.SlugDrive, option.Slug):
+		err = UpdateDrive(ctx, device.Drives, option)
+		if err != nil {
+			return errors.Wrap(err, "error updating drive")
+		}
+
+	// Update NIC
+	case strings.EqualFold(common.SlugNIC, option.Slug):
+		err = UpdateNIC(ctx, device.NICs, option)
+		if err != nil {
+			return errors.Wrap(err, "error updating nic")
+		}
+
+	// Update BMC
+	case strings.EqualFold(common.SlugBMC, option.Slug):
+		err = UpdateBMC(ctx, device.BMC, option)
+		if err != nil {
+			return errors.Wrap(err, "error updating bmc")
+		}
+	default:
+		return errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
+	}
+
+	return nil
+}
+
+// UpdateAll installs all updates updates based on given options, options acts as a filter
+func UpdateAll(ctx context.Context, device *common.Device, options []*model.UpdateOptions) error {
 	for _, option := range options {
-		switch {
-		// Update BIOS
-		case strings.EqualFold(common.SlugBIOS, option.Slug):
-			err = UpdateBIOS(ctx, device.BIOS, option)
-			if err != nil {
-				return errors.Wrap(err, "error updating bios")
-			}
-
-		// Update Drive
-		case strings.EqualFold(common.SlugDrive, option.Slug):
-			err = UpdateDrive(ctx, device.Drives, option)
-			if err != nil {
-				return errors.Wrap(err, "error updating drive")
-			}
-
-		// Update NIC
-		case strings.EqualFold(common.SlugNIC, option.Slug):
-			err = UpdateNIC(ctx, device.NICs, option)
-			if err != nil {
-				return errors.Wrap(err, "error updating nic")
-			}
-
-		// Update BMC
-		case strings.EqualFold(common.SlugBMC, option.Slug):
-			err = UpdateBMC(ctx, device.BMC, option)
-			if err != nil {
-				return errors.Wrap(err, "error updating bmc")
-			}
-		default:
-			return errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
+		if err := UpdateComponent(ctx, device, option); err != nil {
+			return err
 		}
 	}
 
-	//TODO: return reboot required bool
 	return nil
+}
+
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func UpdateRequirements(ctx context.Context, device *common.Device, option *model.UpdateOptions) (*model.UpdateRequirements, error) {
+	var err error
+	var requirements *model.UpdateRequirements
+
+	switch {
+	// Update NIC
+	case strings.EqualFold(common.SlugNIC, option.Slug):
+		requirements, err = UpdateRequirementsNIC(ctx, device.NICs, option)
+		if err != nil {
+			return nil, errors.Wrap(err, "NIC UpdateRequirementsGetter error")
+		}
+
+		return requirements, nil
+
+	default:
+		return nil, errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
+	}
 }
 
 // GetBMCUpdater returns the updater for the given vendor
@@ -122,6 +149,26 @@ func GetNICUpdater(vendor string) (NICUpdater, error) {
 	return nil, errors.Wrap(ErrUpdaterUtilNotIdentified, vendor)
 }
 
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func UpdateRequirementsNIC(ctx context.Context, nics []*common.NIC, options *model.UpdateOptions) (*model.UpdateRequirements, error) {
+	for _, nic := range nics {
+		nicVendor := common.FormatVendorName(nic.Vendor)
+		if !strings.EqualFold(options.Vendor, nicVendor) {
+			continue
+		}
+
+		updater, err := GetNICUpdater(nicVendor)
+		if err != nil {
+			return nil, err
+		}
+
+		return updater.UpdateRequirements(), nil
+	}
+
+	return nil, errors.Wrap(ErrUpdaterUtilNotIdentified, options.Vendor)
+}
+
 // UpdateNIC identifies the nic eligible for update from the inventory and runs the firmware update utility based on the nic vendor
 func UpdateNIC(ctx context.Context, nics []*common.NIC, options *model.UpdateOptions) error {
 	for _, nic := range nics {
@@ -148,6 +195,25 @@ func GetDriveUpdater(vendor string) (DriveUpdater, error) {
 	}
 
 	return nil, errors.Wrap(ErrUpdaterUtilNotIdentified, "vendor: "+vendor)
+}
+
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func UpdateRequirementsDrive(ctx context.Context, drives []*common.Drive, options *model.UpdateOptions) (*model.UpdateRequirements, error) {
+	for _, drive := range drives {
+		if !strings.EqualFold(options.Vendor, drive.Vendor) {
+			continue
+		}
+
+		updater, err := GetDriveUpdater(drive.Vendor)
+		if err != nil {
+			return nil, err
+		}
+
+		return updater.UpdateRequirements(), nil
+	}
+
+	return nil, errors.Wrap(ErrUpdaterUtilNotIdentified, options.Vendor)
 }
 
 // UpdateDrive identifies the drive eligible for update from the inventory and runs the firmware update utility based on the drive vendor

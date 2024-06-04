@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -150,6 +149,15 @@ func setNICFirmware(d *MlxupDevice, firmware *common.Firmware) {
 	}
 }
 
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func (m *Mlxup) UpdateRequirements() *model.UpdateRequirements {
+	return &model.UpdateRequirements{
+		PostInstallReconfiguration: true,
+		PostInstallHostPowercycle:  true,
+	}
+}
+
 // UpdateNIC updates mellanox NIC with the given update file
 func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string, force bool) error {
 	// query list of nics
@@ -173,18 +181,20 @@ func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string, f
 		}
 
 		m.Executor.SetArgs(args...)
-		fmt.Println(">>>>>> " + m.Executor.GetCmd())
 		result, err := m.Executor.Exec(ctx)
 		if err != nil {
+			if result != nil && result.ExitCode != 0 {
+				resetRequiredStr := "The firmware image was already updated on flash, pending reset"
+				if result.Stdout != nil && strings.Contains(string(result.Stdout), resetRequiredStr) {
+					return errors.Wrap(ErrRebootRequired, resetRequiredStr)
+				}
+				return newExecError(m.Executor.GetCmd(), result)
+			}
 			return err
-		}
-
-		if result.ExitCode != 0 {
-			return newExecError(m.Executor.GetCmd(), result)
 		}
 	}
 
-	return reboot required
+	// return reboot required
 
 	return nil
 }

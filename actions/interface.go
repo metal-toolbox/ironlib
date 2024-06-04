@@ -74,6 +74,10 @@ type Updater interface {
 
 	// InstallUpdates installs updates based on the update options
 	InstallUpdates(ctx context.Context, options *model.UpdateOptions) error
+
+	// UpdateRequirements returns requirements to be met before and after a firmware install,
+	// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+	UpdateRequirements(ctx context.Context, option *model.UpdateOptions) (*model.UpdateRequirements, error)
 }
 
 // InventoryCollector defines an interface to collect all device inventory
@@ -149,15 +153,23 @@ type UEFIVarsCollector interface {
 
 // Updaters
 
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+type UpdateRequirementsGetter interface {
+	UpdateRequirements() *model.UpdateRequirements
+}
+
 // DriveUpdater defines an interface to update drive firmware
 type DriveUpdater interface {
 	UtilAttributeGetter
+	UpdateRequirementsGetter
 	UpdateDrive(ctx context.Context, updateFile, modelNumber, serialNumber string) error
 }
 
 // NICUpdater defines an interface to update NIC firmware
 type NICUpdater interface {
 	UtilAttributeGetter
+	UpdateRequirementsGetter
 	UpdateNIC(ctx context.Context, updateFile, modelNumber string, force bool) error
 }
 

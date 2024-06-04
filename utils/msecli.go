@@ -86,6 +86,15 @@ func (m *Msecli) Drives(ctx context.Context) ([]*common.Drive, error) {
 	return drives, nil
 }
 
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func (m *Msecli) UpdateRequirements() *model.UpdateRequirements {
+	return &model.UpdateRequirements{
+		PostInstallReconfiguration: false,
+		PostInstallHostPowercycle:  false,
+	}
+}
+
 // UpdateDrive installs drive updates
 func (m *Msecli) UpdateDrive(ctx context.Context, updateFile, modelNumber, serialNumber string) error {
 	// query list of drives

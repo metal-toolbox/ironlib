@@ -5,8 +5,10 @@ import (
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
+	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -89,6 +91,12 @@ func (a *asrockrack) ListAvailableUpdates(context.Context, *model.UpdateOptions)
 // InstallUpdates for asrockrack based on updateOptions
 func (a *asrockrack) InstallUpdates(context.Context, *model.UpdateOptions) error {
 	return nil
+}
+
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func (a *asrockrack) UpdateRequirements(ctx context.Context, option *model.UpdateOptions) (*model.UpdateRequirements, error) {
+	return nil, errors.Wrap(errs.ErrUpdateReqNotImplemented, "provider: asrockrack")
 }
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
