@@ -35,12 +35,16 @@ func UpdateComponent(ctx context.Context, device *common.Device, option *model.U
 			return errors.Wrap(err, "error updating bios")
 		}
 
+		return nil
+
 	// Update Drive
 	case strings.EqualFold(common.SlugDrive, option.Slug):
 		err = UpdateDrive(ctx, device.Drives, option)
 		if err != nil {
 			return errors.Wrap(err, "error updating drive")
 		}
+
+		return nil
 
 	// Update NIC
 	case strings.EqualFold(common.SlugNIC, option.Slug):
@@ -49,17 +53,19 @@ func UpdateComponent(ctx context.Context, device *common.Device, option *model.U
 			return errors.Wrap(err, "error updating nic")
 		}
 
+		return nil
+
 	// Update BMC
 	case strings.EqualFold(common.SlugBMC, option.Slug):
 		err = UpdateBMC(ctx, device.BMC, option)
 		if err != nil {
 			return errors.Wrap(err, "error updating bmc")
 		}
-	default:
-		return errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
+		return nil
+
 	}
 
-	return nil
+	return errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
 }
 
 // UpdateAll installs all updates updates based on given options, options acts as a filter
@@ -89,9 +95,17 @@ func UpdateRequirements(ctx context.Context, device *common.Device, option *mode
 
 		return requirements, nil
 
-	default:
-		return nil, errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
+		// Update Drive
+	case strings.EqualFold(common.SlugDrive, option.Slug):
+		requirements, err = UpdateRequirementsDrive(ctx, device.Drives, option)
+		if err != nil {
+			return nil, errors.Wrap(err, "error updating drive")
+		}
+
+		return requirements, nil
 	}
+
+	return nil, errors.Wrap(errs.ErrNoUpdateReqGetterForComponent, "slug: "+option.Slug)
 }
 
 // GetBMCUpdater returns the updater for the given vendor

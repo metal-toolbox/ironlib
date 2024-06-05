@@ -2,7 +2,6 @@ package supermicro
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
@@ -149,7 +148,6 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 		option.Model = s.hw.Device.Model
 	}
 
-	fmt.Println(">> YEEPPPP")
 	err = actions.UpdateComponent(ctx, s.hw.Device, option)
 	if err != nil {
 		return err
