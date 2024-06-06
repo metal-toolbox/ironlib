@@ -71,13 +71,8 @@ func (h *Hdparm) DriveCapabilities(ctx context.Context, logicalName string) ([]*
 		return nil, err
 	}
 
-	var capabilities []*common.Capability
-
 	var lines []string
-
-	s := string(out)
-
-	scanner := bufio.NewScanner(strings.NewReader(s))
+	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
@@ -86,6 +81,10 @@ func (h *Hdparm) DriveCapabilities(ctx context.Context, logicalName string) ([]*
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO break up into features and security specific blocks/parsers
+	// use regex to grab features block and parse
+	// use regex to grab security block and parse
 
 	// Delimiters
 	featStart := "Enabled"
@@ -98,18 +97,16 @@ func (h *Hdparm) DriveCapabilities(ctx context.Context, logicalName string) ([]*
 		",", "", "|", "", "set", "", "command", "")
 
 	var featBool, secBool bool
-
+	var capabilities []*common.Capability
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		parts := strings.Fields(line)
-
-		var flag string
 
 		// start/end match specific block delimiters
 		// bools are toggled to indicate lines within a given block
 		switch {
 		case strings.Contains(line, featStart):
-			featBool = true
+			featBool, secBool = true, false
 		case strings.Contains(line, secStart):
 			featBool, secBool = false, true
 		case strings.Contains(line, secEnd):
@@ -117,6 +114,7 @@ func (h *Hdparm) DriveCapabilities(ctx context.Context, logicalName string) ([]*
 		}
 
 		// Parse command capabilities
+		var flag string
 		if featBool && !strings.Contains(line, featStart) {
 			if strings.Contains(line, "*") {
 				line = strings.TrimSpace(strings.TrimPrefix(line, "*\t"))
@@ -127,11 +125,11 @@ func (h *Hdparm) DriveCapabilities(ctx context.Context, logicalName string) ([]*
 					flag += strings.ToLower(word[0:1])
 				}
 
-				capability := new(common.Capability)
-				capability.Name = flag
-				capability.Description = line
-				capability.Enabled = true
-				capabilities = append(capabilities, capability)
+				capabilities = append(capabilities, &common.Capability{
+					Name:        flag,
+					Description: line,
+					Enabled:     true,
+				})
 			} else if !strings.Contains(line, "*") && !strings.Contains(line, featStart) {
 				// Generate short flag identifier
 				line = strings.TrimSpace(sfi.Replace(line))
@@ -139,52 +137,69 @@ func (h *Hdparm) DriveCapabilities(ctx context.Context, logicalName string) ([]*
 					flag += strings.ToLower(word[0:1])
 				}
 
-				capability := new(common.Capability)
-				capability.Name = flag
-				capability.Description = line
-				capability.Enabled = false
-				capabilities = append(capabilities, capability)
+				capabilities = append(capabilities, &common.Capability{
+					Name:        flag,
+					Description: line,
+					Enabled:     false,
+				})
 			}
 		} else if secBool {
 			// Parse security capabilities
 			secSupported := supported.MatchString(line)
 			if !strings.Contains(line, secStart) {
-				capability := new(common.Capability)
+				var capability common.Capability
 				switch {
 				case strings.Contains(line, "65534"):
-					capability.Name, capability.Enabled = "pns", true
-					capability.Enabled = true
-					capability.Description = "password not set"
+					capability = common.Capability{
+						Name:        "pns",
+						Enabled:     true,
+						Description: "password not set",
+					}
 				case secSupported:
-					capability.Name = "es"
-					capability.Enabled = true
-					capability.Description = "encryption supported"
+					capability = common.Capability{
+						Name:        "es",
+						Enabled:     true,
+						Description: "encryption supported",
+					}
 				case strings.Contains(line, "not\tenabled"):
-					capability.Name = "ena"
-					capability.Enabled = true
-					capability.Description = "encryption not active"
+					capability = common.Capability{
+						Name:        "ena",
+						Enabled:     true,
+						Description: "encryption not active",
+					}
 				case strings.Contains(line, "not\tlocked"):
-					capability.Name = "dnl"
-					capability.Enabled = true
-					capability.Description = "device is not locked"
+					capability = common.Capability{
+						Name:        "dnl",
+						Enabled:     true,
+						Description: "device is not locked",
+					}
 				case strings.Contains(line, "not\tfrozen"):
-					capability.Name = "dnf"
-					capability.Enabled = true
-					capability.Description = "device is not frozen"
+					capability = common.Capability{
+						Name:        "dnf",
+						Enabled:     true,
+						Description: "device is not frozen",
+					}
 				case strings.Contains(line, "not\texpired"):
-					capability.Name = "ene"
-					capability.Enabled = true
-					capability.Description = "encryption not expired"
+					capability = common.Capability{
+						Name:        "ene",
+						Enabled:     true,
+						Description: "encryption not expired",
+					}
 				case strings.Contains(line, "supported: enhanced erase"):
-					capability.Name = "esee"
-					capability.Enabled = true
-					capability.Description = "encryption supports enhanced erase"
+					capability = common.Capability{
+						Name:        "esee",
+						Enabled:     true,
+						Description: "encryption supports enhanced erase",
+					}
 				case strings.Contains(line, "SECURITY ERASE UNIT"):
 					seTime, sehTime := seu.Replace(parts[0]), seu.Replace(parts[5])
-					capability.Name = "time" + seTime + ":" + sehTime
-					capability.Description = "erase time: " + seTime + "m, " + sehTime + "m (enhanced)"
+					capability = common.Capability{
+						Name:        "time" + seTime + ":" + sehTime,
+						Description: "erase time: " + seTime + "m, " + sehTime + "m (enhanced)",
+						Enabled:     false,
+					}
 				}
-				capabilities = append(capabilities, capability)
+				capabilities = append(capabilities, &capability)
 			}
 		}
 	}
