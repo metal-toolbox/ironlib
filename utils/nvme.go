@@ -314,9 +314,11 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 		}
 	}
 
+	l := logger.WithField("drive", logicalName)
 	if cer {
-		l := logger.WithField("method", "sanitize").WithField("action", CryptoErase)
-		l.Info("trying wipe")
+		// nolint:govet
+		l := l.WithField("method", "sanitize").WithField("action", CryptoErase)
+		l.Info("wiping")
 		err := n.Sanitize(ctx, logicalName, CryptoErase)
 		if err == nil {
 			return nil
@@ -324,8 +326,9 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 		l.WithError(err).Info("failed")
 	}
 	if ber {
-		l := logger.WithField("method", "sanitize").WithField("action", BlockErase)
-		l.Info("trying wipe")
+		// nolint:govet
+		l := l.WithField("method", "sanitize").WithField("action", BlockErase)
+		l.Info("wiping")
 		err := n.Sanitize(ctx, logicalName, BlockErase)
 		if err == nil {
 			return nil
@@ -333,8 +336,9 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 		l.WithError(err).Info("failed")
 	}
 	if cese {
-		l := logger.WithField("method", "format").WithField("setting", CryptographicErase)
-		l.Info("trying wipe")
+		// nolint:govet
+		l := l.WithField("method", "format").WithField("setting", CryptographicErase)
+		l.Info("wiping")
 		err := n.Format(ctx, logicalName, CryptographicErase)
 		if err == nil {
 			return nil
@@ -342,8 +346,8 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 		l.WithError(err).Info("failed")
 	}
 
-	l := logger.WithField("method", "format").WithField("setting", UserDataErase)
-	l.Info("trying wipe")
+	l = l.WithField("method", "format").WithField("setting", UserDataErase)
+	l.Info("wiping")
 	err := n.Format(ctx, logicalName, UserDataErase)
 	if err == nil {
 		return nil

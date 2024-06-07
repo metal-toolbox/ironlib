@@ -23,9 +23,9 @@ func NewFillZeroCmd(trace bool) *FillZero {
 	return &z
 }
 
-func (z *FillZero) WipeDrive(ctx context.Context, l *logrus.Logger, logicalName string) error {
-	log := l.WithField("device", logicalName)
-	log.Info("starting zero-fill")
+func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, logicalName string) error {
+	log := logger.WithField("drive", logicalName).WithField("method", "zero-fill")
+	log.Info("wiping")
 
 	// Write open
 	file, err := os.OpenFile(logicalName, os.O_WRONLY, 0)
