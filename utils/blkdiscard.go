@@ -17,12 +17,16 @@ type Blkdiscard struct {
 }
 
 // Return a new blkdiscard executor
-func NewBlkdiscardCmd() *Blkdiscard {
+func NewBlkdiscardCmd(trace bool) *Blkdiscard {
 	// lookup env var for util
 	utility := cmp.Or(os.Getenv(EnvBlkdiscardUtility), "blkdiscard")
 
 	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+
+	if !trace {
+		e.SetQuiet()
+	}
 
 	return &Blkdiscard{Executor: e}
 }

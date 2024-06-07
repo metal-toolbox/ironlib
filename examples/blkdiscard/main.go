@@ -12,6 +12,7 @@ import (
 
 var (
 	device  = flag.String("device", "/dev/sdZZZ", "disk to wipe using blkdiscard")
+	verbose = flag.Bool("verbose", false, "show command runs and output")
 	timeout = flag.String("timeout", (2 * time.Minute).String(), "time to wait for command to complete")
 )
 
@@ -28,7 +29,7 @@ func main() {
 		logger.WithError(err).Fatal("failed to parse timeout duration")
 	}
 
-	var blkdiscard actions.DiskWiper = utils.NewBlkdiscardCmd()
+	var blkdiscard actions.DiskWiper = utils.NewBlkdiscardCmd(*verbose)
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
