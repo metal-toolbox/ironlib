@@ -234,7 +234,7 @@ func Test_NvmeFormat(t *testing.T) {
 	}
 }
 
-func Test_NvmeWipe(t *testing.T) {
+func Test_NvmeWipeDrive(t *testing.T) {
 	tests := []struct {
 		caps map[string]bool
 		args []string
@@ -261,7 +261,7 @@ func Test_NvmeWipe(t *testing.T) {
 			logger, hook := tlogrus.NewNullLogger()
 			defer hook.Reset()
 
-			err := n.wipe(context.Background(), logger, dev)
+			err := n.WipeDrive(context.Background(), logger, dev)
 			require.NoError(t, err)
 
 			// FakeExecute is a bad mocker since it doesn't record all calls and sanitize-log calls aren't that interesting

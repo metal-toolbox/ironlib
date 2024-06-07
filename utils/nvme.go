@@ -292,10 +292,6 @@ const (
 
 // WipeDrive implements DriveWiper by running nvme sanitize or nvme format as appropriate
 func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
-	return n.wipe(ctx, logger, drive)
-}
-
-func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
 	var ber bool
 	var cer bool
 	var cese bool
