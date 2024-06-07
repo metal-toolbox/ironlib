@@ -8,14 +8,11 @@ import (
 
 	"github.com/bmc-toolbox/common"
 	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_NewFillZeroCmd(t *testing.T) {
-	// Test if NewFillZeroCmd returns a non-nil pointer
-	zw := NewFillZeroCmd(false)
-	if zw == nil {
-		t.Error("Expected non-nil pointer, got nil")
-	}
+	require.NotNil(t, NewFillZeroCmd(false))
 }
 
 func Test_WipeDrive(t *testing.T) {
@@ -23,16 +20,13 @@ func Test_WipeDrive(t *testing.T) {
 		t.Run(strconv.Itoa(size), func(t *testing.T) {
 			// Create a temporary file for testing
 			tmpfile, err := os.CreateTemp("", "example")
-			if err != nil {
-				t.Fatal(err)
-			}
+			require.NoError(t, err)
 			defer os.Remove(tmpfile.Name()) // clean up
 
 			// Write some content to the temporary file
 			expectedSize := int64(4096)
-			if _, err = tmpfile.Write(make([]byte, expectedSize)); err != nil {
-				t.Fatal(err)
-			}
+			_, err = tmpfile.Write(make([]byte, expectedSize))
+			require.NoError(t, err)
 
 			// Simulate a context
 			ctx := context.Background()
@@ -45,19 +39,12 @@ func Test_WipeDrive(t *testing.T) {
 			logger, hook := test.NewNullLogger()
 			defer hook.Reset()
 			err = zw.WipeDrive(ctx, logger, drive)
-			if err != nil {
-				t.Errorf("Fill returned an error: %v", err)
-			}
+			require.NoError(t, err)
 
 			// Check if the file size remains the same after overwrite
 			fileInfo, err := os.Stat(tmpfile.Name())
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if size := fileInfo.Size(); size != expectedSize {
-				t.Errorf("Expected file size to remain %d after overwrite, got %d", expectedSize, size)
-			}
+			require.NoError(t, err)
+			require.Equal(t, expectedSize, fileInfo.Size())
 		})
 	}
 }
