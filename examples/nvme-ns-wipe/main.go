@@ -5,7 +5,6 @@ import (
 	"flag"
 	"time"
 
-	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/sirupsen/logrus"
 )
@@ -37,28 +36,6 @@ func main() {
 
 	logger.Info("resetting namespaces")
 	err = nvme.ResetNS(ctx, *logicalName)
-	if err != nil {
-		logger.WithError(err).Fatal("exiting")
-	}
-
-	drives, err := nvme.Drives(ctx)
-	if err != nil {
-		logger.WithError(err).Fatal("exiting")
-	}
-
-	var drive *common.Drive
-	for _, d := range drives {
-		if d.LogicalName == *logicalName+"n1" {
-			drive = d
-		}
-	}
-
-	if drive == nil {
-		logger.Fatal("unable to find drive after reset")
-	}
-
-	logger.Info("wiping")
-	err = nvme.WipeDrive(ctx, logger, drive)
 	if err != nil {
 		logger.WithError(err).Fatal("exiting")
 	}
