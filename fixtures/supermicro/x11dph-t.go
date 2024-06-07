@@ -2379,7 +2379,7 @@ var (
 					Model:       "Micron_5200_MTFDDAK960TDN",
 					Serial:      "20032613EE70",
 					ProductName: "Micron_5200_MTFD",
-					LogicalName: "/dev/sda",
+					LogicalName: "/dev/sdm",
 					Firmware: &common.Firmware{
 						Installed:  "D1MU020",
 						Available:  "",
@@ -2411,7 +2411,7 @@ var (
 					Model:       "Micron_5200_MTFDDAK960TDN",
 					Serial:      "20032613D813",
 					ProductName: "Micron_5200_MTFD",
-					LogicalName: "/dev/sdb",
+					LogicalName: "/dev/sdn",
 					Firmware: &common.Firmware{
 						Installed:  "D1MU020",
 						Available:  "",
@@ -2507,7 +2507,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJL8MVK",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdk",
+					LogicalName: "/dev/sdi",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2539,7 +2539,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJHR67K",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdl",
+					LogicalName: "/dev/sdj",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2571,7 +2571,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJJ51YK",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdm",
+					LogicalName: "/dev/sdk",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2603,7 +2603,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJLNERD",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdn",
+					LogicalName: "/dev/sdl",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2635,7 +2635,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJKG9LK",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdc",
+					LogicalName: "/dev/sda",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2667,7 +2667,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJBVPXD",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdd",
+					LogicalName: "/dev/sdb",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2699,7 +2699,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJJ7T3K",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sde",
+					LogicalName: "/dev/sdc",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2731,7 +2731,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJL8U5K",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdf",
+					LogicalName: "/dev/sdd",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2763,7 +2763,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJBP7SD",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdg",
+					LogicalName: "/dev/sde",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2795,7 +2795,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJKVBKK",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdh",
+					LogicalName: "/dev/sdf",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2827,7 +2827,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJK7E2K",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdi",
+					LogicalName: "/dev/sdg",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
@@ -2859,7 +2859,7 @@ var (
 					Model:       "HGST HUS728T8TALE6L4",
 					Serial:      "VDJL2NUK",
 					ProductName: "HGST HUS728T8TAL",
-					LogicalName: "/dev/sdj",
+					LogicalName: "/dev/sdh",
 					Firmware: &common.Firmware{
 						Installed:  "V8GNW460",
 						Available:  "",
