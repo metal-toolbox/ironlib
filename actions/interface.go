@@ -203,5 +203,6 @@ type VirtualDiskManager interface {
 
 // DriveWiper defines an interface to override disk data
 type DriveWiper interface {
+	// WipeDrive wipes away all data from the drive, wipe is always verified to have succeeded
 	WipeDrive(context.Context, *logrus.Logger, *common.Drive) error
 }

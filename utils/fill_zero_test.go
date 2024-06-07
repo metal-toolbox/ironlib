@@ -19,7 +19,7 @@ func Test_NewFillZeroCmd(t *testing.T) {
 }
 
 func Test_FillZeroWipeDrive(t *testing.T) {
-	for _, size := range []int64{4095, 4096, 4097, 8192} {
+	for _, size := range []int64{8192 - 1, 8192, 8192 + 1, 8192 * 2} {
 		t.Run(fmt.Sprintf("%d", size), func(t *testing.T) {
 			// Create a temporary file for testing
 			tmpfile, err := os.CreateTemp("", "example")

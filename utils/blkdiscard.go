@@ -36,12 +36,17 @@ func NewBlkdiscardCmd(trace bool) *Blkdiscard {
 func (b *Blkdiscard) Discard(ctx context.Context, drive *common.Drive) error {
 	b.Executor.SetArgs("--force", drive.LogicalName)
 
-	_, err := b.Executor.Exec(ctx)
+	verify, err := ApplyWatermarks(drive)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	_, err = b.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return verify()
 }
 
 // WipeDrive implements DriveWipe by calling Discard
