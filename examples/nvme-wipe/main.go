@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	device  = flag.String("device", "/dev/nvmeX", "nvme disk to wipe")
-	timeout = flag.String("timeout", (1 * time.Minute).String(), "time to wait for command to complete")
-	verbose = flag.Bool("verbose", false, "show command runs and output")
+	logicalName = flag.String("drive", "/dev/nvmeX", "nvme disk to wipe")
+	timeout     = flag.String("timeout", (1 * time.Minute).String(), "time to wait for command to complete")
+	verbose     = flag.Bool("verbose", false, "show command runs and output")
 )
 
 func main() {
@@ -35,13 +35,13 @@ func main() {
 	defer cancel()
 
 	logger.Info("resetting namespaces")
-	err = nvme.ResetNS(ctx, *device)
+	err = nvme.ResetNS(ctx, *logicalName)
 	if err != nil {
 		logger.WithError(err).Fatal("exiting")
 	}
 
 	logger.Info("wiping")
-	err = nvme.WipeDisk(ctx, logger, *device+"n1")
+	err = nvme.WipeDrive(ctx, logger, *logicalName+"n1")
 	if err != nil {
 		logger.WithError(err).Fatal("exiting")
 	}

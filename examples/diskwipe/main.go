@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	device  = flag.String("device", "/dev/someN", "disk to wipe by filling with zeros")
-	timeout = flag.String("timeout", (24 * time.Hour).String(), "time to wait for command to complete")
-	verbose = flag.Bool("verbose", false, "show command runs and output")
+	logicalName = flag.String("drive", "/dev/someN", "disk to wipe by filling with zeros")
+	timeout     = flag.String("timeout", (24 * time.Hour).String(), "time to wait for command to complete")
+	verbose     = flag.Bool("verbose", false, "show command runs and output")
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	err = sca.WipeDisk(ctx, logger, *device)
+	err = sca.WipeDrive(ctx, logger, *logicalName)
 	if err != nil {
 		logger.Fatal(err)
 	}

@@ -32,8 +32,8 @@ func NewBlkdiscardCmd(trace bool) *Blkdiscard {
 }
 
 // Discard runs blkdiscard on the given device (--force is always used)
-func (b *Blkdiscard) Discard(ctx context.Context, device string) error {
-	b.Executor.SetArgs("--force", device)
+func (b *Blkdiscard) Discard(ctx context.Context, logicalName string) error {
+	b.Executor.SetArgs("--force", logicalName)
 
 	_, err := b.Executor.Exec(ctx)
 	if err != nil {
@@ -43,10 +43,10 @@ func (b *Blkdiscard) Discard(ctx context.Context, device string) error {
 	return nil
 }
 
-// WipeDisk implements DiskWipe by calling Discard
-func (b *Blkdiscard) WipeDisk(ctx context.Context, logger *logrus.Logger, device string) error {
-	logger.WithField("device", device).WithField("method", "blkdiscard").Info("wiping")
-	return b.Discard(ctx, device)
+// WipeDrive implements DriveWipe by calling Discard
+func (b *Blkdiscard) WipeDrive(ctx context.Context, logger *logrus.Logger, logicalName string) error {
+	logger.WithField("drive", logicalName).WithField("method", "blkdiscard").Info("wiping")
+	return b.Discard(ctx, logicalName)
 }
 
 // NewFakeBlkdiscard returns a mock implementation of the Blkdiscard interface for use in tests.

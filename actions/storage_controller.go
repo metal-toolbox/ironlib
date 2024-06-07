@@ -78,14 +78,14 @@ func (s *StorageControllerAction) GetControllerUtility(vendorName, modelName str
 }
 
 // GetWipeUtility returns the wipe utility based on the disk wipping features
-func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DiskWiper, error) {
+func (s *StorageControllerAction) GetWipeUtility(logicalName string) (DriveWiper, error) {
 	s.Logger.Tracef("%s | Detecting wipe utility", logicalName)
 	// TODO: use disk wipping features to return the best wipe utility, currently only one available
 
 	return utils.NewFillZeroCmd(s.trace), nil
 }
 
-func (s *StorageControllerAction) WipeDisk(ctx context.Context, log *logrus.Logger, logicalName string) error {
+func (s *StorageControllerAction) WipeDrive(ctx context.Context, log *logrus.Logger, logicalName string) error {
 	util, err := s.GetWipeUtility(logicalName)
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func (s *StorageControllerAction) WipeDisk(ctx context.Context, log *logrus.Logg
 	}
 
 	// Wipe the disk
-	err = util.WipeDisk(ctx, log, logicalName)
+	err = util.WipeDrive(ctx, log, logicalName)
 	if err != nil {
 		return err
 	}

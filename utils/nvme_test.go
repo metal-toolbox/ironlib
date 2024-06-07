@@ -180,7 +180,7 @@ func Test_NvmeParseSanicap(t *testing.T) {
 	})
 }
 
-func fakeNVMEDevice(t *testing.T) string {
+func fakeNVMEDrive(t *testing.T) string {
 	dir := t.TempDir()
 	f, err := os.Create(dir + "/nvme0n1")
 	require.NoError(t, err)
@@ -193,7 +193,7 @@ func Test_NvmeSanitize(t *testing.T) {
 	for action := range CryptoErase {
 		t.Run(action.String(), func(t *testing.T) {
 			n := NewFakeNvme()
-			dev := fakeNVMEDevice(t)
+			dev := fakeNVMEDrive(t)
 			err := n.Sanitize(context.Background(), dev, action)
 
 			switch action { // nolint:exhaustive
@@ -217,7 +217,7 @@ func Test_NvmeFormat(t *testing.T) {
 	for action := range Reserved {
 		t.Run(action.String(), func(t *testing.T) {
 			n := NewFakeNvme()
-			dev := fakeNVMEDevice(t)
+			dev := fakeNVMEDrive(t)
 			err := n.Format(context.Background(), dev, action)
 
 			switch action { // nolint:exhaustive
@@ -257,7 +257,7 @@ func Test_NvmeWipe(t *testing.T) {
 				{Name: "cese", Enabled: test.caps["cese"]},
 			}
 			n := NewFakeNvme()
-			dev := fakeNVMEDevice(t)
+			dev := fakeNVMEDrive(t)
 			logger, hook := tlogrus.NewNullLogger()
 			defer hook.Reset()
 

@@ -12,6 +12,6 @@ func Test_blkdiscard(t *testing.T) {
 	logger, hook := test.NewNullLogger()
 	defer hook.Reset()
 
-	err := NewFakeBlkdiscard().WipeDisk(context.TODO(), logger, "/dev/sdZZZ")
+	err := NewFakeBlkdiscard().WipeDrive(context.TODO(), logger, "/dev/sdZZZ")
 	assert.NoError(t, err)
 }

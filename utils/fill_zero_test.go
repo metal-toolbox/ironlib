@@ -17,7 +17,7 @@ func Test_NewFillZeroCmd(t *testing.T) {
 	}
 }
 
-func Test_WipeDisk(t *testing.T) {
+func Test_WipeDrive(t *testing.T) {
 	for _, size := range []int{4095, 4096, 4097, 8192} {
 		t.Run(strconv.Itoa(size), func(t *testing.T) {
 			// Create a temporary file for testing
@@ -42,7 +42,7 @@ func Test_WipeDisk(t *testing.T) {
 			// Test Fill function
 			logger, hook := test.NewNullLogger()
 			defer hook.Reset()
-			err = zw.WipeDisk(ctx, logger, tmpfile.Name())
+			err = zw.WipeDrive(ctx, logger, tmpfile.Name())
 			if err != nil {
 				t.Errorf("Fill returned an error: %v", err)
 			}
