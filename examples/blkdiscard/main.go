@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	device  = flag.String("device", "/dev/sdZZZ", "disk to wipe using blkdiscard")
-	verbose = flag.Bool("verbose", false, "show command runs and output")
+	device  = flag.String("device", "/dev/someN", "disk to wipe using blkdiscard")
 	timeout = flag.String("timeout", (2 * time.Minute).String(), "time to wait for command to complete")
+	verbose = flag.Bool("verbose", false, "show command runs and output")
 )
 
 // This example invokes ironlib and runs blkdiscard on the disk /dev/sdZZZ
@@ -22,7 +22,9 @@ func main() {
 
 	logger := logrus.New()
 	logger.Formatter = new(logrus.TextFormatter)
-	logger.SetLevel(logrus.TraceLevel)
+	if *verbose {
+		logger.SetLevel(logrus.TraceLevel)
+	}
 
 	timeout, err := time.ParseDuration(*timeout)
 	if err != nil {

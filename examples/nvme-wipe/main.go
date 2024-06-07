@@ -11,8 +11,8 @@ import (
 
 var (
 	device  = flag.String("device", "/dev/nvmeX", "nvme disk to wipe")
+	timeout = flag.String("timeout", (1 * time.Minute).String(), "time to wait for command to complete")
 	verbose = flag.Bool("verbose", false, "show command runs and output")
-	dur     = flag.String("timeout", (1 * time.Minute).String(), "time to wait for command to complete")
 )
 
 func main() {
@@ -20,9 +20,11 @@ func main() {
 
 	logger := logrus.New()
 	logger.Formatter = new(logrus.TextFormatter)
-	logger.SetLevel(logrus.TraceLevel)
+	if *verbose {
+		logger.SetLevel(logrus.TraceLevel)
+	}
 
-	timeout, err := time.ParseDuration(*dur)
+	timeout, err := time.ParseDuration(*timeout)
 	if err != nil {
 		logger.WithError(err).Fatal("failed to parse timeout duration")
 	}

@@ -2,24 +2,38 @@ package main
 
 import (
 	"context"
+	"flag"
 	"time"
 
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/sirupsen/logrus"
 )
 
-// This example invokes ironlib and wipes the disk /dev/sdZZZ with a timeout of 1 day
+var (
+	device  = flag.String("device", "/dev/someN", "disk to wipe by filling with zeros")
+	timeout = flag.String("timeout", (24 * time.Hour).String(), "time to wait for command to complete")
+	verbose = flag.Bool("verbose", false, "show command runs and output")
+)
 
 func main() {
+	flag.Parse()
+
 	logger := logrus.New()
-	logger.Formatter = new(logrus.JSONFormatter)
-	logger.SetLevel(logrus.TraceLevel)
+	logger.Formatter = new(logrus.TextFormatter)
+	if *verbose {
+		logger.SetLevel(logrus.TraceLevel)
+	}
+
+	timeout, err := time.ParseDuration(*timeout)
+	if err != nil {
+		logger.WithError(err).Fatal("failed to parse timeout duration")
+	}
 
 	sca := actions.NewStorageControllerAction(logger)
-	ctx, cancel := context.WithTimeout(context.Background(), 86400*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	err := sca.WipeDisk(ctx, logger, "/dev/sdZZZ")
+	err = sca.WipeDisk(ctx, logger, *device)
 	if err != nil {
 		logger.Fatal(err)
 	}
