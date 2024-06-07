@@ -4,6 +4,8 @@ import (
 	"cmp"
 	"context"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -35,6 +37,12 @@ func (b *Blkdiscard) Discard(ctx context.Context, device string) error {
 	}
 
 	return nil
+}
+
+// WipeDisk implements DiskWipe by calling Discard
+func (b *Blkdiscard) WipeDisk(ctx context.Context, logger *logrus.Logger, device string) error {
+	logger.WithField("device", device).WithField("method", "blkdiscard").Info("wiping")
+	return b.Discard(ctx, device)
 }
 
 // NewFakeBlkdiscard returns a mock implementation of the Blkdiscard interface for use in tests.

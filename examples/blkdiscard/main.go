@@ -5,6 +5,7 @@ import (
 	"flag"
 	"time"
 
+	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/sirupsen/logrus"
 )
@@ -27,13 +28,13 @@ func main() {
 		logger.WithError(err).Fatal("failed to parse timeout duration")
 	}
 
-	blkdiscard := utils.NewBlkdiscardCmd()
+	var blkdiscard actions.DiskWiper = utils.NewBlkdiscardCmd()
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	logger.Info("running blkdiscard on ", *device)
-	err = blkdiscard.Discard(ctx, *device)
+	err = blkdiscard.WipeDisk(ctx, logger, *device)
 	if err != nil {
 		logger.WithError(err).Fatal("exiting")
 	}
