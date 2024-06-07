@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"strings"
 	"time"
 
 	"github.com/bmc-toolbox/common"
@@ -65,15 +66,28 @@ func main() {
 	case "nvme":
 		wiper = utils.NewNvmeCmd(*verbose)
 	case "sata":
-		wiper = utils.NewFillZeroCmd(*verbose)
+		// Lets see if drive supports TRIM, if so we'll use blkdiscard
+		for _, cap := range drive.Capabilities {
+			if strings.HasPrefix(cap.Description, "Data Set Management TRIM supported") {
+				if cap.Enabled {
+					wiper = utils.NewBlkdiscardCmd(*verbose)
+				}
+				break
+			}
+		}
 
-		// If the user supplied a non-default timeout then we'll honor it, otherwise we just go with a huge timeout.
-		// If this were *real* code and not an example some work could be done to guesstimate a timeout based on disk size.
-		if timeout == defaultTimeout {
-			l.WithField("timeout", timeout.String()).Info("increasing timeout")
-			timeout = 24 * time.Hour
-			ctx, cancel = context.WithTimeout(context.WithoutCancel(ctx), timeout)
-			defer cancel()
+		// drive does not support TRIM so we fall back to filling it up with zero
+		if wiper == nil {
+			wiper = utils.NewFillZeroCmd(*verbose)
+
+			// If the user supplied a non-default timeout then we'll honor it, otherwise we just go with a huge timeout.
+			// If this were *real* code and not an example some work could be done to guesstimate a timeout based on disk size.
+			if timeout == defaultTimeout {
+				l.WithField("timeout", timeout.String()).Info("increasing timeout")
+				timeout = 24 * time.Hour
+				ctx, cancel = context.WithTimeout(context.WithoutCancel(ctx), timeout)
+				defer cancel()
+			}
 		}
 	}
 
