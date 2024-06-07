@@ -2,8 +2,8 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"os"
-	"strconv"
 	"testing"
 
 	"github.com/bmc-toolbox/common"
@@ -16,16 +16,15 @@ func Test_NewFillZeroCmd(t *testing.T) {
 }
 
 func Test_WipeDrive(t *testing.T) {
-	for _, size := range []int{4095, 4096, 4097, 8192} {
-		t.Run(strconv.Itoa(size), func(t *testing.T) {
+	for _, size := range []int64{4095, 4096, 4097, 8192} {
+		t.Run(fmt.Sprintf("%d", size), func(t *testing.T) {
 			// Create a temporary file for testing
 			tmpfile, err := os.CreateTemp("", "example")
 			require.NoError(t, err)
 			defer os.Remove(tmpfile.Name()) // clean up
 
 			// Write some content to the temporary file
-			expectedSize := int64(4096)
-			_, err = tmpfile.Write(make([]byte, expectedSize))
+			_, err = tmpfile.Write(make([]byte, size))
 			require.NoError(t, err)
 
 			// Simulate a context
@@ -44,7 +43,7 @@ func Test_WipeDrive(t *testing.T) {
 			// Check if the file size remains the same after overwrite
 			fileInfo, err := os.Stat(tmpfile.Name())
 			require.NoError(t, err)
-			require.Equal(t, expectedSize, fileInfo.Size())
+			require.Equal(t, size, fileInfo.Size())
 		})
 	}
 }
