@@ -5,6 +5,7 @@ import (
 	"flag"
 	"time"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/sirupsen/logrus"
@@ -36,8 +37,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	logger.Info("running blkdiscard on ", *drive)
-	err = blkdiscard.WipeDrive(ctx, logger, *drive)
+	drive := &common.Drive{Common: common.Common{LogicalName: *drive}}
+	logger.Info("running blkdiscard on ", drive.LogicalName)
+	err = blkdiscard.WipeDrive(ctx, logger, drive)
 	if err != nil {
 		logger.WithError(err).Fatal("exiting")
 	}

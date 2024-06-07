@@ -5,6 +5,7 @@ import (
 	"flag"
 	"time"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/sirupsen/logrus"
 )
@@ -33,7 +34,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	err = sca.WipeDrive(ctx, logger, *logicalName)
+	err = sca.WipeDrive(ctx, logger, &common.Drive{Common: common.Common{LogicalName: *logicalName}})
 	if err != nil {
 		logger.Fatal(err)
 	}

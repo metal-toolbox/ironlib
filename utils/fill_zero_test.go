@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/sirupsen/logrus/hooks/test"
 )
 
@@ -38,11 +39,12 @@ func Test_WipeDrive(t *testing.T) {
 
 			// Create a FillZero instance
 			zw := &FillZero{}
+			drive := &common.Drive{Common: common.Common{LogicalName: tmpfile.Name()}}
 
 			// Test Fill function
 			logger, hook := test.NewNullLogger()
 			defer hook.Reset()
-			err = zw.WipeDrive(ctx, logger, tmpfile.Name())
+			err = zw.WipeDrive(ctx, logger, drive)
 			if err != nil {
 				t.Errorf("Fill returned an error: %v", err)
 			}

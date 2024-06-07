@@ -180,13 +180,13 @@ func Test_NvmeParseSanicap(t *testing.T) {
 	})
 }
 
-func fakeNVMEDrive(t *testing.T) string {
+func fakeNVMEDrive(t *testing.T) *common.Drive {
 	dir := t.TempDir()
 	f, err := os.Create(dir + "/nvme0n1")
 	require.NoError(t, err)
 	require.NoError(t, f.Truncate(20*1024))
 	require.NoError(t, f.Close())
-	return f.Name()
+	return &common.Drive{Common: common.Common{LogicalName: f.Name()}}
 }
 
 func Test_NvmeSanitize(t *testing.T) {
@@ -225,7 +225,7 @@ func Test_NvmeFormat(t *testing.T) {
 				require.NoError(t, err)
 				e, ok := n.Executor.(*FakeExecute)
 				require.True(t, ok)
-				require.Equal(t, []string{"format", "--ses=" + strconv.Itoa(int(action)), dev}, e.Args)
+				require.Equal(t, []string{"format", "--ses=" + strconv.Itoa(int(action)), dev.LogicalName}, e.Args)
 			default:
 				require.Error(t, err)
 				require.ErrorIs(t, err, errFormatInvalidSetting)
@@ -251,17 +251,17 @@ func Test_NvmeWipe(t *testing.T) {
 	for _, test := range tests {
 		name := fmt.Sprintf("ber=%v,cer=%v,cese=%v", test.caps["ber"], test.caps["cer"], test.caps["cese"])
 		t.Run(name, func(t *testing.T) {
-			caps := []*common.Capability{
+			n := NewFakeNvme()
+			dev := fakeNVMEDrive(t)
+			dev.Capabilities = []*common.Capability{
 				{Name: "ber", Enabled: test.caps["ber"]},
 				{Name: "cer", Enabled: test.caps["cer"]},
 				{Name: "cese", Enabled: test.caps["cese"]},
 			}
-			n := NewFakeNvme()
-			dev := fakeNVMEDrive(t)
 			logger, hook := tlogrus.NewNullLogger()
 			defer hook.Reset()
 
-			err := n.wipe(context.Background(), logger, dev, caps)
+			err := n.wipe(context.Background(), logger, dev)
 			require.NoError(t, err)
 
 			// FakeExecute is a bad mocker since it doesn't record all calls and sanitize-log calls aren't that interesting
@@ -269,7 +269,7 @@ func Test_NvmeWipe(t *testing.T) {
 			if test.args[0] == "format" {
 				e, ok := n.Executor.(*FakeExecute)
 				require.True(t, ok)
-				test.args = append(test.args, dev)
+				test.args = append(test.args, dev.LogicalName)
 				require.Equal(t, test.args, e.Args)
 			}
 		})

@@ -291,19 +291,15 @@ const (
 )
 
 // WipeDrive implements DriveWiper by running nvme sanitize or nvme format as appropriate
-func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, logicalName string) error {
-	caps, err := n.DriveCapabilities(ctx, logicalName)
-	if err != nil {
-		return fmt.Errorf("WipeDrive: %w", err)
-	}
-	return n.wipe(ctx, logger, logicalName, caps)
+func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
+	return n.wipe(ctx, logger, drive)
 }
 
-func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName string, caps []*common.Capability) error {
+func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
 	var ber bool
 	var cer bool
 	var cese bool
-	for _, cap := range caps {
+	for _, cap := range drive.Capabilities {
 		switch cap.Name {
 		case "ber":
 			ber = cap.Enabled
@@ -314,12 +310,12 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 		}
 	}
 
-	l := logger.WithField("drive", logicalName)
+	l := logger.WithField("drive", drive.LogicalName)
 	if cer {
 		// nolint:govet
 		l := l.WithField("method", "sanitize").WithField("action", CryptoErase)
 		l.Info("wiping")
-		err := n.Sanitize(ctx, logicalName, CryptoErase)
+		err := n.Sanitize(ctx, drive, CryptoErase)
 		if err == nil {
 			return nil
 		}
@@ -329,7 +325,7 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 		// nolint:govet
 		l := l.WithField("method", "sanitize").WithField("action", BlockErase)
 		l.Info("wiping")
-		err := n.Sanitize(ctx, logicalName, BlockErase)
+		err := n.Sanitize(ctx, drive, BlockErase)
 		if err == nil {
 			return nil
 		}
@@ -339,7 +335,7 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 		// nolint:govet
 		l := l.WithField("method", "format").WithField("setting", CryptographicErase)
 		l.Info("wiping")
-		err := n.Format(ctx, logicalName, CryptographicErase)
+		err := n.Format(ctx, drive, CryptographicErase)
 		if err == nil {
 			return nil
 		}
@@ -348,7 +344,7 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 
 	l = l.WithField("method", "format").WithField("setting", UserDataErase)
 	l.Info("wiping")
-	err := n.Format(ctx, logicalName, UserDataErase)
+	err := n.Format(ctx, drive, UserDataErase)
 	if err == nil {
 		return nil
 	}
@@ -356,31 +352,31 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, logicalName stri
 	return ErrIneffectiveWipe
 }
 
-func (n *Nvme) Sanitize(ctx context.Context, logicalName string, sanact SanitizeAction) error {
+func (n *Nvme) Sanitize(ctx context.Context, drive *common.Drive, sanact SanitizeAction) error {
 	switch sanact { // nolint:exhaustive
 	case BlockErase, CryptoErase:
 	default:
 		return fmt.Errorf("%w: %v", errSanitizeInvalidAction, sanact)
 	}
 
-	verify, err := ApplyWatermarks(logicalName)
+	verify, err := ApplyWatermarks(drive)
 	if err != nil {
 		return err
 	}
 
-	n.Executor.SetArgs("sanitize", "--sanact="+strconv.Itoa(int(sanact)), logicalName)
+	n.Executor.SetArgs("sanitize", "--sanact="+strconv.Itoa(int(sanact)), drive.LogicalName)
 	_, err = n.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}
 
 	// now we loop until sanitize-log reports that sanitization is complete
-	dev := path.Base(logicalName)
+	dev := path.Base(drive.LogicalName)
 	var log map[string]struct {
 		Progress uint16 `json:"sprog"`
 	}
 	for {
-		n.Executor.SetArgs("sanitize-log", "--output-format=json", logicalName)
+		n.Executor.SetArgs("sanitize-log", "--output-format=json", drive.LogicalName)
 		result, err := n.Executor.Exec(ctx)
 		if err != nil {
 			return err
@@ -404,19 +400,19 @@ func (n *Nvme) Sanitize(ctx context.Context, logicalName string, sanact Sanitize
 	return verify()
 }
 
-func (n *Nvme) Format(ctx context.Context, logicalName string, ses SecureEraseSetting) error {
+func (n *Nvme) Format(ctx context.Context, drive *common.Drive, ses SecureEraseSetting) error {
 	switch ses { // nolint:exhaustive
 	case UserDataErase, CryptographicErase:
 	default:
 		return fmt.Errorf("%w: %v", errFormatInvalidSetting, ses)
 	}
 
-	verify, err := ApplyWatermarks(logicalName)
+	verify, err := ApplyWatermarks(drive)
 	if err != nil {
 		return err
 	}
 
-	n.Executor.SetArgs("format", "--ses="+strconv.Itoa(int(ses)), logicalName)
+	n.Executor.SetArgs("format", "--ses="+strconv.Itoa(int(ses)), drive.LogicalName)
 	_, err = n.Executor.Exec(ctx)
 	if err != nil {
 		return err

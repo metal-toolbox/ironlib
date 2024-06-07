@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/sirupsen/logrus"
 )
 
@@ -32,8 +33,8 @@ func NewBlkdiscardCmd(trace bool) *Blkdiscard {
 }
 
 // Discard runs blkdiscard on the given device (--force is always used)
-func (b *Blkdiscard) Discard(ctx context.Context, logicalName string) error {
-	b.Executor.SetArgs("--force", logicalName)
+func (b *Blkdiscard) Discard(ctx context.Context, drive *common.Drive) error {
+	b.Executor.SetArgs("--force", drive.LogicalName)
 
 	_, err := b.Executor.Exec(ctx)
 	if err != nil {
@@ -44,9 +45,9 @@ func (b *Blkdiscard) Discard(ctx context.Context, logicalName string) error {
 }
 
 // WipeDrive implements DriveWipe by calling Discard
-func (b *Blkdiscard) WipeDrive(ctx context.Context, logger *logrus.Logger, logicalName string) error {
-	logger.WithField("drive", logicalName).WithField("method", "blkdiscard").Info("wiping")
-	return b.Discard(ctx, logicalName)
+func (b *Blkdiscard) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
+	logger.WithField("drive", drive.LogicalName).WithField("method", "blkdiscard").Info("wiping")
+	return b.Discard(ctx, drive)
 }
 
 // NewFakeBlkdiscard returns a mock implementation of the Blkdiscard interface for use in tests.

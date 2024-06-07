@@ -203,5 +203,5 @@ type VirtualDiskManager interface {
 
 // DriveWiper defines an interface to override disk data
 type DriveWiper interface {
-	WipeDrive(ctx context.Context, log *logrus.Logger, logicalName string) error
+	WipeDrive(context.Context, *logrus.Logger, *common.Drive) error
 }

@@ -8,6 +8,8 @@ import (
 	"math/big"
 	"os"
 	"slices"
+
+	"github.com/bmc-toolbox/common"
 )
 
 var ErrIneffectiveWipe = errors.New("found left over data after wiping disk")
@@ -19,9 +21,9 @@ type watermark struct {
 
 // ApplyWatermarks applies random watermarks randomly through out the specified device/file.
 // It returns a function that checks if the applied watermarks still exists on the device/file.
-func ApplyWatermarks(logicalName string) (func() error, error) {
+func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	// Write open
-	file, err := os.OpenFile(logicalName, os.O_WRONLY, 0)
+	file, err := os.OpenFile(drive.LogicalName, os.O_WRONLY, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +37,7 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 	}
 
 	checker := func() error {
-		file, err := os.OpenFile(logicalName, os.O_RDONLY, 0)
+		file, err := os.OpenFile(drive.LogicalName, os.O_RDONLY, 0)
 		if err != nil {
 			return err
 		}
@@ -44,19 +46,19 @@ func ApplyWatermarks(logicalName string) (func() error, error) {
 		for i, watermark := range watermarks {
 			_, err = file.Seek(watermark.position, io.SeekStart)
 			if err != nil {
-				return fmt.Errorf("watermark verification, %s@%d(mark=%d), seek: %w", logicalName, watermark.position, i, err)
+				return fmt.Errorf("watermark verification, %s@%d(mark=%d), seek: %w", drive.LogicalName, watermark.position, i, err)
 			}
 
 			// Read the watermark written to the position
 			currentValue := make([]byte, watermarkSize)
 			_, err = io.ReadFull(file, currentValue)
 			if err != nil {
-				return fmt.Errorf("read watermark %s@%d(mark=%d): %w", logicalName, watermark.position, i, err)
+				return fmt.Errorf("read watermark %s@%d(mark=%d): %w", drive.LogicalName, watermark.position, i, err)
 			}
 
 			// Check if the watermark is still in the disk
 			if slices.Equal(currentValue, watermark.data) {
-				return fmt.Errorf("verify wipe %s@%d(mark=%d): %w", logicalName, watermark.position, i, ErrIneffectiveWipe)
+				return fmt.Errorf("verify wipe %s@%d(mark=%d): %w", drive.LogicalName, watermark.position, i, ErrIneffectiveWipe)
 			}
 		}
 		return nil
