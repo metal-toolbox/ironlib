@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,12 +24,17 @@ func NewFillZeroCmd(trace bool) *FillZero {
 	return &z
 }
 
-func (z *FillZero) WipeDisk(ctx context.Context, l *logrus.Logger, logicalName string) error {
-	log := l.WithField("device", logicalName)
-	log.Info("starting zero-fill")
+func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
+	log := logger.WithField("drive", drive.LogicalName).WithField("method", "zero-fill")
+	log.Info("wiping")
+
+	verify, err := ApplyWatermarks(drive)
+	if err != nil {
+		return err
+	}
 
 	// Write open
-	file, err := os.OpenFile(logicalName, os.O_WRONLY, 0)
+	file, err := os.OpenFile(drive.LogicalName, os.O_WRONLY, 0)
 	if err != nil {
 		return err
 	}
@@ -78,7 +84,8 @@ func (z *FillZero) WipeDisk(ctx context.Context, l *logrus.Logger, logicalName s
 	if err != nil {
 		return err
 	}
-	return nil
+
+	return verify()
 }
 
 func printProgress(log *logrus.Entry, totalBytesWritten, partitionSize int64, start time.Time, bytesSinceLastPrint int64) {

@@ -4,6 +4,9 @@ import (
 	"cmp"
 	"context"
 	"os"
+
+	"github.com/bmc-toolbox/common"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -15,26 +18,41 @@ type Blkdiscard struct {
 }
 
 // Return a new blkdiscard executor
-func NewBlkdiscardCmd() *Blkdiscard {
+func NewBlkdiscardCmd(trace bool) *Blkdiscard {
 	// lookup env var for util
 	utility := cmp.Or(os.Getenv(EnvBlkdiscardUtility), "blkdiscard")
 
 	e := NewExecutor(utility)
 	e.SetEnv([]string{"LC_ALL=C.UTF-8"})
 
+	if !trace {
+		e.SetQuiet()
+	}
+
 	return &Blkdiscard{Executor: e}
 }
 
 // Discard runs blkdiscard on the given device (--force is always used)
-func (b *Blkdiscard) Discard(ctx context.Context, device string) error {
-	b.Executor.SetArgs("--force", device)
+func (b *Blkdiscard) Discard(ctx context.Context, drive *common.Drive) error {
+	b.Executor.SetArgs("--force", drive.LogicalName)
 
-	_, err := b.Executor.Exec(ctx)
+	verify, err := ApplyWatermarks(drive)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	_, err = b.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return verify()
+}
+
+// WipeDrive implements DriveWipe by calling Discard
+func (b *Blkdiscard) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
+	logger.WithField("drive", drive.LogicalName).WithField("method", "blkdiscard").Info("wiping")
+	return b.Discard(ctx, drive)
 }
 
 // NewFakeBlkdiscard returns a mock implementation of the Blkdiscard interface for use in tests.

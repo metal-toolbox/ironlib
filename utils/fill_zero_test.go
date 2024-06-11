@@ -1,61 +1,77 @@
 package utils
 
 import (
+	"bytes"
 	"context"
+	"crypto/rand"
+	"fmt"
+	"io"
 	"os"
-	"strconv"
 	"testing"
 
+	"github.com/bmc-toolbox/common"
 	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_NewFillZeroCmd(t *testing.T) {
-	// Test if NewFillZeroCmd returns a non-nil pointer
-	zw := NewFillZeroCmd(false)
-	if zw == nil {
-		t.Error("Expected non-nil pointer, got nil")
-	}
+	require.NotNil(t, NewFillZeroCmd(false))
 }
 
-func Test_WipeDisk(t *testing.T) {
-	for _, size := range []int{4095, 4096, 4097, 8192} {
-		t.Run(strconv.Itoa(size), func(t *testing.T) {
+func Test_FillZeroWipeDrive(t *testing.T) {
+	for _, size := range []int64{8192 - 1, 8192, 8192 + 1, 8192 * 2} {
+		t.Run(fmt.Sprintf("%d", size), func(t *testing.T) {
 			// Create a temporary file for testing
 			tmpfile, err := os.CreateTemp("", "example")
-			if err != nil {
-				t.Fatal(err)
-			}
+			require.NoError(t, err)
 			defer os.Remove(tmpfile.Name()) // clean up
 
 			// Write some content to the temporary file
-			expectedSize := int64(4096)
-			if _, err = tmpfile.Write(make([]byte, expectedSize)); err != nil {
-				t.Fatal(err)
-			}
+			_, err = io.CopyN(tmpfile, rand.Reader, size)
+			require.NoError(t, err)
+			require.NoError(t, tmpfile.Sync())
+			require.NoError(t, tmpfile.Close())
+
+			// Sanity check to make sure file size is written as expected and does not contain all zeros
+			fileInfo, err := os.Stat(tmpfile.Name())
+			require.NoError(t, err)
+			require.Equal(t, size, fileInfo.Size())
+
+			f, err := os.Open(tmpfile.Name())
+			require.NoError(t, err)
+
+			var buf bytes.Buffer
+			n, err := io.Copy(&buf, f)
+			require.NoError(t, err)
+			require.Equal(t, size, n)
+			require.NotEqual(t, make([]byte, size), buf.Bytes())
+			require.NoError(t, f.Close())
 
 			// Simulate a context
 			ctx := context.Background()
 
-			// Create a FillZero instance
 			zw := &FillZero{}
-
-			// Test Fill function
+			drive := &common.Drive{Common: common.Common{LogicalName: tmpfile.Name()}}
 			logger, hook := test.NewNullLogger()
 			defer hook.Reset()
-			err = zw.WipeDisk(ctx, logger, tmpfile.Name())
-			if err != nil {
-				t.Errorf("Fill returned an error: %v", err)
-			}
+
+			err = zw.WipeDrive(ctx, logger, drive)
+			require.NoError(t, err)
 
 			// Check if the file size remains the same after overwrite
-			fileInfo, err := os.Stat(tmpfile.Name())
-			if err != nil {
-				t.Fatal(err)
-			}
+			fileInfo, err = os.Stat(tmpfile.Name())
+			require.NoError(t, err)
+			require.Equal(t, size, fileInfo.Size())
 
-			if size := fileInfo.Size(); size != expectedSize {
-				t.Errorf("Expected file size to remain %d after overwrite, got %d", expectedSize, size)
-			}
+			// Verify contents are all zero
+			f, err = os.Open(tmpfile.Name())
+			require.NoError(t, err)
+
+			buf.Reset()
+			n, err = io.Copy(&buf, f)
+			require.NoError(t, err)
+			require.Equal(t, size, n)
+			require.Equal(t, make([]byte, size), buf.Bytes())
 		})
 	}
 }

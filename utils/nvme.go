@@ -139,9 +139,9 @@ func (n *Nvme) list(ctx context.Context) ([]byte, error) {
 	return result.Stdout, nil
 }
 
-func (n *Nvme) cmdListCapabilities(ctx context.Context, device string) ([]byte, error) {
+func (n *Nvme) cmdListCapabilities(ctx context.Context, logicalName string) ([]byte, error) {
 	// nvme id-ctrl --output-format=json devicepath
-	n.Executor.SetArgs("id-ctrl", "--output-format=json", device)
+	n.Executor.SetArgs("id-ctrl", "--output-format=json", logicalName)
 	result, err := n.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
@@ -155,8 +155,8 @@ func (n *Nvme) cmdListCapabilities(ctx context.Context, device string) ([]byte, 
 // The device is the kernel/OS assigned drive name - /dev/nvmeX
 //
 // This method implements the actions.DriveCapabilityCollector interface.
-func (n *Nvme) DriveCapabilities(ctx context.Context, device string) ([]*common.Capability, error) {
-	out, err := n.cmdListCapabilities(ctx, device)
+func (n *Nvme) DriveCapabilities(ctx context.Context, logicalName string) ([]*common.Capability, error) {
+	out, err := n.cmdListCapabilities(ctx, logicalName)
 	if err != nil {
 		return nil, err
 	}
@@ -290,20 +290,12 @@ const (
 	Reserved
 )
 
-// WipeDisk implements DiskWiper by running nvme sanitize
-func (n *Nvme) WipeDisk(ctx context.Context, logger *logrus.Logger, device string) error {
-	caps, err := n.DriveCapabilities(ctx, device)
-	if err != nil {
-		return fmt.Errorf("WipeDisk: %w", err)
-	}
-	return n.wipe(ctx, logger, device, caps)
-}
-
-func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, device string, caps []*common.Capability) error {
+// WipeDrive implements DriveWiper by running nvme sanitize or nvme format as appropriate
+func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
 	var ber bool
 	var cer bool
 	var cese bool
-	for _, cap := range caps {
+	for _, cap := range drive.Capabilities {
 		switch cap.Name {
 		case "ber":
 			ber = cap.Enabled
@@ -314,37 +306,41 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, device string, c
 		}
 	}
 
+	l := logger.WithField("drive", drive.LogicalName)
 	if cer {
-		l := logger.WithField("method", "sanitize").WithField("action", CryptoErase)
-		l.Info("trying wipe")
-		err := n.Sanitize(ctx, device, CryptoErase)
+		// nolint:govet
+		l := l.WithField("method", "sanitize").WithField("action", CryptoErase)
+		l.Info("wiping")
+		err := n.Sanitize(ctx, drive, CryptoErase)
 		if err == nil {
 			return nil
 		}
 		l.WithError(err).Info("failed")
 	}
 	if ber {
-		l := logger.WithField("method", "sanitize").WithField("action", BlockErase)
-		l.Info("trying wipe")
-		err := n.Sanitize(ctx, device, BlockErase)
+		// nolint:govet
+		l := l.WithField("method", "sanitize").WithField("action", BlockErase)
+		l.Info("wiping")
+		err := n.Sanitize(ctx, drive, BlockErase)
 		if err == nil {
 			return nil
 		}
 		l.WithError(err).Info("failed")
 	}
 	if cese {
-		l := logger.WithField("method", "format").WithField("setting", CryptographicErase)
-		l.Info("trying wipe")
-		err := n.Format(ctx, device, CryptographicErase)
+		// nolint:govet
+		l := l.WithField("method", "format").WithField("setting", CryptographicErase)
+		l.Info("wiping")
+		err := n.Format(ctx, drive, CryptographicErase)
 		if err == nil {
 			return nil
 		}
 		l.WithError(err).Info("failed")
 	}
 
-	l := logger.WithField("method", "format").WithField("setting", UserDataErase)
-	l.Info("trying wipe")
-	err := n.Format(ctx, device, UserDataErase)
+	l = l.WithField("method", "format").WithField("setting", UserDataErase)
+	l.Info("wiping")
+	err := n.Format(ctx, drive, UserDataErase)
 	if err == nil {
 		return nil
 	}
@@ -352,31 +348,31 @@ func (n *Nvme) wipe(ctx context.Context, logger *logrus.Logger, device string, c
 	return ErrIneffectiveWipe
 }
 
-func (n *Nvme) Sanitize(ctx context.Context, device string, sanact SanitizeAction) error {
+func (n *Nvme) Sanitize(ctx context.Context, drive *common.Drive, sanact SanitizeAction) error {
 	switch sanact { // nolint:exhaustive
 	case BlockErase, CryptoErase:
 	default:
 		return fmt.Errorf("%w: %v", errSanitizeInvalidAction, sanact)
 	}
 
-	verify, err := ApplyWatermarks(device)
+	verify, err := ApplyWatermarks(drive)
 	if err != nil {
 		return err
 	}
 
-	n.Executor.SetArgs("sanitize", "--sanact="+strconv.Itoa(int(sanact)), device)
+	n.Executor.SetArgs("sanitize", "--sanact="+strconv.Itoa(int(sanact)), drive.LogicalName)
 	_, err = n.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}
 
 	// now we loop until sanitize-log reports that sanitization is complete
-	dev := path.Base(device)
+	dev := path.Base(drive.LogicalName)
 	var log map[string]struct {
 		Progress uint16 `json:"sprog"`
 	}
 	for {
-		n.Executor.SetArgs("sanitize-log", "--output-format=json", device)
+		n.Executor.SetArgs("sanitize-log", "--output-format=json", drive.LogicalName)
 		result, err := n.Executor.Exec(ctx)
 		if err != nil {
 			return err
@@ -400,19 +396,19 @@ func (n *Nvme) Sanitize(ctx context.Context, device string, sanact SanitizeActio
 	return verify()
 }
 
-func (n *Nvme) Format(ctx context.Context, device string, ses SecureEraseSetting) error {
+func (n *Nvme) Format(ctx context.Context, drive *common.Drive, ses SecureEraseSetting) error {
 	switch ses { // nolint:exhaustive
 	case UserDataErase, CryptographicErase:
 	default:
 		return fmt.Errorf("%w: %v", errFormatInvalidSetting, ses)
 	}
 
-	verify, err := ApplyWatermarks(device)
+	verify, err := ApplyWatermarks(drive)
 	if err != nil {
 		return err
 	}
 
-	n.Executor.SetArgs("format", "--ses="+strconv.Itoa(int(ses)), device)
+	n.Executor.SetArgs("format", "--ses="+strconv.Itoa(int(ses)), drive.LogicalName)
 	_, err = n.Executor.Exec(ctx)
 	if err != nil {
 		return err
@@ -420,8 +416,8 @@ func (n *Nvme) Format(ctx context.Context, device string, ses SecureEraseSetting
 	return verify()
 }
 
-func (n *Nvme) listNS(ctx context.Context, device string) ([]uint, error) {
-	n.Executor.SetArgs("list-ns", "--output-format=json", "--all", device)
+func (n *Nvme) listNS(ctx context.Context, logicalName string) ([]uint, error) {
+	n.Executor.SetArgs("list-ns", "--output-format=json", "--all", logicalName)
 	result, err := n.Executor.Exec(ctx)
 	if err != nil {
 		return nil, err
@@ -444,7 +440,7 @@ func (n *Nvme) listNS(ctx context.Context, device string) ([]uint, error) {
 	return ret, nil
 }
 
-func (n *Nvme) createNS(ctx context.Context, device string, size, blocksize uint) (uint, error) {
+func (n *Nvme) createNS(ctx context.Context, logicalName string, size, blocksize uint) (uint, error) {
 	if blocksize == 0 {
 		return 0, fmt.Errorf("%w: blocksize(0) is zero", errInvalidCreateNSArgs)
 	}
@@ -457,7 +453,7 @@ func (n *Nvme) createNS(ctx context.Context, device string, size, blocksize uint
 
 	_size := strconv.Itoa(int(size / blocksize))
 	_blocksize := strconv.Itoa(int(blocksize))
-	n.Executor.SetArgs("create-ns", device, "--dps=0", "--nsze="+_size, "--ncap="+_size, "--blocksize="+_blocksize)
+	n.Executor.SetArgs("create-ns", logicalName, "--dps=0", "--nsze="+_size, "--ncap="+_size, "--blocksize="+_blocksize)
 	result, err := n.Executor.Exec(ctx)
 	if err != nil {
 		return 0, err
@@ -473,30 +469,30 @@ func (n *Nvme) createNS(ctx context.Context, device string, size, blocksize uint
 	return uint(nsid), err
 }
 
-func (n *Nvme) deleteNS(ctx context.Context, device string, namespaceID uint) error {
+func (n *Nvme) deleteNS(ctx context.Context, logicalName string, namespaceID uint) error {
 	nsid := strconv.Itoa(int(namespaceID))
-	n.Executor.SetArgs("delete-ns", device, "--namespace-id="+nsid)
+	n.Executor.SetArgs("delete-ns", logicalName, "--namespace-id="+nsid)
 	_, err := n.Executor.Exec(ctx)
 	return err
 }
 
-func (n *Nvme) attachNS(ctx context.Context, device string, controllerID, namespaceID uint) error {
+func (n *Nvme) attachNS(ctx context.Context, logicalName string, controllerID, namespaceID uint) error {
 	cntlid := strconv.Itoa(int(controllerID))
 	nsid := strconv.Itoa(int(namespaceID))
-	n.Executor.SetArgs("attach-ns", device, "--controllers="+cntlid, "--namespace-id="+nsid)
+	n.Executor.SetArgs("attach-ns", logicalName, "--controllers="+cntlid, "--namespace-id="+nsid)
 	_, err := n.Executor.Exec(ctx)
 	return err
 }
 
-func (n *Nvme) idNS(ctx context.Context, device string, namespaceID uint) ([]byte, error) {
+func (n *Nvme) idNS(ctx context.Context, logicalName string, namespaceID uint) ([]byte, error) {
 	nsid := strconv.Itoa(int(namespaceID))
-	n.Executor.SetArgs("id-ns", "--output-format=json", device, "--namespace-id="+nsid)
+	n.Executor.SetArgs("id-ns", "--output-format=json", logicalName, "--namespace-id="+nsid)
 	result, err := n.Executor.Exec(ctx)
 	return result.Stdout, err
 }
 
-func (n *Nvme) ResetNS(ctx context.Context, device string) error { // nolint:gocyclo
-	out, err := n.cmdListCapabilities(ctx, device)
+func (n *Nvme) ResetNS(ctx context.Context, logicalName string) error { // nolint:gocyclo
+	out, err := n.cmdListCapabilities(ctx, logicalName)
 	if err != nil {
 		return err
 	}
@@ -510,7 +506,7 @@ func (n *Nvme) ResetNS(ctx context.Context, device string) error { // nolint:goc
 		return err
 	}
 
-	namespaces, err := n.listNS(ctx, device)
+	namespaces, err := n.listNS(ctx, logicalName)
 	if err != nil {
 		return err
 	}
@@ -518,27 +514,27 @@ func (n *Nvme) ResetNS(ctx context.Context, device string) error { // nolint:goc
 	// we need to have at least 1 namespace so we can interogate the features supported
 	if len(namespaces) == 0 {
 		var nsid uint
-		nsid, err = n.createNS(ctx, device, ctrl.TNVMCAP, 512)
+		nsid, err = n.createNS(ctx, logicalName, ctrl.TNVMCAP, 512)
 		if err != nil {
 			return err
 		}
 
-		err = n.attachNS(ctx, device, ctrl.CNTLID, nsid)
+		err = n.attachNS(ctx, logicalName, ctrl.CNTLID, nsid)
 		if err != nil {
 			return err
 		}
 
-		namespaces, err = n.listNS(ctx, device)
+		namespaces, err = n.listNS(ctx, logicalName)
 		if err != nil {
 			return err
 		}
 		if len(namespaces) == 0 {
-			err = fmt.Errorf("%s: failed to find namespaces: %w", device, io.ErrUnexpectedEOF)
+			err = fmt.Errorf("%s: failed to find namespaces: %w", logicalName, io.ErrUnexpectedEOF)
 			return err
 		}
 	}
 
-	out, err = n.idNS(ctx, device, namespaces[0])
+	out, err = n.idNS(ctx, logicalName, namespaces[0])
 	if err != nil {
 		return err
 	}
@@ -562,7 +558,7 @@ func (n *Nvme) ResetNS(ctx context.Context, device string) error { // nolint:goc
 
 	// delete all namespaces
 	for _, ns := range namespaces {
-		err = n.deleteNS(ctx, device, ns)
+		err = n.deleteNS(ctx, logicalName, ns)
 		if err != nil {
 			return err
 		}
@@ -570,23 +566,23 @@ func (n *Nvme) ResetNS(ctx context.Context, device string) error { // nolint:goc
 
 	// figure out nsze and ncap in terms of blocksize, we want both to be the same
 	var nsid uint
-	nsid, err = n.createNS(ctx, device, ctrl.TNVMCAP, ds)
+	nsid, err = n.createNS(ctx, logicalName, ctrl.TNVMCAP, ds)
 	if err != nil {
 		return err
 	}
 
-	err = n.attachNS(ctx, device, ctrl.CNTLID, nsid)
+	err = n.attachNS(ctx, logicalName, ctrl.CNTLID, nsid)
 	if err != nil {
 		return err
 	}
 
-	n.Executor.SetArgs("reset", device)
+	n.Executor.SetArgs("reset", logicalName)
 	_, err = n.Executor.Exec(ctx)
 	if err != nil {
 		return err
 	}
 
-	n.Executor.SetArgs("ns-rescan", device)
+	n.Executor.SetArgs("ns-rescan", logicalName)
 	_, err = n.Executor.Exec(ctx)
 	if err != nil {
 		return err

@@ -10,30 +10,32 @@ import (
 )
 
 var (
-	device  = flag.String("device", "/dev/sdZZZ", "disk to wipe using blkdiscard")
-	timeout = flag.String("timeout", (2 * time.Minute).String(), "time to wait for command to complete")
+	logicalName = flag.String("drive", "/dev/nvmeX", "nvme disk to wipe")
+	timeout     = flag.String("timeout", (1 * time.Minute).String(), "time to wait for command to complete")
+	verbose     = flag.Bool("verbose", false, "show command runs and output")
 )
 
-// This example invokes ironlib and runs blkdiscard on the disk /dev/sdZZZ
 func main() {
 	flag.Parse()
 
 	logger := logrus.New()
 	logger.Formatter = new(logrus.TextFormatter)
-	logger.SetLevel(logrus.TraceLevel)
+	if *verbose {
+		logger.SetLevel(logrus.TraceLevel)
+	}
 
 	timeout, err := time.ParseDuration(*timeout)
 	if err != nil {
 		logger.WithError(err).Fatal("failed to parse timeout duration")
 	}
 
-	blkdiscard := utils.NewBlkdiscardCmd()
+	nvme := utils.NewNvmeCmd(*verbose)
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	logger.Info("running blkdiscard on ", *device)
-	err = blkdiscard.Discard(ctx, *device)
+	logger.Info("resetting namespaces")
+	err = nvme.ResetNS(ctx, *logicalName)
 	if err != nil {
 		logger.WithError(err).Fatal("exiting")
 	}
