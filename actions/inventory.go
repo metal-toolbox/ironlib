@@ -704,7 +704,6 @@ func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context)
 
 	sumStr, err := a.collectors.FirmwareChecksumCollector.BIOSLogoChecksum(ctx)
 	if err != nil {
-		a.log.WithError(err).Warn("error collecting BIOS Logo checksum")
 		return err
 	}
 
