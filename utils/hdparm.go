@@ -2,13 +2,17 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/model"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -205,6 +209,136 @@ func (h *Hdparm) DriveCapabilities(ctx context.Context, logicalName string) ([]*
 	}
 
 	return capabilities, err
+}
+
+// WipeDrive implements DriveWipe by calling Sanitize or Erase as appropriate.
+// Sanitize(CryptoErase) is preferred over Sanitize(BlockErase) which is preferred over Erase(CryptographicErase).
+func (h *Hdparm) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error { // nolint:gocyclo
+	var (
+		esee     bool
+		eseu     bool
+		sanitize bool
+		bee      bool
+		cse      bool
+	)
+	for _, cap := range drive.Capabilities {
+		switch {
+		case cap.Name == "esee":
+			esee = cap.Enabled
+		case cap.Name == "bee":
+			bee = cap.Enabled
+		case cap.Name == "cse":
+			cse = cap.Enabled
+		case cap.Name == "sf":
+			sanitize = cap.Enabled
+		case strings.HasPrefix(cap.Description, "erase time:"):
+			eseu = strings.Contains(cap.Description, "enhanced")
+		}
+	}
+
+	l := logger.WithField("drive", drive.LogicalName)
+	if sanitize && cse {
+		// nolint:govet
+		l := l.WithField("method", "sanitize").WithField("action", "sanitize-crypto-scramble")
+		l.Info("wiping")
+		err := h.Sanitize(ctx, drive, CryptoErase)
+		if err == nil {
+			return nil
+		}
+		l.WithError(err).Info("failed")
+	}
+	if sanitize && bee {
+		// nolint:govet
+		l := l.WithField("method", "sanitize").WithField("action", "sanitize-block-erase")
+		l.Info("wiping")
+		err := h.Sanitize(ctx, drive, BlockErase)
+		if err == nil {
+			return nil
+		}
+		l.WithError(err).Info("failed")
+	}
+	if esee && eseu {
+		// nolint:govet
+		l := l.WithField("method", "security-erase-enhanced")
+		l.Info("wiping")
+		err := h.Erase(ctx, drive, CryptographicErase)
+		if err == nil {
+			return nil
+		}
+		l.WithError(err).Info("failed")
+	}
+	return ErrIneffectiveWipe
+}
+
+// Sanitize wipes drive using `ATA Sanitize Device` via hdparm --sanitize
+func (h *Hdparm) Sanitize(ctx context.Context, drive *common.Drive, sanact SanitizeAction) error {
+	var sanType string
+	switch sanact { // nolint:exhaustive
+	case BlockErase:
+		sanType = "block-erase"
+	case CryptoErase:
+		sanType = "crypto-scramble"
+	default:
+		return fmt.Errorf("%w: %v", errSanitizeInvalidAction, sanact)
+	}
+
+	verify, err := ApplyWatermarks(drive)
+	if err != nil {
+		return err
+	}
+
+	h.Executor.SetArgs("--yes-i-know-what-i-am-doing", "--sanitize-"+sanType, drive.LogicalName)
+	_, err = h.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	// now we loop until --sanitize-status reports that sanitization is complete
+	for {
+		h.Executor.SetArgs("--sanitize-status", drive.LogicalName)
+		result, err := h.Executor.Exec(ctx)
+		if err != nil {
+			return err
+		}
+		if h.sanitizeDone(result.Stdout) {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	return verify()
+}
+
+func (h *Hdparm) sanitizeDone(output []byte) bool {
+	return bytes.Contains(output, []byte("Sanitize Idle"))
+}
+
+// Erase wipes drive using ATA Secure Erase via hdparm --security-erase-enhanced
+func (h *Hdparm) Erase(ctx context.Context, drive *common.Drive, ses SecureEraseSetting) error {
+	switch ses { // nolint:exhaustive
+	case CryptographicErase:
+	default:
+		return fmt.Errorf("%w: %v", errFormatInvalidSetting, ses)
+	}
+
+	h.Executor.SetArgs("--user-master", "u", "--security-set-pass", "p", drive.LogicalName)
+	_, err := h.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	verify, err := ApplyWatermarks(drive)
+	if err != nil {
+		return err
+	}
+
+	h.Executor.SetArgs("--user-master", "u", "--security-erase-enhanced", "p", drive.LogicalName)
+	_, err = h.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return verify()
 }
 
 // NewFakeHdparm returns a mock hdparm collector that returns mock data for use in tests.
