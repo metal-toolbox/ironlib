@@ -3,7 +3,7 @@ module github.com/metal-toolbox/ironlib
 go 1.22
 
 require (
-	github.com/beevik/etree v1.3.0
+	github.com/beevik/etree v1.4.0
 	github.com/bmc-toolbox/common v0.0.0-20240426155832-c9882dbabcca
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
 	github.com/pkg/errors v0.9.1
