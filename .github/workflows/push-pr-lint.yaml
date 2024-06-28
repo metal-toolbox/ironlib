@@ -20,7 +20,7 @@ jobs:
       run: make check-go-generated
 
     - name: Run go tests
-      run: make go-test
+      run: sudo ENABLE_PRIV_TESTS=true make go-test
 
     - name: Set up docker buildx
       uses: docker/setup-buildx-action@v3
