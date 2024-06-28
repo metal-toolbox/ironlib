@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	tlogrus "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,18 +16,9 @@ import (
 
 func Test_NvmeComponents(t *testing.T) {
 	// nolint:dupl
-	expected := []*common.Drive{
-		{Common: common.Common{
+	expected := []*model.Drive{
+		{Drive: common.Drive{Common: common.Common{
 			LogicalName: "/dev/nvme0n1", Serial: "Z9DF70I8FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
-			Capabilities: []*common.Capability{
-				{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
-				{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
-				{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
-				{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported", Enabled: false},
-				{Name: "ber", Description: "Block Erase Sanitize Operation Supported", Enabled: false},
-				{Name: "owr", Description: "Overwrite Sanitize Operation Supported", Enabled: false},
-				{Name: "ndi", Description: "No-Deallocate After Sanitize bit in Sanitize command Supported", Enabled: false},
-			},
 			Metadata: map[string]string{
 				"Block Erase Sanitize Operation Supported":                          "false",
 				"Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)": "false",
@@ -36,18 +28,18 @@ func Test_NvmeComponents(t *testing.T) {
 				"No-Deallocate After Sanitize bit in Sanitize command Supported":    "false",
 				"Overwrite Sanitize Operation Supported":                            "false",
 			},
-		}},
-		{Common: common.Common{
+			Capabilities: []*common.Capability{
+				{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
+				{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
+				{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
+				{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported", Enabled: false},
+				{Name: "ber", Description: "Block Erase Sanitize Operation Supported", Enabled: false},
+				{Name: "owr", Description: "Overwrite Sanitize Operation Supported", Enabled: false},
+				{Name: "ndi", Description: "No-Deallocate After Sanitize bit in Sanitize command Supported", Enabled: false},
+			},
+		}}},
+		{Drive: common.Drive{Common: common.Common{
 			LogicalName: "/dev/nvme1n1", Serial: "Z9DF70I9FY3L", Vendor: "TOSHIBA", Model: "KXG60ZNV256G TOSHIBA", Description: "KXG60ZNV256G TOSHIBA", Firmware: &common.Firmware{Installed: "AGGA4104"}, ProductName: "NULL",
-			Capabilities: []*common.Capability{
-				{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
-				{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
-				{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
-				{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported", Enabled: false},
-				{Name: "ber", Description: "Block Erase Sanitize Operation Supported", Enabled: false},
-				{Name: "owr", Description: "Overwrite Sanitize Operation Supported", Enabled: false},
-				{Name: "ndi", Description: "No-Deallocate After Sanitize bit in Sanitize command Supported", Enabled: false},
-			},
 			Metadata: map[string]string{
 				"Block Erase Sanitize Operation Supported":                          "false",
 				"Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)": "false",
@@ -57,7 +49,16 @@ func Test_NvmeComponents(t *testing.T) {
 				"No-Deallocate After Sanitize bit in Sanitize command Supported":    "false",
 				"Overwrite Sanitize Operation Supported":                            "false",
 			},
-		}},
+			Capabilities: []*common.Capability{
+				{Name: "fmns", Description: "Format Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
+				{Name: "cens", Description: "Crypto Erase Applies to All/Single Namespace(s) (t:All, f:Single)", Enabled: false},
+				{Name: "cese", Description: "Crypto Erase Supported as part of Secure Erase", Enabled: true},
+				{Name: "cer", Description: "Crypto Erase Sanitize Operation Supported", Enabled: false},
+				{Name: "ber", Description: "Block Erase Sanitize Operation Supported", Enabled: false},
+				{Name: "owr", Description: "Overwrite Sanitize Operation Supported", Enabled: false},
+				{Name: "ndi", Description: "No-Deallocate After Sanitize bit in Sanitize command Supported", Enabled: false},
+			},
+		}}},
 	}
 
 	n := NewFakeNvme()
@@ -67,7 +68,18 @@ func Test_NvmeComponents(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Equal(t, expected, drives)
+	assert.Equal(t, len(expected), len(drives))
+	for i := range expected {
+		assert.Equal(t, expected[i].LogicalName, drives[i].LogicalName)
+		assert.Equal(t, expected[i].Serial, drives[i].Serial)
+		assert.Equal(t, expected[i].Vendor, drives[i].Vendor)
+		assert.Equal(t, expected[i].Model, drives[i].Model)
+		assert.Equal(t, expected[i].Description, drives[i].Description)
+		assert.Equal(t, expected[i].ProductName, drives[i].ProductName)
+		assert.Equal(t, expected[i].Firmware, drives[i].Firmware)
+		assert.Equal(t, expected[i].Capabilities, drives[i].Capabilities)
+		assert.Equal(t, expected[i].Metadata, drives[i].Metadata)
+	}
 }
 
 func Test_NvmeDriveCapabilities(t *testing.T) {
@@ -180,13 +192,13 @@ func Test_NvmeParseSanicap(t *testing.T) {
 	})
 }
 
-func fakeNVMEDrive(t *testing.T) *common.Drive {
+func fakeNVMEDrive(t *testing.T) *model.Drive {
 	dir := t.TempDir()
 	f, err := os.Create(dir + "/nvme0n1")
 	require.NoError(t, err)
 	require.NoError(t, f.Truncate(20*1024))
 	require.NoError(t, f.Close())
-	return &common.Drive{Common: common.Common{LogicalName: f.Name()}}
+	return &model.Drive{Drive: common.Drive{Common: common.Common{LogicalName: f.Name()}}}
 }
 
 func Test_NvmeSanitize(t *testing.T) {

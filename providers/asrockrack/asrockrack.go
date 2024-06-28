@@ -41,7 +41,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 
 	// set device manager
 	dm := &asrockrack{
-		hw:     model.NewHardware(&device),
+		hw:     model.NewHardware(model.NewDevice(&device)),
 		logger: l,
 		trace:  trace,
 	}
@@ -50,12 +50,9 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 }
 
 // Returns hardware inventory for the device
-func (a *asrockrack) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
+func (a *asrockrack) GetInventory(ctx context.Context, options ...actions.Option) (*model.Device, error) {
 	// Collect device inventory
 	a.logger.Info("Collecting inventory")
-
-	deviceObj := common.NewDevice()
-	a.hw.Device = &deviceObj
 
 	collector := actions.NewInventoryCollectorAction(a.logger, options...)
 	if err := collector.Collect(ctx, a.hw.Device); err != nil {
@@ -82,7 +79,7 @@ func (a *asrockrack) UpdatesApplied() bool {
 }
 
 // ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
-func (a *asrockrack) ListAvailableUpdates(context.Context, *model.UpdateOptions) (*common.Device, error) {
+func (a *asrockrack) ListAvailableUpdates(context.Context, *model.UpdateOptions) (*model.Device, error) {
 	return nil, nil
 }
 
@@ -93,7 +90,7 @@ func (a *asrockrack) InstallUpdates(context.Context, *model.UpdateOptions) error
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (a *asrockrack) GetInventoryOEM(context.Context, *common.Device, *model.UpdateOptions) error {
+func (a *asrockrack) GetInventoryOEM(context.Context, *model.Device, *model.UpdateOptions) error {
 	return nil
 }
 

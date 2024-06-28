@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"flag"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib"
 	"github.com/metal-toolbox/ironlib/actions"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
 	"github.com/sirupsen/logrus"
 )
@@ -49,7 +50,7 @@ func main() {
 		l.WithError(err).Fatal("exiting")
 	}
 
-	var drive *common.Drive
+	var drive *model.Drive
 	for _, d := range inventory.Drives {
 		if d.LogicalName == *logicalName {
 			drive = d
@@ -60,7 +61,24 @@ func main() {
 		l.Fatal("unable to find disk")
 	}
 
-	// Pick the most appropriate wipe based on the disk type and features supported
+	// Lets see if drive knows how to wipe itself
+	// If so we will *only* try the drive-reported wipers
+	wipers := drive.Wipers()
+	if wipers != nil {
+		var wiped bool
+		for _, wiper := range wipers {
+			if err := wiper.Wipe(ctx, logger); err != nil {
+				wiped = true
+				break
+			}
+		}
+		if !wiped {
+			l.Fatal("failed to wipe drive")
+		}
+		os.Exit(0)
+	}
+
+	// Drive does not know how to wipe itself so lets try and figure out an appropriate Wiper based on the disk type and features supported
 	var wiper actions.DriveWiper
 	switch drive.Protocol {
 	case "nvme":

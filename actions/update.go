@@ -26,7 +26,7 @@ type Updaters struct {
 }
 
 // Update runs updates based on given options
-func Update(ctx context.Context, device *common.Device, options []*model.UpdateOptions) error {
+func Update(ctx context.Context, device *model.Device, options []*model.UpdateOptions) error {
 	var err error
 
 	for _, option := range options {
@@ -149,7 +149,7 @@ func GetDriveUpdater(vendor string) (DriveUpdater, error) {
 }
 
 // UpdateDrive identifies the drive eligible for update from the inventory and runs the firmware update utility based on the drive vendor
-func UpdateDrive(ctx context.Context, drives []*common.Drive, options *model.UpdateOptions) error {
+func UpdateDrive(ctx context.Context, drives []*model.Drive, options *model.UpdateOptions) error {
 	for _, drive := range drives {
 		if !strings.EqualFold(options.Vendor, drive.Vendor) {
 			continue

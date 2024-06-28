@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 
-	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
@@ -53,7 +52,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 	}
 
 	// set device
-	device := common.NewDevice()
+	device := model.Device{}
 	device.Model = deviceModel
 	device.Vendor = deviceVendor
 	device.Serial = serial
@@ -112,7 +111,7 @@ func (d *dell) UpdatesApplied() bool {
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (d *dell) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
+func (d *dell) GetInventory(ctx context.Context, options ...actions.Option) (*model.Device, error) {
 	// Collect device inventory
 	d.logger.Info("Collecting hardware inventory")
 
@@ -126,7 +125,7 @@ func (d *dell) GetInventory(ctx context.Context, options ...actions.Option) (*co
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (d *dell) GetInventoryOEM(ctx context.Context, _ *common.Device, options *model.UpdateOptions) error {
+func (d *dell) GetInventoryOEM(ctx context.Context, _ *model.Device, options *model.UpdateOptions) error {
 	d.setUpdateOptions(options)
 
 	oemComponents, err := d.dsuInventory(ctx)
@@ -140,7 +139,7 @@ func (d *dell) GetInventoryOEM(ctx context.Context, _ *common.Device, options *m
 }
 
 // ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
-func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error) {
+func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*model.Device, error) {
 	// collect firmware updates available for components
 	d.logger.Info("Identifying component firmware updates...")
 

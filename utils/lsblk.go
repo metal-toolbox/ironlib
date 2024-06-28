@@ -57,10 +57,8 @@ func (l *Lsblk) Attributes() (utilName model.CollectorUtility, absolutePath stri
 	return "lsblk", l.Executor.CmdPath(), er
 }
 
-// Executes lsblk list, parses the output and returns a slice of *common.Drive
-func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
-	drives := make([]*common.Drive, 0)
-
+// Executes lsblk list, parses the output and returns a slice of *model.Drive
+func (l *Lsblk) Drives(ctx context.Context) ([]*model.Drive, error) {
 	out, err := l.list(ctx)
 	if err != nil {
 		return nil, err
@@ -73,18 +71,16 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 		return nil, err
 	}
 
-	for _, d := range items["blockdevices"] {
+	drives := make([]*model.Drive, len(items["blockdevices"]))
+	for i, d := range items["blockdevices"] {
 		dModel := d.Model
 
 		var vendor string
-
-		modelTokens := strings.Split(d.Model, " ")
-
-		if len(modelTokens) > 1 {
+		if modelTokens := strings.Split(d.Model, " "); len(modelTokens) > 1 {
 			vendor = modelTokens[1]
 		}
 
-		drive := &common.Drive{
+		drives[i] = model.NewDrive(&common.Drive{
 			Protocol: strings.ToLower(d.Transport),
 			Common: common.Common{
 				LogicalName: strings.TrimSpace(d.Device),
@@ -93,9 +89,7 @@ func (l *Lsblk) Drives(ctx context.Context) ([]*common.Drive, error) {
 				Model:       strings.TrimSpace(dModel),
 			},
 			StorageControllerDriveID: -1,
-		}
-
-		drives = append(drives, drive)
+		}, nil)
 	}
 
 	return drives, nil

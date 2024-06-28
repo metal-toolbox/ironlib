@@ -1788,7 +1788,7 @@ var (
 	}
 
 	// r6515 inventory taken with lshw, merged with data from smartctl
-	R6515_inventory_lshw_smartctl = &common.Device{
+	R6515_inventory_lshw_smartctl = &model.Device{Device: common.Device{
 		Common: common.Common{
 			Oem:         false,
 			Description: "",
@@ -3297,7 +3297,7 @@ var (
 			},
 		},
 		Enclosures: []*common.Enclosure{},
-	}
+	}}
 
 	// dsu update preview as a device object
 	R6515_updatePreview = &common.Device{

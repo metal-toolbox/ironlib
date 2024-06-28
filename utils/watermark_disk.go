@@ -9,7 +9,7 @@ import (
 	"os"
 	"slices"
 
-	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 )
 
 var ErrIneffectiveWipe = errors.New("found left over data after wiping disk")
@@ -21,7 +21,7 @@ type watermark struct {
 
 // ApplyWatermarks applies random watermarks randomly through out the specified device/file.
 // It returns a function that checks if the applied watermarks still exists on the device/file.
-func ApplyWatermarks(drive *common.Drive) (func() error, error) {
+func ApplyWatermarks(drive *model.Drive) (func() error, error) {
 	// Write open
 	file, err := os.OpenFile(drive.LogicalName, os.O_WRONLY, 0)
 	if err != nil {

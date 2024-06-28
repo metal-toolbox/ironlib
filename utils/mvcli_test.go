@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,8 +62,8 @@ func Test_MvcliStorageControllers(t *testing.T) {
 }
 
 func Test_MvcliDrives(t *testing.T) {
-	expected := []*common.Drive{
-		{
+	expected := []*model.Drive{
+		{Drive: common.Drive{
 			Common: common.Common{
 				Description: "MTFDDAV240TCB",
 				Vendor:      "micron",
@@ -80,8 +81,8 @@ func Test_MvcliDrives(t *testing.T) {
 			Type:                     common.SlugDriveTypeSATASSD,
 			NegotiatedSpeedGbps:      6,
 			StorageControllerDriveID: 0,
-		},
-		{
+		}},
+		{Drive: common.Drive{
 			Common: common.Common{
 				Description: "MTFDDAV240TCB",
 				Vendor:      "micron",
@@ -99,7 +100,7 @@ func Test_MvcliDrives(t *testing.T) {
 			Type:                     common.SlugDriveTypeSATASSD,
 			NegotiatedSpeedGbps:      6,
 			StorageControllerDriveID: 1,
-		},
+		}},
 	}
 
 	cli := newFakeMvcli(t, "info-pd")

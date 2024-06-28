@@ -5,7 +5,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -33,7 +33,7 @@ func NewBlkdiscardCmd(trace bool) *Blkdiscard {
 }
 
 // Discard runs blkdiscard on the given device (--force is always used)
-func (b *Blkdiscard) Discard(ctx context.Context, drive *common.Drive) error {
+func (b *Blkdiscard) Discard(ctx context.Context, drive *model.Drive) error {
 	b.Executor.SetArgs("--force", drive.LogicalName)
 
 	verify, err := ApplyWatermarks(drive)
@@ -50,7 +50,7 @@ func (b *Blkdiscard) Discard(ctx context.Context, drive *common.Drive) error {
 }
 
 // WipeDrive implements DriveWipe by calling Discard
-func (b *Blkdiscard) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
+func (b *Blkdiscard) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *model.Drive) error {
 	logger.WithField("drive", drive.LogicalName).WithField("method", "blkdiscard").Info("wiping")
 	return b.Discard(ctx, drive)
 }

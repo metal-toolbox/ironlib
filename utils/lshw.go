@@ -25,7 +25,7 @@ var (
 // The lshw command
 type Lshw struct {
 	Executor   Executor
-	Device     *common.Device
+	Device     *model.Device
 	nicSerials map[string]bool
 }
 
@@ -102,7 +102,7 @@ func (l *Lshw) Attributes() (utilName model.CollectorUtility, absolutePath strin
 // based on the data parsed from lshw
 //
 // Implements the InventoryCollector interface
-func (l *Lshw) Collect(ctx context.Context, device *common.Device) error {
+func (l *Lshw) Collect(ctx context.Context, device *model.Device) error {
 	// The device we're taking inventory of
 	l.Device = device
 
@@ -218,7 +218,7 @@ func (l *Lshw) parseNode(node *LshwNode) {
 	case "disk":
 		drive := l.xDrive(node)
 		if drive != nil {
-			l.Device.Drives = append(l.Device.Drives, drive)
+			l.Device.AddDrive(drive)
 		}
 	case "storage":
 		sController := l.xStorageController(node)
@@ -516,7 +516,7 @@ func nicFwParseBroadcom(s string) string {
 }
 
 // Returns Drive information struct populated with the attributes identified by lshw
-func (l *Lshw) xDrive(node *LshwNode) *common.Drive {
+func (l *Lshw) xDrive(node *LshwNode) *model.Drive {
 	if strings.Contains(node.Product, "Virtual") || node.Product == "" || strings.Contains(node.Description, "SATA controller") {
 		return nil
 	}
@@ -546,7 +546,7 @@ func (l *Lshw) xDrive(node *LshwNode) *common.Drive {
 		drive.Vendor = common.VendorFromString(node.Product)
 	}
 
-	return drive
+	return model.NewDrive(drive, nil)
 }
 
 // Returns Storage controller information struct populated with the attributes identified by lshw

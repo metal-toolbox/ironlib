@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,36 +25,29 @@ func newFakeMsecli() (*Msecli, error) {
 }
 
 func Test_MsecliDrives(t *testing.T) {
-	expected := []*common.Drive{
-		{
+	expected := []*model.Drive{
+		{Drive: common.Drive{
 			Common: common.Common{
 				Serial:      "193423710BDA",
 				Vendor:      "micron",
 				Model:       "Micron_5200_MTFDDAK480TDN",
 				Description: "Micron_5200_MTFDDAK480TDN",
-				Firmware: &common.Firmware{
-					Installed: "D1MU020",
-				},
-				Metadata: map[string]string{},
+				Firmware:    &common.Firmware{Installed: "D1MU020"},
+				Metadata:    map[string]string{},
 			},
-
 			Type: common.SlugDriveTypeSATASSD,
-		},
-		{
+		}},
+		{Drive: common.Drive{
 			Common: common.Common{
-				Serial: "193423711167",
-				Vendor: "micron",
-
+				Serial:      "193423711167",
+				Vendor:      "micron",
 				Model:       "Micron_5200_MTFDDAK480TDN",
 				Description: "Micron_5200_MTFDDAK480TDN",
-				Firmware: &common.Firmware{
-					Installed: "D1MU020",
-				},
-				Metadata: map[string]string{},
+				Firmware:    &common.Firmware{Installed: "D1MU020"},
+				Metadata:    map[string]string{},
 			},
-
 			Type: common.SlugDriveTypeSATASSD,
-		},
+		}},
 	}
 
 	m, err := newFakeMsecli()

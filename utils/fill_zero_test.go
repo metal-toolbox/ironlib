@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/model"
 	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/require"
 )
@@ -51,7 +52,7 @@ func Test_FillZeroWipeDrive(t *testing.T) {
 			ctx := context.Background()
 
 			zw := &FillZero{}
-			drive := &common.Drive{Common: common.Common{LogicalName: tmpfile.Name()}}
+			drive := &model.Drive{Drive: common.Drive{Common: common.Common{LogicalName: tmpfile.Name()}}}
 			logger, hook := test.NewNullLogger()
 			defer hook.Reset()
 
