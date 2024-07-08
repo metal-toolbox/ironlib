@@ -223,13 +223,13 @@ func (h *Hdparm) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *co
 	)
 	for _, cap := range drive.Capabilities {
 		switch {
-		case cap.Name == "esee":
+		case cap.Description == "encryption supports enhanced erase":
 			esee = cap.Enabled
-		case cap.Name == "bee":
+		case cap.Description == "BLOCK ERASE EXT":
 			bee = cap.Enabled
-		case cap.Name == "cse":
+		case cap.Description == "CRYPTO SCRAMBLE EXT":
 			cse = cap.Enabled
-		case cap.Name == "sf":
+		case cap.Description == "SANITIZE feature":
 			sanitize = cap.Enabled
 		case strings.HasPrefix(cap.Description, "erase time:"):
 			eseu = strings.Contains(cap.Description, "enhanced")
