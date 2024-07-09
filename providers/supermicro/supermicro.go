@@ -3,7 +3,6 @@ package supermicro
 import (
 	"context"
 
-	"github.com/bmc-toolbox/common"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/firmware"
@@ -38,7 +37,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 		return nil, errors.Wrap(errs.NewDmidecodeValueError("Serial", "", 0), err.Error())
 	}
 
-	device := common.NewDevice()
+	device := model.Device{}
 	device.Model = deviceModel
 	device.Vendor = deviceVendor
 	device.Serial = serial
@@ -68,7 +67,7 @@ func (s *supermicro) UpdatesApplied() bool {
 }
 
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
-func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
+func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option) (*model.Device, error) {
 	// Collect device inventory
 	s.logger.Info("Collecting hardware inventory")
 
@@ -107,7 +106,7 @@ func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option
 }
 
 // ListUpdatesAvailable does nothing on a SMC device
-func (s *supermicro) ListAvailableUpdates(context.Context, *model.UpdateOptions) (*common.Device, error) {
+func (s *supermicro) ListAvailableUpdates(context.Context, *model.UpdateOptions) (*model.Device, error) {
 	return nil, nil
 }
 
@@ -142,7 +141,7 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 
 // GetInventoryOEM collects device inventory using vendor specific tooling
 // and updates the given device.OemComponents object with the OEM inventory
-func (s *supermicro) GetInventoryOEM(context.Context, *common.Device, *model.UpdateOptions) error {
+func (s *supermicro) GetInventoryOEM(context.Context, *model.Device, *model.UpdateOptions) error {
 	return nil
 }
 

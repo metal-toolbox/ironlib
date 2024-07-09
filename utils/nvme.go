@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/bmc-toolbox/common"
+	"github.com/metal-toolbox/ironlib/actions/wipe"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/sirupsen/logrus"
 )
@@ -72,8 +73,8 @@ func (n *Nvme) Attributes() (utilName model.CollectorUtility, absolutePath strin
 	return "nvme", n.Executor.CmdPath(), er
 }
 
-// Executes nvme list, parses the output and returns a slice of *common.Drive
-func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
+// Executes nvme list, parses the output and returns a slice of *model.Drive
+func (n *Nvme) Drives(ctx context.Context) ([]*model.Drive, error) {
 	out, err := n.list(ctx)
 	if err != nil {
 		return nil, err
@@ -86,15 +87,12 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 		return nil, err
 	}
 
-	drives := make([]*common.Drive, len(list.Devices))
+	drives := make([]*model.Drive, len(list.Devices))
 	for i, d := range list.Devices {
 		dModel := d.ModelNumber
 
 		var vendor string
-
-		modelTokens := strings.Split(d.ModelNumber, " ")
-
-		if len(modelTokens) > 1 {
+		if modelTokens := strings.Split(d.ModelNumber, " "); len(modelTokens) > 1 {
 			vendor = modelTokens[1]
 		}
 
@@ -109,7 +107,7 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 			metadata[f.Description] = strconv.FormatBool(f.Enabled)
 		}
 
-		drives[i] = &common.Drive{
+		drives[i] = model.NewDrive(&common.Drive{
 			Common: common.Common{
 				LogicalName:  d.DevicePath,
 				Serial:       d.SerialNumber,
@@ -121,7 +119,7 @@ func (n *Nvme) Drives(ctx context.Context) ([]*common.Drive, error) {
 				Capabilities: capabilitiesFound,
 				Metadata:     metadata,
 			},
-		}
+		}, n)
 	}
 
 	return drives, nil
@@ -291,7 +289,20 @@ const (
 )
 
 // WipeDrive implements DriveWiper by running nvme sanitize or nvme format as appropriate
-func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
+func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *model.Drive) error {
+	for _, cmd := range n.Wipers(drive) {
+		if cmd.Wipe(ctx, logger) == nil {
+			return nil
+		}
+	}
+	return ErrIneffectiveWipe
+}
+
+// Wipers implements model.WipersGetter so *Nvme can be passed to model.NewDrive
+// It returns functions that are able to wipe the drive according the capabilities reported by the drive.
+// The functions are ordered by preference, in this case first function is the most secure and last is least.
+// Sanitize is preferred over format, crytpographic erase modes over non-cryptographic erase.
+func (n *Nvme) Wipers(drive *model.Drive) []wipe.Wiper {
 	var ber bool
 	var cer bool
 	var cese bool
@@ -306,49 +317,63 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 		}
 	}
 
-	l := logger.WithField("drive", drive.LogicalName)
+	var utilities []wipe.Wiper
+
 	if cer {
-		// nolint:govet
-		l := l.WithField("method", "sanitize").WithField("action", CryptoErase)
-		l.Info("wiping")
-		err := n.Sanitize(ctx, drive, CryptoErase)
-		if err == nil {
-			return nil
-		}
-		l.WithError(err).Info("failed")
+		fn := wipe.WipeFunc(func(ctx context.Context, logger *logrus.Logger) error {
+			l := logger.WithField("method", "sanitize").WithField("action", CryptoErase)
+			l.Info("wiping")
+			err := n.Sanitize(ctx, drive, CryptoErase)
+			if err == nil {
+				return nil
+			}
+			l.WithError(err).Info("failed")
+			return err
+		})
+		utilities = append(utilities, fn)
 	}
 	if ber {
-		// nolint:govet
-		l := l.WithField("method", "sanitize").WithField("action", BlockErase)
-		l.Info("wiping")
-		err := n.Sanitize(ctx, drive, BlockErase)
-		if err == nil {
-			return nil
-		}
-		l.WithError(err).Info("failed")
+		fn := wipe.WipeFunc(func(ctx context.Context, logger *logrus.Logger) error {
+			l := logger.WithField("method", "sanitize").WithField("action", BlockErase)
+			l.Info("wiping")
+			err := n.Sanitize(ctx, drive, BlockErase)
+			if err == nil {
+				return nil
+			}
+			l.WithError(err).Info("failed")
+			return err
+		})
+		utilities = append(utilities, fn)
 	}
 	if cese {
-		// nolint:govet
-		l := l.WithField("method", "format").WithField("setting", CryptographicErase)
+		fn := wipe.WipeFunc(func(ctx context.Context, logger *logrus.Logger) error {
+			l := logger.WithField("method", "format").WithField("setting", CryptographicErase)
+			l.Info("wiping")
+			err := n.Format(ctx, drive, CryptographicErase)
+			if err == nil {
+				return nil
+			}
+			l.WithError(err).Info("failed")
+			return err
+		})
+		utilities = append(utilities, fn)
+	}
+
+	fn := wipe.WipeFunc(func(ctx context.Context, logger *logrus.Logger) error {
+		l := logger.WithField("method", "format").WithField("setting", UserDataErase)
 		l.Info("wiping")
-		err := n.Format(ctx, drive, CryptographicErase)
+		err := n.Format(ctx, drive, UserDataErase)
 		if err == nil {
 			return nil
 		}
 		l.WithError(err).Info("failed")
-	}
-
-	l = l.WithField("method", "format").WithField("setting", UserDataErase)
-	l.Info("wiping")
-	err := n.Format(ctx, drive, UserDataErase)
-	if err == nil {
-		return nil
-	}
-	l.WithError(err).Info("failed")
-	return ErrIneffectiveWipe
+		return err
+	})
+	utilities = append(utilities, fn)
+	return utilities
 }
 
-func (n *Nvme) Sanitize(ctx context.Context, drive *common.Drive, sanact SanitizeAction) error {
+func (n *Nvme) Sanitize(ctx context.Context, drive *model.Drive, sanact SanitizeAction) error {
 	switch sanact { // nolint:exhaustive
 	case BlockErase, CryptoErase:
 	default:
@@ -396,7 +421,7 @@ func (n *Nvme) Sanitize(ctx context.Context, drive *common.Drive, sanact Sanitiz
 	return verify()
 }
 
-func (n *Nvme) Format(ctx context.Context, drive *common.Drive, ses SecureEraseSetting) error {
+func (n *Nvme) Format(ctx context.Context, drive *model.Drive, ses SecureEraseSetting) error {
 	switch ses { // nolint:exhaustive
 	case UserDataErase, CryptographicErase:
 	default:

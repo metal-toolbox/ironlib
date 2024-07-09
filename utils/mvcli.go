@@ -187,16 +187,15 @@ func (m *Mvcli) StorageControllers(ctx context.Context) ([]*common.StorageContro
 	return hbas, nil
 }
 
-func (m *Mvcli) Drives(ctx context.Context) ([]*common.Drive, error) {
+func (m *Mvcli) Drives(ctx context.Context) ([]*model.Drive, error) {
 	devices, err := m.Info(ctx, "pd")
 	if err != nil {
 		return nil, err
 	}
 
-	drives := []*common.Drive{}
-
-	for _, d := range devices {
-		drive := &common.Drive{
+	drives := make([]*model.Drive, len(devices))
+	for i, d := range devices {
+		drives[i] = model.NewDrive(&common.Drive{
 			Common: common.Common{
 				Model:       d.Model,
 				Vendor:      common.VendorFromString(d.Model),
@@ -211,9 +210,7 @@ func (m *Mvcli) Drives(ctx context.Context) ([]*common.Drive, error) {
 			Type:                     m.processDriveType(d.Type, d.SSDType),
 			NegotiatedSpeedGbps:      d.CurrentSpeed,
 			StorageControllerDriveID: d.ID,
-		}
-
-		drives = append(drives, drive)
+		}, nil)
 	}
 
 	return drives, nil

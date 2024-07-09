@@ -76,33 +76,3 @@ func (s *StorageControllerAction) GetControllerUtility(vendorName, modelName str
 
 	return nil, errors.Wrap(ErrVirtualDiskManagerUtilNotIdentified, "vendor: "+vendorName+" model: "+modelName)
 }
-
-// GetWipeUtility returns the wipe utility based on the disk wipping features
-func (s *StorageControllerAction) GetWipeUtility(drive *common.Drive) (DriveWiper, error) {
-	s.Logger.Tracef("%s | Detecting wipe utility", drive.LogicalName)
-	// TODO: use disk wipping features to return the best wipe utility, currently only one available
-
-	return utils.NewFillZeroCmd(s.trace), nil
-}
-
-func (s *StorageControllerAction) WipeDrive(ctx context.Context, log *logrus.Logger, drive *common.Drive) error {
-	util, err := s.GetWipeUtility(drive)
-	if err != nil {
-		return err
-	}
-
-	// Watermark disk
-	// Before wiping the disk, we apply watermarks to later verify successful deletion
-	check, err := utils.ApplyWatermarks(drive)
-	if err != nil {
-		return err
-	}
-
-	// Wipe the disk
-	err = util.WipeDrive(ctx, log, drive)
-	if err != nil {
-		return err
-	}
-
-	return check()
-}
