@@ -293,3 +293,61 @@ var fixtureHdparmDeviceCapabilities = []*common.Capability{
 		Enabled:     false,
 	},
 }
+
+func Test_HdparmSanitizeDone(t *testing.T) {
+	// note the order is not messed up, this is indeed what hdparm showed me
+	tests := []struct {
+		name string
+		done bool
+		in   string
+	}{
+		{
+			name: "5%",
+			in: `
+/dev/sdb:
+Issuing SANITIZE_STATUS command
+Sanitize status:
+    State:    SD2 Sanitize operation In Process
+    Progress: 0xf5a (5%)
+`,
+		},
+		{
+			name: "1%",
+			in: `
+/dev/sdb:
+Issuing SANITIZE_STATUS command
+Sanitize status:
+    State:    SD2 Sanitize operation In Process
+    Progress: 0x28f (1%)
+`,
+		},
+		{
+			name: "3%",
+			in: `
+/dev/sdb:
+Issuing SANITIZE_STATUS command
+Sanitize status:
+    State:    SD2 Sanitize operation In Process
+    Progress: 0xa3c (3%)
+`,
+		},
+		{
+			name: "done",
+			done: true,
+			in: `
+/dev/sdb:
+Issuing SANITIZE_STATUS command
+Sanitize status:
+    State:    SD0 Sanitize Idle
+    Last Sanitize Operation Completed Without Error
+`,
+		},
+	}
+
+	var h Hdparm
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.done, h.sanitizeDone([]byte(test.in)))
+		})
+	}
+}

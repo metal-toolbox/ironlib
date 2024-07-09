@@ -66,18 +66,30 @@ func main() {
 	case "nvme":
 		wiper = utils.NewNvmeCmd(*verbose)
 	case "sata":
-		// Lets see if drive supports TRIM, if so we'll use blkdiscard
+		// Lets figure out the drive capabilities in an easier format
+		var sanitize bool
+		var esee bool
+		var trim bool
 		for _, cap := range drive.Capabilities {
-			if strings.HasPrefix(cap.Description, "Data Set Management TRIM supported") {
-				if cap.Enabled {
-					wiper = utils.NewBlkdiscardCmd(*verbose)
-				}
-				break
+			switch {
+			case cap.Description == "encryption supports enhanced erase":
+				esee = cap.Enabled
+			case cap.Description == "SANITIZE feature":
+				sanitize = cap.Enabled
+			case strings.HasPrefix(cap.Description, "Data Set Management TRIM supported"):
+				trim = cap.Enabled
 			}
 		}
 
-		// drive does not support TRIM so we fall back to filling it up with zero
-		if wiper == nil {
+		switch {
+		case sanitize || esee:
+			// Drive supports Sanitize or Enhanced Erase, so we use hdparm
+			wiper = utils.NewHdparmCmd(*verbose)
+		case trim:
+			// Drive supports TRIM, so we use blkdiscard
+			wiper = utils.NewBlkdiscardCmd(*verbose)
+		default:
+			// Drive does not support any preferred wipe method so we fall back to filling it up with zero
 			wiper = utils.NewFillZeroCmd(*verbose)
 
 			// If the user supplied a non-default timeout then we'll honor it, otherwise we just go with a huge timeout.
