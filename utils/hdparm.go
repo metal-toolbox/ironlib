@@ -245,7 +245,7 @@ func (h *Hdparm) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *co
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 	if sanitize && bee {
 		// nolint:govet
@@ -255,7 +255,7 @@ func (h *Hdparm) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *co
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 	if esee && eseu {
 		// nolint:govet
@@ -265,7 +265,7 @@ func (h *Hdparm) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *co
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 	return ErrIneffectiveWipe
 }

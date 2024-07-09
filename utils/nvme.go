@@ -315,7 +315,7 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 	if ber {
 		// nolint:govet
@@ -325,7 +325,7 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 	if cese {
 		// nolint:govet
@@ -335,7 +335,7 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 
 	l = l.WithField("method", "format").WithField("setting", UserDataErase)
@@ -344,7 +344,7 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 	if err == nil {
 		return nil
 	}
-	l.WithError(err).Info("failed")
+	l.WithError(err).Error("failed")
 	return ErrIneffectiveWipe
 }
 
