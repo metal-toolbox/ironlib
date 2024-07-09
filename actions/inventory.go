@@ -689,7 +689,7 @@ func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context)
 	}()
 
 	if a.collectors.FirmwareChecksumCollector == nil {
-		a.log.Info("nil firmware checksum collector")
+		a.log.Debug("nil firmware checksum collector")
 		return nil
 	}
 
@@ -698,7 +698,7 @@ func (a *InventoryCollectorAction) CollectFirmwareChecksums(ctx context.Context)
 	if slices.Contains(a.disabledCollectorUtilities, collectorKind) ||
 		slices.Contains(a.disabledCollectorUtilities, firmware.FirmwareDumpUtility) ||
 		slices.Contains(a.disabledCollectorUtilities, firmware.UEFIParserUtility) {
-		a.log.Info("firmware checksum disabled")
+		a.log.Debug("firmware checksum disabled")
 		return nil
 	}
 

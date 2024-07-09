@@ -95,7 +95,7 @@ func main() {
 			// If the user supplied a non-default timeout then we'll honor it, otherwise we just go with a huge timeout.
 			// If this were *real* code and not an example some work could be done to guesstimate a timeout based on disk size.
 			if timeout == defaultTimeout {
-				l.WithField("timeout", timeout.String()).Info("increasing timeout")
+				l.WithField("timeout", timeout.String()).Debug("increasing timeout")
 				timeout = 24 * time.Hour
 				ctx, cancel = context.WithTimeout(context.WithoutCancel(ctx), timeout)
 				defer cancel()
@@ -107,7 +107,9 @@ func main() {
 		l.Fatal("failed find appropriate wiper drive")
 	}
 
-	err = wiper.WipeDrive(ctx, logger, drive)
+	ll := logger
+	ll.SetLevel(logrus.DebugLevel)
+	err = wiper.WipeDrive(ctx, ll, drive)
 	if err != nil {
 		l.Fatal("failed to wipe drive")
 	}

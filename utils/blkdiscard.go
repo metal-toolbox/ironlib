@@ -51,7 +51,7 @@ func (b *Blkdiscard) Discard(ctx context.Context, drive *common.Drive) error {
 
 // WipeDrive implements DriveWipe by calling Discard
 func (b *Blkdiscard) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
-	logger.WithField("drive", drive.LogicalName).WithField("method", "blkdiscard").Info("wiping")
+	logger.WithField("drive", drive.LogicalName).WithField("method", "blkdiscard").Debug("wiping")
 	return b.Discard(ctx, drive)
 }
 

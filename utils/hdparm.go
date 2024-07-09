@@ -240,32 +240,32 @@ func (h *Hdparm) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *co
 	if sanitize && cse {
 		// nolint:govet
 		l := l.WithField("method", "sanitize").WithField("action", "sanitize-crypto-scramble")
-		l.Info("wiping")
+		l.Debug("wiping")
 		err := h.Sanitize(ctx, drive, CryptoErase)
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 	if sanitize && bee {
 		// nolint:govet
 		l := l.WithField("method", "sanitize").WithField("action", "sanitize-block-erase")
-		l.Info("wiping")
+		l.Debug("wiping")
 		err := h.Sanitize(ctx, drive, BlockErase)
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 	if esee && eseu {
 		// nolint:govet
 		l := l.WithField("method", "security-erase-enhanced")
-		l.Info("wiping")
+		l.Debug("wiping")
 		err := h.Erase(ctx, drive, CryptographicErase)
 		if err == nil {
 			return nil
 		}
-		l.WithError(err).Info("failed")
+		l.WithError(err).Error("failed")
 	}
 	return ErrIneffectiveWipe
 }

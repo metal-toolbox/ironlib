@@ -70,7 +70,7 @@ func (s *supermicro) UpdatesApplied() bool {
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
 func (s *supermicro) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
 	// Collect device inventory
-	s.logger.Info("Collecting hardware inventory")
+	s.logger.Debug("Collecting hardware inventory")
 
 	// define collectors for supermicro hardware
 	collectors := &actions.Collectors{

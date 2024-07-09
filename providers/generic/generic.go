@@ -53,7 +53,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 // Returns hardware inventory for the device
 func (a *Generic) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
 	// Collect device inventory
-	a.logger.Info("Collecting inventory")
+	a.logger.Debug("Collecting inventory")
 
 	collector := actions.NewInventoryCollectorAction(a.logger, options...)
 	if err := collector.Collect(ctx, a.hw.Device); err != nil {

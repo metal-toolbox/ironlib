@@ -114,7 +114,7 @@ func (d *dell) UpdatesApplied() bool {
 // GetInventory collects hardware inventory along with the firmware installed and returns a Device object
 func (d *dell) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
 	// Collect device inventory
-	d.logger.Info("Collecting hardware inventory")
+	d.logger.Debug("Collecting hardware inventory")
 
 	collector := actions.NewInventoryCollectorAction(d.logger, options...)
 	if err := collector.Collect(ctx, d.hw.Device); err != nil {
@@ -142,7 +142,7 @@ func (d *dell) GetInventoryOEM(ctx context.Context, _ *common.Device, options *m
 // ListAvailableUpdates runs the vendor tooling (dsu) to identify updates available
 func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error) {
 	// collect firmware updates available for components
-	d.logger.Info("Identifying component firmware updates...")
+	d.logger.Debug("Identifying component firmware updates...")
 
 	d.setUpdateOptions(options)
 
@@ -153,11 +153,11 @@ func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOp
 
 	count := len(oemUpdates)
 	if count == 0 {
-		d.logger.Info("no available dell Oem updates")
+		d.logger.Debug("no available dell Oem updates")
 		return nil, nil
 	}
 
-	d.logger.WithField("count", count).Info("component updates identified..")
+	d.logger.WithField("count", count).Debug("component updates identified..")
 
 	d.hw.OEMComponents = append(d.hw.OEMComponents, oemUpdates...)
 
@@ -225,7 +225,7 @@ func (d *dell) setUpdateOptions(options *model.UpdateOptions) {
 			"dsu repo":    d.dsuReleaseVersion,
 			"base url":    d.updateBaseURL,
 		},
-	).Info("update parameters")
+	).Debug("update parameters")
 }
 
 // ApplyUpdate is here to satisfy the actions.Updater interface
