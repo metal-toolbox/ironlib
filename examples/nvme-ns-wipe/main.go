@@ -34,7 +34,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	logger.Info("resetting namespaces")
+	logger.Debug("resetting namespaces")
 	err = nvme.ResetNS(ctx, *logicalName)
 	if err != nil {
 		logger.WithError(err).Fatal("exiting")

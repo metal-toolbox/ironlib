@@ -79,7 +79,7 @@ func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 
 	d.logger.WithFields(
 		logrus.Fields{"file": updateFile},
-	).Info("Installing dell Update Bin file")
+	).Debug("Installing dell Update Bin file")
 
 	result, err := e.Exec(ctx)
 	if err != nil {
@@ -88,7 +88,7 @@ func (d *dell) installUpdate(ctx context.Context, updateFile string, downgrade b
 
 	d.logger.WithFields(
 		logrus.Fields{"file": updateFile},
-	).Info("Installed")
+	).Debug("Installed")
 
 	d.hw.PendingReboot = true
 
@@ -140,7 +140,7 @@ func (d *dell) pre(ctx context.Context) (err error) {
 		}
 	}
 
-	d.logger.Info("Dell DSU prerequisites setup complete")
+	d.logger.Debug("Dell DSU prerequisites setup complete")
 	d.DsuPrequisitesInstalled = true
 
 	return nil

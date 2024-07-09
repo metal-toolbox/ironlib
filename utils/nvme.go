@@ -310,7 +310,7 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 	if cer {
 		// nolint:govet
 		l := l.WithField("method", "sanitize").WithField("action", CryptoErase)
-		l.Info("wiping")
+		l.Debug("wiping")
 		err := n.Sanitize(ctx, drive, CryptoErase)
 		if err == nil {
 			return nil
@@ -320,7 +320,7 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 	if ber {
 		// nolint:govet
 		l := l.WithField("method", "sanitize").WithField("action", BlockErase)
-		l.Info("wiping")
+		l.Debug("wiping")
 		err := n.Sanitize(ctx, drive, BlockErase)
 		if err == nil {
 			return nil
@@ -330,7 +330,7 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 	if cese {
 		// nolint:govet
 		l := l.WithField("method", "format").WithField("setting", CryptographicErase)
-		l.Info("wiping")
+		l.Debug("wiping")
 		err := n.Format(ctx, drive, CryptographicErase)
 		if err == nil {
 			return nil
@@ -339,7 +339,7 @@ func (n *Nvme) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *comm
 	}
 
 	l = l.WithField("method", "format").WithField("setting", UserDataErase)
-	l.Info("wiping")
+	l.Debug("wiping")
 	err := n.Format(ctx, drive, UserDataErase)
 	if err == nil {
 		return nil

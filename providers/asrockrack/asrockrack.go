@@ -52,7 +52,7 @@ func New(dmidecode *utils.Dmidecode, l *logrus.Logger) (actions.DeviceManager, e
 // Returns hardware inventory for the device
 func (a *asrockrack) GetInventory(ctx context.Context, options ...actions.Option) (*common.Device, error) {
 	// Collect device inventory
-	a.logger.Info("Collecting inventory")
+	a.logger.Debug("Collecting inventory")
 
 	deviceObj := common.NewDevice()
 	a.hw.Device = &deviceObj

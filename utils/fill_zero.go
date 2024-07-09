@@ -26,7 +26,7 @@ func NewFillZeroCmd(trace bool) *FillZero {
 
 func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *common.Drive) error {
 	log := logger.WithField("drive", drive.LogicalName).WithField("method", "zero-fill")
-	log.Info("wiping")
+	log.Debug("wiping")
 
 	verify, err := ApplyWatermarks(drive)
 	if err != nil {
@@ -46,7 +46,7 @@ func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *
 		return err
 	}
 
-	log.WithField("size", fmt.Sprintf("%dB", partitionSize)).Info("disk info detected")
+	log.WithField("size", fmt.Sprintf("%dB", partitionSize)).Debug("disk info detected")
 	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *
 		// Check if the context has been canceled
 		select {
 		case <-ctx.Done():
-			log.Info("stopping")
+			log.Debug("stopping")
 			return ctx.Err()
 		default:
 			l := min(int64(len(buffer)), bytesRemaining)
@@ -100,7 +100,7 @@ func printProgress(log *logrus.Entry, totalBytesWritten, partitionSize int64, st
 		"progress":  fmt.Sprintf("%.2f%%", progress),
 		"speed":     fmt.Sprintf("%.2f MB/s", mbPerSecond),
 		"remaining": fmt.Sprintf("%.2f hour(s)", remainingHours),
-	}).Info("")
+	}).Debug("")
 }
 
 // SetQuiet lowers the verbosity
