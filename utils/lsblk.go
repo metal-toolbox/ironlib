@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	EnvLsblkUtility = "IRONLIB_UTIL_LSBLK"
+	EnvLsblkUtility                        = "IRONLIB_UTIL_LSBLK"
+	LsblkUtility    model.CollectorUtility = "lsblk"
 )
 
 var ErrLsblkTransportUnsupported = errors.New("Unsupported transport type")
@@ -32,7 +33,7 @@ type lsblkDeviceAttributes struct {
 
 // Return a new lsblk executor
 func NewLsblkCmd(trace bool) *Lsblk {
-	utility := "lsblk"
+	utility := string(LsblkUtility)
 
 	// lookup env var for util
 	if eVar := os.Getenv(EnvLsblkUtility); eVar != "" {
@@ -54,7 +55,7 @@ func (l *Lsblk) Attributes() (utilName model.CollectorUtility, absolutePath stri
 	// Call CheckExecutable first so that the Executable CmdPath is resolved.
 	er := l.Executor.CheckExecutable()
 
-	return "lsblk", l.Executor.CmdPath(), er
+	return LsblkUtility, l.Executor.CmdPath(), er
 }
 
 // Executes lsblk list, parses the output and returns a slice of *common.Drive
