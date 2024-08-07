@@ -11,10 +11,14 @@ import (
 	"github.com/metal-toolbox/ironlib/model"
 )
 
+const (
+	UefiVariableCollectorUtility model.CollectorUtility = "uefi-variable-collector"
+)
+
 type UEFIVariableCollector struct{}
 
 func (UEFIVariableCollector) Attributes() (model.CollectorUtility, string, error) {
-	return "uefi-variable-collector", "", nil
+	return UefiVariableCollectorUtility, "", nil
 }
 
 type UEFIVarEntry struct {
