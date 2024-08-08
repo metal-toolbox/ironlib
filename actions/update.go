@@ -133,7 +133,7 @@ func UpdateNIC(ctx context.Context, nics []*common.NIC, options *model.UpdateOpt
 			return err
 		}
 
-		return updater.UpdateNIC(ctx, options.UpdateFile, options.Model)
+		return updater.UpdateNIC(ctx, options.UpdateFile, options.Model, options.ForceInstall)
 	}
 
 	return errors.Wrap(ErrUpdaterUtilNotIdentified, options.Vendor)
