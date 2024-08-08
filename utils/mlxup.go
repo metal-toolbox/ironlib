@@ -150,7 +150,7 @@ func setNICFirmware(d *MlxupDevice, firmware *common.Firmware) {
 }
 
 // UpdateNIC updates mellanox NIC with the given update file
-func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string) error {
+func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string, force bool) error {
 	// query list of nics
 	nics, err := m.Query(ctx)
 	if err != nil {
@@ -165,7 +165,13 @@ func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string) e
 			}
 		}
 
-		m.Executor.SetArgs("--yes", "--dev", nic.PCIDeviceName, "--image-file", updateFile)
+		args := []string{"--yes", "--dev", nic.PCIDeviceName, "--image-file", updateFile}
+
+		if force {
+			args = append(args, "--force")
+		}
+
+		m.Executor.SetArgs(args...)
 		result, err := m.Executor.Exec(ctx)
 		if err != nil {
 			return err

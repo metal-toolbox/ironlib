@@ -172,7 +172,7 @@ func (d *dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions)
 		return d.installAvailableUpdates(ctx, options.DownloadOnly)
 	}
 
-	exitCode, err := d.installUpdate(ctx, options.Slug, options.AllowDowngrade)
+	exitCode, err := d.installUpdate(ctx, options.Slug, options.ForceInstall)
 	if err != nil {
 		return err
 	}
