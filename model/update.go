@@ -15,3 +15,8 @@ type UpdateOptions struct {
 	RepositoryVersion string // The update repository version to activate when defined
 	BaseURL           string // The BaseURL for the updates
 }
+
+// UpdateRequirements holds attributes that indicate requirements for before/after a component firmware install
+type UpdateRequirements struct {
+	PostInstallPowerCycle bool
+}
