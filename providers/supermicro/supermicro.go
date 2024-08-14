@@ -113,7 +113,7 @@ func (s *supermicro) ListAvailableUpdates(context.Context, *model.UpdateOptions)
 
 // UpdateRequirements returns requirements to be met before and after a firmware install,
 // the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
-func (s *supermicro) UpdateRequirements(ctx context.Context, componentSlug, componentVendor, componentModel string) (model.UpdateRequirements, error) {
+func (s *supermicro) UpdateRequirements(_ context.Context, componentSlug, componentVendor, componentModel string) (model.UpdateRequirements, error) {
 	return actions.UpdateRequirements(componentSlug, componentVendor, componentModel)
 }
 
