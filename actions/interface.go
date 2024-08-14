@@ -149,6 +149,12 @@ type UEFIVarsCollector interface {
 
 // Updaters
 
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+type UpdateRequirementsGetter interface {
+	UpdateRequirements(componentModel string) model.UpdateRequirements
+}
+
 // DriveUpdater defines an interface to update drive firmware
 type DriveUpdater interface {
 	UtilAttributeGetter
@@ -158,8 +164,8 @@ type DriveUpdater interface {
 // NICUpdater defines an interface to update NIC firmware
 type NICUpdater interface {
 	UtilAttributeGetter
+	UpdateRequirementsGetter
 	UpdateNIC(ctx context.Context, updateFile, modelNumber string, force bool) error
-	UpdateRequirements() model.UpdateRequirements
 }
 
 // BMCUpdater defines an interface to update BMC firmware
