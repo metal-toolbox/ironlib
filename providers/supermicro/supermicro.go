@@ -111,6 +111,26 @@ func (s *supermicro) ListAvailableUpdates(context.Context, *model.UpdateOptions)
 	return nil, nil
 }
 
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func (s *supermicro) UpdateRequirements(ctx context.Context, componentSlug, componentVendor, componentModel string) (model.UpdateRequirements, error) {
+	var err error
+
+	// collect device inventory if it isn't added already
+	if s.hw.Device == nil || s.hw.Device.BIOS == nil {
+		s.hw.Device, err = s.GetInventory(ctx)
+		if err != nil {
+			return model.UpdateRequirements{}, err
+		}
+	}
+
+	if componentModel == "" {
+		componentModel = s.hw.Device.Model
+	}
+
+	return actions.UpdateRequirements(componentSlug, componentVendor, componentModel)
+}
+
 // InstallUpdates for Supermicros based on the given options
 //
 // errors are returned when the updater fails to apply updates
@@ -127,7 +147,7 @@ func (s *supermicro) InstallUpdates(ctx context.Context, option *model.UpdateOpt
 		option.Model = s.hw.Device.Model
 	}
 
-	err = actions.Update(ctx, s.hw.Device, []*model.UpdateOptions{option})
+	err = actions.UpdateComponent(ctx, s.hw.Device, option)
 	if err != nil {
 		return err
 	}
