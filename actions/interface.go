@@ -45,6 +45,8 @@ type Getter interface {
 	ListAvailableUpdates(ctx context.Context, options *model.UpdateOptions) (*common.Device, error)
 	// Retrieve BIOS configuration for device
 	GetBIOSConfiguration(ctx context.Context) (map[string]string, error)
+	// UpdateRequirements returns requirements to be met before and after a firmware install
+	UpdateRequirements(ctx context.Context, componentSlug, componentVendor, componentModel string) (model.UpdateRequirements, error)
 }
 
 // Utility interface couples the configuration, collection and update interfaces
