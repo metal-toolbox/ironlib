@@ -179,11 +179,14 @@ func (m *Mlxup) UpdateNIC(ctx context.Context, updateFile, modelNumber string, f
 		m.Executor.SetArgs(args...)
 		result, err := m.Executor.Exec(ctx)
 		if err != nil {
+			if result != nil && result.ExitCode != 0 {
+				resetRequiredStr := "The firmware image was already updated on flash, pending reset"
+				if result.Stdout != nil && strings.Contains(string(result.Stdout), resetRequiredStr) {
+					return errors.Wrap(ErrRebootRequired, resetRequiredStr)
+				}
+				return newExecError(m.Executor.GetCmd(), result)
+			}
 			return err
-		}
-
-		if result.ExitCode != 0 {
-			return newExecError(m.Executor.GetCmd(), result)
 		}
 	}
 
