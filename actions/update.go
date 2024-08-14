@@ -25,45 +25,73 @@ type Updaters struct {
 	StorageControllers StorageControllerUpdater
 }
 
-// Update runs updates based on given options
-func Update(ctx context.Context, device *common.Device, options []*model.UpdateOptions) error {
+func UpdateComponent(ctx context.Context, device *common.Device, option *model.UpdateOptions) error {
 	var err error
+	switch {
+	// Update BIOS
+	case strings.EqualFold(common.SlugBIOS, option.Slug):
+		err = UpdateBIOS(ctx, device.BIOS, option)
+		if err != nil {
+			return errors.Wrap(err, "error updating bios")
+		}
 
+	// Update Drive
+	case strings.EqualFold(common.SlugDrive, option.Slug):
+		err = UpdateDrive(ctx, device.Drives, option)
+		if err != nil {
+			return errors.Wrap(err, "error updating drive")
+		}
+
+	// Update NIC
+	case strings.EqualFold(common.SlugNIC, option.Slug):
+		err = UpdateNIC(ctx, device.NICs, option)
+		if err != nil {
+			return errors.Wrap(err, "error updating nic")
+		}
+
+	// Update BMC
+	case strings.EqualFold(common.SlugBMC, option.Slug):
+		err = UpdateBMC(ctx, device.BMC, option)
+		if err != nil {
+			return errors.Wrap(err, "error updating bmc")
+		}
+	default:
+		return errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
+	}
+
+	return nil
+}
+
+// UpdateAll installs all updates based on given options, options acts as a filter
+func UpdateAll(ctx context.Context, device *common.Device, options []*model.UpdateOptions) error {
 	for _, option := range options {
-		switch {
-		// Update BIOS
-		case strings.EqualFold(common.SlugBIOS, option.Slug):
-			err = UpdateBIOS(ctx, device.BIOS, option)
-			if err != nil {
-				return errors.Wrap(err, "error updating bios")
-			}
-
-		// Update Drive
-		case strings.EqualFold(common.SlugDrive, option.Slug):
-			err = UpdateDrive(ctx, device.Drives, option)
-			if err != nil {
-				return errors.Wrap(err, "error updating drive")
-			}
-
-		// Update NIC
-		case strings.EqualFold(common.SlugNIC, option.Slug):
-			err = UpdateNIC(ctx, device.NICs, option)
-			if err != nil {
-				return errors.Wrap(err, "error updating nic")
-			}
-
-		// Update BMC
-		case strings.EqualFold(common.SlugBMC, option.Slug):
-			err = UpdateBMC(ctx, device.BMC, option)
-			if err != nil {
-				return errors.Wrap(err, "error updating bmc")
-			}
-		default:
-			return errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "slug: "+option.Slug)
+		if err := UpdateComponent(ctx, device, option); err != nil {
+			return err
 		}
 	}
 
 	return nil
+}
+
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func UpdateRequirements(componentSlug, componentVendor, componentModel string) (model.UpdateRequirements, error) {
+	slug := strings.ToUpper(componentSlug)
+	vendor := common.FormatVendorName(componentVendor)
+	req := model.UpdateRequirements{}
+
+	switch componentSlug {
+	case common.SlugNIC:
+		updater, err := GetNICUpdater(vendor)
+		if err != nil {
+			return req, err
+		}
+
+		return updater.UpdateRequirements(componentModel), nil
+
+	default:
+		return req, errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "component: "+slug)
+	}
 }
 
 // GetBMCUpdater returns the updater for the given vendor
