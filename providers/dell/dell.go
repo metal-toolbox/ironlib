@@ -164,6 +164,12 @@ func (d *dell) ListAvailableUpdates(ctx context.Context, options *model.UpdateOp
 	return d.hw.Device, nil
 }
 
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func (d *dell) UpdateRequirements(_ context.Context, _, _, _ string) (model.UpdateRequirements, error) {
+	return model.UpdateRequirements{}, errors.Wrap(errs.ErrUpdateReqNotImplemented, "provider: generic")
+}
+
 // InstallUpdates for Dells based on updateOptions
 func (d *dell) InstallUpdates(ctx context.Context, options *model.UpdateOptions) error {
 	d.setUpdateOptions(options)

@@ -84,6 +84,12 @@ func (a *Generic) ListAvailableUpdates(_ context.Context, _ *model.UpdateOptions
 	return nil, nil
 }
 
+// UpdateRequirements returns requirements to be met before and after a firmware install,
+// the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
+func (a *Generic) UpdateRequirements(_ context.Context, _, _, _ string) (model.UpdateRequirements, error) {
+	return model.UpdateRequirements{}, errors.Wrap(errs.ErrUpdateReqNotImplemented, "provider: generic")
+}
+
 // InstallUpdates installs updates based on updateOptions
 func (a *Generic) InstallUpdates(_ context.Context, _ *model.UpdateOptions) error {
 	return nil
