@@ -10,6 +10,7 @@ var (
 	ErrVersionStrExpectedSemver = errors.New("expected version string to follow semver format")
 	ErrFakeExecutorInvalidArgs  = errors.New("invalid number of args passed to fake executor")
 	ErrRepositoryBaseURL        = errors.New("repository base URL undefined, ensure UpdateOptions.BaseURL OR UPDATE_BASE_URL env var is set")
+	ErrRebootRequired           = errors.New("reboot required")
 )
 
 // ExecError is returned when the command exits with an error or a non zero exit status
