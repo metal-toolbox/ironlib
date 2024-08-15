@@ -75,22 +75,21 @@ func UpdateAll(ctx context.Context, device *common.Device, options []*model.Upda
 
 // UpdateRequirements returns requirements to be met before and after a firmware install,
 // the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
-func UpdateRequirements(componentSlug, componentVendor, componentModel string) (model.UpdateRequirements, error) {
+func UpdateRequirements(componentSlug, componentVendor, componentModel string) (*model.UpdateRequirements, error) {
 	slug := strings.ToUpper(componentSlug)
 	vendor := common.FormatVendorName(componentVendor)
-	req := model.UpdateRequirements{}
 
 	switch componentSlug {
 	case common.SlugNIC:
 		updater, err := GetNICUpdater(vendor)
 		if err != nil {
-			return req, err
+			return nil, err
 		}
 
 		return updater.UpdateRequirements(componentModel), nil
 
 	default:
-		return req, errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "component: "+slug)
+		return nil, errors.Wrap(errs.ErrNoUpdateHandlerForComponent, "component: "+slug)
 	}
 }
 
