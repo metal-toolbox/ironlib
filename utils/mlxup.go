@@ -150,8 +150,8 @@ func setNICFirmware(d *MlxupDevice, firmware *common.Firmware) {
 }
 
 // UpdateRequirements implements the actions/NICUpdater interface to return any pre/post firmware install requirements.
-func (m *Mlxup) UpdateRequirements(_ string) model.UpdateRequirements {
-	return model.UpdateRequirements{PostInstallHostPowercycle: true}
+func (m *Mlxup) UpdateRequirements(_ string) *model.UpdateRequirements {
+	return &model.UpdateRequirements{PostInstallHostPowercycle: true}
 }
 
 // UpdateNIC updates mellanox NIC with the given update file

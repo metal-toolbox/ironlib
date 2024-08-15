@@ -46,7 +46,7 @@ type Getter interface {
 	// Retrieve BIOS configuration for device
 	GetBIOSConfiguration(ctx context.Context) (map[string]string, error)
 	// UpdateRequirements returns requirements to be met before and after a firmware install
-	UpdateRequirements(ctx context.Context, componentSlug, componentVendor, componentModel string) (model.UpdateRequirements, error)
+	UpdateRequirements(ctx context.Context, componentSlug, componentVendor, componentModel string) (*model.UpdateRequirements, error)
 }
 
 // Utility interface couples the configuration, collection and update interfaces
@@ -154,7 +154,7 @@ type UEFIVarsCollector interface {
 // UpdateRequirements returns requirements to be met before and after a firmware install,
 // the caller may use the information to determine if a powercycle, reconfiguration or other actions are required on the component.
 type UpdateRequirementsGetter interface {
-	UpdateRequirements(componentModel string) model.UpdateRequirements
+	UpdateRequirements(componentModel string) *model.UpdateRequirements
 }
 
 // DriveUpdater defines an interface to update drive firmware
