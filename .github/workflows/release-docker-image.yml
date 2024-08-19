@@ -59,7 +59,7 @@ jobs:
 
       - name: Scan image
         id: scan
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v4
         with:
           image: ghcr.io/metal-toolbox/ironlib@${{ steps.dockerbuild.outputs.digest }}
           acs-report-enable: true
