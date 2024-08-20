@@ -79,7 +79,7 @@ func UpdateRequirements(componentSlug, componentVendor, componentModel string) (
 	slug := strings.ToUpper(componentSlug)
 	vendor := common.FormatVendorName(componentVendor)
 
-	switch componentSlug {
+	switch slug {
 	case common.SlugNIC:
 		updater, err := GetNICUpdater(vendor)
 		if err != nil {
