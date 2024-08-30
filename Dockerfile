@@ -90,11 +90,10 @@ RUN if [[ $TARGETARCH == "amd64" ]] ; then \
 RUN rm -rf /tmp/*
 
 # The non-distributable files are executables provided by hardware vendors.
-ARG ACCESS_KEY
-ARG INSTALL_NON_DISTRIBUTABLE=false
-ARG S3_BUCKET_ALIAS=utils
-ARG S3_PATH
-ARG SECRET_KEY
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SECRET_ACCESS_KEY
+ARG BUCKET
+ARG INSTALL_NON_DISTRIBUTABLE
 COPY scripts/install-non-distributable.sh non-distributable/
 RUN cd non-distributable && ./install-non-distributable.sh
 RUN rm -rf non-distributable/
