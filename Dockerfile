@@ -89,18 +89,17 @@ RUN if [[ $TARGETARCH == "amd64" ]] ; then \
 # Delete /tmp/* as we don't need those included in the image.
 RUN rm -rf /tmp/*
 
-# The non-distributable files are executables provided by hardware vendors.
-ARG AWS_ACCESS_KEY_ID
-ARG AWS_SECRET_ACCESS_KEY
-ARG BUCKET
-ARG INSTALL_NON_DISTRIBUTABLE
-COPY scripts/install-non-distributable.sh non-distributable/
-RUN cd non-distributable && ./install-non-distributable.sh
-RUN rm -rf non-distributable/
-
 # Use same base image used by deps so that we keep all the meta-vars (CMD, PATH, ...)
 FROM base
 # copy ironlib wrapper binaries
 COPY --from=helper-binaries /usr/sbin/getbiosconfig /usr/sbin/getinventory /usr/sbin/
 # copy installed packages
 COPY --from=deps / /
+
+# Install non-distributable files when the env var is set, left for downstream consumers
+COPY scripts/install-non-distributable.sh non-distributable/
+ONBUILD ARG AWS_ACCESS_KEY_ID
+ONBUILD ARG AWS_SECRET_ACCESS_KEY
+ONBUILD ARG BUCKET
+ONBUILD ARG INSTALL_NON_DISTRIBUTABLE
+ONBUILD RUN cd non-distributable && ./install-non-distributable.sh
