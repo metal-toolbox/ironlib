@@ -1,0 +1,7 @@
+*.md
+.chainguard
+.github
+.golangci.yaml
+Dockerfile
+bin/
+renovate.json
