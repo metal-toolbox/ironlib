@@ -1,6 +1,12 @@
 #!/bin/bash
 set -eux
 
+INSTALL_NON_DISTRIBUTABLE=${INSTALL_NON_DISTRIBUTABLE:-}
+if ! [[ ${INSTALL_NON_DISTRIBUTABLE,,} =~ ^(1|on|true|y|yes)$ ]]; then
+	echo not installing non-distributable files >&2
+	exit 0
+fi
+
 ARCH=$(uname -m)
 export WORKDIR="non-distributable"
 

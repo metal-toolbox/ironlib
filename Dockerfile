@@ -89,38 +89,15 @@ RUN if [[ $TARGETARCH == "amd64" ]] ; then \
 # Delete /tmp/* as we don't need those included in the image.
 RUN rm -rf /tmp/*
 
-# Install non-distributable files when the env var is set.
-#
 # The non-distributable files are executables provided by hardware vendors.
-ARG INSTALL_NON_DISTRIBUTABLE=false
-ENV INSTALL_NON_DISTRIBUTABLE=$INSTALL_NON_DISTRIBUTABLE
-
-# S3_BUCKET_ALIAS is the alias set on the S3 bucket, for details refer to the minio
-# client guide https://github.com/minio/mc/blob/master/docs/minio-client-complete-guide.md
-ARG S3_BUCKET_ALIAS=utils
-ENV S3_BUCKET_ALIAS=$S3_BUCKET_ALIAS
-
-# S3_PATH is the path in the s3 bucket where the non-distributable files are located
-# note, this generally includes the s3 bucket alias
-ARG S3_PATH
-ENV S3_PATH=$S3_PATH
-
 ARG ACCESS_KEY
-ENV ACCESS_KEY=$ACCESS_KEY
-
+ARG INSTALL_NON_DISTRIBUTABLE=false
+ARG S3_BUCKET_ALIAS=utils
+ARG S3_PATH
 ARG SECRET_KEY
-ENV SECRET_KEY=$SECRET_KEY
-
-COPY scripts scripts
-RUN if [[ $INSTALL_NON_DISTRIBUTABLE = "true" ]]; then \
-      mkdir -p non-distributable && \
-      cp scripts/install-non-distributable.sh ./non-distributable/install.sh && \
-      cd ./non-distributable/ && \
-      ./install.sh $S3_BUCKET_ALIAS && \
-      cd .. && \
-      rm -rf non-distributable; \
-    fi
-RUN rm -rf scripts/
+COPY scripts/install-non-distributable.sh non-distributable/
+RUN cd non-distributable && ./install-non-distributable.sh
+RUN rm -rf non-distributable/
 
 # Use same base image used by deps so that we keep all the meta-vars (CMD, PATH, ...)
 FROM base
