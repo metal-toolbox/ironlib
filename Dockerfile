@@ -103,3 +103,4 @@ ONBUILD ARG AWS_SECRET_ACCESS_KEY
 ONBUILD ARG BUCKET
 ONBUILD ARG INSTALL_NON_DISTRIBUTABLE
 ONBUILD RUN cd non-distributable && ./install-non-distributable.sh
+ONBUILD RUN rm -rf non-distributable
