@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/sirupsen/logrus"
 )
@@ -451,8 +451,8 @@ func (n *Nvme) createNS(ctx context.Context, logicalName string, size, blocksize
 		return 0, fmt.Errorf("%w: size(%d) is not a multiple of blocksize(%d)", errInvalidCreateNSArgs, size, blocksize)
 	}
 
-	_size := strconv.Itoa(int(size / blocksize))
-	_blocksize := strconv.Itoa(int(blocksize))
+	_size := strconv.FormatUint(uint64(size/blocksize), 10)
+	_blocksize := strconv.FormatUint(uint64(blocksize), 10)
 	n.Executor.SetArgs("create-ns", logicalName, "--dps=0", "--nsze="+_size, "--ncap="+_size, "--blocksize="+_blocksize)
 	result, err := n.Executor.Exec(ctx)
 	if err != nil {
@@ -465,27 +465,27 @@ func (n *Nvme) createNS(ctx context.Context, logicalName string, size, blocksize
 	if len(parts) != 3 {
 		return 0, fmt.Errorf("unable to parse nsid: %w", io.ErrUnexpectedEOF)
 	}
-	nsid, err := strconv.Atoi(string(parts[2]))
+	nsid, err := strconv.ParseUint(string(parts[2]), 10, 32)
 	return uint(nsid), err
 }
 
 func (n *Nvme) deleteNS(ctx context.Context, logicalName string, namespaceID uint) error {
-	nsid := strconv.Itoa(int(namespaceID))
+	nsid := strconv.FormatUint(uint64(namespaceID), 10)
 	n.Executor.SetArgs("delete-ns", logicalName, "--namespace-id="+nsid)
 	_, err := n.Executor.Exec(ctx)
 	return err
 }
 
 func (n *Nvme) attachNS(ctx context.Context, logicalName string, controllerID, namespaceID uint) error {
-	cntlid := strconv.Itoa(int(controllerID))
-	nsid := strconv.Itoa(int(namespaceID))
+	cntlid := strconv.FormatUint(uint64(controllerID), 10)
+	nsid := strconv.FormatUint(uint64(namespaceID), 10)
 	n.Executor.SetArgs("attach-ns", logicalName, "--controllers="+cntlid, "--namespace-id="+nsid)
 	_, err := n.Executor.Exec(ctx)
 	return err
 }
 
 func (n *Nvme) idNS(ctx context.Context, logicalName string, namespaceID uint) ([]byte, error) {
-	nsid := strconv.Itoa(int(namespaceID))
+	nsid := strconv.FormatUint(uint64(namespaceID), 10)
 	n.Executor.SetArgs("id-ns", "--output-format=json", logicalName, "--namespace-id="+nsid)
 	result, err := n.Executor.Exec(ctx)
 	return result.Stdout, err

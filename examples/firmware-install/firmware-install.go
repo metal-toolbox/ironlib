@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
+	"github.com/sirupsen/logrus"
+
 	"github.com/metal-toolbox/ironlib"
 	"github.com/metal-toolbox/ironlib/model"
-	"github.com/sirupsen/logrus"
 )
 
 // This example invokes ironlib to install the supermicro BMC firmware

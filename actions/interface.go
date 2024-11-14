@@ -3,10 +3,11 @@ package actions
 import (
 	"context"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
+	"github.com/sirupsen/logrus"
+
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/sirupsen/logrus"
 )
 
 // DeviceManager interface is returned to the caller when calling ironlib.New()

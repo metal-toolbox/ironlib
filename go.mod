@@ -4,8 +4,8 @@ go 1.22
 
 require (
 	github.com/beevik/etree v1.4.1
-	github.com/bmc-toolbox/common v0.0.0-20240426155832-c9882dbabcca
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
+	github.com/metal-toolbox/bmc-common v1.0.2
 	github.com/pkg/errors v0.9.1
 	github.com/r3labs/diff/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3

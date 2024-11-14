@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
 	asrrFixtures "github.com/metal-toolbox/ironlib/fixtures/asrr"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	"github.com/stretchr/testify/assert"

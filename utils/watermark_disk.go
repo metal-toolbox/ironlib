@@ -9,7 +9,7 @@ import (
 	"os"
 	"slices"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
 )
 
 var ErrIneffectiveWipe = errors.New("found left over data after wiping disk")

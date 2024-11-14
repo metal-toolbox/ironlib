@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bmc-toolbox/common"
-	"github.com/metal-toolbox/ironlib/model"
-	"github.com/metal-toolbox/ironlib/utils"
+	common "github.com/metal-toolbox/bmc-common"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 )
 
 var ErrVirtualDiskManagerUtilNotIdentified = errors.New("virtual disk management utility not identifed")

@@ -8,13 +8,14 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/bmc-toolbox/common"
-	"github.com/metal-toolbox/ironlib/firmware"
-	"github.com/metal-toolbox/ironlib/model"
-	"github.com/metal-toolbox/ironlib/utils"
+	common "github.com/metal-toolbox/bmc-common"
 	"github.com/pkg/errors"
 	"github.com/r3labs/diff/v3"
 	"github.com/sirupsen/logrus"
+
+	"github.com/metal-toolbox/ironlib/firmware"
+	"github.com/metal-toolbox/ironlib/model"
+	"github.com/metal-toolbox/ironlib/utils"
 )
 
 var (
@@ -840,7 +841,6 @@ func (a *InventoryCollectorAction) vetChanges(changes diff.Changelog) diff.Chang
 
 	for _, change := range changes {
 		// Skip changes that delete items
-		change := change
 		if a.acceptChange(&change) {
 			accepted = append(accepted, change)
 		}

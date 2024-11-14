@@ -1,7 +1,7 @@
 package asrr
 
 import (
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
 )
 
 // E3C246D4INL is an example inventory taken with lshw
