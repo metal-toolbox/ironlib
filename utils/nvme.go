@@ -465,7 +465,7 @@ func (n *Nvme) createNS(ctx context.Context, logicalName string, size, blocksize
 	if len(parts) != 3 {
 		return 0, fmt.Errorf("unable to parse nsid: %w", io.ErrUnexpectedEOF)
 	}
-	nsid, err := strconv.ParseUint(string(parts[2]), 10, 64)
+	nsid, err := strconv.ParseUint(string(parts[2]), 10, 32)
 	return uint(nsid), err
 }
 
