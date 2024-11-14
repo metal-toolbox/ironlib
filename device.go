@@ -3,7 +3,10 @@ package ironlib
 import (
 	"fmt"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/providers/asrockrack"
@@ -11,8 +14,6 @@ import (
 	"github.com/metal-toolbox/ironlib/providers/generic"
 	"github.com/metal-toolbox/ironlib/providers/supermicro"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // New returns a device Manager interface based on the hardware deviceVendor, model attributes

@@ -1,7 +1,8 @@
 package dell
 
 import (
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
+
 	"github.com/metal-toolbox/ironlib/model"
 )
 
@@ -1633,7 +1634,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "SATA controller",
-					Vendor:       "Advanced Micro Devices, Inc. [AMD]",
+					Vendor:       common.VendorAMD,
 					Model:        "FCH SATA Controller [AHCI mode]",
 					Serial:       "dead:beef",
 					ProductName:  "FCH SATA Controller [AHCI mode]",
@@ -1654,7 +1655,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "SATA controller",
-					Vendor:       "Advanced Micro Devices, Inc. [AMD]",
+					Vendor:       common.VendorAMD,
 					Model:        "FCH SATA Controller [AHCI mode]",
 					Serial:       "dead:beef",
 					ProductName:  "FCH SATA Controller [AHCI mode]",
@@ -3212,7 +3213,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "SATA controller",
-					Vendor:       "Advanced Micro Devices, Inc. [AMD]",
+					Vendor:       common.VendorAMD,
 					Model:        "FCH SATA Controller [AHCI mode]",
 					Serial:       "dead:beef",
 					ProductName:  "FCH SATA Controller [AHCI mode]",
@@ -3233,7 +3234,7 @@ var (
 				Common: common.Common{
 					Oem:          false,
 					Description:  "SATA controller",
-					Vendor:       "Advanced Micro Devices, Inc. [AMD]",
+					Vendor:       common.VendorAMD,
 					Model:        "FCH SATA Controller [AHCI mode]",
 					Serial:       "dead:beef",
 					ProductName:  "FCH SATA Controller [AHCI mode]",

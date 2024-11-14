@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
+	"github.com/sirupsen/logrus"
+
 	"github.com/metal-toolbox/ironlib"
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/sirupsen/logrus"
 )
 
 var (

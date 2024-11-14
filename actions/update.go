@@ -4,11 +4,12 @@ import (
 	"context"
 	"strings"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
+	"github.com/pkg/errors"
+
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/pkg/errors"
 )
 
 var (

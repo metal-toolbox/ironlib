@@ -8,7 +8,6 @@ lint: golangci-lint check-go-generated
 
 ## Run golangci-lint
 golangci-lint:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57
 	golangci-lint run --config .golangci.yml
 
 ## Run go generate

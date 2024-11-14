@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/bmc-toolbox/common"
 	"github.com/dselans/dmidecode"
+	common "github.com/metal-toolbox/bmc-common"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/pkg/errors"

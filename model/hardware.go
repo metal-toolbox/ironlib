@@ -1,6 +1,8 @@
 package model
 
-import "github.com/bmc-toolbox/common"
+import (
+	common "github.com/metal-toolbox/bmc-common"
+)
 
 // Hardware is a base struct that various providers inherit
 type Hardware struct {

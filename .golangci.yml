@@ -41,52 +41,49 @@ linters:
   # Comments help explain why its disabled or point at ones we should not disable but will take a little work
   # If its not commented its likely because its just too annoying or we don't find useful
   disable:
-    - copyloopvar # requires go >=1.22
     - cyclop
-    - deadcode # deprecated
     - depguard
     - errname # maybe should be enabled
-    - exhaustivestruct # deprecated
+    - execinquery
     - exhaustruct
+    - exportloopref
     - forbidigo
     - funlen
+    - gci
     - gochecknoglobals
     - gochecknoinits
     - gocognit
     - goconst
     - godot
     - godox
-    - golint # deprecated
     - gomnd
-    - ifshort # deprecated
     - inamedparam
     - interfacebloat
-    - interfacer # deprecated
-    - intrange # requires go >=1.22
     - ireturn # should be enabled, ironlib needs some changes
+    - intrange
     - lll # not previously enabled, ironlib and mctl both fail this
-    - maligned # deprecated
+    - mnd
     - nestif
     - nilnil
     - nlreturn
     - nolintlint
-    - nonamedreturns # should be enabled, probably
-    - nosnakecase # deprecated
+    - nonamedreturns # FIXME: named returns are unmaintainable
     - paralleltest
     - perfsprint
-    - scopelint # deprecated
-    - structcheck # deprecated
     - tagliatelle
     - tenv # should be enabled
     - testpackage
     - testifylint # should be enabled
     - thelper # should be enabled
-    - varcheck # deprecated
     - varnamelen
     - wrapcheck
     - wsl
 
 issues:
+  exclude-files:
+    - ".*_test\\.go"
+  exclude-dirs:
+    - fixtures
   exclude-rules:
     - linters:
         - stylecheck

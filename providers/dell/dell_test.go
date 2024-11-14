@@ -6,14 +6,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
+	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/metal-toolbox/ironlib/actions"
 	dellFixtures "github.com/metal-toolbox/ironlib/fixtures/dell"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/stretchr/testify/assert"
 )
 
 var r6515fixtures = "../../fixtures/dell/r6515"

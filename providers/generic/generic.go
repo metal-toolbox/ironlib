@@ -3,13 +3,14 @@ package generic
 import (
 	"context"
 
-	"github.com/bmc-toolbox/common"
+	common "github.com/metal-toolbox/bmc-common"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/metal-toolbox/ironlib/actions"
 	"github.com/metal-toolbox/ironlib/errs"
 	"github.com/metal-toolbox/ironlib/model"
 	"github.com/metal-toolbox/ironlib/utils"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // A Generic device has methods to collect hardware inventory, regardless of the vendor
