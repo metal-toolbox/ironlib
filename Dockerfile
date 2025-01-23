@@ -40,8 +40,13 @@ RUN echo "Target ARCH is $TARGETARCH"
 
 # Bootstrap Dell DSU repository
 # Install Dell idracadm7 to enable collecting BIOS configuration and use install_weak_deps=0 to avoid pulling extra packages
+# The package srvadmin-idracadm7 is no longer available in the official repository due to end-of-life (EOL) of https://linux.dell.com/repo/hardware/dsu/.  
+# This is a workaround by pinning the DSU version to DSU_24.11.11, which still contains srvadmin-idracadm7.  
+# Related support case: https://www.dell.com/community/en/conversations/systems-management-general/racadm-missing-from-latest-linux-repo/67530fd3a9a6071a45ae51e6
+
 RUN if [[ $TARGETARCH == "amd64" ]]; then \
       curl -O https://linux.dell.com/repo/hardware/dsu/bootstrap.cgi && \
+      sed -i 's|REPO_URL="/repo/hardware/dsu/"|REPO_URL="/repo/hardware/DSU_24.11.11/"|' bootstrap.cgi && \
       bash bootstrap.cgi && \
       rm -f bootstrap.cgi && \
       microdnf install -y srvadmin-idracadm7; \
