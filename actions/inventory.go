@@ -450,7 +450,7 @@ func (a *InventoryCollectorAction) CollectDriveCapabilities(ctx context.Context)
 		//
 		// if theres others to be supported, the driveCapabilityCollectorByLogicalName() method
 		// is to be updated to include the required support for SAS/USB/SCSI or other kinds of transports.
-		if !slices.Contains([]string{"sata", "nvme"}, drive.Protocol) {
+		if !slices.Contains([]string{"sata", "nvme", "sas"}, drive.Protocol) {
 			continue
 		}
 
