@@ -225,7 +225,7 @@ func Test_NvmeFormat(t *testing.T) {
 				require.NoError(t, err)
 				e, ok := n.Executor.(*FakeExecute)
 				require.True(t, ok)
-				require.Equal(t, []string{"format", "--ses=" + strconv.Itoa(int(action)), dev.LogicalName}, e.Args)
+				require.Equal(t, []string{"format", "--ses=" + strconv.Itoa(int(action)), "--force", dev.LogicalName}, e.Args)
 			default:
 				require.Error(t, err)
 				require.ErrorIs(t, err, errFormatInvalidSetting)
@@ -239,8 +239,8 @@ func Test_NvmeWipeDrive(t *testing.T) {
 		caps map[string]bool
 		args []string
 	}{
-		{caps: map[string]bool{"ber": false, "cer": false, "cese": false}, args: []string{"format", "--ses=1"}},
-		{caps: map[string]bool{"ber": false, "cer": false, "cese": true}, args: []string{"format", "--ses=2"}},
+		{caps: map[string]bool{"ber": false, "cer": false, "cese": false}, args: []string{"format", "--ses=1", "--force"}},
+		{caps: map[string]bool{"ber": false, "cer": false, "cese": true}, args: []string{"format", "--ses=2", "--force"}},
 		{caps: map[string]bool{"ber": false, "cer": true, "cese": false}, args: []string{"sanitize", "--sanact=4"}},
 		{caps: map[string]bool{"ber": false, "cer": true, "cese": true}, args: []string{"sanitize", "--sanact=4"}},
 		{caps: map[string]bool{"ber": true, "cer": false, "cese": false}, args: []string{"sanitize", "--sanact=2"}},
