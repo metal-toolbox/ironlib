@@ -408,7 +408,7 @@ func (n *Nvme) Format(ctx context.Context, drive *common.Drive, ses SecureEraseS
 		return err
 	}
 
-	n.Executor.SetArgs("format", "--ses="+strconv.Itoa(int(ses)), drive.LogicalName)
+	n.Executor.SetArgs("format", "--ses="+strconv.Itoa(int(ses)), "--force", drive.LogicalName)
 	_, err = n.Executor.Exec(ctx)
 	if err != nil {
 		return err
