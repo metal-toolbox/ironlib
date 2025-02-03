@@ -9,6 +9,7 @@ import (
 
 	common "github.com/metal-toolbox/bmc-common"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
 )
 
 type FillZero struct {
@@ -34,7 +35,8 @@ func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *
 	}
 
 	// Write open
-	file, err := os.OpenFile(drive.LogicalName, os.O_WRONLY, 0)
+	flags := unix.O_RDWR | unix.O_NONBLOCK
+	file, err := os.OpenFile(drive.LogicalName, flags, 0)
 	if err != nil {
 		return err
 	}
@@ -56,6 +58,7 @@ func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *
 	var totalBytesWritten int64
 	buffer := make([]byte, 4096)
 	start := time.Now()
+	lastSync := time.Now()
 	for bytesRemaining := partitionSize; bytesRemaining > 0; {
 		// Check if the context has been canceled
 		select {
@@ -72,6 +75,16 @@ func (z *FillZero) WipeDrive(ctx context.Context, logger *logrus.Logger, drive *
 			totalBytesWritten += int64(bytesWritten)
 			bytesSinceLastPrint += int64(bytesWritten)
 			bytesRemaining -= int64(bytesWritten)
+
+			// Sync to disk every 60 seconds
+			if time.Since(lastSync) >= 60*time.Second {
+				log.Debug("Sync")
+				err = file.Sync()
+				if err != nil {
+					return err
+				}
+				lastSync = time.Now()
+			}
 			// Print progress report every 10 seconds and when done
 			if bytesRemaining == 0 || time.Since(start) >= 10*time.Second {
 				printProgress(log, totalBytesWritten, partitionSize, start, bytesSinceLastPrint)
