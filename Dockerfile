@@ -1,5 +1,5 @@
 # build ironlib wrapper binaries
-FROM golang:1.22-alpine AS helper-binaries
+FROM golang:1.24-alpine AS helper-binaries
 
 WORKDIR /workspace
 
