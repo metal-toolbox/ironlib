@@ -364,8 +364,9 @@ func (l *Lshw) xNIC(node *LshwNode) *common.NIC {
 
 	// TODO(splaspood) We should merge on something other than serial
 	if node.Serial == "" {
-		log.Printf("Warn: NIC component without serial, ignored: %+v\n", node)
-		return nil
+		vendor, product, _ := lshwPciIDParse(node.Product)
+		node.Serial = vendor + ":" + product + ":" + node.Businfo
+		log.Printf("Warn: NIC component without serial, using: %+v\n", node.Serial)
 	}
 
 	serial := strings.ToLower(node.Serial)
