@@ -70,11 +70,11 @@ func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	// While this delay helps ensure that the data is written, it is not an ideal solution, and further investigation is needed to find more efficient synchronization mechanisms.
 	err = file.Sync()
 	if err != nil {
-		return nil, fmt.Errorf("Error syncing: %v", err)
+		return nil, err)
 	}
 	err = file.Close()
 	if err != nil {
-		return nil, fmt.Errorf("Error closing: %v", err)
+		return nil, err)
 	}
 	time.Sleep(500 * time.Millisecond)
 	return checker, nil
