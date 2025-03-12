@@ -40,21 +40,21 @@ func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	checker := func() error {
 		// The delay gives the controller time to release I/O blocking, which could otherwise cause the verification process to fail due to incomplete or pending I/O operations.
 		time.Sleep(500 * time.Millisecond)
-		file, err := os.OpenFile(drive.LogicalName, os.O_RDONLY, 0)
+		checkFile, err := os.OpenFile(drive.LogicalName, os.O_RDONLY, 0)
 		if err != nil {
 			return err
 		}
-		defer file.Close()
+		defer checkFile.Close()
 
 		for i, watermark := range watermarks {
-			_, err = file.Seek(watermark.position, io.SeekStart)
+			_, err = checkFile.Seek(watermark.position, io.SeekStart)
 			if err != nil {
 				return fmt.Errorf("watermark verification, %s@%d(mark=%d), seek: %w", drive.LogicalName, watermark.position, i, err)
 			}
 
 			// Read the watermark written to the position
 			currentValue := make([]byte, watermarkSize)
-			_, err = io.ReadFull(file, currentValue)
+			_, err = io.ReadFull(checkFile, currentValue)
 			if err != nil {
 				return fmt.Errorf("read watermark %s@%d(mark=%d): %w", drive.LogicalName, watermark.position, i, err)
 			}
