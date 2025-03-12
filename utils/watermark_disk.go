@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"os"
 	"slices"
+	"time"
 
 	common "github.com/metal-toolbox/bmc-common"
 )
@@ -23,7 +24,7 @@ type watermark struct {
 // It returns a function that checks if the applied watermarks still exists on the device/file.
 func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	// Write open
-	file, err := os.OpenFile(drive.LogicalName, os.O_WRONLY, 0)
+	file, err := os.OpenFile(drive.LogicalName, os.O_WRONLY|os.O_SYNC, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -37,23 +38,25 @@ func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	}
 
 	checker := func() error {
-		file, err := os.OpenFile(drive.LogicalName, os.O_RDONLY, 0)
-		if err != nil {
-			return err
+		// The delay gives the controller time to release I/O blocking, which could otherwise cause the verification process to fail due to incomplete or pending I/O operations.
+		time.Sleep(500 * time.Millisecond)
+		checkFile, checkErr := os.OpenFile(drive.LogicalName, os.O_RDONLY, 0)
+		if checkErr != nil {
+			return checkErr
 		}
-		defer file.Close()
+		defer checkFile.Close()
 
 		for i, watermark := range watermarks {
-			_, err = file.Seek(watermark.position, io.SeekStart)
-			if err != nil {
-				return fmt.Errorf("watermark verification, %s@%d(mark=%d), seek: %w", drive.LogicalName, watermark.position, i, err)
+			_, checkErr = checkFile.Seek(watermark.position, io.SeekStart)
+			if checkErr != nil {
+				return fmt.Errorf("watermark verification, %s@%d(mark=%d), seek: %w", drive.LogicalName, watermark.position, i, checkErr)
 			}
 
 			// Read the watermark written to the position
 			currentValue := make([]byte, watermarkSize)
-			_, err = io.ReadFull(file, currentValue)
-			if err != nil {
-				return fmt.Errorf("read watermark %s@%d(mark=%d): %w", drive.LogicalName, watermark.position, i, err)
+			_, checkErr = io.ReadFull(checkFile, currentValue)
+			if checkErr != nil {
+				return fmt.Errorf("read watermark %s@%d(mark=%d): %w", drive.LogicalName, watermark.position, i, checkErr)
 			}
 
 			// Check if the watermark is still in the disk
@@ -63,6 +66,17 @@ func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 		}
 		return nil
 	}
+	// We introduce a 500-millisecond delay to give the OS enough time to properly flush the disk buffers to disk.
+	// While this delay helps ensure that the data is written, it is not an ideal solution, and further investigation is needed to find more efficient synchronization mechanisms.
+	err = file.Sync()
+	if err != nil {
+		return nil, err
+	}
+	err = file.Close()
+	if err != nil {
+		return nil, err
+	}
+	time.Sleep(500 * time.Millisecond)
 	return checker, nil
 }
 
