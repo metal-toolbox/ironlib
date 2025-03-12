@@ -23,7 +23,7 @@ type watermark struct {
 // It returns a function that checks if the applied watermarks still exists on the device/file.
 func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	// Write open
-	file, err := os.OpenFile(drive.LogicalName, os.O_WRONLY, 0)
+	file, err := os.OpenFile(drive.LogicalName, os.O_WRONLY|os.O_SYNC, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +37,8 @@ func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	}
 
 	checker := func() error {
+		// The delay gives the controller time to release I/O blocking, which could otherwise cause the verification process to fail due to incomplete or pending I/O operations.
+		time.Sleep(500 * time.Millisecond)
 		file, err := os.OpenFile(drive.LogicalName, os.O_RDONLY, 0)
 		if err != nil {
 			return err
@@ -63,6 +65,11 @@ func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 		}
 		return nil
 	}
+	// We introduce a 500-millisecond delay to give the OS enough time to properly flush the disk buffers to disk.
+	// While this delay helps ensure that the data is written, it is not an ideal solution, and further investigation is needed to find more efficient synchronization mechanisms.
+	file.Sync()
+	file.Close()
+	time.Sleep(500 * time.Millisecond)
 	return checker, nil
 }
 
