@@ -40,23 +40,23 @@ func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	checker := func() error {
 		// The delay gives the controller time to release I/O blocking, which could otherwise cause the verification process to fail due to incomplete or pending I/O operations.
 		time.Sleep(500 * time.Millisecond)
-		checkFile, err := os.OpenFile(drive.LogicalName, os.O_RDONLY, 0)
-		if err != nil {
-			return err
+		checkFile, checkErr := os.OpenFile(drive.LogicalName, os.O_RDONLY, 0)
+		if checkErr != nil {
+			return checkErr
 		}
 		defer checkFile.Close()
 
 		for i, watermark := range watermarks {
-			_, err = checkFile.Seek(watermark.position, io.SeekStart)
-			if err != nil {
-				return fmt.Errorf("watermark verification, %s@%d(mark=%d), seek: %w", drive.LogicalName, watermark.position, i, err)
+			_, checkErr = checkFile.Seek(watermark.position, io.SeekStart)
+			if checkErr != nil {
+				return fmt.Errorf("watermark verification, %s@%d(mark=%d), seek: %w", drive.LogicalName, watermark.position, i, checkErr)
 			}
 
 			// Read the watermark written to the position
 			currentValue := make([]byte, watermarkSize)
-			_, err = io.ReadFull(checkFile, currentValue)
-			if err != nil {
-				return fmt.Errorf("read watermark %s@%d(mark=%d): %w", drive.LogicalName, watermark.position, i, err)
+			_, checkErr = io.ReadFull(checkFile, currentValue)
+			if checkErr != nil {
+				return fmt.Errorf("read watermark %s@%d(mark=%d): %w", drive.LogicalName, watermark.position, i, checkErr)
 			}
 
 			// Check if the watermark is still in the disk
@@ -70,11 +70,11 @@ func ApplyWatermarks(drive *common.Drive) (func() error, error) {
 	// While this delay helps ensure that the data is written, it is not an ideal solution, and further investigation is needed to find more efficient synchronization mechanisms.
 	err = file.Sync()
 	if err != nil {
-		return nil, fmt.Errorf("Error syncing: %v",err)
+		return nil, fmt.Errorf("Error syncing: %v", err)
 	}
 	err = file.Close()
 	if err != nil {
-		return nil, fmt.Errorf("Error closing: %v",err)
+		return nil, fmt.Errorf("Error closing: %v", err)
 	}
 	time.Sleep(500 * time.Millisecond)
 	return checker, nil
