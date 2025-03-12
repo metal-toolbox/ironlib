@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"os"
 	"slices"
+	"time"
 
 	common "github.com/metal-toolbox/bmc-common"
 )
