@@ -136,6 +136,7 @@ func (l *Lshw) Collect(ctx context.Context, device *common.Device) error {
 		}
 
 		// collect components
+		// nolint:contextcheck // complains because xNIC uses a context
 		l.recurseNodes(parentNode.ChildNodes)
 	}
 
