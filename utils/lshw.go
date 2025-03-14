@@ -368,6 +368,24 @@ func (l *Lshw) xNIC(node *LshwNode) *common.NIC {
 		return nil
 	}
 
+	// In case we have a bonded interface, the MAC returned by lshw is not the real one.
+	// If logicalName is a string (not an array), we verify the Serial (= MAC address).
+	logicalName, isString := node.LogicalName.(string)
+	if isString {
+		// Correct MAC (=node.Serial) with ethtool
+		e := NewExecutor("ethtool")
+		e.SetEnv([]string{"LC_ALL=C.UTF-8"})
+		e.SetArgs("-P", logicalName)
+		e.SetQuiet() // nothing sent to real stdout
+		result, err := e.Exec(context.TODO())
+		// replace serial if no error
+		if err == nil {
+			parts := strings.Split(string(result.Stdout), " ")
+			// last part is MAC
+			node.Serial = strings.TrimSpace(parts[len(parts)-1])
+		}
+	}
+
 	serial := strings.ToLower(node.Serial)
 	if l.nicSerials[serial] {
 		return nil
