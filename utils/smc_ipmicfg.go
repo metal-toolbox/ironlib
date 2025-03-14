@@ -14,6 +14,7 @@ import (
 
 const EnvSmcIpmicfgUtility = "IRONLIB_UTIL_SMC_IPMICFG"
 
+// nolint:recvcheck // TODO: pointer and non-pointer receivers
 type Ipmicfg struct {
 	Executor Executor
 }
