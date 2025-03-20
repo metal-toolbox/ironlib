@@ -71,7 +71,7 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: true
 
-      - uses: anchore/sbom-action/download-syft@v0.17.7
+      - uses: anchore/sbom-action/download-syft@v0.18.0
 
       # TODO(jaosorior): Uncomment once we migrate off CentOS.
       # - name: upload Anchore scan SARIF report
