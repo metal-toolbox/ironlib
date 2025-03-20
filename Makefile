@@ -12,7 +12,7 @@ golangci-lint:
 
 ## Run go generate
 generate:
-	go install golang.org/x/tools/cmd/stringer@v0.21.0
+	go install golang.org/x/tools/cmd/stringer@v0.31.0
 	go generate ./...
 
 ## Check generated files are up to date
