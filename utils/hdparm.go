@@ -338,10 +338,14 @@ func (h *Hdparm) Erase(ctx context.Context, drive *common.Drive, ses SecureErase
 		return err
 	}
 
+	// This is a workaround to avoid the disk being locked after the erase.
 	h.Executor.SetArgs("--user-master", "u", "--security-disable", "p", drive.LogicalName)
 	_, err = h.Executor.Exec(ctx)
-	if err != nil {
-		return err
+	if err == nil {
+		// This is a weird one because this should error most of the time but
+		// we want to know when it doesn't error because that's a bug.
+		// So we log it but don't return an error.
+		logrus.WithField("drive", drive.LogicalName).Debug("hdparm --security-disable succeeded - this is unexpected")
 	}
 
 	return verify()
