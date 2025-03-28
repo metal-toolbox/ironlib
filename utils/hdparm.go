@@ -338,6 +338,12 @@ func (h *Hdparm) Erase(ctx context.Context, drive *common.Drive, ses SecureErase
 		return err
 	}
 
+	h.Executor.SetArgs("--user-master", "u", "--security-disable", "p", drive.LogicalName)
+	_, err = h.Executor.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
 	return verify()
 }
 
