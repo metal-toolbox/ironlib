@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.1
 
 require (
-	github.com/beevik/etree v1.5.0
+	github.com/beevik/etree v1.5.1
 	github.com/dselans/dmidecode v0.0.0-20180814053009-65c3f9d81910
 	github.com/metal-toolbox/bmc-common v1.0.3
 	github.com/pkg/errors v0.9.1
