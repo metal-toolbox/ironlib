@@ -1,26 +1,36 @@
 {
   "extends": [
-    "config:base",
+    "config:recommended",
     ":rebaseStalePrs",
     ":dependencyDashboard"
   ],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "labels": ["security"]
+    "labels": [
+      "security"
+    ]
   },
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "rollbackPrs": true,
   "rebaseWhen": "auto",
-  "addLabels": ["dependencies"],
-  "stabilityDays": 3,
+  "addLabels": [
+    "dependencies"
+  ],
+  "minimumReleaseAge": "3 days",
   "postUpdateOptions": [
     "gomodTidy"
   ],
-"packageRules": [
-  {
-    "description": "Automatically merge minor and patch-level updates",
-    "matchUpdateTypes": ["minor", "patch", "digest"],
-    "automerge": true
-  }
-]
+  "packageRules": [
+    {
+      "description": "Automatically merge minor and patch-level updates",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
+      "automerge": true
+    }
+  ]
 }
