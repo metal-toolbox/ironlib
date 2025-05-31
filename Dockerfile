@@ -18,7 +18,7 @@ ENV CGO_ENABLED=0
 RUN go build -o /usr/sbin/getbiosconfig examples/biosconfig/biosconfig.go
 RUN go build -o /usr/sbin/getinventory examples/inventory/inventory.go
 
-FROM almalinux:9-minimal AS base
+FROM almalinux:10-minimal AS base
 FROM base AS deps
 
 # Configure microdnf to avoid installing unwanted packages
