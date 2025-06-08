@@ -2,7 +2,7 @@ module github.com/metal-toolbox/ironlib
 
 go 1.23.0
 
-toolchain go1.24.1
+toolchain go1.24.4
 
 require (
 	github.com/beevik/etree v1.5.0
